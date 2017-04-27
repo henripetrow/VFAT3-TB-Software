@@ -1,0 +1,31 @@
+100 Send CC-A
+1 Send CC-A
+1 Send CC-A
+
+
+1 Write RUN 1
+1 Send RunMode
+
+1 Send_Repeat LV1A 10 10
+
+10 Send BC0
+1 Send_Repeat LV1A 10 10
+
+10 Send EC0
+1 Send_Repeat LV1A 10 10
+
+10 Send ReSync
+1 Send_Repeat LV1A 10 10
+
+10 Send LV1A+EC0
+1 Send_Repeat LV1A 10 10
+
+10 Send LV1A+BC0
+1 Send_Repeat LV1A 10 10
+
+10 Send LV1A+EC0+BC0
+1 Send_Repeat LV1A 10 10
+
+10 Send EC0+BC0
+1 Send_Repeat LV1A 10 10
+
