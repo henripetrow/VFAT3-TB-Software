@@ -147,6 +147,7 @@ class VFAT3_GUI:
 
         OPTIONS = [
                 "Channels",
+                "Front End Settings",
                 "Control Logic",
                 "Data Packet",
                 "Front End",
@@ -158,7 +159,6 @@ class VFAT3_GUI:
                 "Latency",
                 "Calibration 0",
                 "Calibration 1",
-                "Front End DACs",
                 "Biasing 0",
                 "Biasing 1",
                 "Biasing 2",
@@ -651,44 +651,6 @@ class VFAT3_GUI:
 
 ######################### REGISTER-TAB FUNCTIONS ####################
 
-    def apply_register_values(self):
-        if self.register_mode == 'r':
-            text = "The register is read only\n"
-            self.add_to_interactive_screen(text)
-        else:
-            text = "->Setting the register: %s \n" % self.value
-            self.add_to_interactive_screen(text)
-            j = 0
-            for i in self.register_names:
-                new_value = int(self.entry[j].get())
-                try:
-                    key = LUT[i]
-                except ValueError:
-                    text =  "-IGNORED: Invalid value for Register: %s" % i
-                    self.add_to_interactive_screen(text)
-                    continue
-                addr = key[0]
-                variable = key[1]
-                size = register[addr].reg_array[variable][1]
-                if new_value < 0 or new_value > 2**(size)-1:
-                    text = "-IGNORED: Value out of the range of the register: %d \n" % new_value
-                    self.add_to_interactive_screen(text)
-                else:
-                    register[addr].reg_array[variable][0] = new_value
-                    text = "Register: %s Value: %s \n" % (i,new_value)
-                    self.add_to_interactive_screen(text)
-                j += 1
-            data = []
-            data_intermediate = []
-            for x in register[addr].reg_array:
-                data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-                data.extend(data_intermediate)
-            data.reverse()
-            paketti = self.SC_encoder.create_SC_packet(addr,data,"WRITE",0)
-            write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
-            for x in range(1,len(paketti)):
-                write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
-            self.execute()
 
     def apply_register_values(self):
         if self.register_mode == 'r':
@@ -717,6 +679,24 @@ class VFAT3_GUI:
                     text = "Register: %s Value: %s \n" % (i,new_value)
                     self.add_to_interactive_screen(text)
                 j += 1
+
+            data = []
+            data_intermediate = []
+            for x in register[131].reg_array:
+                data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+                data.extend(data_intermediate)
+            data.reverse()
+
+
+            paketti = self.SC_encoder.create_SC_packet(131,data,"WRITE",0)
+            write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
+            for x in range(1,len(paketti)):
+                write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
+            self.execute()
+
+
+
+
             filler_16bits = [0]*16
             full_data = []
             data = []
@@ -982,11 +962,11 @@ class VFAT3_GUI:
             self.register_names = ["CHIP_ID"]
 
 
-        elif self.value == "Front End DACs":
+        elif self.value == "Front End Settings":
             self.register_mode = 'rw'
             register_nr = "FED"
-            description = "Front End related DACs."
-            self.register_names = ["PRE_I_BSF","PRE_I_BIT","PRE_I_BLCC","PRE_VREF","SH_I_BFCAS","SH_I_BDIFF","SD_I_BDIFF","SD_I_BSF","SD_I_BFCAS"]
+            description = "Front End related registers."
+            self.register_names = ["TP_FE","RES_PRE","CAP_PRE","PRE_I_BSF","PRE_I_BIT","PRE_I_BLCC","PRE_VREF","SH_I_BFCAS","SH_I_BDIFF","SD_I_BDIFF","SD_I_BSF","SD_I_BFCAS"]
 
 
 
@@ -1020,6 +1000,24 @@ class VFAT3_GUI:
                 if register_nr == "FED":
                     text =  "Reading the Front end DAC registers\n"
                     self.add_to_interactive_screen(text)
+
+                    paketti = self.SC_encoder.create_SC_packet(131,0,"READ",0)
+                    write_instruction(self.interactive_output_file,150, FCC_LUT[paketti[0]], 1)
+                    for x in range(1,len(paketti)):
+                        write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
+                    output = self.execute()
+                    if output[0] == "Error":
+                        text =  "%s: %s\n" %(output[0],output[1])
+                        text =  "Register values might be incorrect.\n"
+                        self.add_to_interactive_screen(text)
+                    else:
+                        print "Read data:"
+                        new_data = output[0][0].data
+                        print new_data
+                        new_data = ''.join(str(e) for e in new_data[-16:])
+                        register[131].change_values(new_data)
+
+
                     paketti = self.SC_encoder.create_SC_packet(141,0,"MULTI_READ",0)
                     print paketti
                     write_instruction(self.interactive_output_file,150, FCC_LUT[paketti[0]], 1)
