@@ -3,7 +3,7 @@
 # Lappeenranta University of Technology
 ###########################################
 
-#import serial
+import serial
 import sys, os
 #sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
 #from ipbus import *
