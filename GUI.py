@@ -527,11 +527,6 @@ class VFAT3_GUI:
         for x in range(1,len(paketti)):
             write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
 
-        output = self.SC_encoder.create_SC_packet(addr1,0,"READ",0)
-        paketti = output[0]
-        write_instruction(self.interactive_output_file,150, FCC_LUT[paketti[0]], 0)
-        for x in range(1,len(paketti)):
-            write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
         output = self.execute()
         if output[0] == "Error":
             text =  "%s: %s\n" %(output[0],output[1])
@@ -542,8 +537,27 @@ class VFAT3_GUI:
                 self.add_to_interactive_screen(text)
                 text = "ADC0: %s\n" % int(''.join(map(str, output[0][0].data)),2)
                 self.add_to_interactive_screen(text) 
-                text = "ADC1: %s\n" % int(''.join(map(str, output[0][1].data)),2)
+
+
+
+        output = self.SC_encoder.create_SC_packet(addr1,0,"READ",0)
+        paketti = output[0]
+        write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
+        for x in range(1,len(paketti)):
+            write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
+
+        output = self.execute()
+        if output[0] == "Error":
+            text =  "%s: %s\n" %(output[0],output[1])
+            self.add_to_interactive_screen(text)
+        else:
+            if output[0]:
+                text =  "Received Values:\n"
+                self.add_to_interactive_screen(text)
+                text = "ADC1: %s\n" % int(''.join(map(str, output[0][0].data)),2)
                 self.add_to_interactive_screen(text) 
+
+
 
 
     def send_Cal_trigger(self):
