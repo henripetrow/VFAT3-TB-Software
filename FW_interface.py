@@ -195,7 +195,7 @@ class FW_interface:
             open("./data/FPGA_output_list.dat", 'w').close()
             with open("./data/FPGA_output_list.dat", "a") as myfile:
                 for i in data_list:
-                    myfile.write(a)
+                    myfile.write(i)
 
 
 
