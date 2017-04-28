@@ -664,11 +664,12 @@ class VFAT3_GUI:
         if self.register_mode == 'r':
             text = "The register is read only\n"
             self.add_to_interactive_screen(text)
-        elif self.value == "Front End DACs":
+        elif self.value == "Front End Settings":
             text = "->Setting the Front End DAC registers \n"
             self.add_to_interactive_screen(text)
             j = 0
             for i in self.register_names:
+
                 new_value = int(self.entry[j].get())
                 try:
                     key = LUT[i]
@@ -1005,7 +1006,7 @@ class VFAT3_GUI:
         if len(sys.argv) >= 2:
             
 
-            if sys.argv[1] != '-a_nr': # If not in Aamir mode without read. we read the values from the chip
+            if sys.argv[1] != '-nr': # If not in Aamir mode without read. we read the values from the chip
                 # Read a register value from the chip and save it to the corresponding register object.
 
                 if register_nr == "FED":
