@@ -525,7 +525,7 @@ class VFAT3_GUI:
         paketti = output[0]
         write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
         for x in range(1,len(paketti)):
-            write_instruction(1, FCC_LUT[paketti[x]], 0)
+            write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
 
         output = self.SC_encoder.create_SC_packet(addr1,0,"READ",0)
         paketti = output[0]
