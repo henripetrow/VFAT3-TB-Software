@@ -7,6 +7,9 @@
 
 10 Write SD_I_BSF 0
 
+10 Read 131072
+10 Read 131073
+
 10 Repeat 64
 
 10 Write SD_I_BSF 1

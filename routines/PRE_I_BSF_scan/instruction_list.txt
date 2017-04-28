@@ -7,12 +7,17 @@
 
 130 Write PRE_I_BSF 0
 
-10 Repeat 60
+500 Read 131072
+500 Read 131073
 
-140 Write PRE_I_BSF 1
 
-140 Read 131072
-140 Read 131073
+10 Repeat 30
+
+500 Write PRE_I_BSF 2
+
+500 Read 131072
+500 Read 131073
 
 
 10 End_Repeat
+

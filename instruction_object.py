@@ -3,6 +3,8 @@
 # Lappeenranta University of Technology
 ###########################################
 
+import csv
+
 from SC_encode import *
 from VFAT3_registers import *
 from test_system_functions import *
@@ -15,7 +17,8 @@ class instruction_object:
     def __init__(self,modified_scan_name):
         self.BCcounter = 0
         self.instruction_list = []
-        self.output_file = "./routines/%s/FPGA_instruction_list.txt" % modified_scan_name
+        self.even_output_file =  "./routines/%s/output_events.csv" % modified_scan_name
+        self.output_file =       "./routines/%s/FPGA_instruction_list.txt" % modified_scan_name
         open(self.output_file, 'w').close()
         self.SC_encoder = SC_encode()
         self.registers = register
@@ -24,9 +27,13 @@ class instruction_object:
         self.Register_change_list = []
         self.Register_read_list = []
         self.event_list = []
+        self.instruction_write_list = []
 
     def get_events(self):
         self.event_list = [self.CalPulse_list,self.FCC_list,self.Register_change_list,self.Register_read_list]
+        with open(self.even_output_file, "wb") as f:
+            writer = csv.writer(f)
+            writer.writerows(self.event_list)
         return self.event_list
 
     def add(self, command_type, BCd, command_addr_register, increment):
@@ -36,27 +43,31 @@ class instruction_object:
     def clear(self):
         self.instruction_list = []
 
+    def add_instruction(self,input_file, BCd, command, erase):
+        self.instruction_write_list.append([BCd,command])
+
     def write_register_defaults():
         write_register_default_values("SCAN")
 
-    def write_to_file(self):
+    def write_to_file(self,write_BCd_as_fillers):
         for line in self.instruction_list:
             command_type = line[0]
             BCd = line[1]
             idle_flag = 0
-          #  for x in range(1,BCd):
-          #      if idle_flag == 0:     
-          #          write_instruction(self.output_file, 1, "PPPP",0)
-          #          idle_flag = 1
-          #      else:
-          #          write_instruction(self.output_file, 1, "AAAA",0)
-          #          idle_flag = 0
+            if write_BCd_as_fillers:
+                for x in range(1,BCd):
+                    if idle_flag == 0:     
+                        self.add_instruction(self.output_file, 1, "PPPP",0)
+                        idle_flag = 1
+                    else:
+                        self.add_instruction(self.output_file, 1, "AAAA",0)
+                        idle_flag = 0
 
             # FCC
             if command_type == "FCC":
                 command = line[2]
                 command_bin = FCC_LUT[command] # Add error checks.  # BCd comes reversed?
-                write_instruction(self.output_file, BCd, command_bin, 0)
+                self.add_instruction(self.output_file, BCd, command_bin, 0)
                 self.BCcounter = self.BCcounter + BCd
 
 
@@ -77,11 +88,11 @@ class instruction_object:
                 addr = line[2]
 
                 self.BCcounter = self.BCcounter + BCd
-                paketti = self.SC_encoder.create_SC_packet(addr,data,"READ",self.BCcounter)
-
-                write_instruction(self.output_file, BCd, FCC_LUT[paketti[0]], 0)
+                output = self.SC_encoder.create_SC_packet(addr,data,"READ",self.BCcounter)
+                paketti = output[0]
+                self.add_instruction(self.output_file, BCd, FCC_LUT[paketti[0]], 0)
                 for x in range(1,len(paketti)):     
-                    write_instruction(self.output_file, 1, FCC_LUT[paketti[x]],0)
+                    self.add_instruction(self.output_file, 1, FCC_LUT[paketti[x]],0)
                     self.BCcounter = self.BCcounter + 1
 
                 self.Register_read_list.append([self.BCcounter,addr])
@@ -90,7 +101,6 @@ class instruction_object:
             elif command_type == "WRITE" or command_type == "WRITE_REPEAT":   			########## Need a read repeat.
 
                 reg = line[2]
-                print "Generation write"
                 str_reg = reg
                 if isinstance(reg, (int, long)):
                     data = line[3]
@@ -131,17 +141,19 @@ class instruction_object:
                 data.reverse()
 
                 self.BCcounter = self.BCcounter + BCd
-                paketti = self.SC_encoder.create_SC_packet(addr,data,"WRITE",self.BCcounter)                
-
+                output = self.SC_encoder.create_SC_packet(addr,data,"WRITE",self.BCcounter)                
+                paketti = output[0]
+                trans_id = output[1]
                 # Snapshots of register changes for the decoding of the outputdata.
-                self.Register_change_list.append([self.BCcounter,str_reg,new_value])
+                self.Register_change_list.append([self.BCcounter,str_reg,new_value,trans_id])
  
                 # Write instructions
-                write_instruction(self.output_file, BCd, FCC_LUT[paketti[0]], 0)  # To get the right starting BCd
+                self.add_instruction(self.output_file, BCd, FCC_LUT[paketti[0]], 0)  # To get the right starting BCd
                 for x in range(1,len(paketti)):
-                    write_instruction(self.output_file, 1, FCC_LUT[paketti[x]], 0)  # To get the right starting BCd
+                    self.add_instruction(self.output_file, 1, FCC_LUT[paketti[x]], 0)  # To get the right starting BCd
                     self.BCcounter = self.BCcounter + 1
 
+        write_instruction_list(self.output_file, self.instruction_write_list)
 
 
 

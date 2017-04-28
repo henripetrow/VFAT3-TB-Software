@@ -7,14 +7,16 @@
 
 10 Write SD_I_BFCAS 0
 
-10 Repeat 60
-
 10 Read 131072
 10 Read 131073
 
-10 Write SD_I_BFCAS 4
+10 Repeat 60
+
+10 Write SD_I_BFCAS 1
+
+10 Read 131072
+10 Read 131073
 
 10 End_Repeat
 
-10 Read 131072
-10 Read 131073
+

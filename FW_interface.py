@@ -3,7 +3,7 @@
 # Lappeenranta University of Technology
 ###########################################
 
-import serial
+#import serial
 import sys, os
 #sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
 #from ipbus import *
@@ -11,6 +11,7 @@ import sys, os
 from test_system_functions import *
 from output_decoder import *
 import time
+import shutil
 
 class FW_interface:
 
@@ -28,6 +29,8 @@ class FW_interface:
             print "Entering Aamir mode."
 
         self.FCC_LUT_L = {
+        "AAAA":"00000000",
+        "PPPP":"11111111",
         "0000":"00010111",
         "1111":"11101000",
         "0001":"00001111",
@@ -86,6 +89,8 @@ class FW_interface:
                     myfile.write("%s" % line)
 
     def launch(self,register,file_name,serial_port):
+        if file_name != "./data/FPGA_instruction_list.dat":
+            shutil.copy2(file_name, "./data/FPGA_instruction_list.dat")
         timeout = 0
         print "Chosen COM port: %s" % serial_port
         ########### NORMAL MODE ##########
@@ -107,12 +112,13 @@ class FW_interface:
 
         ############# SIMULATION MODE ##########
         if self.simulation_mode == 1:
+
             with open("./data/FPGA_statusfile.dat", "w") as myfile:
                 myfile.write("1")
             counter = 0
             while(True):
                 counter += 1
-                if counter == 60:
+                if counter == 100:
                     print "Timeout, no response from the firmware."
                     timeout = 1
                     break
@@ -173,15 +179,27 @@ class FW_interface:
 
             ser.write(bytearray(output_byte_list))
 
-            open("./data/FPGA_output_list.dat", 'w').close()
+            data_list = []
             for i in range(0,1024):
                 data = ser.read()
                 data = ord(data)
                 data = dec_to_bin_with_stuffing(data, 8)
                 data = ''.join(str(e) for e in data)
                 data = "000000000001,%s\n" % data
-                with open("./data/FPGA_output_list.dat", "a") as myfile:
-                    myfile.write(data)
+                data_list.append(data)
+
+
+
+
+
+            open("./data/FPGA_output_list.dat", 'w').close()
+            with open("./data/FPGA_output_list.dat", "a") as myfile:
+                for i in data_list:
+                    myfile.write(a)
+
+
+
+
             timeout = 0
 
         if not timeout:
@@ -190,3 +208,11 @@ class FW_interface:
         else:
             output_data = ['Error','Timeout, no response from the firmware.']
         return output_data
+
+
+
+
+
+
+
+

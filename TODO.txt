@@ -2,9 +2,9 @@
 - Move register descriptions etc. to the objects.
 - When SLEEP set all register to defaults.
 - Scan data handling.
-- Generation of Run code for scans, because genereating it every time you run takes forever. Then transactions should be in a flie also(can be a csv write in python..).
-- Split github to fw and sw.
-- Group related registers to same page.
+- crc
+- Generation of Run code for scans, because genereating it every time you run takes forever. Then transactions should be in a file also(can be a csv write in python.).
 - Two fields for write and read to the registers.
-- possibility to choose baudrate and comport.
 - Make multi read more genral than the current 5 reads.
+- Reduce amount of R/W. Create one big list and write all at once.
+- For scan routines, no modification by hand. File generated in automatically for given parameters.

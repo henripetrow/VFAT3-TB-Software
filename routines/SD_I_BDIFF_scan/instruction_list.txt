@@ -3,16 +3,19 @@
 1 Send CC-A
 
 
-10 Write Monitor_Sel 7
+150 Write Monitor_Sel 7
 
-10 Write SD_I_BDIFF 0
+150 Write SD_I_BDIFF 0
+
+150 Read 131072
+150 Read 131073
 
 10 Repeat 254
 
-10 Write SD_I_BDIFF 1
+150 Write SD_I_BDIFF 1
 
-10 Read 131072
-10 Read 131073
+150 Read 131072
+150 Read 131073
 
 
 10 End_Repeat

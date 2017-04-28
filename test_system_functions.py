@@ -11,6 +11,16 @@ def write_instruction(input_file, BCd, command, erase):
     with open(input_file, "a") as myfile:
         myfile.write("%s%s\n" % (BCd,command))
 
+def write_instruction_list(input_file, instruction_list):
+
+    open(input_file, 'w').close() 
+    with open(input_file, "a") as myfile:
+        for i in instruction_list:
+            BCd = dec_to_bin_with_stuffing(i[0],12)
+            BCd = ''.join(str(e) for e in BCd)
+            myfile.write("%s%s\n" % (BCd,i[1]))
+
+
 def write_register_default_values(value):
     data = []
     with open('data/register_default_values.dat', 'rU') as f:

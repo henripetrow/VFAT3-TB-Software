@@ -42,15 +42,13 @@ class SC_encode:
             words = 1
             action_value = 1
         self.transaction_ID = self.update_trans_ID()
-        print "create words"
-        print words
         ipbus = self.IPbus14_package(address,data,words,action_value,self.transaction_ID)
         paketti = self.HDLC_package(ipbus)
         paketti = self.binary_to_sc(paketti) # Convert binary form to a list of SC0 and SC1 commands
         if BCcounter != 0:
             with open("./data/sent_SCs.dat", "a") as myfile:
                 myfile.write("%d %s\n" % (BCcounter,self.transaction_ID))
-        return paketti
+        return [paketti, self.transaction_ID]
 
     def HDLC_package(self,ipbus_package):
         hdlc_pack = []
@@ -95,11 +93,9 @@ class SC_encode:
         info_code = [1,1,1,1]
         
         # Number of words. 12 bits.
-        print wrds
         words = dec_to_bin_with_stuffing(wrds, 12)
         words.reverse()
-        print "words"
-        print words
+
 
 
         # Transaction_ID. 8 bits.

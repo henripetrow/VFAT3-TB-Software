@@ -27,9 +27,10 @@ import  os
 from instruction_object import *
 
 
-def generator(scan_name):
+def generator(scan_name,write_BCd_as_fillers):
     modified_scan_name = scan_name.replace(" ", "_")
     input_file = "./routines/%s/instruction_list.txt" % modified_scan_name
+    output_file = "./routines/%s/FPGA_instruction_list.txt" % modified_scan_name
     repeat_flag = 0
     repeat_times = 1
     generation_output_list = []
@@ -76,7 +77,7 @@ def generator(scan_name):
                         generation_output_list.append(text)
                         instruction_list.clear()
                         instruction_list.add("WRITE", BCd, reg, value)
-                        instruction_list.write_to_file()
+                        instruction_list.write_to_file(write_BCd_as_fillers)
                         instruction_list.clear()
 
                 ######### Read from slow Control.
@@ -98,7 +99,7 @@ def generator(scan_name):
                     else:
                         instruction_list.clear()
                         instruction_list.add("READ", BCd, addr, 0)
-                        instruction_list.write_to_file()
+                        instruction_list.write_to_file(write_BCd_as_fillers)
                         instruction_list.clear()
 
                ######### write default values to the register.
@@ -116,7 +117,7 @@ def generator(scan_name):
                     else:
                         instruction_list.clear()
                         instruction_list.add("FCC", BCd, command, 0)
-                        instruction_list.write_to_file()
+                        instruction_list.write_to_file(write_BCd_as_fillers)
                         instruction_list.clear()
 
                 ##### Start a repeat loop.
@@ -136,7 +137,7 @@ def generator(scan_name):
                 elif split_line[1] == "End_Repeat":
                     repeat_flag = 0
                     for i in xrange(repeat_times):
-                        instruction_list.write_to_file()
+                        instruction_list.write_to_file(write_BCd_as_fillers)
                     instruction_list.clear()
                     repeat_times = 0
                     text = "Ending repeat"
@@ -172,7 +173,7 @@ def generator(scan_name):
                         instruction_list.add("FCC", BCd, command, 0)
                         for i in xrange(repeat-1):
     			        instruction_list.add("FCC", interval, command, 0)
-                        instruction_list.write_to_file()
+                        instruction_list.write_to_file(write_BCd_as_fillers)
                         instruction_list.clear()
 
                 else:
@@ -181,8 +182,8 @@ def generator(scan_name):
 
     # Generation of the statistics.
 
-    num_lines = sum(1 for line in open('./data/FPGA_instruction_list.dat'))
-    b = os.path.getsize("./data/FPGA_instruction_list.dat")
+    num_lines = sum(1 for line in open(output_file))
+    b = os.path.getsize(output_file)
     size = b/1000
     size = (num_lines*16)/1000
     time_ns = instruction_list.BCcounter*25
