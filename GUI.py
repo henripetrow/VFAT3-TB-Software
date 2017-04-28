@@ -246,6 +246,8 @@ class VFAT3_GUI:
         self.CalPulse_LV1A_label0 = Label(self.misc_frame, text = "BC")
         self.CalPulse_LV1A_label0.grid(column = 4, row= 4, sticky='e')
 
+        self.close_button = Button(self.misc_frame, text="Set FE nominal values", command= lambda: self.set_FE_nominal_values(), width = bwidth)
+        self.close_button.grid(column = 1, row= 5, sticky='e')
 
         ################ FW CONFIGURE TAB #######################################
 
@@ -573,6 +575,82 @@ class VFAT3_GUI:
         write_instruction(self.interactive_output_file,1, CalPulse_encoded, 1)
         write_instruction(self.interactive_output_file,latency, LV1A_encoded, 0)
         self.execute()
+
+
+    def set_FE_nominal_values(self):
+        register[141].PRE_I_BSF[0] = 13
+        register[141].PRE_I_BIT[0] = 150
+        register[142].PRE_I_BLCC[0] = 25
+        register[142].PRE_VREF[0] = 86
+        register[143].SH_I_BFCAS[0] = 250
+        register[143].SH_I_BDIFF[0] = 150
+        register[144].SD_I_BDIFF[0] = 255
+        register[145].SD_I_BSF[0] = 15
+        register[145].SD_I_BFCAS[0] = 255
+
+
+        filler_16bits = [0]*16
+        full_data = []
+        data = []
+        data_intermediate = []
+        for x in register[141].reg_array:
+            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+            data.extend(data_intermediate)
+        data.reverse()
+        data.extend(filler_16bits)
+        print data
+        full_data.extend(data)
+
+        data = []
+        data_intermediate = []
+        for x in register[142].reg_array:
+            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+            data.extend(data_intermediate)
+        data.reverse()
+        data.extend(filler_16bits)
+        print data
+        full_data.extend(data)
+
+        data = []
+        data_intermediate = []
+        for x in register[143].reg_array:
+            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+            data.extend(data_intermediate)
+        data.reverse()
+        data.extend(filler_16bits)
+        print data
+        full_data.extend(data)
+
+        data = []
+        data_intermediate = []
+        for x in register[144].reg_array:
+            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+            data.extend(data_intermediate)
+        data.reverse()
+        data.extend(filler_16bits)
+        print data
+        full_data.extend(data)
+
+        data = []
+        data_intermediate = []
+        for x in register[145].reg_array:
+            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+            data.extend(data_intermediate)
+        data.reverse()
+        data.extend(filler_16bits)
+        print data
+        full_data.extend(data)
+
+
+
+        output = self.SC_encoder.create_SC_packet(141,full_data,"MULTI_WRITE",0)
+        paketti = output[0]
+        write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
+        for x in range(1,len(paketti)):
+            write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
+        self.execute()
+
+
 
 ################## SCAN/TEST -FUNCTIONS #############################
 
