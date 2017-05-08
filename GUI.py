@@ -24,6 +24,8 @@ class VFAT3_GUI:
                 self.interfaceFW = FW_interface(1)      #  1 - Simulation mode(with simulation model)
             elif sys.argv[1] == '-a' or sys.argv[1] == '-a_nr':
                 self.interfaceFW = FW_interface(2)      #  1 - Simulation mode(with simulation model)
+            elif sys.argv[1] == '-j':
+                self.interfaceFW = FW_interface(0)      # 0 - Normal mode(with Firmware)
             else:
                 print "Unrecognised option."
                 self.interfaceFW = FW_interface(2)      # 0 - Normal mode(with Firmware)
@@ -264,11 +266,14 @@ class VFAT3_GUI:
                 "COM4",
                 "COM5",
                 "COM6",
-
+                "/dev/ttyUSB0",
+                "/dev/ttyUSB1",
+                "/dev/ttyUSB2",
+                "/dev/ttyUSB3"
                 ]
-        self.chosen_serial_port = self.serial_options[2]
+        self.chosen_serial_port = self.serial_options[7]
         self.serial_port_variable = StringVar(master)
-        self.serial_port_variable.set(self.serial_options[2]) # default value
+        self.serial_port_variable.set(self.serial_options[7]) # default value
 
         # SERIAL PORT DROP DOWN MENU
         serial_port_drop_menu = OptionMenu(self.FW_frame, self.serial_port_variable, *self.serial_options, command=self.change_com_port)
@@ -521,9 +526,9 @@ class VFAT3_GUI:
         self.add_to_interactive_screen(text)
 
         addr0 = 131072 # ADC0 address
-        addr1 = 131073 # ADC0 address
+        addr1 = 131073 # ADC1 address
 
-        output = self.SC_encoder.create_SC_packet(addr0,0,"READ",0)
+        output = self.SC_encoder.create_SC_packet(addr1,0,"READ",0)
         paketti = output[0]
         write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
         for x in range(1,len(paketti)):
@@ -547,8 +552,9 @@ class VFAT3_GUI:
         write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
         for x in range(1,len(paketti)):
             write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
-
+        print "Reading ADC1"
         output = self.execute()
+        print len(output[0])
         if output[0] == "Error":
             text =  "%s: %s\n" %(output[0],output[1])
             self.add_to_interactive_screen(text)
@@ -557,7 +563,9 @@ class VFAT3_GUI:
                 text =  "Received Values:\n"
                 self.add_to_interactive_screen(text)
                 text = "ADC1: %s\n" % int(''.join(map(str, output[0][0].data)),2)
-                self.add_to_interactive_screen(text) 
+                self.add_to_interactive_screen(text)
+            else:
+                print "No ADC1 values found"
 
 
 
@@ -1161,7 +1169,10 @@ class VFAT3_GUI:
                     for x in range(1,len(paketti)):
                         write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
                     output = self.execute()
-                    if output[0] == "Error":
+                    if not output[0]:
+                        text =  "No read data found. Register values might be incorrect.\n"
+                        self.add_to_interactive_screen(text)
+                    elif output[0] == "Error":
                         text =  "%s: %s\n" %(output[0],output[1])
                         text =  "Register values might be incorrect.\n"
                         self.add_to_interactive_screen(text)

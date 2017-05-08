@@ -274,14 +274,15 @@ def decode_output_data(filename,register):
                 continue
 
             input_value = split_line[1]
+            print input_value
             BCcounter = BCcounter + BCd
             #print datapacket_status
             # Sync responses.
             if input_value == "00111010":
-                sync_response_list.append([BCcounter,"SyncAkc"])
+                sync_response_list.append([BCcounter,"SyncAck"])
                 print "******Sync Ack********"
             if input_value == "11111110":
-                sync_response_list.append([BCcounter,"VerifAkc"])
+                sync_response_list.append([BCcounter,"VerifAck"])
                 print "******SyncVerifAck********"
 
             # DATA PACKETS

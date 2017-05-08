@@ -5,8 +5,8 @@
 
 import serial
 import sys, os
-#sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
-#from ipbus import *
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
+from ipbus import *
 
 from test_system_functions import *
 from output_decoder import *
@@ -162,8 +162,11 @@ class FW_interface:
                     pass
             f0.close()
             size = i + 1
-
+            print "Packet size."
+            print size
             c, f= divmod(size, 1<<8)        # split the size to 8 bit lsb and msb
+            print c
+            print f
             output_byte_list.append(c)
             output_byte_list.append(f)
 
@@ -180,12 +183,13 @@ class FW_interface:
             ser.write(bytearray(output_byte_list))
 
             data_list = []
-            for i in range(0,1024):
+            for i in range(0,700):
                 data = ser.read()
                 data = ord(data)
                 data = dec_to_bin_with_stuffing(data, 8)
                 data = ''.join(str(e) for e in data)
                 data = "000000000001,%s\n" % data
+
                 data_list.append(data)
 
 
@@ -207,6 +211,7 @@ class FW_interface:
             open("./data/FPGA_output_list.dat", 'w').close()
         else:
             output_data = ['Error','Timeout, no response from the firmware.']
+            open("./data/FPGA_output_list.dat", 'w').close()
         return output_data
 
 
