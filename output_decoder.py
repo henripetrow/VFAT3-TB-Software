@@ -274,7 +274,7 @@ def decode_output_data(filename,register):
                 continue
 
             input_value = split_line[1]
-            print input_value
+            #print input_value
             BCcounter = BCcounter + BCd
             #print datapacket_status
             # Sync responses.

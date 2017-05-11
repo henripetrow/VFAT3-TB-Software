@@ -13,7 +13,7 @@ from VFAT3_registers import *
 from generator import *
 from test_system_functions import *
 from FW_interface import *
-
+import time
 
 import subprocess # For opening scans for edit in the system default editor.
 
@@ -34,13 +34,13 @@ class VFAT3_GUI:
         self.SC_encoder = SC_encode()
         self.channel_register = 0
         self.value = ""
-        self.write_BCd_as_fillers = 0
+        self.write_BCd_as_fillers = 1
         self.CalPulseLV1A_latency = 4
         self.transaction_ID = 0
         self.interactive_output_file = "./data/FPGA_instruction_list.dat"
         s = ttk.Style()
         s.configure('My.TFrame', background='white')
-        self.COM_port = "COM2"
+        self.COM_port = "/dev/ttyUSB0"
         self.register_mode = 'r'
         self.register_names = []
         self.master = master
@@ -322,7 +322,9 @@ class VFAT3_GUI:
                 "SH_I_BDIFF scan",
                 "SD_I_BDIFF scan",
                 "SD_I_BSF scan",
-                "SD_I_BFCAS scan"
+                "SD_I_BFCAS scan",
+                "Counter Resets",
+                "S-curve"
                 ]
         self.chosen_scan = self.scan_options[0]
         self.scan_variable = StringVar(master)
@@ -662,6 +664,28 @@ class VFAT3_GUI:
 
 ################## SCAN/TEST -FUNCTIONS #############################
 
+    def write_register(self,register_nr):
+        filler_16bits = [0]*16
+        data = []
+        data_intermediate = []
+        for x in register[register_nr].reg_array:
+            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+            data.extend(data_intermediate)
+        data.reverse()
+        data.extend(filler_16bits)
+        print 
+        output = self.SC_encoder.create_SC_packet(register_nr,data,"WRITE",0)
+        paketti = output[0]
+        write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
+        for x in range(1,len(paketti)):
+            write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
+        self.execute()       
+
+
+
+
+
+
 
     def generate_scan(self):
         text =  "->Generating the scan instruction file: %s\n" % self.chosen_scan
@@ -686,7 +710,88 @@ class VFAT3_GUI:
         scan_name = self.chosen_scan
         modified = scan_name.replace(" ", "_")
         generation_events = list(csv.reader(open("./routines/%s/output_events.csv" % modified)))
-        self.scan_execute(scan_name,generation_events)
+        if self.chosen_scan == "Counter Resets":
+            self.counter_resets_execute(scan_name,generation_events)
+        elif self.chosen_scan == "S-curve":
+            self.Scurve_execute(scan_name,generation_events)
+        else:
+            self.scan_execute(scan_name,generation_events)
+
+    def counter_resets_execute(self,scan_name,generation_events):
+        modified = scan_name.replace(" ", "_")
+        file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
+        output = self.interfaceFW.launch(register,file_name,self.COM_port)
+        if output[0] == "Error":
+            text =  "%s: %s\n" %(output[0],output[1])
+            self.add_to_interactive_screen(text)
+        else:
+            text =  "Received Packets:\n"
+            self.add_to_interactive_screen(text)
+            text = "SystemBC|EC|BC\n"
+            self.add_to_interactive_screen(text)
+
+            for i in output[1]:
+                text = "%d|%d|%d\n" %(i.systemBC,i.EC,i.BC)
+                self.add_to_interactive_screen(text)
+
+    def Scurve_execute(self,scan_name,generation_events):
+        ## Setting the needed registers.
+        self.set_FE_nominal_values()
+        time.sleep(2)
+        register[0].cal[0] = 1
+        self.write_register(0)
+        time.sleep(2)
+        register[129].ST[0] = 1
+        self.write_register(129)
+        time.sleep(2)
+        register[130].DT[0] = 1
+        self.write_register(130)
+        time.sleep(2)
+        register[138].CAL_DAC[0] = 0
+        register[138].CAL_MODE[0] = 2
+        self.write_register(138)
+        time.sleep(2)
+        register[139].CAL_DUR[0] = 2
+        self.write_register(139)
+        time.sleep(2)
+
+
+
+
+
+
+        modified = scan_name.replace(" ", "_")
+        file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
+        scurve_data = []
+        for j in range(0,30):
+            time.sleep(5)
+            register[138].CAL_DAC[0] += 1
+            self.write_register(138)
+            time.sleep(5)
+
+            output = self.interfaceFW.launch(register,file_name,self.COM_port)
+            if output[0] == "Error":
+                text =  "%s: %s\n" %(output[0],output[1])
+                self.add_to_interactive_screen(text)
+            else:
+                #text =  "Received Packets:\n"
+                #self.add_to_interactive_screen(text)
+                #text = "SystemBC|EC|BC|hit\n"
+                #self.add_to_interactive_screen(text)
+                hits = 0
+                for i in output[1]:
+                    if i.hit_found == 1:
+                        hits += 1
+                    #text = "%d|%d|%d|%d\n" %(i.systemBC,i.EC,i.BC,i.hit_found)
+                    #self.add_to_interactive_screen(text)
+                #text =  "Hits: %d/10\n" % hits
+                #self.add_to_interactive_screen(text) 
+                scurve_data.append([register[138].CAL_DAC[0],hits])          
+
+        for k in scurve_data:
+                text =  "%d %d\n" %(k[0],k[1])
+                self.add_to_interactive_screen(text)
+
 
     def scan_execute(self,scan_name,generation_events):
         SC_writes = generation_events[3]

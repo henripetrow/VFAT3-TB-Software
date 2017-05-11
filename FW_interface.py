@@ -69,22 +69,26 @@ class FW_interface:
         with open("./data/FPGA_instruction_list.dat", 'r') as f:
             for line in f:
                 line = line.rstrip('\n')
-                data_line = line + "0000000000000000"
+                data_line = "0000000000000000" + line
                 #using pychips
                 self.glib.set("test_fifo",int(data_line,2))
                 print "Writing command to fifo:"
                 print data_line
-                print int(data_line,2)
+                #print int(data_line,2)
                 data_line = ""
 
     def read_fifo(self):
+        print "Entering read fifo"
         open("./data/FPGA_output.dat", 'w').close()
-        while (False):
+        while (True):
             line = self.glib.get("test_fifo")
-            line = dec_to_bin_with_stuffing(line, 32)
-            if line == 0:
+            print "Read from FIFO:"
+            print line
+            if line == 0 or line == None:
+                print "FIFO returned 'None'"
                 break
             else:
+                line = dec_to_bin_with_stuffing(line, 32)
                 with open("./data/FPGA_output.dat", "a") as myfile:
                     myfile.write("%s" % line)
 
@@ -95,20 +99,27 @@ class FW_interface:
         print "Chosen COM port: %s" % serial_port
         ########### NORMAL MODE ##########
         if self.simulation_mode == 0:
+            self.write_control(0)
+            time.sleep(1)
             self.write_fifo()
+            time.sleep(1)
             self.write_control(1)
+            time.sleep(1)
             counter = 0
             while True:
                 counter += 1
+                time.sleep(5)
                 status = self.read_control()
-                if counter == 20:
+                if counter == 2:
                     print "Timeout, no response from the firmware."
                     timeout = 1
                     break
                 if status == 3:
+                    print "Go to read fifo."
+                    self.read_fifo()
                     break
-                time.sleep(1)
-            self.read_fifo()
+
+
 
         ############# SIMULATION MODE ##########
         if self.simulation_mode == 1:
