@@ -86,6 +86,7 @@ class FW_interface:
             print line
             if line == 0 or line == None:
                 print "FIFO returned 'None'"
+                timeout = 1
                 break
             else:
                 line = dec_to_bin_with_stuffing(line, 32)
