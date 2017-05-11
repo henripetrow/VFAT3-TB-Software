@@ -115,7 +115,6 @@ class FW_interface:
                     timeout = 1
                     break
                 if status == 3:
-                    print "Go to read fifo."
                     self.read_fifo()
                     break
 

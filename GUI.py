@@ -22,10 +22,13 @@ class VFAT3_GUI:
         if len(sys.argv) >= 2:
             if sys.argv[1] == '-s':
                 self.interfaceFW = FW_interface(1)      #  1 - Simulation mode(with simulation model)
+                self.mode = 1
             elif sys.argv[1] == '-a' or sys.argv[1] == '-a_nr':
                 self.interfaceFW = FW_interface(2)      #  1 - Simulation mode(with simulation model)
+                self.mode = 2
             elif sys.argv[1] == '-j':
                 self.interfaceFW = FW_interface(0)      # 0 - Normal mode(with Firmware)
+                self.mode = 0
             else:
                 print "Unrecognised option."
                 self.interfaceFW = FW_interface(2)      # 0 - Normal mode(with Firmware)
@@ -96,7 +99,8 @@ class VFAT3_GUI:
         self.misc_frame.grid()
 
         self.FW_frame = ttk.Frame(self.nb)
-        self.FW_frame.grid()
+        if self.mode == 2:
+            self.FW_frame.grid()
 
         ##########FCC TAB################################
         self.label = Label(self.FCC_frame, text="Send Fast Control Commands (FCC)")
@@ -290,7 +294,8 @@ class VFAT3_GUI:
         self.nb.add(self.FCC_frame, text="FCC")
         self.nb.add(self.register_frame, text="Registers")
         self.nb.add(self.misc_frame, text="misc.")
-        self.nb.add(self.FW_frame, text="Firmware")
+        if self.mode == 2:
+            self.nb.add(self.FW_frame, text="Firmware")
         self.nb.grid(column = 0, row = 0)
 
         #self.nb.grid_forget()
