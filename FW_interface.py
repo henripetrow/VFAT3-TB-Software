@@ -4,14 +4,14 @@
 ###########################################
 
 import serial
-import sys, os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
-from ipbus import *
-
-from test_system_functions import *
+import sys
+import os
 from output_decoder import *
 import time
 import shutil
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
+from ipbus import *
 
 class FW_interface:
 
@@ -49,18 +49,14 @@ class FW_interface:
         "1110":"11110000"
         }
 
-
-
-
-
-    def write_control(self,input_value):
+    def write_control(self, input_value):
         print "Writing control register: %d" % input_value
-        #using pychips
-        self.glib.set("control_register",input_value)
+        # using py-chips
+        self.glib.set("control_register", input_value)
 
     def read_control(self): 
         print "Reading control register."
-        #using pychips
+        # using py-chips
         value = self.glib.get("control_register")
         print value
         return value
@@ -70,35 +66,36 @@ class FW_interface:
             for line in f:
                 line = line.rstrip('\n')
                 data_line = "0000000000000000" + line
-                #using pychips
-                self.glib.set("test_fifo",int(data_line,2))
+                # using py-chips
+                self.glib.set("test_fifo", int(data_line, 2))
                 print "Writing command to fifo:"
                 print data_line
-                #print int(data_line,2)
-                data_line = ""
 
     def read_fifo(self):
         print "Entering read fifo"
         open("./data/FPGA_output.dat", 'w').close()
-        while (True):
+        counter = 0
+        while True:
+            time.sleep(5)
             line = self.glib.get("test_fifo")
             print "Read from FIFO:"
             print line
-            if line == 0 or line == None:
+            if line == 0 or counter == 6:
                 print "FIFO returned 'None'"
                 timeout = 1
                 break
-            else:
-                line = dec_to_bin_with_stuffing(line, 32)
-                with open("./data/FPGA_output.dat", "a") as myfile:
-                    myfile.write("%s" % line)
+            #else:
+            #    line = dec_to_bin_with_stuffing(line, 32)
+            #    with open("./data/FPGA_output.dat", "a") as myfile:
+            #        myfile.write("%s" % line)
+            counter += 1
 
-    def launch(self,register,file_name,serial_port):
+    def launch(self, register, file_name, serial_port):
         if file_name != "./data/FPGA_instruction_list.dat":
             shutil.copy2(file_name, "./data/FPGA_instruction_list.dat")
         timeout = 0
         print "Chosen COM port: %s" % serial_port
-        ########### NORMAL MODE ##########
+        # ########## NORMAL MODE ##########
         if self.simulation_mode == 0:
             self.write_control(0)
             time.sleep(1)
@@ -119,9 +116,7 @@ class FW_interface:
                     self.read_fifo()
                     break
 
-
-
-        ############# SIMULATION MODE ##########
+        # ############ SIMULATION MODE ##########
         if self.simulation_mode == 1:
 
             with open("./data/FPGA_statusfile.dat", "w") as myfile:
@@ -144,9 +139,7 @@ class FW_interface:
                         myfile.write("0")
                     break
 
-
-
-        ############### Aamir mode #####################333
+        # ############## Aamir mode #####################333
         if self.simulation_mode == 2:
             ser = serial.Serial(serial_port, baudrate=115200, writeTimeout=0)
             # ser.baudrate =9600
