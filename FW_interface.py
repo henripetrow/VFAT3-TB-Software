@@ -85,7 +85,7 @@ class FW_interface:
             print "Read from FIFO:"
             print line
             if line == 0:
-                print "FIFO returned 'None'"
+                print "FIFO returned 0"
                 break
             else:
                 line = dec_to_bin_with_stuffing(line, 32)
@@ -98,6 +98,7 @@ class FW_interface:
                     myfile.write(line)
 
     def launch(self, register, file_name, serial_port):
+        open("./data/FPGA_output_list.dat", 'w').close()
         if file_name != "./data/FPGA_instruction_list.dat":
             shutil.copy2(file_name, "./data/FPGA_instruction_list.dat")
         timeout = 0
@@ -105,11 +106,11 @@ class FW_interface:
         # ########## NORMAL MODE ##########
         if self.simulation_mode == 0:
             self.write_control(0)
-            time.sleep(1)
+            # time.sleep(1)
             self.write_fifo()
-            time.sleep(1)
+            # time.sleep(1)
             self.write_control(1)
-            time.sleep(1)
+            # time.sleep(1)
             self.read_fifo()
 
 
@@ -210,11 +211,9 @@ class FW_interface:
         if not timeout:
             print "Decoding output data."
             output_data = decode_output_data('./data/FPGA_output_list.dat', register)
-            open("./data/FPGA_output_list.dat", 'w').close()
         else:
             print "not Decoding output data."
             output_data = ['Error','Timeout, no response from the firmware.']
-            open("./data/FPGA_output_list.dat", 'w').close()
         return output_data
 
 
