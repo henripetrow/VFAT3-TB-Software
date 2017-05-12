@@ -95,7 +95,7 @@ class IPbus_response:
         received_crc_lsb = ''.join(map(str, data[-16:-8]))
         received_crc_msb = ''.join(map(str, data[-8:]))
         received_crc_bin = received_crc_msb+received_crc_lsb
-        #received_crc_bin = ''.join(map(str, received_crc_bin))
+        # received_crc_bin = ''.join(map(str, received_crc_bin))
         received_crc = int(received_crc_bin,2) # Extract the CRC value from the received message. CRC is the last 16 bits of the data
 
         crc_calculation = []
@@ -106,9 +106,9 @@ class IPbus_response:
         crc_calculation.extend(transaction_ID_bin)
         crc_calculation.extend(words_bin)
         crc_calculation.extend(protocol_bin)
-        #print crc_calculation
+        # print crc_calculation
         calculated_crc = crc_remainder(data[:-16]) # Calculate the CRC for the message.
-        #calculated_crc = crc_remainder(crc_calculation) # Calculate the CRC for the message.
+        # calculated_crc = crc_remainder(crc_calculation) # Calculate the CRC for the message.
         if received_crc == calculated_crc:
             print "CRC check ok."
         else:
@@ -153,13 +153,13 @@ class datapacket:
             self.calculated_crc = crc_remainder(crc_calculation)
 
         if self.EC:
-            self.EC = int(self.EC,2)
+            self.EC = int(self.EC, 2)
             print "EC: %d" % self.EC
         else:
             print "No EC value."
             self.EC = 0
         if self.BC:
-            self.BC = int(self.BC,2)
+            self.BC = int(self.BC, 2)
             print "BC: %d" % self.BC
         else:
             print "No BC value."
@@ -169,7 +169,7 @@ class datapacket:
         indices = indices[:self.partitions]
         if self.spzs_data:
             print "Decoding SPZS data %s" %self.spzs_data
-            for i in range(0,17):
+            for i in range(0, 17):
                 if i in indices:
                     self.data += self.spzs_data[:8]
                     print "Data found in partition %d, %s" % (i, self.spzs_data[:8])
@@ -183,14 +183,12 @@ class datapacket:
         if '1' in self.data:
             self.hit_found = 1
 
-
         if self.data:            
             print "DATA:"
             for i in range(0,(len(self.data)/8)):
                 print self.data[i*8:(1+i)*8]
         else:
             print "No data."
-
 
         if self.received_crc != self.calculated_crc:
             self.crc_error = 1
@@ -246,6 +244,7 @@ def decode_output_data(filename,register):
 
     with open(filename, 'r') as f:
         for line in f:
+            print line
             line = line.rstrip('\n')
             line = line.replace(" ","")
             split_line = line.split(",")

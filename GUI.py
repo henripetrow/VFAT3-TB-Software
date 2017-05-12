@@ -2,8 +2,10 @@
 # Created by Henri Petrow 2017
 # Lappeenranta University of Technology
 ###########################################
-
-
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
+from ipbus import *
 
 from Tkinter import *
 import ttk
@@ -243,17 +245,19 @@ class VFAT3_GUI:
         self.CalPulse_LV1A_button.grid(column = 1, row = 4, sticky='e')
 
         self.CalPulse_LV1A_label0 = Label(self.misc_frame, text = "Latency")
-        self.CalPulse_LV1A_label0.grid(column = 2, row= 4, sticky='e')
+        self.CalPulse_LV1A_label0.grid(column=2, row=4, sticky='e')
 
         self.CalPulse_LV1A_entry = Entry(self.misc_frame, width=5)
-        self.CalPulse_LV1A_entry.grid(column = 3, row= 4, sticky='e')
+        self.CalPulse_LV1A_entry.grid(column=3, row=4, sticky='e')
         self.CalPulse_LV1A_entry.insert(0, self.CalPulseLV1A_latency)
 
         self.CalPulse_LV1A_label0 = Label(self.misc_frame, text = "BC")
-        self.CalPulse_LV1A_label0.grid(column = 4, row= 4, sticky='e')
+        self.CalPulse_LV1A_label0.grid(column=4, row=4, sticky='e')
 
-        self.close_button = Button(self.misc_frame, text="Set FE nominal values", command= lambda: self.set_FE_nominal_values(), width = bwidth)
-        self.close_button.grid(column = 1, row= 5, sticky='e')
+        self.FE_button = Button(self.misc_frame, text="Set FE nominal values", command= lambda: self.set_FE_nominal_values(), width = bwidth)
+        self.FE_button.grid(column=1, row=5, sticky='e')
+
+
 
         ################ FW CONFIGURE TAB #######################################
 
@@ -507,8 +511,6 @@ class VFAT3_GUI:
 
 ################# MISC-TAB FUNCTIONS ################################
 
-
-
     def send_sync(self):
         text =  "->Sending sync request.\n"
         self.add_to_interactive_screen(text)
@@ -574,9 +576,6 @@ class VFAT3_GUI:
             else:
                 print "No ADC1 values found"
 
-
-
-
     def send_Cal_trigger(self):
         latency = int(self.CalPulse_LV1A_entry.get())
         self.CalPulseLV1A_latency = latency
@@ -590,7 +589,6 @@ class VFAT3_GUI:
         write_instruction(self.interactive_output_file,1, CalPulse_encoded, 1)
         write_instruction(self.interactive_output_file,latency, LV1A_encoded, 0)
         self.execute()
-
 
     def set_FE_nominal_values(self):
         register[141].PRE_I_BSF[0] = 13
@@ -685,12 +683,6 @@ class VFAT3_GUI:
         for x in range(1,len(paketti)):
             write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
         self.execute()       
-
-
-
-
-
-
 
     def generate_scan(self):
         text =  "->Generating the scan instruction file: %s\n" % self.chosen_scan
@@ -797,7 +789,6 @@ class VFAT3_GUI:
                 text =  "%d %d\n" %(k[0],k[1])
                 self.add_to_interactive_screen(text)
 
-
     def scan_execute(self,scan_name,generation_events):
         SC_writes = generation_events[3]
         modified = scan_name.replace(" ", "_")
@@ -844,8 +835,6 @@ class VFAT3_GUI:
 
 
         return output 
-
-
 
     def modify_scan(self):
         text =  "->Modifying the scan: %s\n" % self.chosen_scan

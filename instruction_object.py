@@ -55,7 +55,7 @@ class instruction_object:
             BCd = line[1]
             idle_flag = 0
             if write_BCd_as_fillers:
-                for x in range(1,BCd):
+                for x in range(1, BCd):
                     if idle_flag == 0:     
                         self.add_instruction(self.output_file, 1, "PPPP",0)
                         idle_flag = 1
@@ -66,15 +66,15 @@ class instruction_object:
             # FCC
             if command_type == "FCC":
                 command = line[2]
-                command_bin = FCC_LUT[command] # Add error checks.  # BCd comes reversed?
+                command_bin = FCC_LUT[command]  # Add error checks.  # BCd comes reversed?
                 self.add_instruction(self.output_file, BCd, command_bin, 0)
                 self.BCcounter = self.BCcounter + BCd
 
 
-                ####### Information collection
+                # ###### Information collection
                 if command == "CalPulse":
                     channel_list = []
-                    for i in range(0,129):
+                    for i in range(0, 129):
                         if not register[i].mask:             
                             if register[i].cal:
                                 channel_list.append(i)
@@ -88,17 +88,17 @@ class instruction_object:
                 addr = line[2]
 
                 self.BCcounter = self.BCcounter + BCd
-                output = self.SC_encoder.create_SC_packet(addr,data,"READ",self.BCcounter)
+                output = self.SC_encoder.create_SC_packet(addr, data, "READ", self.BCcounter)
                 paketti = output[0]
                 self.add_instruction(self.output_file, BCd, FCC_LUT[paketti[0]], 0)
-                for x in range(1,len(paketti)):     
-                    self.add_instruction(self.output_file, 1, FCC_LUT[paketti[x]],0)
+                for x in range(1, len(paketti)):
+                    self.add_instruction(self.output_file, 1, FCC_LUT[paketti[x]], 0)
                     self.BCcounter = self.BCcounter + 1
 
                 self.Register_read_list.append([self.BCcounter,addr])
 
             # WRITE
-            elif command_type == "WRITE" or command_type == "WRITE_REPEAT":   			########## Need a read repeat.
+            elif command_type == "WRITE" or command_type == "WRITE_REPEAT":   			# ######### Need a read repeat.
 
                 reg = line[2]
                 str_reg = reg
@@ -108,7 +108,7 @@ class instruction_object:
                 else:
                     try:
                         key = LUT[reg]
-                    except ValueError: #Muuta
+                    except ValueError:  # Muuta
                         print "-IGNORED: Invalid value for Register: %s" % reg
                         continue
 
@@ -134,18 +134,18 @@ class instruction_object:
                     data = []
                     data_intermediate = []
                     for x in register[addr].reg_array:
-                       data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-                       data_intermediate.reverse()
-                       data.extend(data_intermediate)
+                        data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+                        data_intermediate.reverse()
+                        data.extend(data_intermediate)
 
                 data.reverse()
 
                 self.BCcounter = self.BCcounter + BCd
-                output = self.SC_encoder.create_SC_packet(addr,data,"WRITE",self.BCcounter)                
+                output = self.SC_encoder.create_SC_packet(addr, data, "WRITE", self.BCcounter)
                 paketti = output[0]
                 trans_id = output[1]
                 # Snapshots of register changes for the decoding of the outputdata.
-                self.Register_change_list.append([self.BCcounter,str_reg,new_value,trans_id])
+                self.Register_change_list.append([self.BCcounter, str_reg, new_value, trans_id])
  
                 # Write instructions
                 self.add_instruction(self.output_file, BCd, FCC_LUT[paketti[0]], 0)  # To get the right starting BCd

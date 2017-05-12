@@ -50,45 +50,52 @@ class FW_interface:
         }
 
     def write_control(self, input_value):
+        glib = GLIB()
         print "Writing control register: %d" % input_value
         # using py-chips
-        self.glib.set("control_register", input_value)
+        glib.set("state_fw", input_value)
 
-    def read_control(self): 
+    def read_control(self):
+        glib = GLIB()
         print "Reading control register."
         # using py-chips
-        value = self.glib.get("control_register")
+        value = glib.get("state_fw")
         print value
         return value
 
     def write_fifo(self):
+        glib = GLIB()
         with open("./data/FPGA_instruction_list.dat", 'r') as f:
             for line in f:
                 line = line.rstrip('\n')
                 data_line = "0000000000000000" + line
                 # using py-chips
-                self.glib.set("test_fifo", int(data_line, 2))
+                glib.set("test_fifo", int(data_line, 2))
                 print "Writing command to fifo:"
                 print data_line
 
     def read_fifo(self):
+        glib = GLIB()
         print "Entering read fifo"
         open("./data/FPGA_output.dat", 'w').close()
         counter = 0
         while True:
-            time.sleep(5)
-            line = self.glib.get("test_fifo")
+            time.sleep(1)
+            line = glib.get("test_fifo")
             print "Read from FIFO:"
             print line
-            if line == 0 or counter == 6:
+            if line == 0:
                 print "FIFO returned 'None'"
-                timeout = 1
                 break
-            #else:
-            #    line = dec_to_bin_with_stuffing(line, 32)
-            #    with open("./data/FPGA_output.dat", "a") as myfile:
-            #        myfile.write("%s" % line)
-            counter += 1
+            else:
+                line = dec_to_bin_with_stuffing(line, 32)
+                print line
+                line1 = ''.join(str(e) for e in line[0:24])
+                line2 = ''.join(str(e) for e in line[-8:])
+                line = "%s,%s" % (int(line1, 2), line2)
+                print line
+                with open("./data/FPGA_output_list.dat", "a") as myfile:
+                    myfile.write(line)
 
     def launch(self, register, file_name, serial_port):
         if file_name != "./data/FPGA_instruction_list.dat":
@@ -103,18 +110,8 @@ class FW_interface:
             time.sleep(1)
             self.write_control(1)
             time.sleep(1)
-            counter = 0
-            while True:
-                counter += 1
-                time.sleep(5)
-                status = self.read_control()
-                if counter == 2:
-                    print "Timeout, no response from the firmware."
-                    timeout = 1
-                    break
-                if status == 3:
-                    self.read_fifo()
-                    break
+            self.read_fifo()
+
 
         # ############ SIMULATION MODE ##########
         if self.simulation_mode == 1:
@@ -211,9 +208,11 @@ class FW_interface:
             timeout = 0
 
         if not timeout:
-            output_data = decode_output_data('./data/FPGA_output_list.dat',register)
+            print "Decoding output data."
+            output_data = decode_output_data('./data/FPGA_output_list.dat', register)
             open("./data/FPGA_output_list.dat", 'w').close()
         else:
+            print "not Decoding output data."
             output_data = ['Error','Timeout, no response from the firmware.']
             open("./data/FPGA_output_list.dat", 'w').close()
         return output_data
