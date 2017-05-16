@@ -775,7 +775,7 @@ class VFAT3_GUI:
                 # text =  "Hits: %d/10\n" % hits
                 # self.add_to_interactive_screen(text)
                 scurve_data.append([register[138].CAL_DAC[0],hits])          
-        text =  "CAL_DAC|HITS\n"
+        text =  "CAL_DAC|HITS \n"
         self.add_to_interactive_screen(text)
         for k in scurve_data:
                 text =  "%d %d\n" %(k[0],k[1])
