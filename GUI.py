@@ -39,7 +39,7 @@ class VFAT3_GUI:
         self.SC_encoder = SC_encode()
         self.channel_register = 0
         self.value = ""
-        self.write_BCd_as_fillers = 1
+        self.write_BCd_as_fillers = 0
         self.CalPulseLV1A_latency = 4
         self.transaction_ID = 0
         self.interactive_output_file = "./data/FPGA_instruction_list.dat"
@@ -481,7 +481,6 @@ class VFAT3_GUI:
 
         return output                 
 
-
     def change_mode(self,mode):
         if mode == "interactive":
             self.scan_frame.grid_forget()
@@ -493,8 +492,6 @@ class VFAT3_GUI:
 
 
 ################# FW-TAB FUNCTIONS ################################
-
-
 
     def FW_sync(self):
         text =  "-> Resynchronising Firmware.\n"
@@ -664,10 +661,9 @@ class VFAT3_GUI:
         self.execute()
 
 
-
 ################## SCAN/TEST -FUNCTIONS #############################
 
-    def write_register(self,register_nr):
+    def write_register(self, register_nr):
         filler_16bits = [0]*16
         data = []
         data_intermediate = []
@@ -714,7 +710,7 @@ class VFAT3_GUI:
         else:
             self.scan_execute(scan_name,generation_events)
 
-    def counter_resets_execute(self,scan_name,generation_events):
+    def counter_resets_execute(self, scan_name, generation_events):
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
         output = self.interfaceFW.launch(register,file_name,self.COM_port)
@@ -731,65 +727,61 @@ class VFAT3_GUI:
                 text = "%d|%d|%d\n" %(i.systemBC,i.EC,i.BC)
                 self.add_to_interactive_screen(text)
 
-    def Scurve_execute(self,scan_name,generation_events):
-        ## Setting the needed registers.
+    def Scurve_execute(self, scan_name, generation_events):
+        # Setting the needed registers.
         self.set_FE_nominal_values()
-        time.sleep(2)
         register[0].cal[0] = 1
         self.write_register(0)
-        time.sleep(2)
+
         register[129].ST[0] = 1
         self.write_register(129)
-        time.sleep(2)
+
         register[130].DT[0] = 1
         self.write_register(130)
-        time.sleep(2)
+
         register[138].CAL_DAC[0] = 0
         register[138].CAL_MODE[0] = 2
         self.write_register(138)
-        time.sleep(2)
+
+        register[139].CAL_FS[0] = 0
         register[139].CAL_DUR[0] = 2
         self.write_register(139)
-        time.sleep(2)
-
-
-
-
 
 
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
         scurve_data = []
-        for j in range(0,30):
-            time.sleep(5)
+        for j in range(0, 30):
+            # time.sleep(5)
             register[138].CAL_DAC[0] += 1
             self.write_register(138)
-            time.sleep(5)
+            # time.sleep(5)
 
-            output = self.interfaceFW.launch(register,file_name,self.COM_port)
+            output = self.interfaceFW.launch(register, file_name, self.COM_port)
             if output[0] == "Error":
-                text =  "%s: %s\n" %(output[0],output[1])
+                text = "%s: %s\n" % (output[0], output[1])
                 self.add_to_interactive_screen(text)
             else:
-                #text =  "Received Packets:\n"
-                #self.add_to_interactive_screen(text)
-                #text = "SystemBC|EC|BC|hit\n"
-                #self.add_to_interactive_screen(text)
+                # text =  "Received Packets:\n"
+                # self.add_to_interactive_screen(text)
+                # text = "SystemBC|EC|BC|hit\n"
+                # self.add_to_interactive_screen(text)
                 hits = 0
                 for i in output[1]:
                     if i.hit_found == 1:
                         hits += 1
-                    #text = "%d|%d|%d|%d\n" %(i.systemBC,i.EC,i.BC,i.hit_found)
-                    #self.add_to_interactive_screen(text)
-                #text =  "Hits: %d/10\n" % hits
-                #self.add_to_interactive_screen(text) 
+                    # text = "%d|%d|%d|%d\n" %(i.systemBC,i.EC,i.BC,i.hit_found)
+                    # self.add_to_interactive_screen(text)
+                # text =  "Hits: %d/10\n" % hits
+                # self.add_to_interactive_screen(text)
                 scurve_data.append([register[138].CAL_DAC[0],hits])          
-
+        text =  "CAL_DAC|HITS\n"
+        self.add_to_interactive_screen(text)
         for k in scurve_data:
                 text =  "%d %d\n" %(k[0],k[1])
                 self.add_to_interactive_screen(text)
 
-    def scan_execute(self,scan_name,generation_events):
+    def scan_execute(self, scan_name, generation_events):
         SC_writes = generation_events[3]
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
@@ -844,7 +836,7 @@ class VFAT3_GUI:
         file_name = "./routines/%s/instruction_list.txt" % modified
         proc = subprocess.Popen(['gedit', file_name])
 
-    def choose_scan(self,value):
+    def choose_scan(self, value):
        self.chosen_scan = value
 
 ######################## FCC-TAB FUNCTIONS ##########################
