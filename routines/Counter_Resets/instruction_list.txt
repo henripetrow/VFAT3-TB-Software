@@ -1,0 +1,7 @@
+#1 Send EC0
+#1 Send BC0
+1 Send ReSync
+10 Send LV1A
+10 Send LV1A
+10 Send LV1A
+10 Send LV1A
