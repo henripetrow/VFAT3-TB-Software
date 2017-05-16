@@ -30,7 +30,7 @@ class instruction_object:
         self.instruction_write_list = []
 
     def get_events(self):
-        self.event_list = [self.CalPulse_list,self.FCC_list,self.Register_change_list,self.Register_read_list]
+        self.event_list = [self.CalPulse_list, self.FCC_list, self.Register_change_list, self.Register_read_list]
         with open(self.even_output_file, "wb") as f:
             writer = csv.writer(f)
             writer.writerows(self.event_list)

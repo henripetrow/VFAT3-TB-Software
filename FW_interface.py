@@ -51,16 +51,16 @@ class FW_interface:
 
     def write_control(self, input_value):
         glib = GLIB()
-        print "Writing control register: %d" % input_value
+        #print "Writing control register: %d" % input_value
         # using py-chips
         glib.set("state_fw", input_value)
 
     def read_control(self):
         glib = GLIB()
-        print "Reading control register."
+        #print "Reading control register."
         # using py-chips
         value = glib.get("state_fw")
-        print value
+        #print value
         return value
 
     def write_fifo(self):
@@ -71,42 +71,37 @@ class FW_interface:
                 data_line = "0000000000000000" + line
                 # using py-chips
                 glib.set("test_fifo", int(data_line, 2))
-                print "Writing command to fifo:"
-                print data_line
+                # print "Writing command to fifo:"
+                # print data_line
 
     def empty_fifo(self):
         glib = GLIB()
-        print "Emptying fifo"
+        # print "Emptying fifo"
 
 
         while True:
             line = glib.get("test_fifo")
-            print "Read from FIFO:"
-            print line
+            # print "Read from FIFO:"
+            # print line
             if line == 0 or line is None:
-                print "FIFO returned 0"
+                #print "FIFO returned 0"
                 break
 
     def read_fifo(self):
         glib = GLIB()
-        print "Entering read fifo"
+        # print "Entering read fifo"
         open("./data/FPGA_output.dat", 'w').close()
         counter = 0
         while True:
-            #time.sleep(1)
             line = glib.get("test_fifo")
-            print "Read from FIFO:"
-            print line
             if line == 0 or line is None:
-                print "FIFO returned 0"
+                # print "FIFO returned 0"
                 break
             else:
                 line = dec_to_bin_with_stuffing(line, 32)
-                print line
                 line1 = ''.join(str(e) for e in line[0:24])
                 line2 = ''.join(str(e) for e in line[-8:])
                 line = "%s,%s \n" % (int(line1, 2), line2)
-                print line
                 with open("./data/FPGA_output_list.dat", "a") as myfile:
                     myfile.write(line)
 
@@ -115,7 +110,7 @@ class FW_interface:
         if file_name != "./data/FPGA_instruction_list.dat":
             shutil.copy2(file_name, "./data/FPGA_instruction_list.dat")
         timeout = 0
-        print "Chosen COM port: %s" % serial_port
+        # print "Chosen COM port: %s" % serial_port
         # ########## NORMAL MODE ##########
         if self.simulation_mode == 0:
             self.empty_fifo()

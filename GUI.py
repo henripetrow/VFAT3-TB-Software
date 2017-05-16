@@ -49,6 +49,7 @@ class VFAT3_GUI:
         self.register_mode = 'r'
         self.register_names = []
         self.master = master
+        # self.master.wm_iconbitmap('/home/a0312687/VFAT3-TB-Software/data/LUT_logo.ico')
         self.master.title("GUI for the VFAT3 test system.")
         bwidth = 15
         self.master.minsize(width=680, height=450)
@@ -333,7 +334,8 @@ class VFAT3_GUI:
                 "SD_I_BSF scan",
                 "SD_I_BFCAS scan",
                 "Counter Resets",
-                "S-curve"
+                "S-curve",
+                "S-curve all ch"
                 ]
         self.chosen_scan = self.scan_options[0]
         self.scan_variable = StringVar(master)
@@ -686,7 +688,7 @@ class VFAT3_GUI:
         scan_name = self.chosen_scan
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s.txt" % modified
-        output = generator(scan_name,self.write_BCd_as_fillers)
+        output = generator(scan_name, self.write_BCd_as_fillers)
 
         if self.verbose_var.get() == 1:
             for i in output[0]:
@@ -704,11 +706,13 @@ class VFAT3_GUI:
         modified = scan_name.replace(" ", "_")
         generation_events = list(csv.reader(open("./routines/%s/output_events.csv" % modified)))
         if self.chosen_scan == "Counter Resets":
-            self.counter_resets_execute(scan_name,generation_events)
+            self.counter_resets_execute(scan_name, generation_events)
         elif self.chosen_scan == "S-curve":
-            self.Scurve_execute(scan_name,generation_events)
+            self.Scurve_execute(scan_name, generation_events)
+        elif self.chosen_scan == "S-curve all ch":
+            self.Scurve_all_ch_execute(scan_name, generation_events)
         else:
-            self.scan_execute(scan_name,generation_events)
+            self.scan_execute(scan_name, generation_events)
 
     def counter_resets_execute(self, scan_name, generation_events):
         modified = scan_name.replace(" ", "_")
@@ -726,6 +730,71 @@ class VFAT3_GUI:
             for i in output[1]:
                 text = "%d|%d|%d\n" %(i.systemBC,i.EC,i.BC)
                 self.add_to_interactive_screen(text)
+
+    def Scurve_all_ch_execute(self, scan_name, generation_events):
+        # Setting the needed registers.
+        self.set_FE_nominal_values()
+        register[0].cal[0] = 1
+        self.write_register(0)
+
+        register[129].ST[0] = 1
+        self.write_register(129)
+
+        register[130].DT[0] = 1
+        self.write_register(130)
+
+        register[138].CAL_DAC[0] = 0
+        register[138].CAL_MODE[0] = 2
+        self.write_register(138)
+
+        register[139].CAL_FS[0] = 0
+        register[139].CAL_DUR[0] = 2
+        self.write_register(139)
+
+        modified = scan_name.replace(" ", "_")
+        file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
+        all_ch_data = []
+
+        for k in range(0, 120):
+            scurve_data = []
+            register[k].cal[0] = 1
+            self.write_register(k)
+            register[138].CAL_DAC[0] = 0
+            self.write_register(138)
+
+            for j in range(0, 30):
+                register[138].CAL_DAC[0] += 1
+                self.write_register(138)
+                output = self.interfaceFW.launch(register, file_name, self.COM_port)
+                if output[0] == "Error":
+                    text = "%s: %s\n" % (output[0], output[1])
+                    self.add_to_interactive_screen(text)
+                else:
+                    hits = 0
+                    for i in output[1]:
+                        if i.hit_found == 1:
+                            hits += 1
+                    scurve_data.append(hits)
+
+            register[k].cal[0] = 0
+            self.write_register(k)
+            all_ch_data.append(scurve_data)
+        # print all_ch_data
+
+        with open("./routines/%s/S-curve_data.csv" % modified, "wb") as f:
+            writer = csv.writer(f)
+            writer.writerows(all_ch_data)
+
+
+        # for a in range(0, 30):
+        #     text = "%d" %a
+        #     for h in all_ch_data:
+        #         text += ",%d" % h[a]
+        #     self.add_to_interactive_screen(text+"\n")
+
+
+
+
 
     def Scurve_execute(self, scan_name, generation_events):
         # Setting the needed registers.
@@ -841,7 +910,7 @@ class VFAT3_GUI:
 
 ######################## FCC-TAB FUNCTIONS ##########################
 
-    def send_FCC(self,command):
+    def send_FCC(self, command):
         text = "->Sending %s.\n" % command
         self.add_to_interactive_screen(text)
         command_encoded = FCC_LUT[command]
@@ -1004,7 +1073,7 @@ class VFAT3_GUI:
             self.add_to_interactive_screen(text)
         self.update_registers("Channels")
 
-    def update_registers(self,value):
+    def update_registers(self, value):
         self.value = value
         self.channel_label.grid_forget()
         self.channel_entry.grid_forget()
@@ -1310,6 +1379,7 @@ class VFAT3_GUI:
 
 root = Tk()
 my_gui = VFAT3_GUI(root)
+
 root.mainloop()
 
 
