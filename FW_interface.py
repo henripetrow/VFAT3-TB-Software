@@ -74,17 +74,30 @@ class FW_interface:
                 print "Writing command to fifo:"
                 print data_line
 
+    def empty_fifo(self):
+        glib = GLIB()
+        print "Emptying fifo"
+
+
+        while True:
+            line = glib.get("test_fifo")
+            print "Read from FIFO:"
+            print line
+            if line == 0 or line is None:
+                print "FIFO returned 0"
+                break
+
     def read_fifo(self):
         glib = GLIB()
         print "Entering read fifo"
         open("./data/FPGA_output.dat", 'w').close()
         counter = 0
         while True:
-            time.sleep(1)
+            #time.sleep(1)
             line = glib.get("test_fifo")
             print "Read from FIFO:"
             print line
-            if line == 0:
+            if line == 0 or line is None:
                 print "FIFO returned 0"
                 break
             else:
@@ -92,7 +105,7 @@ class FW_interface:
                 print line
                 line1 = ''.join(str(e) for e in line[0:24])
                 line2 = ''.join(str(e) for e in line[-8:])
-                line = "%s,%s" % (int(line1, 2), line2)
+                line = "%s,%s \n" % (int(line1, 2), line2)
                 print line
                 with open("./data/FPGA_output_list.dat", "a") as myfile:
                     myfile.write(line)
@@ -105,6 +118,7 @@ class FW_interface:
         print "Chosen COM port: %s" % serial_port
         # ########## NORMAL MODE ##########
         if self.simulation_mode == 0:
+            self.empty_fifo()
             self.write_control(0)
             # time.sleep(1)
             self.write_fifo()
@@ -140,17 +154,13 @@ class FW_interface:
         # ############## Aamir mode #####################333
         if self.simulation_mode == 2:
             ser = serial.Serial(serial_port, baudrate=115200, writeTimeout=0)
-            # ser.baudrate =9600
             ser.bytesize = serial.EIGHTBITS  # number of bits per bytes
             ser.parity = serial.PARITY_NONE  # set parity check: no parity
             ser.stopbits = serial.STOPBITS_ONE  # number of stop bits
-            # ser.timeout = None          #block read
-            # ser.timeout = 1  # non-block read
             ser.timeout = 10  # timeout block read
             ser.xonxoff = True  # disable software flow control
             ser.rtscts = False  # disable hardware (RTS/CTS) flow control
             ser.dsrdtr = False  # disable hardware (DSR/DTR) flow control
-            # ser.writeTimeout = 100  # timeout for write
 
             data = "\xca"
             ser.write(data)
@@ -178,6 +188,7 @@ class FW_interface:
                     data_line = line[-4:]
                     data_line = self.FCC_LUT_L[data_line]
                     data_line = int(data_line, 2)
+                    print data_line
                     output_byte_list.append(data_line)
 
 

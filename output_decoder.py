@@ -244,7 +244,7 @@ def decode_output_data(filename,register):
 
     with open(filename, 'r') as f:
         for line in f:
-            print line
+            #print line
             line = line.rstrip('\n')
             line = line.replace(" ","")
             split_line = line.split(",")

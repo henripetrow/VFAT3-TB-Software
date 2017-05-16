@@ -521,13 +521,13 @@ class VFAT3_GUI:
         self.execute()
 
     def send_idle(self):
-        text =  "->Sending IDLE transaction.\n"
+        text = "->Sending IDLE transaction.\n"
         self.add_to_interactive_screen(text)
-        output = self.SC_encoder.create_SC_packet(0,0,"IDLE",0)
+        output = self.SC_encoder.create_SC_packet(0, 0, "IDLE", 0)
         paketti = output[0]
-        write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
-        for x in range(1,len(paketti)):
-            write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
+        write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
+        for x in range(1, len(paketti)):
+            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
         self.execute()
 
     def read_ADCs(self):
