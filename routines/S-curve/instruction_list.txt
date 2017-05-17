@@ -1,3 +1,4 @@
+1 Send RunMode
 1 Send EC0
-1 Send_Repeat CalPulse 38 40 
+1 Send_Repeat CalPulse 20 800 
 

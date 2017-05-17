@@ -82,7 +82,7 @@ class FW_interface:
         while True:
             line = glib.get("test_fifo")
             # print "Read from FIFO:"
-            # print line
+            print line
             if line == 0 or line is None:
                 #print "FIFO returned 0"
                 break

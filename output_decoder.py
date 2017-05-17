@@ -16,29 +16,29 @@ class IPbus_response:
         data_in.reverse()
         hdlc_address_bin = ''.join(str(e) for e in data_in)
         self.hdlc_address = int(hdlc_address_bin,2)
-        print "HDLC Address: %s" % hdlc_address_bin
-        print "HDLC Address: %d" % self.hdlc_address
+        # print "HDLC Address: %s" % hdlc_address_bin
+        # print "HDLC Address: %d" % self.hdlc_address
 
         data_in = data[8:16]
         data_in.reverse()
         hdlc_control_bin = ''.join(str(e) for e in data_in)
         self.hdlc_control = int(hdlc_control_bin,2)
-        print "HDLC Control: %s" % hdlc_control_bin
-        print "HDLC Control: %d" % self.hdlc_control
+        # print "HDLC Control: %s" % hdlc_control_bin
+        # print "HDLC Control: %d" % self.hdlc_control
 
         data_in = data[16:20]
         data_in.reverse()
         info_code_bin = ''.join(str(e) for e in data_in)
         self.info_code = int(info_code_bin,2)
-        print "Info Code: %s" % info_code_bin
-        print "Info Code: %d" % self.info_code
+        # print "Info Code: %s" % info_code_bin
+        # print "Info Code: %d" % self.info_code
 
         data_in = data[20:24]
         data_in.reverse()
         type_ID_bin = ''.join(str(e) for e in data_in)
         self.type_ID = int(type_ID_bin,2)
-        print "Type Id: %s" % type_ID_bin
-        print "Type Id: %d" % self.type_ID
+        # print "Type Id: %s" % type_ID_bin
+        # print "Type Id: %d" % self.type_ID
 
         data_in = data[24:32]
         data_in.reverse()
@@ -51,16 +51,16 @@ class IPbus_response:
         data_in.reverse()
         words_bin = ''.join(str(e) for e in data_in)
         self.words = int(words_bin,2)
-        print "Words: %s" % words_bin
-        print "Words: %d" % self.words
+        # print "Words: %s" % words_bin
+        # print "Words: %d" % self.words
 
 
         data_in = data[44:48]
         data_in.reverse()
         protocol_bin = ''.join(str(e) for e in data_in)
         self.protocol = int(protocol_bin,2)
-        print "Protocol: %s" % protocol_bin
-        print "Protocol: %d" % self.protocol
+        # print "Protocol: %s" % protocol_bin
+        # print "Protocol: %d" % self.protocol
 
         if self.type_ID  == 0:
             if self.words == 5:
@@ -345,9 +345,9 @@ def decode_output_data(filename,register):
                     datapacket_byte_counter = 0               # Set the byte counter to 0 for the next state.
 
             elif datapacket_status == "DATA" and dataformat_register.DT[0] == 1:  # Enter the DATA state to collect the bytes for DATA.
-                print "Collecting SPZS Data"
+                # print "Collecting SPZS Data"
                 if len(data_packet.partition_table) < 16:
-                    print "Collecting Partition table %s" % input_value
+                    # print "Collecting Partition table %s" % input_value
                     data_packet.partition_table += input_value
                 elif len(data_packet.partition_table) == 16:
                     if datapacket_byte_counter == 0:
@@ -358,10 +358,10 @@ def decode_output_data(filename,register):
                         if dataformat_register.P16[0] == 1:
                             datapacket_status = "CRC"         # Set state to IDLE.
                         data_packet.partitions = data_size
-                        print "The data size is: %d" % data_size
+                        # print "The data size is: %d" % data_size
 
 
-                    print "SPZS data: %s" % input_value
+                    # print "SPZS data: %s" % input_value
                     data_packet.spzs_data += input_value      # Input value is added to the data
                     datapacket_byte_counter += 1              # Byte counter is incremented by one to count the amount of data bytes.
                     if datapacket_byte_counter >= data_size:      # If byte counter is >= than data_size we have all data bytes and we can move to next state.
@@ -372,7 +372,7 @@ def decode_output_data(filename,register):
 
             elif datapacket_status == "DATA" and dataformat_register.DT[0] == 0:                   # Enter the DATA state to collect the bytes for DATA.
                 data_size = 16
-                print "Collecting data: %s" % input_value
+                # print "Collecting data: %s" % input_value
                 data_packet.data += input_value                # Input value is added to the data.               
                 datapacket_byte_counter += 1                   # Byte counter is incremented by one to count the amount of data bytes. 
                 if datapacket_byte_counter >= data_size:       # If byte counter is >= than data_size we have all data bytes and we can move to next state.
@@ -381,7 +381,7 @@ def decode_output_data(filename,register):
 
             elif datapacket_status == "CRC":                   # Enter the DATA state to collect the bytes for DATA.
                 crc_size = 2
-                print "Collecting CRC."
+                # print "Collecting CRC."
                 data_packet.crc += input_value                 # Input value is added to the data.               
                 datapacket_byte_counter += 1                   # Byte counter is incremented by one to count the amount of data bytes. 
                 if datapacket_byte_counter >= crc_size:        # If byte counter is >= than data_size we have all data bytes and we can move to next state.
@@ -415,10 +415,10 @@ def decode_output_data(filename,register):
                     #hdlc_flag_bit = 1                          # Change the flag bit to 1 to indicate that HDLC-message has started.
                     hdlc_start_BCd = SC_shift_register[0][0]   # Get the value of the BCcounter in the beginning of the flag byte, to store the beginning time of the hdlc message.
                     hdlc_state = "DATA"                     # The first HDLC field after the flag is the address field.
-                    print 'HDLC flag found, start collecting data.'
+                    # print 'HDLC flag found, start collecting data.'
                     SC_bit_counter = 0                         # Set the bit counter to zero. With this counter we count when we have a full byte of SC0's and SC1's.
                 elif hdlc_flag_bit == 1:                       # See if the flag bit is set. This indicates that it is the end flag of the message.
-                    print 'HDLC flag found, stop collecting data. Analysing data..'
+                    # print 'HDLC flag found, stop collecting data. Analysing data..'
                     hdlc_flag_bit = 0                          # Set hdlc flag to zero to indicate that the hdlc-message has ended.
                     IPbus_transaction_list.append(IPbus_response(hdlc_start_BCd,hdlc_data)) # Create an IPbus_response object with the new data and add it to the transaction list.
                     hdlc_state = "IDLE"                          # The HDLC message is complete. Change state to IDLE.
@@ -427,7 +427,7 @@ def decode_output_data(filename,register):
                 SC_shift_register = [[0,0]]*8                    # Clear the shift register.
 
             if SC_bit_counter == 8 and hdlc_state == "DATA":     # If the bit counter has counted to one byte and the state is control.
-                print 'Collecting a byte of SC data: %s' % str([i[1] for i in SC_shift_register])
+                # print 'Collecting a byte of SC data: %s' % str([i[1] for i in SC_shift_register])
                 hdlc_flag_bit = 1
                 hdlc_data.extend([i[1] for i in SC_shift_register]) # Save the data byte to the list.
                 SC_bit_counter = 0                               # Set the bit counter to zero. Data acquisition ends when flag byte has been found in the flag-section.  

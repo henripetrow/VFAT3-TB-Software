@@ -8,21 +8,21 @@ register = [None]*65541
 
 class GBL_CFG_CH:
     def __init__(self):
-        self.cal = [0,1]
-        self.mask = [0,1]
-        self.zcc_dac = [0,7]
-        self.arm_dac = [0,7]
+        self.cal = [0, 1]
+        self.mask = [0, 1]
+        self.zcc_dac = [0, 7]
+        self.arm_dac = [0, 7]
 
-        self.reg_array = [self.cal,self.mask,self.zcc_dac,self.arm_dac]
+        self.reg_array = [self.cal, self.mask, self.zcc_dac, self.arm_dac]
 
     def change_values(self, new_values):
  
-        self.cal[0] = int(new_values[0],2)
-        self.mask[0] = int(new_values[1],2)
-        self.zcc_dac[0] = int(new_values[2:9],2)
-        self.arm_dac[0] = int(new_values[9:],2)
+        self.cal[0] = int(new_values[0], 2)
+        self.mask[0] = int(new_values[1], 2)
+        self.zcc_dac[0] = int(new_values[2:9], 2)
+        self.arm_dac[0] = int(new_values[9:], 2)
 
-for i in range(0,129):
+for i in range(0, 129):
     register[i] = GBL_CFG_CH()
 
 class GBL_CFG_CTR_0:
@@ -323,26 +323,28 @@ class GBL_CFG_BIAS_6:
 
 register[146] = GBL_CFG_BIAS_6()
 
+
 class GBL_CFG_RUN:
     def __init__(self):
-        self.empty1 = [0,15]
-        self.RUN = [0,1]
+        self.empty1 = [0, 15]
+        self.RUN = [0, 1]
 
-        self.reg_array = [self.empty1,self.RUN]
+        self.reg_array = [self.empty1, self.RUN]
 
     def change_values(self, new_values):
-        self.RUN[0] = int(new_values[-1],2)
+        self.RUN[0] = int(new_values[-1], 2)
 
 register[65535] = GBL_CFG_RUN()
 
+
 class HW_ID_ID:
     def __init__(self):
-        self.ID = [90464596,32]
+        self.ID = [90464596, 32]
 
         self.reg_array = [self.ID]
 
     def change_values(self, new_values):
-        self.ID[0] = int(new_values,2)
+        self.ID[0] = int(new_values, 2)
 
 register[65536] = HW_ID_ID()
 
@@ -357,6 +359,7 @@ class HW_ID_VER:
         self.VER[0] = int(new_values,2)
 
 register[65537] = HW_ID_VER()
+
 
 class HW_RW_REG:
     def __init__(self):

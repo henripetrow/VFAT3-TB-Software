@@ -732,10 +732,9 @@ class VFAT3_GUI:
                 self.add_to_interactive_screen(text)
 
     def Scurve_all_ch_execute(self, scan_name, generation_events):
+        start = time.time()
         # Setting the needed registers.
         self.set_FE_nominal_values()
-        register[0].cal[0] = 1
-        self.write_register(0)
 
         register[129].ST[0] = 1
         self.write_register(129)
@@ -751,6 +750,9 @@ class VFAT3_GUI:
         register[139].CAL_DUR[0] = 2
         self.write_register(139)
 
+        register[65535].RUN[0] = 1
+        self.write_register(65535)
+        time.sleep(1)
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
         all_ch_data = []
@@ -762,7 +764,7 @@ class VFAT3_GUI:
             register[138].CAL_DAC[0] = 0
             self.write_register(138)
 
-            for j in range(0, 30):
+            for j in range(5, 40):
                 register[138].CAL_DAC[0] += 1
                 self.write_register(138)
                 output = self.interfaceFW.launch(register, file_name, self.COM_port)
@@ -779,18 +781,15 @@ class VFAT3_GUI:
             register[k].cal[0] = 0
             self.write_register(k)
             all_ch_data.append(scurve_data)
-        # print all_ch_data
 
         with open("./routines/%s/S-curve_data.csv" % modified, "wb") as f:
             writer = csv.writer(f)
             writer.writerows(all_ch_data)
+        stop = time.time()
+        run_time = (stop - start) / 60
+        text = "Run time (minutes): %f" % run_time
+        self.add_to_interactive_screen(text)
 
-
-        # for a in range(0, 30):
-        #     text = "%d" %a
-        #     for h in all_ch_data:
-        #         text += ",%d" % h[a]
-        #     self.add_to_interactive_screen(text+"\n")
 
 
 
@@ -799,8 +798,9 @@ class VFAT3_GUI:
     def Scurve_execute(self, scan_name, generation_events):
         # Setting the needed registers.
         self.set_FE_nominal_values()
-        register[0].cal[0] = 1
-        self.write_register(0)
+        channel = 127
+        register[channel].cal[0] = 1
+        self.write_register(channel)
 
         register[129].ST[0] = 1
         self.write_register(129)
@@ -816,6 +816,9 @@ class VFAT3_GUI:
         register[139].CAL_DUR[0] = 2
         self.write_register(139)
 
+        register[65535].RUN[0] = 1
+        self.write_register(65535)
+        time.sleep(1)
 
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
@@ -849,6 +852,9 @@ class VFAT3_GUI:
         for k in scurve_data:
                 text =  "%d %d\n" %(k[0],k[1])
                 self.add_to_interactive_screen(text)
+
+        register[channel].cal[0] = 0
+        self.write_register(channel)
 
     def scan_execute(self, scan_name, generation_events):
         SC_writes = generation_events[3]
