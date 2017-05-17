@@ -733,18 +733,29 @@ class VFAT3_GUI:
 
     def Scurve_all_ch_execute(self, scan_name, generation_events):
         start = time.time()
+
+        modified = scan_name.replace(" ", "_")
+        file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
+
+        DAC_start = 1 # needed value +1
+        DAC_stop = 15
         # Setting the needed registers.
         self.set_FE_nominal_values()
 
-        register[129].ST[0] = 1
-        self.write_register(129)
 
-        register[130].DT[0] = 1
+
+        register[130].DT[0] = 0
         self.write_register(130)
 
-        register[138].CAL_DAC[0] = 0
         register[138].CAL_MODE[0] = 2
         self.write_register(138)
+
+        register[132].SEL_COMP_MODE[0] = 0
+        self.write_register(132)
+
+        register[135].ZCC_DAC[0] = 10
+        register[135].ARM_DAC[0] = 100
+        self.write_register(135)
 
         register[139].CAL_FS[0] = 0
         register[139].CAL_DUR[0] = 2
@@ -753,20 +764,27 @@ class VFAT3_GUI:
         register[65535].RUN[0] = 1
         self.write_register(65535)
         time.sleep(1)
-        modified = scan_name.replace(" ", "_")
-        file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
+
+        register[129].ST[0] = 1
+        self.write_register(129)
+
+
         all_ch_data = []
 
-        for k in range(0, 120):
+        for k in range(0, 1):
             scurve_data = []
+
+            # Set calibration to right channel.
             register[k].cal[0] = 1
             self.write_register(k)
-            register[138].CAL_DAC[0] = 0
-            self.write_register(138)
+            time.sleep(0.1)
 
-            for j in range(5, 40):
-                register[138].CAL_DAC[0] += 1
-                self.write_register(138)
+            # Set CAL_DAC value
+            register[138].CAL_DAC[0] = DAC_start-1
+            self.write_register(138)
+            time.sleep(0.1)
+
+            for j in range(DAC_start, DAC_stop):
                 output = self.interfaceFW.launch(register, file_name, self.COM_port)
                 if output[0] == "Error":
                     text = "%s: %s\n" % (output[0], output[1])
@@ -774,12 +792,16 @@ class VFAT3_GUI:
                 else:
                     hits = 0
                     for i in output[1]:
-                        if i.hit_found == 1:
+                        # print i.data[127-k]
+                        if i.data[127-k] == "1":
                             hits += 1
                     scurve_data.append(hits)
 
+            # Unset the calibration to the channel.
             register[k].cal[0] = 0
             self.write_register(k)
+            print "Channel: %d DAC: %d\n" % (k, j)
+            time.sleep(0.1)
             all_ch_data.append(scurve_data)
 
         with open("./routines/%s/S-curve_data.csv" % modified, "wb") as f:
@@ -796,6 +818,9 @@ class VFAT3_GUI:
 
 
     def Scurve_execute(self, scan_name, generation_events):
+
+        start = time.time()
+
         # Setting the needed registers.
         self.set_FE_nominal_values()
         channel = 127
@@ -855,6 +880,11 @@ class VFAT3_GUI:
 
         register[channel].cal[0] = 0
         self.write_register(channel)
+
+        stop = time.time()
+        run_time = (stop - start) / 60
+        text = "Run time (minutes): %f" % run_time
+        self.add_to_interactive_screen(text)
 
     def scan_execute(self, scan_name, generation_events):
         SC_writes = generation_events[3]

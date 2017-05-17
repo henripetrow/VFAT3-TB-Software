@@ -15,36 +15,39 @@ class IPbus_response:
         data_in = data[0:8]
         data_in.reverse()
         hdlc_address_bin = ''.join(str(e) for e in data_in)
-        self.hdlc_address = int(hdlc_address_bin,2)
+        if hdlc_address_bin != "":
+            self.hdlc_address = int(hdlc_address_bin, 2)
         # print "HDLC Address: %s" % hdlc_address_bin
         # print "HDLC Address: %d" % self.hdlc_address
 
         data_in = data[8:16]
         data_in.reverse()
         hdlc_control_bin = ''.join(str(e) for e in data_in)
-        self.hdlc_control = int(hdlc_control_bin,2)
+        if hdlc_control_bin != "":
+            self.hdlc_control = int(hdlc_control_bin, 2)
         # print "HDLC Control: %s" % hdlc_control_bin
         # print "HDLC Control: %d" % self.hdlc_control
 
         data_in = data[16:20]
         data_in.reverse()
         info_code_bin = ''.join(str(e) for e in data_in)
-        self.info_code = int(info_code_bin,2)
+        if info_code_bin != "":
+            self.info_code = int(info_code_bin, 2)
         # print "Info Code: %s" % info_code_bin
         # print "Info Code: %d" % self.info_code
 
         data_in = data[20:24]
         data_in.reverse()
         type_ID_bin = ''.join(str(e) for e in data_in)
-        self.type_ID = int(type_ID_bin,2)
+        self.type_ID = int(type_ID_bin, 2)
         # print "Type Id: %s" % type_ID_bin
         # print "Type Id: %d" % self.type_ID
 
         data_in = data[24:32]
         data_in.reverse()
         transaction_ID_bin = ''.join(str(e) for e in data_in)
-        self.transaction_ID = int(transaction_ID_bin,2)
-        print "Transaction ID: %s" % transaction_ID_bin
+        self.transaction_ID = int(transaction_ID_bin, 2)
+        # print "Transaction ID: %s" % transaction_ID_bin
         print "Transaction ID: %d" % self.transaction_ID
 
         data_in = data[32:44]
@@ -235,10 +238,10 @@ def decode_output_data(filename,register):
     hdlc_state = "IDLE"
     hdlc_start_BCd = 0
     hdlc_flag_bit = 0
-    hdlc_flag = [0,1,1,1,1,1,1,0]
+    hdlc_flag = [0, 1, 1, 1, 1, 1, 1, 0]
     hdlc_data = []
-    ipbus_protocol_version = [0,0,1,0]
-    ipbus_info_code = [1,1,1,1]
+    ipbus_protocol_version = [0, 0, 1, 0]
+    ipbus_info_code = [1, 1, 1, 1]
 
     dataformat_register = register[130] 
 
@@ -395,7 +398,7 @@ def decode_output_data(filename,register):
 
             if input_value == SC0:                            # See if the input line is SC0.   
                 if SC1_counter == 5:
-                    print "Bit stuffing detected, Ignoring one SC0."
+                    # print "Bit stuffing detected, Ignoring one SC0."
                     SC1_counter = 0
                     bit_stuffing_flag = 1
                 else:
