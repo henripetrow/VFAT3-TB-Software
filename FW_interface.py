@@ -141,7 +141,7 @@ class FW_interface:
             self.empty_fifo()
             self.write_control(0)
             # time.sleep(1)
-            # print "Write FIFO"
+            # print "Write FIFO"'
             self.write_fifo()
             # time.sleep(1)
             self.write_control(1)

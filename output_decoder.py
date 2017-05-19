@@ -10,7 +10,7 @@ class IPbus_response:
     def __init__(self, BCd, data):
         self.type = "IPbus"
         self.BCd = BCd
-        print data
+        # print data
         print "****************"
         print "SLOW CONTROL RESPONSE RECEIVED"
 
@@ -251,9 +251,9 @@ def decode_output_data(filename,register):
 
     with open(filename, 'r') as f:
         for line in f:
-            print line
+            # print line
             line = line.rstrip('\n')
-            line = line.replace(" ","")
+            line = line.replace(" ", "")
             split_line = line.split(",")
 
             # Calculate the datapacket size
@@ -278,18 +278,18 @@ def decode_output_data(filename,register):
                 print(e)
                 print "-IGNORE: Invalid value: %s" % split_line[0]
                 continue
-            print [i[1] for i in SC_shift_register]
-            print hdlc_state
+            # print [i[1] for i in SC_shift_register]
+            # print hdlc_state
             input_value = split_line[1]
             #print input_value
             BCcounter = BCcounter + BCd
             #print datapacket_status
             # Sync responses.
             if input_value == "00111010":
-                sync_response_list.append([BCcounter,"SyncAck"])
+                sync_response_list.append([BCcounter, "SyncAck"])
                 print "******Sync Ack********"
             if input_value == "11111110":
-                sync_response_list.append([BCcounter,"VerifAck"])
+                sync_response_list.append([BCcounter, "VerifAck"])
                 print "******SyncVerifAck********"
 
             # DATA PACKETS
@@ -405,7 +405,7 @@ def decode_output_data(filename,register):
 
             if input_value == SC0:                            # See if the input line is SC0.   
                 if SC1_counter == 5:
-                    print "Bit stuffing detected, Ignoring one SC0."
+                    # print "Bit stuffing detected, Ignoring one SC0."
                     SC1_counter = 0
                     bit_stuffing_flag = 1
                 else:
@@ -425,10 +425,10 @@ def decode_output_data(filename,register):
                     #hdlc_flag_bit = 1                          # Change the flag bit to 1 to indicate that HDLC-message has started.
                     hdlc_start_BCd = SC_shift_register[0][0]   # Get the value of the BCcounter in the beginning of the flag byte, to store the beginning time of the hdlc message.
                     hdlc_state = "DATA"                     # The first HDLC field after the flag is the address field.
-                    print 'HDLC flag found, start collecting data.'
+                    # print 'HDLC flag found, start collecting data.'
                     SC_bit_counter = 0                         # Set the bit counter to zero. With this counter we count when we have a full byte of SC0's and SC1's.
                 elif hdlc_flag_bit == 1:                       # See if the flag bit is set. This indicates that it is the end flag of the message.
-                    print 'HDLC flag found, stop collecting data. Analysing data..'
+                    # print 'HDLC flag found, stop collecting data. Analysing data..'
                     hdlc_flag_bit = 0                          # Set hdlc flag to zero to indicate that the hdlc-message has ended.
                     if len(hdlc_data) >= 17:
                         new_IPbus_packt = IPbus_response(hdlc_start_BCd, hdlc_data)

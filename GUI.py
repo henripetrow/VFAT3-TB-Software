@@ -804,7 +804,7 @@ class VFAT3_GUI:
                 for i in output[3]:
                     if i.type == "IPbus":
                         #print "IPBUS"
-                        print hits
+                        # print hits
                         scurve_data.append(hits)
                         hits = 0
                     elif i.type == "data_packet":
@@ -829,7 +829,7 @@ class VFAT3_GUI:
                     for i in output[3]:
                         if i.type == "IPbus":
                             # print "IPBUS"
-                            print hits
+                            # print hits
                             scurve_data.append(hits)
                             hits = 0
                         elif i.type == "data_packet":
@@ -854,7 +854,7 @@ class VFAT3_GUI:
                     for i in output[3]:
                         if i.type == "IPbus":
                             # print "IPBUS"
-                            print hits
+                            # print hits
                             scurve_data.append(hits)
                             hits = 0
                         elif i.type == "data_packet":
@@ -873,7 +873,9 @@ class VFAT3_GUI:
             saved_data.extend(scurve)
             all_ch_data.append(saved_data)
         timestamp = time.strftime("%Y%m%d_%H%M")
-        filename = "./routines/%s/S-curve_data%s.csv" % (modified,timestamp)
+        filename = "./routines/%s/S-curve_data%s.csv" % (modified, timestamp)
+        test = "Results were saved to the file: %s" % filename
+        self.add_to_interactive_screen(text)
         with open(filename, "wb") as f:
             writer = csv.writer(f)
             writer.writerows(all_ch_data)
