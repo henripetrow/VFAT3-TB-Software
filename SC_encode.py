@@ -42,20 +42,20 @@ class SC_encode:
             words = 1
             action_value = 1
         self.transaction_ID = self.update_trans_ID()
-        ipbus = self.IPbus14_package(address,data,words,action_value,self.transaction_ID)
+        ipbus = self.IPbus14_package(address, data, words, action_value, self.transaction_ID)
         paketti = self.HDLC_package(ipbus)
-        paketti = self.binary_to_sc(paketti) # Convert binary form to a list of SC0 and SC1 commands
+        paketti = self.binary_to_sc(paketti)  # Convert binary form to a list of SC0 and SC1 commands
         if BCcounter != 0:
             with open("./data/sent_SCs.dat", "a") as myfile:
-                myfile.write("%d %s\n" % (BCcounter,self.transaction_ID))
+                myfile.write("%d %s\n" % (BCcounter, self.transaction_ID))
         return [paketti, self.transaction_ID]
 
-    def HDLC_package(self,ipbus_package):
+    def HDLC_package(self, ipbus_package):
         hdlc_pack = []
         data = []
-        flag = [0,1,1,1,1,1,1,0]
-        address = [0,0,0,0,0,0,0,0]
-        control = [1,1,0,0,0,0,0,0]
+        flag = [0, 1, 1, 1, 1, 1, 1, 0]
+        address = [0, 0, 0, 0, 0, 0, 0, 0]
+        control = [1, 1, 0, 0, 0, 0, 0, 0]
 
         data.extend(address)
         data.extend(control)
@@ -83,14 +83,14 @@ class SC_encode:
         hdlc_pack.extend(flag)
         return hdlc_pack
 
-    def IPbus14_package(self, addr,data,wrds,typ,trans_ID):
+    def IPbus14_package(self, addr, data, wrds, typ, trans_ID):
         ipbus_pack = []
         
         # Protocol Version. 0x2
-        protocol_version = [0,1,0,0]
+        protocol_version = [0, 1, 0, 0]
         
         # Info code 0xe
-        info_code = [1,1,1,1]
+        info_code = [1, 1, 1, 1]
         
         # Number of words. 12 bits.
         words = dec_to_bin_with_stuffing(wrds, 12)
@@ -115,7 +115,7 @@ class SC_encode:
      
 
         if typ == "f": # Idle
-            type_ID = [1,1,1,1]
+            type_ID = [1, 1, 1, 1]
             ipbus_pack.extend(type_ID)
             ipbus_pack.extend(transaction_ID)
             words = dec_to_bin_with_stuffing(0, 12)
@@ -123,7 +123,7 @@ class SC_encode:
             ipbus_pack.extend(protocol_version)
   
         if typ == 0: # Read
-            type_ID = [0,0,0,0]
+            type_ID = [0, 0, 0, 0]
             ipbus_pack.extend(type_ID)
             ipbus_pack.extend(transaction_ID)
             ipbus_pack.extend(words)
@@ -131,7 +131,7 @@ class SC_encode:
             ipbus_pack.extend(address)
 
         if typ == 1: # Write
-            type_ID = [1,0,0,0,]
+            type_ID = [1, 0, 0, 0]
             ipbus_pack.extend(type_ID)
             ipbus_pack.extend(transaction_ID)
             ipbus_pack.extend(words)
@@ -144,7 +144,7 @@ class SC_encode:
                 ipbus_pack.extend(data)                
             
         if typ == 2: # Non-incrementing Read
-            type_ID = [0,1,0,0]
+            type_ID = [0, 1, 0, 0]
             ipbus_pack.extend(type_ID)
             ipbus_pack.extend(transaction_ID)
             ipbus_pack.extend(address)

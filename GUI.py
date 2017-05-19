@@ -3,6 +3,7 @@
 # Lappeenranta University of Technology
 ###########################################
 import sys
+import time
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
 from ipbus import *
@@ -319,23 +320,24 @@ class VFAT3_GUI:
 
      
         self.scan_options = [
-                "ZCC_DAC scan",
-                "ARM_DAC scan",
-                "HYST_DAC scan",
-                "CFD_DAC_1 scan",
-                "CFD_DAC_2 scan",
-                "PRE_I_BSF scan",
-                "PRE_I_BIT scan",
-                "PRE_I_BLCC scan",
-                "PRE_VREF scan",
-                "SH_I_BFCAS scan",
-                "SH_I_BDIFF scan",
-                "SD_I_BDIFF scan",
-                "SD_I_BSF scan",
-                "SD_I_BFCAS scan",
-                "Counter Resets",
+                # "ZCC_DAC scan",
+                # "ARM_DAC scan",
+                # "HYST_DAC scan",
+                # "CFD_DAC_1 scan",
+                # "CFD_DAC_2 scan",
+                # "PRE_I_BSF scan",
+                # "PRE_I_BIT scan",
+                # "PRE_I_BLCC scan",
+                # "PRE_VREF scan",
+                # "SH_I_BFCAS scan",
+                # "SH_I_BDIFF scan",
+                # "SD_I_BDIFF scan",
+                # "SD_I_BSF scan",
+                # "SD_I_BFCAS scan",
+                # "Counter Resets",
                 "S-curve",
-                "S-curve all ch"
+                "S-curve all ch",
+                "S-curve all ch cont."
                 ]
         self.chosen_scan = self.scan_options[0]
         self.scan_variable = StringVar(master)
@@ -673,8 +675,8 @@ class VFAT3_GUI:
             data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
             data.extend(data_intermediate)
         data.reverse()
+
         data.extend(filler_16bits)
-        print 
         output = self.SC_encoder.create_SC_packet(register_nr,data,"WRITE",0)
         paketti = output[0]
         write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
@@ -700,7 +702,7 @@ class VFAT3_GUI:
         self.add_to_interactive_screen(text)
 
     def run_scan(self):
-        text =  "->Running the scan: %s\n" % self.chosen_scan
+        text = "->Running the scan: %s\n" % self.chosen_scan
         self.add_to_interactive_screen(text)
         scan_name = self.chosen_scan
         modified = scan_name.replace(" ", "_")
@@ -711,6 +713,12 @@ class VFAT3_GUI:
             self.Scurve_execute(scan_name, generation_events)
         elif self.chosen_scan == "S-curve all ch":
             self.Scurve_all_ch_execute(scan_name, generation_events)
+        elif self.chosen_scan == "S-curve all ch cont.":
+            while True:
+                self.Scurve_all_ch_execute(scan_name, generation_events)
+                for i in range(0, 30):
+                    print "Wait"
+                    time.sleep(60)
         else:
             self.scan_execute(scan_name, generation_events)
 
@@ -737,28 +745,28 @@ class VFAT3_GUI:
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
 
-        DAC_start = 1 # needed value +1
-        DAC_stop = 15
         # Setting the needed registers.
         self.set_FE_nominal_values()
-
 
 
         register[130].DT[0] = 0
         self.write_register(130)
 
-        register[138].CAL_MODE[0] = 2
-        self.write_register(138)
+        # register[138].CAL_MODE[0] = 2
+        # self.write_register(138)
 
         register[132].SEL_COMP_MODE[0] = 0
         self.write_register(132)
+
+        register[134].Iref[0] = 29
+        self.write_register(134)
 
         register[135].ZCC_DAC[0] = 10
         register[135].ARM_DAC[0] = 100
         self.write_register(135)
 
         register[139].CAL_FS[0] = 0
-        register[139].CAL_DUR[0] = 2
+        register[139].CAL_DUR[0] = 200
         self.write_register(139)
 
         register[65535].RUN[0] = 1
@@ -770,47 +778,112 @@ class VFAT3_GUI:
 
 
         all_ch_data = []
-
-        for k in range(0, 1):
-            scurve_data = []
+        scurve_data = []
+        saved_data = []
+        error_counter = 0
+        error_list = []
+        all_ch_data.append(["", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35])
+        for k in range(0, 128):
 
             # Set calibration to right channel.
             register[k].cal[0] = 1
             self.write_register(k)
-            time.sleep(0.1)
+            time.sleep(0.5)
 
-            # Set CAL_DAC value
-            register[138].CAL_DAC[0] = DAC_start-1
-            self.write_register(138)
-            time.sleep(0.1)
+            print saved_data
 
-            for j in range(DAC_start, DAC_stop):
-                output = self.interfaceFW.launch(register, file_name, self.COM_port)
+            scurve_data = []
+            #scurve_data.append(k)
+            output = self.interfaceFW.launch(register, file_name, self.COM_port,1)
+            if output[0] == "Error":
+                text = "%s: %s\n" % (output[0], output[1])
+                self.add_to_interactive_screen(text)
+            else:
+                hits = 0
+                print "Channel: %d" % k
+                print len(output[3])
+                for i in output[3]:
+                    if i.type == "IPbus":
+                        #print "IPBUS"
+                        print hits
+                        scurve_data.append(hits)
+                        hits = 0
+                    elif i.type == "data_packet":
+                        # print "DATAPACKET"
+                        # print "%s" % i.data[127-k]
+                        if i.data[127-k] == "1":
+                            hits += 1
+            if len(scurve_data) <= 20:
+                # programPause = raw_input("Press the <ENTER> key to continue...")
+                time.sleep(5)
+                scurve_data = []
+                error_counter += 1
+                error_list.append("Channnel: %d, too short" % k)
+                output = self.interfaceFW.launch(register, file_name, self.COM_port, 1)
                 if output[0] == "Error":
                     text = "%s: %s\n" % (output[0], output[1])
                     self.add_to_interactive_screen(text)
                 else:
                     hits = 0
-                    for i in output[1]:
-                        # print i.data[127-k]
-                        if i.data[127-k] == "1":
-                            hits += 1
-                    scurve_data.append(hits)
-
+                    print "Channel: %d" % k
+                    print len(output[3])
+                    for i in output[3]:
+                        if i.type == "IPbus":
+                            # print "IPBUS"
+                            print hits
+                            scurve_data.append(hits)
+                            hits = 0
+                        elif i.type == "data_packet":
+                            # print "DATAPACKET"
+                            # print "%s" % i.data[127-k]
+                            if i.data[127 - k] == "1":
+                                hits += 1
+            if scurve_data[3] == 0:
+                # programPause = raw_input("Press the <ENTER> key to continue...")
+                time.sleep(5)
+                scurve_data = []
+                error_counter += 1
+                error_list.append("Channnel: %d, zeros" % k)
+                output = self.interfaceFW.launch(register, file_name, self.COM_port, 1)
+                if output[0] == "Error":
+                    text = "%s: %s\n" % (output[0], output[1])
+                    self.add_to_interactive_screen(text)
+                else:
+                    hits = 0
+                    print "Channel: %d" % k
+                    print len(output[3])
+                    for i in output[3]:
+                        if i.type == "IPbus":
+                            # print "IPBUS"
+                            print hits
+                            scurve_data.append(hits)
+                            hits = 0
+                        elif i.type == "data_packet":
+                            # print "DATAPACKET"
+                            # print "%s" % i.data[127-k]
+                            if i.data[127 - k] == "1":
+                                hits += 1
             # Unset the calibration to the channel.
             register[k].cal[0] = 0
             self.write_register(k)
-            print "Channel: %d DAC: %d\n" % (k, j)
-            time.sleep(0.1)
-            all_ch_data.append(scurve_data)
-
-        with open("./routines/%s/S-curve_data.csv" % modified, "wb") as f:
+            time.sleep(0.5)
+            saved_data = []
+            saved_data.append(k)
+            scurve = scurve_data[2:]
+            scurve.reverse()
+            saved_data.extend(scurve)
+            all_ch_data.append(saved_data)
+        timestamp = time.strftime("%Y%m%d_%H%M")
+        filename = "./routines/%s/S-curve_data%s.csv" % (modified,timestamp)
+        with open(filename, "wb") as f:
             writer = csv.writer(f)
             writer.writerows(all_ch_data)
         stop = time.time()
         run_time = (stop - start) / 60
         text = "Run time (minutes): %f" % run_time
         self.add_to_interactive_screen(text)
+        print "Error counter: %d" % error_counter
+        print error_list
 
 
 

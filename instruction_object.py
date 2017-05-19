@@ -128,16 +128,17 @@ class instruction_object:
                     if new_value < 0 or new_value > 2**(size)-1:
                         print "-IGNORED: Value out of the range of the register: %d" % new_value
                         continue
+                    print "CHange"
                     print new_value
+                    print register[addr].reg_array[variable][0]
                     register[addr].reg_array[variable][0] = new_value
                     
                     data = []
                     data_intermediate = []
                     for x in register[addr].reg_array:
                         data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-                        data_intermediate.reverse()
                         data.extend(data_intermediate)
-
+                    print data
                 data.reverse()
 
                 self.BCcounter = self.BCcounter + BCd

@@ -8,7 +8,9 @@ from SC_encode import *
 
 class IPbus_response:
     def __init__(self, BCd, data):
+        self.type = "IPbus"
         self.BCd = BCd
+        print data
         print "****************"
         print "SLOW CONTROL RESPONSE RECEIVED"
 
@@ -121,6 +123,7 @@ class IPbus_response:
 
 class datapacket:
     def __init__(self):
+        self.type = "data_packet"
         self.header = ""
         self.FIFO_warning = 0
         self.systemBC = 0
@@ -186,12 +189,12 @@ class datapacket:
         if '1' in self.data:
             self.hit_found = 1
 
-        if self.data:            
-            print "DATA:"
-            for i in range(0,(len(self.data)/8)):
-                print self.data[i*8:(1+i)*8]
-        else:
-            print "No data."
+        # if self.data:
+        #    print "DATA:"
+        #    for i in range(0,(len(self.data)/8)):
+        #        print self.data[i*8:(1+i)*8]
+        #else:
+        #    print "No data."
 
         if self.received_crc != self.calculated_crc:
             self.crc_error = 1
@@ -234,6 +237,7 @@ def decode_output_data(filename,register):
     IPbus_transaction_list = []
     datapacket_list = []
     sync_response_list = []
+    transaction_list = []
 
     hdlc_state = "IDLE"
     hdlc_start_BCd = 0
@@ -247,7 +251,7 @@ def decode_output_data(filename,register):
 
     with open(filename, 'r') as f:
         for line in f:
-            #print line
+            print line
             line = line.rstrip('\n')
             line = line.replace(" ","")
             split_line = line.split(",")
@@ -274,7 +278,8 @@ def decode_output_data(filename,register):
                 print(e)
                 print "-IGNORE: Invalid value: %s" % split_line[0]
                 continue
-
+            print [i[1] for i in SC_shift_register]
+            print hdlc_state
             input_value = split_line[1]
             #print input_value
             BCcounter = BCcounter + BCd
@@ -317,6 +322,7 @@ def decode_output_data(filename,register):
                 if dataformat_register.SZP[0] == 1:           # If SZP has been set to one. We only receive the header, so data packet is ready.
                     data_packet.ready(dataformat_register)    # Finish the data_packet object.
                     datapacket_list.append(data_packet)       # Add the finished data packet to the data packet list.
+                    transaction_list.append(data_packet)
                     continue                                  # Continue to read next line from file.
                 if dataformat_register.SZD[0] == 1:           # If SZD is set to one, we will get also time tag
                     if EC_size == 0:                          # If size of EC is 0, only BC is received. The state is changed straight to BC
@@ -390,6 +396,7 @@ def decode_output_data(filename,register):
                 if datapacket_byte_counter >= crc_size:        # If byte counter is >= than data_size we have all data bytes and we can move to next state.
                     data_packet.ready(dataformat_register)
                     datapacket_list.append(data_packet)        # Add the finished data packet to the data packet list
+                    transaction_list.append(data_packet)
                     datapacket_status = "IDLE"                 # Set state to IDLE.
                     datapacket_byte_counter = 0                # Set the byte counter to 0 for the next state.
 
@@ -398,19 +405,19 @@ def decode_output_data(filename,register):
 
             if input_value == SC0:                            # See if the input line is SC0.   
                 if SC1_counter == 5:
-                    # print "Bit stuffing detected, Ignoring one SC0."
+                    print "Bit stuffing detected, Ignoring one SC0."
                     SC1_counter = 0
                     bit_stuffing_flag = 1
                 else:
                     SC_shift_register = SC_shift_register[1:]     # Remove the first item from the SC shift register.
-                    SC_shift_register.append([BCcounter,0])       # Add zero and the BCcounter value to the SC shift register
+                    SC_shift_register.append([BCcounter, 0])       # Add zero and the BCcounter value to the SC shift register
                     SC_bit_counter += 1
                 SC1_counter = 0
                 
             if input_value == SC1:                            # See if the input line is SC1.
                 SC1_counter += 1
                 SC_shift_register = SC_shift_register[1:]     # Remove the first item from the SC shift register.
-                SC_shift_register.append([BCcounter,1])       # Add one and the BCcounter value to the SC shift register
+                SC_shift_register.append([BCcounter, 1])       # Add one and the BCcounter value to the SC shift register
                 SC_bit_counter += 1
 
             if [i[1] for i in SC_shift_register] == hdlc_flag and bit_stuffing_flag == 0: # Compare the first row of the shift register to see if it is HDLC flag.
@@ -418,12 +425,15 @@ def decode_output_data(filename,register):
                     #hdlc_flag_bit = 1                          # Change the flag bit to 1 to indicate that HDLC-message has started.
                     hdlc_start_BCd = SC_shift_register[0][0]   # Get the value of the BCcounter in the beginning of the flag byte, to store the beginning time of the hdlc message.
                     hdlc_state = "DATA"                     # The first HDLC field after the flag is the address field.
-                    # print 'HDLC flag found, start collecting data.'
+                    print 'HDLC flag found, start collecting data.'
                     SC_bit_counter = 0                         # Set the bit counter to zero. With this counter we count when we have a full byte of SC0's and SC1's.
                 elif hdlc_flag_bit == 1:                       # See if the flag bit is set. This indicates that it is the end flag of the message.
-                    # print 'HDLC flag found, stop collecting data. Analysing data..'
+                    print 'HDLC flag found, stop collecting data. Analysing data..'
                     hdlc_flag_bit = 0                          # Set hdlc flag to zero to indicate that the hdlc-message has ended.
-                    IPbus_transaction_list.append(IPbus_response(hdlc_start_BCd,hdlc_data)) # Create an IPbus_response object with the new data and add it to the transaction list.
+                    if len(hdlc_data) >= 17:
+                        new_IPbus_packt = IPbus_response(hdlc_start_BCd, hdlc_data)
+                        IPbus_transaction_list.append(new_IPbus_packt) # Create an IPbus_response object with the new data and add it to the transaction list.
+                        transaction_list.append(new_IPbus_packt)
                     hdlc_state = "IDLE"                          # The HDLC message is complete. Change state to IDLE.
                     SC_bit_counter = 0
                     del hdlc_data[:]
@@ -438,7 +448,7 @@ def decode_output_data(filename,register):
 
 
 
-    output_data = [IPbus_transaction_list, datapacket_list, sync_response_list]
+    output_data = [IPbus_transaction_list, datapacket_list, sync_response_list, transaction_list]
     return output_data
 
 

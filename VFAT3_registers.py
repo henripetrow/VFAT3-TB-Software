@@ -137,13 +137,13 @@ register[133] = GBL_CFG_CTR_4()
 
 class GBL_CFG_CTR_5:
     def __init__(self):
-        self.empty1 = [0,10]
-        self.Iref = [32,6]
+        self.empty1 = [0, 10]
+        self.Iref = [32, 6]
 
-        self.reg_array = [self.empty1,self.Iref]
+        self.reg_array = [self.empty1, self.Iref]
 
     def change_values(self, new_values):
-        self.Iref[0] = int(new_values[10:],2)
+        self.Iref[0] = int(new_values[10:], 2)
 
 
 register[134] = GBL_CFG_CTR_5()
@@ -188,19 +188,19 @@ register[137] = GBL_CFG_LAT()
 
 class GBL_CFG_CAL_0:
     def __init__(self):
-        self.empty1 = [0,1]
-        self.CAL_SEL_POL = [0,1]
-        self.CAL_PHI = [0,3]
-        self.CAL_EXT = [0,1]
-        self.CAL_DAC = [0,8]
-        self.CAL_MODE = [0,2]
+        self.empty1 = [0, 1]
+        self.CAL_SEL_POL = [0, 1]
+        self.CAL_PHI = [0, 3]
+        self.CAL_EXT = [0, 1]
+        self.CAL_DAC = [0, 8]
+        self.CAL_MODE = [0, 2]
 
-        self.reg_array = [self.empty1,self.CAL_SEL_POL,self.CAL_PHI,self.CAL_EXT,self.CAL_DAC,self.CAL_MODE]
+        self.reg_array = [self.empty1, self.CAL_SEL_POL, self.CAL_PHI, self.CAL_EXT, self.CAL_DAC, self.CAL_MODE]
 
     def change_values(self, new_values):
-        self.CAL_SEL_POL[0] = int(new_values[1],2)
-        self.CAL_PHI[0] = int(new_values[2:5],2)
-        self.CAL_EXT[0] = int(new_values[5],2)
+        self.CAL_SEL_POL[0] = int(new_values[1], 2)
+        self.CAL_PHI[0] = int(new_values[2:5], 2)
+        self.CAL_EXT[0] = int(new_values[5], 2)
         self.CAL_DAC[0] = int(new_values[6:14],2)
         self.CAL_MODE[0] = int(new_values[14:],2)
 

@@ -92,6 +92,7 @@ class FW_interface:
         # print "Entering read fifo"
         open("./data/FPGA_output.dat", 'w').close()
         counter = 0
+        data_list = []
         while True:
             line = glib.get("test_fifo")
             if line == 0 or line is None:
@@ -102,10 +103,34 @@ class FW_interface:
                 line1 = ''.join(str(e) for e in line[0:24])
                 line2 = ''.join(str(e) for e in line[-8:])
                 line = "%s,%s \n" % (int(line1, 2), line2)
-                with open("./data/FPGA_output_list.dat", "a") as myfile:
-                    myfile.write(line)
+                data_list.append(line)
 
-    def launch(self, register, file_name, serial_port):
+        open("./data/FPGA_output_list.dat", 'w').close()
+        with open("./data/FPGA_output_list.dat", "a") as myfile:
+            for i in data_list:
+                myfile.write(i)
+
+    def read_routine_fifo(self):
+        glib = GLIB()
+        # print "Entering read fifo"
+        open("./data/FPGA_output.dat", 'w').close()
+        counter = 0
+        data_list = []
+
+        data_list = glib.fifoRead("test_fifo", 130074)
+
+
+        open("./data/FPGA_output_list.dat", 'w').close()
+        with open("./data/FPGA_output_list.dat", "a") as myfile:
+            for i in data_list:
+                # print i
+                line = dec_to_bin_with_stuffing(i, 32)
+                line1 = ''.join(str(e) for e in line[0:24])
+                line2 = ''.join(str(e) for e in line[-8:])
+                line = "%s,%s \n" % (int(line1, 2), line2)
+                myfile.write(line)
+
+    def launch(self, register, file_name, serial_port, routine = 0):
         open("./data/FPGA_output_list.dat", 'w').close()
         if file_name != "./data/FPGA_instruction_list.dat":
             shutil.copy2(file_name, "./data/FPGA_instruction_list.dat")
@@ -116,11 +141,16 @@ class FW_interface:
             self.empty_fifo()
             self.write_control(0)
             # time.sleep(1)
+            # print "Write FIFO"
             self.write_fifo()
             # time.sleep(1)
             self.write_control(1)
             # time.sleep(1)
-            self.read_fifo()
+            # print "Read FIFO"
+            if routine == 1:
+                self.read_routine_fifo()
+            else:
+                self.read_fifo()
 
 
         # ############ SIMULATION MODE ##########
