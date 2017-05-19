@@ -874,7 +874,7 @@ class VFAT3_GUI:
             all_ch_data.append(saved_data)
         timestamp = time.strftime("%Y%m%d_%H%M")
         filename = "./routines/%s/S-curve_data%s.csv" % (modified, timestamp)
-        text = "Results were saved to the file: %s" % filename
+        text = "Results were saved to the file:\n %s \n" % filename
         self.add_to_interactive_screen(text)
         with open(filename, "wb") as f:
             writer = csv.writer(f)
