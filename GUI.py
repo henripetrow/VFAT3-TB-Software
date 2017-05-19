@@ -318,7 +318,6 @@ class VFAT3_GUI:
         self.scan_label = ttk.Label(self.scan_frame, text="Available scans and tests.")
         self.scan_label.grid(column=0,row=0)
 
-     
         self.scan_options = [
                 # "ZCC_DAC scan",
                 # "ARM_DAC scan",
