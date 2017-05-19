@@ -11,8 +11,8 @@ class IPbus_response:
         self.type = "IPbus"
         self.BCd = BCd
         # print data
-        print "****************"
-        print "SLOW CONTROL RESPONSE RECEIVED"
+        # print "****************"
+        # print "SLOW CONTROL RESPONSE RECEIVED"
 
         data_in = data[0:8]
         data_in.reverse()
@@ -50,7 +50,7 @@ class IPbus_response:
         transaction_ID_bin = ''.join(str(e) for e in data_in)
         self.transaction_ID = int(transaction_ID_bin, 2)
         # print "Transaction ID: %s" % transaction_ID_bin
-        print "Transaction ID: %d" % self.transaction_ID
+        # print "Transaction ID: %d" % self.transaction_ID
 
         data_in = data[32:44]
         data_in.reverse()
@@ -88,14 +88,18 @@ class IPbus_response:
             else:
                 self.data = data[48:80]
                 self.data.reverse()
-            print "Data:"
-            print self.data
-        else:
-            print "No data."
-        if self.info_code == 0:
-            print "Transaction ok."
-        else:
-            print "!-> Transaction error %d ", self.info_code     
+            # print "Data:"
+            # print self.data
+        # else:
+        #    print "No data."
+        # if self.info_code == 0:
+        #     print "Transaction ok."
+        # else:
+        #     print "!-> Transaction error %d ", self.info_code
+
+        if self.info_code != 0:
+            print "!-> Transaction error %d ", self.info_code
+
 
         received_crc_lsb = ''.join(map(str, data[-16:-8]))
         received_crc_msb = ''.join(map(str, data[-8:]))
@@ -114,11 +118,11 @@ class IPbus_response:
         # print crc_calculation
         calculated_crc = crc_remainder(data[:-16]) # Calculate the CRC for the message.
         # calculated_crc = crc_remainder(crc_calculation) # Calculate the CRC for the message.
-        if received_crc == calculated_crc:
-            print "CRC check ok."
-        else:
-            print "!-> CRC error."
-        print "****************"
+        # if received_crc == calculated_crc:
+        #     print "CRC check ok."
+        # else:
+        #     print "!-> CRC error."
+        # print "****************"
 
 
 class datapacket:
@@ -141,12 +145,12 @@ class datapacket:
         self.hit_found = 0
 
     def ready(self,dataformat_register):
-        print "****************"
-        print "DATA PACKET RECEIVED"
-        print "Header: %s" % self.header
-        print "FIFO warning: %d" % self.FIFO_warning
-        print "System BC: %d" % self.systemBC
-        print self.data
+        # print "****************"
+        # print "DATA PACKET RECEIVED"
+        # print "Header: %s" % self.header
+        # print "FIFO warning: %d" % self.FIFO_warning
+        # print "System BC: %d" % self.systemBC
+        #print self.data
         if dataformat_register.SZP[0] == 0:
             self.received_crc = int(self.crc,2)
             crc_calculation = []  
@@ -160,13 +164,13 @@ class datapacket:
 
         if self.EC:
             self.EC = int(self.EC, 2)
-            print "EC: %d" % self.EC
+            # print "EC: %d" % self.EC
         else:
             print "No EC value."
             self.EC = 0
         if self.BC:
             self.BC = int(self.BC, 2)
-            print "BC: %d" % self.BC
+            # print "BC: %d" % self.BC
         else:
             print "No BC value."
             self.BC = 0
@@ -184,7 +188,7 @@ class datapacket:
                 else:
                     self.data += "00000000"
                     
-        print "****************"
+        # print "****************"
 
         if '1' in self.data:
             self.hit_found = 1
@@ -196,11 +200,11 @@ class datapacket:
         #else:
         #    print "No data."
 
-        if self.received_crc != self.calculated_crc:
-            self.crc_error = 1
-            print("!-> CRC error.")
-        else:
-            print("CRC ok.")
+        # if self.received_crc != self.calculated_crc:
+        #     self.crc_error = 1
+        #     print("!-> CRC error.")
+        # else:
+        #     print("CRC ok.")
 
 
 
@@ -287,10 +291,10 @@ def decode_output_data(filename,register):
             # Sync responses.
             if input_value == "00111010":
                 sync_response_list.append([BCcounter, "SyncAck"])
-                print "******Sync Ack********"
+                # print "******Sync Ack********"
             if input_value == "11111110":
                 sync_response_list.append([BCcounter, "VerifAck"])
-                print "******SyncVerifAck********"
+                # print "******SyncVerifAck********"
 
             # DATA PACKETS
             #print ""
@@ -298,7 +302,7 @@ def decode_output_data(filename,register):
             #print "datapacket byte counter: %d" % datapacket_byte_counter
  
             if (input_value == HDR_1 or input_value == HDR_1W) and datapacket_status == "IDLE": # See if the read line is Header 1.
-                print("Header I found.")
+                # print("Header I found.")
                 data_header = 1                               # Type of header. To be used to stop after EC or BC.
                 data_packet = datapacket()                    # Create a new data packet object. 
                 if input_value == HDR_1W:                     # Check if FIFO warning was given.
@@ -312,7 +316,7 @@ def decode_output_data(filename,register):
                 datapacket_byte_counter = 0                   # Set byte counter to zero. This is used to count the number of bytes to be read in different stages.
 
             elif (input_value == HDR_2 or input_value == HDR_2W) and datapacket_status == "IDLE":
-                print("Header II found.")
+                # print("Header II found.")
                 data_header = 2                               # Type of header.
                 data_packet = datapacket()                    # Create a new data packet object.
                 if input_value == HDR_2W:                     # Check if FIFO warning was given.

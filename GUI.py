@@ -342,7 +342,7 @@ class VFAT3_GUI:
         self.scan_variable = StringVar(master)
         self.scan_variable.set(self.scan_options[0]) # default value
 
-        # REGISTER DROP DOWN MENU
+        # SCAN DROP DOWN MENU
         scan_drop_menu = OptionMenu(self.scan_frame, self.scan_variable, *self.scan_options, command=self.choose_scan)
         scan_drop_menu.config(width=30)
         scan_drop_menu.grid(row=1)
@@ -353,16 +353,16 @@ class VFAT3_GUI:
         verbose_check_button.grid()
 
         # SCAN RUN AND MODIFY BUTTONS
-        self.scan_button_frame = ttk.Frame(self.scan_frame, width = 302, height=200)
+        self.scan_button_frame = ttk.Frame(self.scan_frame, width=302, height=200)
         self.scan_button_frame.grid()  
         self.scan_button_frame.grid_propagate(False)
 
-        self.modify_button = Button(self.scan_button_frame, text="Modify", command = self.modify_scan)
+        self.modify_button = Button(self.scan_button_frame, text="Modify", command=self.modify_scan)
         self.modify_button.grid(column=0, row=0)
-        self.generate_button = Button(self.scan_button_frame, text="Generate", command = self.generate_scan)
+        self.generate_button = Button(self.scan_button_frame, text="Generate", command=self.generate_scan)
         self.generate_button.grid(column=1, row=0)
-        self.run_button = Button(self.scan_button_frame, text="RUN", command = self.run_scan)
-        self.run_button.grid(column=2,row=0)
+        self.run_button = Button(self.scan_button_frame, text="RUN", command=self.run_scan)
+        self.run_button.grid(column=2, row=0)
 
 
         self.scan_frame.grid_forget()
@@ -370,8 +370,8 @@ class VFAT3_GUI:
 
 
         # INTERACTIVE SCREEN
-        self.interactive_screen = Text(master, bg="black", fg="white", height = 30, width = 60)
-        self.interactive_screen.grid(column=1, row = 0)
+        self.interactive_screen = Text(master, bg="black", fg="white", height=30, width=60)
+        self.interactive_screen.grid(column=1, row=0)
         self.add_to_interactive_screen("\n")
         self.add_to_interactive_screen("############################################################\n")
         self.add_to_interactive_screen(" Welcome to the VFAT3 test system Graphical User Interface. \n")
@@ -515,9 +515,19 @@ class VFAT3_GUI:
         text =  "->Sending sync request.\n"
         self.add_to_interactive_screen(text)
         command_encoded = FCC_LUT["CC-A"]
-        write_instruction(self.interactive_output_file,1, command_encoded,1)
-        write_instruction(self.interactive_output_file,1, command_encoded,0)
-        write_instruction(self.interactive_output_file,1, command_encoded,0)
+        write_instruction(self.interactive_output_file, 1, command_encoded, 1)
+        write_instruction(self.interactive_output_file, 1, command_encoded, 0)
+        write_instruction(self.interactive_output_file, 1, command_encoded, 0)
+        output = self.interfaceFW.launch(register, self.interactive_output_file, self.COM_port,2)
+        if output[0] == "Error":
+            text = "%s: %s\n" % (output[0], output[1])
+            self.add_to_interactive_screen(text)
+        elif output[2]:
+            print "Synch ok."
+            for i in output[2]:
+                print "BC:%d, %s\n" % (i[0], i[1])
+        else:
+            print "Synch fail."
         self.execute()
 
     def send_idle(self):
@@ -714,9 +724,24 @@ class VFAT3_GUI:
             self.Scurve_all_ch_execute(scan_name, generation_events)
         elif self.chosen_scan == "S-curve all ch cont.":
             while True:
+
                 self.Scurve_all_ch_execute(scan_name, generation_events)
                 for i in range(0, 30):
-                    print "Wait"
+                    print "->Sending sync request."
+                    command_encoded = FCC_LUT["CC-A"]
+                    write_instruction(self.interactive_output_file, 1, command_encoded, 1)
+                    write_instruction(self.interactive_output_file, 1, command_encoded, 0)
+                    write_instruction(self.interactive_output_file, 1, command_encoded, 0)
+                    output = self.interfaceFW.launch(register, self.interactive_output_file, self.COM_port)
+                    if output[0] == "Error":
+                        text = "%s: %s\n" % (output[0], output[1])
+                        self.add_to_interactive_screen(text)
+                    elif output[2]:
+                        print "Synch ok."
+                        for i in output[2]:
+                            print "BC:%d, %s\n" % (i[0], i[1])
+                    else:
+                        print "Synch fail."
                     time.sleep(60)
         else:
             self.scan_execute(scan_name, generation_events)
@@ -772,7 +797,8 @@ class VFAT3_GUI:
         self.write_register(65535)
         time.sleep(1)
 
-        register[129].ST[0] = 1
+        register[129].ST[0] = 0
+        register[129].PS[0] = 7
         self.write_register(129)
 
 
@@ -800,7 +826,7 @@ class VFAT3_GUI:
             else:
                 hits = 0
                 print "Channel: %d" % k
-                print len(output[3])
+                # print len(output[3])
                 for i in output[3]:
                     if i.type == "IPbus":
                         #print "IPBUS"
@@ -814,6 +840,7 @@ class VFAT3_GUI:
                             hits += 1
             if len(scurve_data) <= 20:
                 # programPause = raw_input("Press the <ENTER> key to continue...")
+                print "Error, not enough values. Try again."
                 time.sleep(5)
                 scurve_data = []
                 error_counter += 1
@@ -824,8 +851,6 @@ class VFAT3_GUI:
                     self.add_to_interactive_screen(text)
                 else:
                     hits = 0
-                    print "Channel: %d" % k
-                    print len(output[3])
                     for i in output[3]:
                         if i.type == "IPbus":
                             # print "IPBUS"
@@ -839,6 +864,10 @@ class VFAT3_GUI:
                                 hits += 1
             if scurve_data[3] == 0:
                 # programPause = raw_input("Press the <ENTER> key to continue...")
+                print "Error, all zeroes. Try again."
+                # Set calibration to right channel.
+                register[k].cal[0] = 1
+                self.write_register(k)
                 time.sleep(5)
                 scurve_data = []
                 error_counter += 1
@@ -849,8 +878,6 @@ class VFAT3_GUI:
                     self.add_to_interactive_screen(text)
                 else:
                     hits = 0
-                    print "Channel: %d" % k
-                    print len(output[3])
                     for i in output[3]:
                         if i.type == "IPbus":
                             # print "IPBUS"
@@ -873,7 +900,7 @@ class VFAT3_GUI:
             saved_data.extend(scurve)
             all_ch_data.append(saved_data)
         timestamp = time.strftime("%Y%m%d_%H%M")
-        filename = "./routines/%s/S-curve_data%s.csv" % (modified, timestamp)
+        filename = "./results/S-curve_data%s.csv" % timestamp
         text = "Results were saved to the file:\n %s \n" % filename
         self.add_to_interactive_screen(text)
         with open(filename, "wb") as f:
@@ -881,75 +908,80 @@ class VFAT3_GUI:
             writer.writerows(all_ch_data)
         stop = time.time()
         run_time = (stop - start) / 60
-        text = "Run time (minutes): %f" % run_time
+        text = "Run time (minutes): %f\n" % run_time
         self.add_to_interactive_screen(text)
         print "Error counter: %d" % error_counter
         print error_list
 
-
-
-
-
-
     def Scurve_execute(self, scan_name, generation_events):
 
         start = time.time()
-
-        # Setting the needed registers.
-        self.set_FE_nominal_values()
         channel = 127
+        # Set calibration to right channel.
         register[channel].cal[0] = 1
         self.write_register(channel)
 
-        register[129].ST[0] = 1
-        self.write_register(129)
 
-        register[130].DT[0] = 1
+        self.set_FE_nominal_values()
+
+        register[130].DT[0] = 0
         self.write_register(130)
 
-        register[138].CAL_DAC[0] = 0
-        register[138].CAL_MODE[0] = 2
-        self.write_register(138)
+        # register[138].CAL_MODE[0] = 2
+        # self.write_register(138)
+
+        register[132].SEL_COMP_MODE[0] = 0
+        self.write_register(132)
+
+        register[134].Iref[0] = 29
+        self.write_register(134)
+
+        register[135].ZCC_DAC[0] = 10
+        register[135].ARM_DAC[0] = 100
+        self.write_register(135)
 
         register[139].CAL_FS[0] = 0
-        register[139].CAL_DUR[0] = 2
+        register[139].CAL_DUR[0] = 200
         self.write_register(139)
 
         register[65535].RUN[0] = 1
         self.write_register(65535)
         time.sleep(1)
 
+        register[129].ST[0] = 0
+        register[129].PS[0] = 7
+        self.write_register(129)
+
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
         scurve_data = []
-        for j in range(0, 30):
-            # time.sleep(5)
-            register[138].CAL_DAC[0] += 1
-            self.write_register(138)
-            # time.sleep(5)
 
-            output = self.interfaceFW.launch(register, file_name, self.COM_port)
-            if output[0] == "Error":
-                text = "%s: %s\n" % (output[0], output[1])
-                self.add_to_interactive_screen(text)
-            else:
-                # text =  "Received Packets:\n"
-                # self.add_to_interactive_screen(text)
-                # text = "SystemBC|EC|BC|hit\n"
-                # self.add_to_interactive_screen(text)
-                hits = 0
-                for i in output[1]:
-                    if i.hit_found == 1:
+
+        output = self.interfaceFW.launch(register, file_name, self.COM_port)
+        if output[0] == "Error":
+            text = "%s: %s\n" % (output[0], output[1])
+            self.add_to_interactive_screen(text)
+        else:
+            hits = 0
+            dac = 38
+            for i in output[3]:
+                if i.type == "IPbus":
+                    # print "IPBUS"
+                    # print hits
+                    dac -= 1
+                    scurve_data.append([dac, hits])
+                    hits = 0
+                elif i.type == "data_packet":
+                    # print "DATAPACKET"
+                    # print "%s" % i.data[127-k]
+                    if i.data[127 - channel] == "1":
                         hits += 1
-                    # text = "%d|%d|%d|%d\n" %(i.systemBC,i.EC,i.BC,i.hit_found)
-                    # self.add_to_interactive_screen(text)
-                # text =  "Hits: %d/10\n" % hits
-                # self.add_to_interactive_screen(text)
-                scurve_data.append([register[138].CAL_DAC[0],hits])          
-        text =  "CAL_DAC|HITS \n"
+
+
+        text = "CAL_DAC|HITS \n"
         self.add_to_interactive_screen(text)
-        for k in scurve_data:
-                text =  "%d %d\n" %(k[0],k[1])
+        for k in scurve_data[2:]:
+                text = "%d %d\n" % (k[0], k[1])
                 self.add_to_interactive_screen(text)
 
         register[channel].cal[0] = 0
@@ -1028,7 +1060,6 @@ class VFAT3_GUI:
         self.execute()
 
 ######################### REGISTER-TAB FUNCTIONS ####################
-
 
     def apply_register_values(self):
         if self.register_mode == 'r':

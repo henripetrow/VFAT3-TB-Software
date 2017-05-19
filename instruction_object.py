@@ -66,9 +66,19 @@ class instruction_object:
             # FCC
             if command_type == "FCC":
                 command = line[2]
-                command_bin = FCC_LUT[command]  # Add error checks.  # BCd comes reversed?
-                self.add_instruction(self.output_file, BCd, command_bin, 0)
-                self.BCcounter = self.BCcounter + BCd
+
+
+                if command == "CalPulse_LV1A":
+                    command_bin = FCC_LUT["CalPulse"]  # Add error checks.  # BCd comes reversed?
+                    self.add_instruction(self.output_file, BCd, command_bin, 0)
+                    command_bin = FCC_LUT["LV1A"]  # Add error checks.  # BCd comes reversed?
+                    self.add_instruction(self.output_file, 10, command_bin, 0)
+                    self.BCcounter = self.BCcounter + BCd +10
+
+                else:
+                    command_bin = FCC_LUT[command]  # Add error checks.  # BCd comes reversed?
+                    self.add_instruction(self.output_file, BCd, command_bin, 0)
+                    self.BCcounter = self.BCcounter + BCd
 
 
                 # ###### Information collection

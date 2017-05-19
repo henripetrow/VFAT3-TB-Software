@@ -6,7 +6,7 @@
 
 1000 Repeat 20
 
-5000 Send_Repeat CalPulse 100 5000 
+5000 Send_Repeat CalPulse_LV1A 100 5000 
 
 5000 Send SCOnly
 5000 Write CAL_DAC 1

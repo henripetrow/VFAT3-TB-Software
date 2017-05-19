@@ -77,15 +77,20 @@ class FW_interface:
     def empty_fifo(self):
         glib = GLIB()
         # print "Emptying fifo"
-
-
         while True:
             line = glib.get("test_fifo")
             # print "Read from FIFO:"
-            print line
+            # print line
             if line == 0 or line is None:
                 #print "FIFO returned 0"
                 break
+
+    def empty_full_fifo(self):
+        glib = GLIB()
+        # print "Emptying fifo"
+        data_list = glib.fifoRead("test_fifo", 130074)
+
+
 
     def read_fifo(self):
         glib = GLIB()
@@ -138,7 +143,10 @@ class FW_interface:
         # print "Chosen COM port: %s" % serial_port
         # ########## NORMAL MODE ##########
         if self.simulation_mode == 0:
-            self.empty_fifo()
+            if routine == 2:
+                self.empty_full_fifo()
+            else:
+                self.empty_fifo()
             self.write_control(0)
             # time.sleep(1)
             # print "Write FIFO"'
@@ -245,7 +253,7 @@ class FW_interface:
             timeout = 0
 
         if not timeout:
-            print "Decoding output data."
+            # print "Decoding output data."
             output_data = decode_output_data('./data/FPGA_output_list.dat', register)
         else:
             print "not Decoding output data."
