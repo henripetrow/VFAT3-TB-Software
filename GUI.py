@@ -5,9 +5,11 @@
 import sys
 import time
 import os
+import math
+import matplotlib.pyplot as plt
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
 from ipbus import *
-
+import numpy
 from Tkinter import *
 import ttk
 import sys
@@ -484,7 +486,7 @@ class VFAT3_GUI:
 
         return output                 
 
-    def change_mode(self,mode):
+    def change_mode(self, mode):
         if mode == "interactive":
             self.scan_frame.grid_forget()
             self.nb.grid(column=0,row=0)
@@ -505,7 +507,7 @@ class VFAT3_GUI:
         write_instruction(self.interactive_output_file,1, command_encoded,0)
         self.execute()
 
-    def change_com_port(self,port):
+    def change_com_port(self, port):
         self.COM_port = port
 
 
@@ -807,88 +809,42 @@ class VFAT3_GUI:
         saved_data = []
         error_counter = 0
         error_list = []
-        all_ch_data.append(["", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35])
+        all_ch_data.append(["", "255-CAL_DAC"])
+        all_ch_data.append(["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35])
         for k in range(0, 128):
-
-            # Set calibration to right channel.
-            register[k].cal[0] = 1
-            self.write_register(k)
-            time.sleep(0.5)
-
-            print saved_data
-
-            scurve_data = []
-            #scurve_data.append(k)
-            output = self.interfaceFW.launch(register, file_name, self.COM_port,1)
-            if output[0] == "Error":
-                text = "%s: %s\n" % (output[0], output[1])
-                self.add_to_interactive_screen(text)
-            else:
-                hits = 0
-                print "Channel: %d" % k
-                # print len(output[3])
-                for i in output[3]:
-                    if i.type == "IPbus":
-                        #print "IPBUS"
-                        # print hits
-                        scurve_data.append(hits)
-                        hits = 0
-                    elif i.type == "data_packet":
-                        # print "DATAPACKET"
-                        # print "%s" % i.data[127-k]
-                        if i.data[127-k] == "1":
-                            hits += 1
-            if len(scurve_data) <= 20:
-                # programPause = raw_input("Press the <ENTER> key to continue...")
-                print "Error, not enough values. Try again."
-                time.sleep(5)
-                scurve_data = []
-                error_counter += 1
-                error_list.append("Channnel: %d, too short" % k)
-                output = self.interfaceFW.launch(register, file_name, self.COM_port, 1)
-                if output[0] == "Error":
-                    text = "%s: %s\n" % (output[0], output[1])
-                    self.add_to_interactive_screen(text)
-                else:
-                    hits = 0
-                    for i in output[3]:
-                        if i.type == "IPbus":
-                            # print "IPBUS"
-                            # print hits
-                            scurve_data.append(hits)
-                            hits = 0
-                        elif i.type == "data_packet":
-                            # print "DATAPACKET"
-                            # print "%s" % i.data[127-k]
-                            if i.data[127 - k] == "1":
-                                hits += 1
-            if scurve_data[3] == 0:
-                # programPause = raw_input("Press the <ENTER> key to continue...")
-                print "Error, all zeroes. Try again."
+            print "Channel: %d" % k
+            while True:
                 # Set calibration to right channel.
                 register[k].cal[0] = 1
                 self.write_register(k)
-                time.sleep(5)
+                time.sleep(0.5)
+
                 scurve_data = []
-                error_counter += 1
-                error_list.append("Channnel: %d, zeros" % k)
                 output = self.interfaceFW.launch(register, file_name, self.COM_port, 1)
                 if output[0] == "Error":
                     text = "%s: %s\n" % (output[0], output[1])
                     self.add_to_interactive_screen(text)
                 else:
                     hits = 0
+
                     for i in output[3]:
                         if i.type == "IPbus":
-                            # print "IPBUS"
-                            # print hits
                             scurve_data.append(hits)
                             hits = 0
                         elif i.type == "data_packet":
-                            # print "DATAPACKET"
-                            # print "%s" % i.data[127-k]
-                            if i.data[127 - k] == "1":
+                            if i.data[127-k] == "1":
                                 hits += 1
+                print scurve_data
+
+                if len(scurve_data) != 22:
+                    print "Not enough values, trying again."
+                    continue
+                if scurve_data[3] == 0:
+                    print "All zeroes, trying again."
+                    continue
+                if len(scurve_data) == 22 and scurve_data[3] != 0:
+                    break
+
             # Unset the calibration to the channel.
             register[k].cal[0] = 0
             self.write_register(k)
@@ -900,18 +856,20 @@ class VFAT3_GUI:
             saved_data.extend(scurve)
             all_ch_data.append(saved_data)
         timestamp = time.strftime("%Y%m%d_%H%M")
-        filename = "./results/S-curve_data%s.csv" % timestamp
+        filename = "/home/a0312687/cernbox/results/%sS-curve_data.csv" % timestamp
         text = "Results were saved to the file:\n %s \n" % filename
         self.add_to_interactive_screen(text)
         with open(filename, "wb") as f:
             writer = csv.writer(f)
             writer.writerows(all_ch_data)
+        self.scurve_analyze(all_ch_data)
         stop = time.time()
         run_time = (stop - start) / 60
         text = "Run time (minutes): %f\n" % run_time
         self.add_to_interactive_screen(text)
         print "Error counter: %d" % error_counter
         print error_list
+
 
     def Scurve_execute(self, scan_name, generation_events):
 
@@ -1046,6 +1004,84 @@ class VFAT3_GUI:
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/instruction_list.txt" % modified
         proc = subprocess.Popen(['gedit', file_name])
+
+    def scurve_analyze(self, scurve_data):
+        full_data = []
+        mean_list = []
+        rms_list = []
+        full_data.append([""])
+        full_data.append(["Differential data"])
+        full_data.append(["", "255-CAL_DAC"])
+        full_data.append(["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, "mean", "RMS"])
+        dac_values = scurve_data[1][1:]
+
+        fig = plt.figure(figsize=(10, 10))
+        plt.subplot(311)
+
+        for i in range(2, 130):
+            diff = []
+            diff_value = 0
+
+            mean_calc = 0
+            summ = 0
+            data = scurve_data[i][1:]
+            channel = scurve_data[i][0]
+            l = 0
+            diff.append(channel)
+            diff.append("")
+            for j in data:
+                if l != 0:
+                    diff_value = j-previous_value
+                    diff.append(diff_value)
+                    mean_calc += dac_values[l]*diff_value
+                    summ += diff_value
+                previous_value = j
+                l += 1
+            mean = mean_calc/float(summ)
+            mean_list.append(mean)
+            l = 1
+            rms = 0
+            for r in diff[2:]:
+                rms += r*(mean-dac_values[l])**2
+                l += 1
+            rms = math.sqrt(rms/summ)
+            rms_list.append(rms)
+            diff.append(mean)
+            diff.append(rms)
+            full_data.append(diff)
+            plt.plot(dac_values, data)
+
+
+
+        plt.xlabel('255-CAL_DAC')
+        plt.ylabel('%')
+        plt.title('S-curves of all channels')
+
+        plt.subplot(312)
+        plt.plot(range(0, 128), rms_list)
+        plt.xlabel('Channel')
+        plt.ylabel('RMS')
+        plt.title('RMS of all channels')
+
+        plt.subplot(313)
+        plt.plot(range(0, 128), mean_list)
+        plt.xlabel('Channel')
+        plt.ylabel('mean')
+        plt.title('mean of all channels')
+        fig.subplots_adjust(hspace=.5)
+        timestamp = time.strftime("%Y%m%d_%H%M")
+
+        filename = "/home/a0312687/cernbox/results/%sS-curve_plot.pdf" % timestamp
+        fig.savefig(filename)
+        #plt.show()
+
+        filename = "/home/a0312687/cernbox/results/%sS-curve_data.csv" % timestamp
+        text = "Results were saved to the file:\n %s \n" % filename
+        self.add_to_interactive_screen(text)
+        with open(filename, "ab") as f:
+            writer = csv.writer(f)
+            writer.writerows(full_data)
+
 
     def choose_scan(self, value):
        self.chosen_scan = value
