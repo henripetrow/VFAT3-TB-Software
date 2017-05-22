@@ -14,14 +14,14 @@ from test_system_functions import *
 
 class instruction_object:
 
-    def __init__(self,modified_scan_name):
+    def __init__(self, modified_scan_name, registers):
         self.BCcounter = 0
+        self.register = registers
         self.instruction_list = []
         self.even_output_file =  "./routines/%s/output_events.csv" % modified_scan_name
         self.output_file =       "./routines/%s/FPGA_instruction_list.txt" % modified_scan_name
         open(self.output_file, 'w').close()
         self.SC_encoder = SC_encode()
-        self.registers = register
         self.CalPulse_list = []
         self.FCC_list = []
         self.Register_change_list = []
@@ -43,13 +43,13 @@ class instruction_object:
     def clear(self):
         self.instruction_list = []
 
-    def add_instruction(self,input_file, BCd, command, erase):
-        self.instruction_write_list.append([BCd,command])
+    def add_instruction(self, input_file, BCd, command, erase):
+        self.instruction_write_list.append([BCd, command])
 
     def write_register_defaults():
         write_register_default_values("SCAN")
 
-    def write_to_file(self,write_BCd_as_fillers):
+    def write_to_file(self, write_BCd_as_fillers):
         for line in self.instruction_list:
             command_type = line[0]
             BCd = line[1]
@@ -57,46 +57,43 @@ class instruction_object:
             if write_BCd_as_fillers:
                 for x in range(1, BCd):
                     if idle_flag == 0:     
-                        self.add_instruction(self.output_file, 1, "PPPP",0)
+                        self.add_instruction(self.output_file, 1, "PPPP", 0)
                         idle_flag = 1
                     else:
-                        self.add_instruction(self.output_file, 1, "AAAA",0)
+                        self.add_instruction(self.output_file, 1, "AAAA", 0)
                         idle_flag = 0
 
             # FCC
             if command_type == "FCC":
                 command = line[2]
 
-
                 if command == "CalPulse_LV1A":
                     command_bin = FCC_LUT["CalPulse"]  # Add error checks.  # BCd comes reversed?
                     self.add_instruction(self.output_file, BCd, command_bin, 0)
                     command_bin = FCC_LUT["LV1A"]  # Add error checks.  # BCd comes reversed?
                     self.add_instruction(self.output_file, 10, command_bin, 0)
-                    self.BCcounter = self.BCcounter + BCd +10
+                    self.BCcounter = self.BCcounter + BCd + 10
 
                 else:
                     command_bin = FCC_LUT[command]  # Add error checks.  # BCd comes reversed?
                     self.add_instruction(self.output_file, BCd, command_bin, 0)
                     self.BCcounter = self.BCcounter + BCd
 
-
                 # ###### Information collection
                 if command == "CalPulse":
                     channel_list = []
                     for i in range(0, 129):
-                        if not register[i].mask:             
-                            if register[i].cal:
+                        if not self.register[i].mask:
+                            if self.register[i].cal:
                                 channel_list.append(i)
-                    self.CalPulse_list.append([self.BCcounter,channel_list])
+                    self.CalPulse_list.append([self.BCcounter, channel_list])
                 else:
-                    self.FCC_list.append([self.BCcounter,command])
+                    self.FCC_list.append([self.BCcounter, command])
 
             # READ
             elif command_type == "READ":
                 data = 0
                 addr = line[2]
-
                 self.BCcounter = self.BCcounter + BCd
                 output = self.SC_encoder.create_SC_packet(addr, data, "READ", self.BCcounter)
                 paketti = output[0]
@@ -109,7 +106,6 @@ class instruction_object:
 
             # WRITE
             elif command_type == "WRITE" or command_type == "WRITE_REPEAT":   			# ######### Need a read repeat.
-
                 reg = line[2]
                 str_reg = reg
                 if isinstance(reg, (int, long)):
@@ -124,33 +120,24 @@ class instruction_object:
 
                     addr = key[0]
                     variable = key[1]
-
-                    current_value = register[addr].reg_array[variable][0]
-                    size = register[addr].reg_array[variable][1]
+                    current_value = self.register[addr].reg_array[variable][0]
+                    size = self.register[addr].reg_array[variable][1]
 
                     if command_type == "WRITE_REPEAT":
                         increment = line[3]
                         new_value = current_value + increment
-
                     if command_type == "WRITE":
                         new_value = line[3]
-
                     if new_value < 0 or new_value > 2**(size)-1:
                         print "-IGNORED: Value out of the range of the register: %d" % new_value
                         continue
-                    print "CHange"
-                    print new_value
-                    print register[addr].reg_array[variable][0]
-                    register[addr].reg_array[variable][0] = new_value
+                    self.register[addr].reg_array[variable][0] = new_value
                     
                     data = []
-                    data_intermediate = []
-                    for x in register[addr].reg_array:
-                        data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-                        data.extend(data_intermediate)
+                    for x in self.register[addr].reg_array:
+                        data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
                     print data
                 data.reverse()
-
                 self.BCcounter = self.BCcounter + BCd
                 output = self.SC_encoder.create_SC_packet(addr, data, "WRITE", self.BCcounter)
                 paketti = output[0]

@@ -207,13 +207,7 @@ class datapacket:
         #     print("CRC ok.")
 
 
-
-
-
-
-
-
-def decode_output_data(filename,register):
+def decode_output_data(filename, register):
     BCcounter = 0
 
     # Data packet registers
@@ -225,7 +219,7 @@ def decode_output_data(filename,register):
     SC_bit_counter = 0
     SC1_counter = 0
     bit_stuffing_flag = 0
-    SC_shift_register = [[0,0]]*8
+    SC_shift_register = [[0, 0]]*8
     SC_shift_register_counter = 0
 
     # Headers from the chips

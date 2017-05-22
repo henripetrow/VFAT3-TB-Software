@@ -8,7 +8,6 @@ from test_system_functions import *
 
 class SC_encode:
 
-
     def __init__(self):
         self.SC0 = "SC0"
         self.SC1 = "SC1"

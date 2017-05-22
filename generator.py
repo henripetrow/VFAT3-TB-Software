@@ -23,11 +23,11 @@
 
 
 import time
-import  os
+import os
 from instruction_object import *
 
 
-def generator(scan_name,write_BCd_as_fillers):
+def generator(scan_name, write_BCd_as_fillers, register):
     modified_scan_name = scan_name.replace(" ", "_")
     input_file = "./routines/%s/instruction_list.txt" % modified_scan_name
     output_file = "./routines/%s/FPGA_instruction_list.txt" % modified_scan_name
@@ -35,7 +35,7 @@ def generator(scan_name,write_BCd_as_fillers):
     repeat_times = 1
     generation_output_list = []
     generation_error_list = []
-    instruction_list = instruction_object(modified_scan_name)
+    instruction_list = instruction_object(modified_scan_name, register)
     start = time.time()
     with open(input_file, 'rU') as f:
         for line in f:
@@ -167,12 +167,12 @@ def generator(scan_name,write_BCd_as_fillers):
                     if repeat_flag == 1:
                         instruction_list.add("FCC", BCd, command, 0)
                         for i in xrange(repeat-1):
-    			        instruction_list.add("FCC", interval, command, 0)
+                            instruction_list.add("FCC", interval, command, 0)
                     else:
                         instruction_list.clear()
                         instruction_list.add("FCC", BCd, command, 0)
                         for i in xrange(repeat-1):
-    			        instruction_list.add("FCC", interval, command, 0)
+                            instruction_list.add("FCC", interval, command, 0)
                         instruction_list.write_to_file(write_BCd_as_fillers)
                         instruction_list.clear()
 
@@ -192,7 +192,7 @@ def generator(scan_name,write_BCd_as_fillers):
     # print time_us
     time_ms = time_us/1000.0
 
-    specs = [num_lines,size,instruction_list.BCcounter,time_ms]
+    specs = [num_lines, size, instruction_list.BCcounter, time_ms]
     events = instruction_list.get_events()
     stop = time.time()
     print("Generation time (minutes):")
