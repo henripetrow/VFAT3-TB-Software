@@ -857,7 +857,6 @@ class VFAT3_GUI:
             all_ch_data.append(saved_data)
         timestamp = time.strftime("%Y%m%d_%H%M")
         # filename = "/home/a0312687/cernbox/results/%sS-curve_data.csv" % timestamp
-
         folder = "./results/"
 
         text = "Results were saved to the folder:\n %s \n" % folder
