@@ -5,6 +5,7 @@
 import sys
 import time
 import os
+import numpy
 import math
 import matplotlib.pyplot as plt
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
@@ -444,9 +445,9 @@ class VFAT3_GUI:
                     else: 
                         data_ok = "Transaction error."                     
 
-                    text =  "Transaction ID:%d, %s\n" % (i.transaction_ID, data_ok)
+                    text = "Transaction ID:%d, %s\n" % (i.transaction_ID, data_ok)
                     self.add_to_interactive_screen(text)                
-                    if i.type_ID  == 0:
+                    if i.type_ID == 0:
                         text = "Data:\n %s\n" % i.data
                         self.add_to_interactive_screen(text) 
 
@@ -520,7 +521,7 @@ class VFAT3_GUI:
         write_instruction(self.interactive_output_file, 1, command_encoded, 1)
         write_instruction(self.interactive_output_file, 1, command_encoded, 0)
         write_instruction(self.interactive_output_file, 1, command_encoded, 0)
-        output = self.interfaceFW.launch(register, self.interactive_output_file, self.COM_port,2)
+        output = self.interfaceFW.launch(register, self.interactive_output_file, self.COM_port, 2)
         if output[0] == "Error":
             text = "%s: %s\n" % (output[0], output[1])
             self.add_to_interactive_screen(text)
@@ -530,7 +531,6 @@ class VFAT3_GUI:
                 print "BC:%d, %s\n" % (i[0], i[1])
         else:
             print "Synch fail."
-        self.execute()
 
     def send_idle(self):
         text = "->Sending IDLE transaction.\n"
@@ -856,10 +856,13 @@ class VFAT3_GUI:
             saved_data.extend(scurve)
             all_ch_data.append(saved_data)
         timestamp = time.strftime("%Y%m%d_%H%M")
-        filename = "/home/a0312687/cernbox/results/%sS-curve_data.csv" % timestamp
-        text = "Results were saved to the file:\n %s \n" % filename
+        # filename = "/home/a0312687/cernbox/results/%sS-curve_data.csv" % timestamp
+
+        folder = "./results/"
+
+        text = "Results were saved to the folder:\n %s \n" % folder
         self.add_to_interactive_screen(text)
-        with open(filename, "wb") as f:
+        with open("%s%sS-curve_data.csv" % (folder, timestamp), "wb") as f:
             writer = csv.writer(f)
             writer.writerows(all_ch_data)
         self.scurve_analyze(all_ch_data)
@@ -1016,7 +1019,8 @@ class VFAT3_GUI:
         dac_values = scurve_data[1][1:]
 
         fig = plt.figure(figsize=(10, 10))
-        plt.subplot(311)
+
+        sub1 = plt.subplot(311)
 
         for i in range(2, 130):
             diff = []
@@ -1051,37 +1055,50 @@ class VFAT3_GUI:
             full_data.append(diff)
             plt.plot(dac_values, data)
 
+        rms_mean = numpy.mean(rms_list)
+        rms_rms = numpy.std(rms_list)
 
+        mean_mean = numpy.mean(mean_list)
+        mean_rms = numpy.std(mean_list)
 
-        plt.xlabel('255-CAL_DAC')
-        plt.ylabel('%')
-        plt.title('S-curves of all channels')
+        sub1.set_xlabel('255-CAL_DAC')
+        sub1.set_ylabel('%')
+        sub1.set_title('S-curves of all channels')
+        sub1.grid(True)
+        text = "S-curves, 128 channels, HG, 25 ns."
+        sub1.text(25, 140, text, horizontalalignment='center',  verticalalignment='center')
 
-        plt.subplot(312)
-        plt.plot(range(0, 128), rms_list)
-        plt.xlabel('Channel')
-        plt.ylabel('RMS')
-        plt.title('RMS of all channels')
+        sub2 = plt.subplot(312)
+        sub2.plot(range(0, 128), rms_list)
+        sub2.set_xlabel('Channel')
+        sub2.set_ylabel('RMS')
+        sub2.set_title('RMS of all channels')
+        sub2.grid(True)
+        text = "mean: %.2f RMS: %.2f" % (rms_mean, rms_rms)
+        sub2.text(10, 0.85, text, horizontalalignment='center',  verticalalignment='center', bbox=dict(alpha=0.5))
 
-        plt.subplot(313)
-        plt.plot(range(0, 128), mean_list)
-        plt.xlabel('Channel')
-        plt.ylabel('mean')
-        plt.title('mean of all channels')
+        sub3 = plt.subplot(313)
+        sub3.plot(range(0, 128), mean_list)
+        sub3.set_xlabel('Channel')
+        sub3.set_ylabel('255-CAL_DAC')
+        sub3.set_title('mean of all channels')
+        sub3.grid(True)
+        text = "Mean: %.2f RMS: %.2f" % (mean_mean, mean_rms)
+        sub3.text(10, 31, text, horizontalalignment='center',  verticalalignment='center', bbox=dict(alpha=0.5))
+
         fig.subplots_adjust(hspace=.5)
+
         timestamp = time.strftime("%Y%m%d_%H%M")
+        # folder = "/home/a0312687/cernbox/results/"
+        folder = "./results/"
+        fig.savefig("%s%sS-curve_plot.pdf" % (folder, timestamp))
 
-        filename = "/home/a0312687/cernbox/results/%sS-curve_plot.pdf" % timestamp
-        fig.savefig(filename)
-        #plt.show()
-
-        filename = "/home/a0312687/cernbox/results/%sS-curve_data.csv" % timestamp
-        text = "Results were saved to the file:\n %s \n" % filename
-        self.add_to_interactive_screen(text)
-        with open(filename, "ab") as f:
+        with open("%s%sS-curve_data.csv" % (folder, timestamp), "ab") as f:
             writer = csv.writer(f)
             writer.writerows(full_data)
 
+        text = "Results were saved to the folder:\n %s \n" % folder
+        self.add_to_interactive_screen(text)
 
     def choose_scan(self, value):
        self.chosen_scan = value

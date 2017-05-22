@@ -86,9 +86,11 @@ class FW_interface:
                 break
 
     def empty_full_fifo(self):
+        print "Emptying FIFO"
         glib = GLIB()
         # print "Emptying fifo"
-        data_list = glib.fifoRead("test_fifo", 130074)
+        data_list = glib.fifoRead("test_fifo", 131000)
+        print "FIFO empty"
 
 
 
@@ -100,6 +102,7 @@ class FW_interface:
         data_list = []
         while True:
             line = glib.get("test_fifo")
+            # print line
             if line == 0 or line is None:
                 # print "FIFO returned 0"
                 break
@@ -147,13 +150,14 @@ class FW_interface:
                 self.empty_full_fifo()
             else:
                 self.empty_fifo()
+            time.sleep(1)
             self.write_control(0)
-            # time.sleep(1)
+            time.sleep(0.1)
             # print "Write FIFO"'
             self.write_fifo()
-            # time.sleep(1)
+            time.sleep(0.1)
             self.write_control(1)
-            # time.sleep(1)
+            time.sleep(0.1)
             # print "Read FIFO"
             if routine == 1:
                 self.read_routine_fifo()
