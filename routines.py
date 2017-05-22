@@ -18,6 +18,7 @@ def scurve_all_ch_execute(obj, scan_name):
     obj.register[130].DT[0] = 0
     obj.write_register(130)
 
+
     # register[138].CAL_MODE[0] = 2
     # obj.write_register(138)
 
