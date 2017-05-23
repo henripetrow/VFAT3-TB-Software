@@ -293,7 +293,7 @@ def scurve_execute(obj, scan_name):
 
 def set_up_trigger_pattern(obj, option):
 
-    obj.set_FE_nominal_values()
+
 
     if option == 2:
         text = "Clearing trigger patterns\n"
@@ -341,34 +341,43 @@ def set_up_trigger_pattern(obj, option):
                 obj.register[k].cal[0] = 1
                 obj.write_register(k)
 
+        obj.set_FE_nominal_values()
+        print "Set FE nominal values."
+
         obj.register[130].DT[0] = 0
         obj.write_register(130)
 
         obj.register[138].CAL_DAC[0] = 200
         obj.register[138].CAL_MODE[0] = 1
         obj.write_register(138)
+        print "Set CAL_DAC to: %d and CAL_MODE to: %d" % (obj.register[138].CAL_DAC[0], obj.register[138].CAL_MODE[0])
 
         obj.register[132].SEL_COMP_MODE[0] = 0
         obj.write_register(132)
+        print "Set SEL_COMP_MODE to: %d" % obj.register[132].SEL_COMP_MODE[0]
 
         obj.register[134].Iref[0] = 29
         obj.write_register(134)
+        print "Set Iref to: %d" % obj.register[134].Iref[0]
 
         obj.register[135].ZCC_DAC[0] = 10
         obj.register[135].ARM_DAC[0] = 100
         obj.write_register(135)
+        print "Set ZCC_DAC to: %d and Set ARM_DAC to: %d" % (obj.register[135].ZCC_DAC[0], obj.register[135].ARM_DAC[0])
 
         obj.register[139].CAL_FS[0] = 3
         obj.register[139].CAL_DUR[0] = 100
         obj.write_register(139)
+        print "Set CAL_FS to: %d and Set CAL_DUR to: %d" % (obj.register[139].CAL_FS[0], obj.register[139].CAL_DUR[0])
 
         obj.register[65535].RUN[0] = 1
         obj.write_register(65535)
+        print "Set RUN to: %d" % obj.register[65535].RUN[0]
 
         obj.register[129].ST[0] = 1
         obj.register[129].PS[0] = 0
         obj.write_register(129)
-
+        print "Set ST to: %d and Set PS to: %d" % (obj.register[129].ST[0], obj.register[129].PS[0])
 
 
 
