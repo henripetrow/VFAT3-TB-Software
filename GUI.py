@@ -235,10 +235,10 @@ class VFAT3_GUI:
         self.sync_button = Button(self.misc_frame, text="Sync", command= lambda: self.send_sync(), width = bwidth)
         self.sync_button.grid(column = 1, row= 2, sticky='e')
 
-        self.sync_check_button = Button(self.misc_frame, text="Sync check", command= lambda: self.send_FCC("CC-B"), width = bwidth)
+        self.sync_check_button = Button(self.misc_frame, text="Sync check", command= lambda: self.send_FCC("CC-B"), width=bwidth)
         self.sync_check_button.grid(column = 1, row = 3, sticky='e')
 
-        self.CalPulse_LV1A_button = Button(self.misc_frame, text="CalPulse+LV1A", command = self.send_Cal_trigger, width = bwidth)
+        self.CalPulse_LV1A_button = Button(self.misc_frame, text="CalPulse+LV1A", command=self.send_Cal_trigger, width=bwidth)
         self.CalPulse_LV1A_button.grid(column = 1, row = 4, sticky='e')
 
         self.CalPulse_LV1A_label0 = Label(self.misc_frame, text = "Latency")
@@ -251,8 +251,17 @@ class VFAT3_GUI:
         self.CalPulse_LV1A_label0 = Label(self.misc_frame, text = "BC")
         self.CalPulse_LV1A_label0.grid(column=4, row=4, sticky='e')
 
-        self.FE_button = Button(self.misc_frame, text="Set FE nominal values", command= lambda: self.set_FE_nominal_values(), width = bwidth)
+        self.FE_button = Button(self.misc_frame, text="Set FE nominal values", command=lambda: self.set_FE_nominal_values(), width=bwidth)
         self.FE_button.grid(column=1, row=5, sticky='e')
+
+        self.Trig1_set_button = Button(self.misc_frame, text="Set trigger pattern 1", command=lambda: set_up_trigger_pattern(self, 0), width=bwidth)
+        self.Trig1_set_button.grid(column=1, row=6, sticky='e')
+
+        self.Trig2_set_button = Button(self.misc_frame, text="Set trigger pattern 2", command=lambda: set_up_trigger_pattern(self, 1), width=bwidth)
+        self.Trig2_set_button.grid(column=1, row=7, sticky='e')
+
+        self.Trig_clear_button = Button(self.misc_frame, text="Clear trigger pattern", command=lambda: set_up_trigger_pattern(self, 2), width=bwidth)
+        self.Trig_clear_button.grid(column=1, row=8, sticky='e')
 
         # ############### FW CONFIGURE TAB #######################################
 
@@ -426,6 +435,7 @@ class VFAT3_GUI:
                 for i in output[0]:
                     if i.info_code == 0:
                         data_ok = "Transaction ok."
+                        print "Transaction ok."
                     else: 
                         data_ok = "Transaction error."                     
 
@@ -670,29 +680,49 @@ class VFAT3_GUI:
         data.reverse()
 
         data.extend(filler_16bits)
-        output = self.SC_encoder.create_SC_packet(register_nr, data, "WRITE", 0)
-        paketti = output[0]
-        write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-        for x in range(1, len(paketti)):
-            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-        self.execute()       
 
+        flag = 0
+        while True:
+            output = self.SC_encoder.create_SC_packet(register_nr, data, "WRITE", 0)
+            paketti = output[0]
+            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
+            for x in range(1, len(paketti)):
+                write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+            output = self.interfaceFW.launch(register, self.interactive_output_file, self.COM_port)
+            if output[0] == "Error":
+                text = "%s: %s\n" % (output[0], output[1])
+                self.add_to_interactive_screen(text)
+            else:
+                if output[0]:
+                    for i in output[0]:
+                        if i.info_code == 0:
+                            print "Transaction ok."
+                            flag = 1
+                        else:
+                            print "Transaction error. Error code."
+
+                else:
+                    print "Transaction error. No reply."
+                    print "Trying again."
+                    continue
+            if flag == 1:
+                break
     def generate_scan(self):
-        text =  "->Generating the scan instruction file: %s\n" % self.chosen_scan
-        self.add_to_interactive_screen(text)
-        scan_name = self.chosen_scan
-        modified = scan_name.replace(" ", "_")
-        file_name = "./routines/%s.txt" % modified
-        output = generator(scan_name, self.write_BCd_as_fillers, self.register)
+            text =  "->Generating the scan instruction file: %s\n" % self.chosen_scan
+            self.add_to_interactive_screen(text)
+            scan_name = self.chosen_scan
+            modified = scan_name.replace(" ", "_")
+            file_name = "./routines/%s.txt" % modified
+            output = generator(scan_name, self.write_BCd_as_fillers, self.register)
 
-        if self.verbose_var.get() == 1:
-            for i in output[0]:
-                self.add_to_interactive_screen(i)
-                self.add_to_interactive_screen("\n")
-        print output[2]
-        text = "Lines: %d, Size:%d kb, Duration: %d BC, %f ms.\n" %(output[2][0], output[2][1], output[2][2], output[2][3])
-        self.add_to_interactive_screen("Generated file:\n")
-        self.add_to_interactive_screen(text)
+            if self.verbose_var.get() == 1:
+                for i in output[0]:
+                    self.add_to_interactive_screen(i)
+                    self.add_to_interactive_screen("\n")
+            print output[2]
+            text = "Lines: %d, Size:%d kb, Duration: %d BC, %f ms.\n" %(output[2][0], output[2][1], output[2][2], output[2][3])
+            self.add_to_interactive_screen("Generated file:\n")
+            self.add_to_interactive_screen(text)
 
     def run_scan(self):
         text = "->Running the scan: %s\n" % self.chosen_scan

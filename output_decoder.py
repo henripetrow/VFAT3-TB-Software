@@ -98,7 +98,7 @@ class IPbus_response:
         #     print "!-> Transaction error %d ", self.info_code
 
         if self.info_code != 0:
-            print "!-> Transaction error %d ", self.info_code
+            print "!-> Transaction error: %d " % self.info_code
 
 
         received_crc_lsb = ''.join(map(str, data[-16:-8]))

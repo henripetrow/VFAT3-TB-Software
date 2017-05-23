@@ -129,7 +129,7 @@ def scurve_analyze(obj, scurve_data, folder):
     dac_values = scurve_data[1][1:]
 
     fig = plt.figure(figsize=(10, 20))
-    sub1 = plt.subplot(511)
+    sub1 = plt.subplot(411)
 
     for i in range(2, 130):
         diff = []
@@ -176,7 +176,7 @@ def scurve_analyze(obj, scurve_data, folder):
     text = "%s \n S-curves, 128 channels, HG, 25 ns." % timestamp
     sub1.text(25, 140, text, horizontalalignment='center', verticalalignment='center')
 
-    sub2 = plt.subplot(512)
+    sub2 = plt.subplot(413)
     sub2.plot(range(0, 128), rms_list)
     sub2.set_xlabel('Channel')
     sub2.set_ylabel('RMS')
@@ -185,7 +185,7 @@ def scurve_analyze(obj, scurve_data, folder):
     text = "mean: %.2f RMS: %.2f" % (rms_mean, rms_rms)
     sub2.text(10, 0.85, text, horizontalalignment='center', verticalalignment='center', bbox=dict(alpha=0.5))
 
-    sub3 = plt.subplot(513)
+    sub3 = plt.subplot(412)
     sub3.plot(range(0, 128), mean_list)
     sub3.set_xlabel('Channel')
     sub3.set_ylabel('255-CAL_DAC')
@@ -194,15 +194,15 @@ def scurve_analyze(obj, scurve_data, folder):
     text = "Mean: %.2f RMS: %.2f" % (mean_mean, mean_rms)
     sub3.text(10, 31, text, horizontalalignment='center', verticalalignment='center', bbox=dict(alpha=0.5))
 
-    sub4 = plt.subplot(514)
-    n, bins, patches = sub4.hist(mean_list, bins='auto')
-    y = mlab.normpdf(bins, mean_mean, mean_rms)
-    sub4.plot(bins, y, 'r--', linewidth=1)
+    sub4 = plt.subplot(427)
+    n, bins, patches = sub4.hist(mean_list, bins=30)
+    # y = mlab.normpdf(bins, mean_mean, mean_rms)
+    # sub4.plot(bins, y, 'r--', linewidth=1)
 
-    sub5 = plt.subplot(515)
-    n, bins, patches = sub5.hist(rms_list, bins='auto')
-    y = mlab.normpdf(bins, rms_mean, rms_rms)
-    sub5.plot(bins, y, 'r--', linewidth=1)
+    sub5 = plt.subplot(428)
+    n, bins, patches = sub5.hist(rms_list, bins=30)
+    # y = mlab.normpdf(bins, rms_mean, rms_rms)
+    # sub5.plot(bins, y, 'r--', linewidth=1)
 
     fig.subplots_adjust(hspace=.5)
 
@@ -289,3 +289,90 @@ def scurve_execute(obj, scan_name):
     run_time = (stop - start) / 60
     text = "Run time (minutes): %f" % run_time
     obj.add_to_interactive_screen(text)
+
+
+def set_up_trigger_pattern(obj, option):
+
+    obj.set_FE_nominal_values()
+
+    if option == 2:
+        text = "Clearing trigger patterns\n"
+        obj.add_to_interactive_screen(text)
+        for k in range(0, 128):
+                print "Clear channel: %d" %k
+                obj.register[k].cal[0] = 0
+                obj.write_register(k)
+                time.sleep(0.1)
+        obj.register[130].DT[0] = 0
+        obj.write_register(130)
+
+        obj.register[138].CAL_DAC[0] = 0
+        obj.register[138].CAL_MODE[0] = 0
+        obj.write_register(138)
+
+        obj.register[132].SEL_COMP_MODE[0] = 0
+        obj.write_register(132)
+
+        obj.register[139].CAL_FS[0] = 0
+        obj.register[139].CAL_DUR[0] = 0
+        obj.write_register(139)
+
+        obj.register[65535].RUN[0] = 0
+        obj.write_register(65535)
+
+        obj.register[129].ST[0] = 0
+        obj.register[129].PS[0] = 0
+        obj.write_register(129)
+    else:
+
+        if option == 0:
+            text = "Setting trigger pattern 1.\n"
+            obj.add_to_interactive_screen(text)
+            for k in range(0, 128, 2):
+                print "Set channel:%d" % k
+                obj.register[k].cal[0] = 1
+                obj.write_register(k)
+
+        if option == 1:
+            text = "Setting trigger pattern 2.\n"
+            obj.add_to_interactive_screen(text)
+            for k in range(1, 128, 2):
+                print "Set channel:%d" % k
+                obj.register[k].cal[0] = 1
+                obj.write_register(k)
+
+        obj.register[130].DT[0] = 0
+        obj.write_register(130)
+
+        obj.register[138].CAL_DAC[0] = 200
+        obj.register[138].CAL_MODE[0] = 1
+        obj.write_register(138)
+
+        obj.register[132].SEL_COMP_MODE[0] = 0
+        obj.write_register(132)
+
+        obj.register[134].Iref[0] = 29
+        obj.write_register(134)
+
+        obj.register[135].ZCC_DAC[0] = 10
+        obj.register[135].ARM_DAC[0] = 100
+        obj.write_register(135)
+
+        obj.register[139].CAL_FS[0] = 3
+        obj.register[139].CAL_DUR[0] = 100
+        obj.write_register(139)
+
+        obj.register[65535].RUN[0] = 1
+        obj.write_register(65535)
+
+        obj.register[129].ST[0] = 1
+        obj.register[129].PS[0] = 0
+        obj.write_register(129)
+
+
+
+
+
+
+
+

@@ -150,12 +150,12 @@ class FW_interface:
                 self.empty_full_fifo()
             else:
                 self.empty_fifo()
-            time.sleep(1)
+            # time.sleep(1)
             self.write_control(0)
-            time.sleep(0.1)
+            # time.sleep(0.1)
             # print "Write FIFO"'
             self.write_fifo()
-            time.sleep(0.1)
+            # time.sleep(0.1)
             self.write_control(1)
             time.sleep(0.1)
             # print "Read FIFO"
