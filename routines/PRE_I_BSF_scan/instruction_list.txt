@@ -1,23 +1,22 @@
-1 Send CC-A
-1 Send CC-A
-1 Send CC-A
+1 Write Monitor_Sel 4
+200 Write ST 0
+200 Write RUN 1
+200 Write PRE_I_BSF 0
+
+1000 Send BC0
+
+1000 Read 131072
+1000 Read 131073
 
 
-130 Write Monitor_Sel 4
+200 Repeat 63
 
-130 Write PRE_I_BSF 0
-
-500 Read 131072
-500 Read 131073
-
-
-10 Repeat 30
-
-500 Write PRE_I_BSF 2
-
-500 Read 131072
-500 Read 131073
-
+200 Write PRE_I_BSF 1
+1000 Read 131072
+1000 Read 131073
 
 10 End_Repeat
 
+200 Write PRE_I_BSF 40
+500 Write Monitor_Sel 0
+200 Write RUN 0

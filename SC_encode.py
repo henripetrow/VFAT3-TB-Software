@@ -19,12 +19,12 @@ class SC_encode:
             self.transaction_ID = 0
         return self.transaction_ID
 
-    def binary_to_sc(self,package):
-        package = [self.SC1 if x==1 else x for x in package]
-        package = [self.SC0 if x==0 else x for x in package]
+    def binary_to_sc(self, package):
+        package = [self.SC1 if x == 1 else x for x in package]
+        package = [self.SC0 if x == 0 else x for x in package]
         return package
 
-    def create_SC_packet(self,address,data,action,BCcounter):
+    def create_SC_packet(self, address, data, action, BCcounter):
         if action == "IDLE":
             action_value = "f"
             words = 1

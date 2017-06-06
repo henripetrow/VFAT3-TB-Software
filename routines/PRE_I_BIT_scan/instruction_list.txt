@@ -1,19 +1,22 @@
-100 Send CC-A
-1 Send CC-A
-1 Send CC-A
+1 Write Monitor_Sel 2
+200 Write ST 0
+200 Write RUN 1
+200 Write PRE_I_BIT 0
 
-150 Write Monitor_Sel 2
+1000 Send BC0
+
+1000 Read 131072
+1000 Read 131073
 
 
-150 Write PRE_I_BIT 0
-150 Read 131072
-150 Read 131073
+200 Repeat 64
 
-10 Repeat 254
-
-150 Write PRE_I_BIT 1
-
-150 Read 131072
-150 Read 131073
+1000 Write PRE_I_BIT 1
+2000 Read 131072
+2000 Read 131073
 
 10 End_Repeat
+
+500 Write PRE_I_BIT 32
+500 Write Monitor_Sel 0
+200 Write RUN 0

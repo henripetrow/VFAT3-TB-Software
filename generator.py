@@ -193,7 +193,8 @@ def generator(scan_name, write_BCd_as_fillers, register):
     time_ms = time_us/1000.0
 
     specs = [num_lines, size, instruction_list.BCcounter, time_ms]
-    events = instruction_list.get_events()
+    # events = instruction_list.get_events()
+    events = 0
     stop = time.time()
     print("Generation time (minutes):")
     print(stop - start)/60

@@ -16,16 +16,15 @@ from ipbus import *
 class FW_interface:
 
     def __init__(self, mode):
-        self.simulation_mode = mode
-        if self.simulation_mode == 0: #Normal mode
+        self.connection_mode = mode
+        if self.connection_mode == 0:  # IPbus mode
             print "Entering normal mode"
-            #using pychips
             self.glib = GLIB()
-        if self.simulation_mode == 1: #Simulation mode
+        if self.connection_mode == 1:  # Simulation mode
             with open("./data/FPGA_statusfile.dat", "w") as myfile:
                 print "Entering Simulation mode."
                 myfile.write("0")
-        if self.simulation_mode == 2: #Aamir mode
+        if self.connection_mode == 2:  # Serial mode
             print "Entering Aamir mode."
 
         self.FCC_LUT_L = {
@@ -49,62 +48,40 @@ class FW_interface:
         "1110":"11110000"
         }
 
+    def reset_vfat3(self):
+        self.glib.set("reset", 1)
+
     def write_control(self, input_value):
-        glib = GLIB()
-        #print "Writing control register: %d" % input_value
-        # using py-chips
-        glib.set("state_fw", input_value)
+        self.glib.set("state_fw", input_value)
 
     def read_control(self):
-        glib = GLIB()
-        #print "Reading control register."
-        # using py-chips
-        value = glib.get("state_fw")
-        #print value
+        value = self.glib.get("state_fw")
         return value
 
     def write_fifo(self):
-        glib = GLIB()
         with open("./data/FPGA_instruction_list.dat", 'r') as f:
             for line in f:
                 line = line.rstrip('\n')
                 data_line = "0000000000000000" + line
-                # using py-chips
-                glib.set("test_fifo", int(data_line, 2))
-                # print "Writing command to fifo:"
-                # print data_line
+                self.glib.set("test_fifo", int(data_line, 2))
 
     def empty_fifo(self):
-        glib = GLIB()
-        # print "Emptying fifo"
         while True:
-            line = glib.get("test_fifo")
-            # print "Read from FIFO:"
-            # print line
+            line = self.glib.get("test_fifo")
             if line == 0 or line is None:
-                #print "FIFO returned 0"
                 break
 
     def empty_full_fifo(self):
         print "Emptying FIFO"
-        glib = GLIB()
-        # print "Emptying fifo"
-        data_list = glib.fifoRead("test_fifo", 131000)
+        self.glib.fifoRead("test_fifo", 131000)
         print "FIFO empty"
 
-
-
     def read_fifo(self):
-        glib = GLIB()
-        # print "Entering read fifo"
         open("./data/FPGA_output.dat", 'w').close()
-        counter = 0
         data_list = []
         while True:
-            line = glib.get("test_fifo")
-            # print line
+            line = self.glib.get("test_fifo")
             if line == 0 or line is None:
-                # print "FIFO returned 0"
                 break
             else:
                 line = dec_to_bin_with_stuffing(line, 32)
@@ -112,61 +89,47 @@ class FW_interface:
                 line2 = ''.join(str(e) for e in line[-8:])
                 line = "%s,%s \n" % (int(line1, 2), line2)
                 data_list.append(line)
-
         open("./data/FPGA_output_list.dat", 'w').close()
         with open("./data/FPGA_output_list.dat", "a") as myfile:
             for i in data_list:
                 myfile.write(i)
 
     def read_routine_fifo(self):
-        glib = GLIB()
-        # print "Entering read fifo"
         open("./data/FPGA_output.dat", 'w').close()
-        counter = 0
-        data_list = []
-
-        data_list = glib.fifoRead("test_fifo", 130074)
-
+        data_list = self.glib.fifoRead("test_fifo", 130074)
 
         open("./data/FPGA_output_list.dat", 'w').close()
         with open("./data/FPGA_output_list.dat", "a") as myfile:
             for i in data_list:
-                # print i
                 line = dec_to_bin_with_stuffing(i, 32)
                 line1 = ''.join(str(e) for e in line[0:24])
                 line2 = ''.join(str(e) for e in line[-8:])
                 line = "%s,%s \n" % (int(line1, 2), line2)
                 myfile.write(line)
 
-    def launch(self, register, file_name, serial_port, routine = 0):
+    def launch(self, register, file_name, serial_port, routine=0):
         open("./data/FPGA_output_list.dat", 'w').close()
         if file_name != "./data/FPGA_instruction_list.dat":
             shutil.copy2(file_name, "./data/FPGA_instruction_list.dat")
         timeout = 0
-        # print "Chosen COM port: %s" % serial_port
+
         # ########## NORMAL MODE ##########
-        if self.simulation_mode == 0:
+        if self.connection_mode == 0:
             if routine == 2:
                 self.empty_full_fifo()
             else:
                 self.empty_fifo()
-            # time.sleep(1)
             self.write_control(0)
-            # time.sleep(0.1)
-            # print "Write FIFO"'
             self.write_fifo()
-            # time.sleep(0.1)
             self.write_control(1)
             time.sleep(0.1)
-            # print "Read FIFO"
             if routine == 1:
                 self.read_routine_fifo()
             else:
                 self.read_fifo()
 
-
         # ############ SIMULATION MODE ##########
-        if self.simulation_mode == 1:
+        if self.connection_mode == 1:
 
             with open("./data/FPGA_statusfile.dat", "w") as myfile:
                 myfile.write("1")
@@ -189,7 +152,7 @@ class FW_interface:
                     break
 
         # ############## Aamir mode #####################333
-        if self.simulation_mode == 2:
+        if self.connection_mode == 2:
             ser = serial.Serial(serial_port, baudrate=115200, writeTimeout=0)
             ser.bytesize = serial.EIGHTBITS  # number of bits per bytes
             ser.parity = serial.PARITY_NONE  # set parity check: no parity
@@ -198,24 +161,15 @@ class FW_interface:
             ser.xonxoff = True  # disable software flow control
             ser.rtscts = False  # disable hardware (RTS/CTS) flow control
             ser.dsrdtr = False  # disable hardware (DSR/DTR) flow control
-
             data = "\xca"
             ser.write(data)
-            #data = "\x00"
-            #ser.write(data)
-
-
             output_byte_list = []
             with open(file_name, 'r') as f0:
                 for i, l in enumerate(f0):
                     pass
             f0.close()
             size = i + 1
-            print "Packet size."
-            print size
-            c, f= divmod(size, 1<<8)        # split the size to 8 bit lsb and msb
-            print c
-            print f
+            c, f = divmod(size, 1 << 8)        # split the size to 8 bit lsb and msb
             output_byte_list.append(c)
             output_byte_list.append(f)
 
@@ -228,10 +182,7 @@ class FW_interface:
                     print data_line
                     output_byte_list.append(data_line)
 
-
-
             ser.write(bytearray(output_byte_list))
-
             data_list = []
             for i in range(0,700):
                 data = ser.read()
@@ -239,29 +190,19 @@ class FW_interface:
                 data = dec_to_bin_with_stuffing(data, 8)
                 data = ''.join(str(e) for e in data)
                 data = "000000000001,%s\n" % data
-
                 data_list.append(data)
-
-
-
-
 
             open("./data/FPGA_output_list.dat", 'w').close()
             with open("./data/FPGA_output_list.dat", "a") as myfile:
                 for i in data_list:
                     myfile.write(i)
-
-
-
-
             timeout = 0
 
         if not timeout:
-            # print "Decoding output data."
             output_data = decode_output_data('./data/FPGA_output_list.dat', register)
         else:
             print "not Decoding output data."
-            output_data = ['Error','Timeout, no response from the firmware.']
+            output_data = ['Error', 'Timeout, no response from the firmware.']
         return output_data
 
 

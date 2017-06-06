@@ -3,6 +3,7 @@
 # Lappeenranta University of Technology
 ###########################################
 
+
 def write_instruction(input_file, BCd, command, erase):
     if erase == 1:
         open(input_file, 'w').close() 
@@ -10,6 +11,7 @@ def write_instruction(input_file, BCd, command, erase):
     BCd = ''.join(str(e) for e in BCd)
     with open(input_file, "a") as myfile:
         myfile.write("%s%s\n" % (BCd,command))
+
 
 def write_instruction_list(input_file, instruction_list):
 
@@ -57,6 +59,7 @@ def dec_to_bin_with_stuffing(inn, size):
         out.insert(0,0)
     return out
 
+
 def data_packet_bit_stuffing(data):
     out = []
     SC1_counter = 0
@@ -71,6 +74,7 @@ def data_packet_bit_stuffing(data):
             out.extend([0])
             SC1_counter = 0
     return out
+
 
 def crc_remainder(input_package):
     polynomial_bitstring = 4129

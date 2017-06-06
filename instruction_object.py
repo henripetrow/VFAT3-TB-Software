@@ -80,15 +80,15 @@ class instruction_object:
                     self.BCcounter = self.BCcounter + BCd
 
                 # ###### Information collection
-                if command == "CalPulse":
-                    channel_list = []
-                    for i in range(0, 129):
-                        if not self.register[i].mask:
-                            if self.register[i].cal:
-                                channel_list.append(i)
-                    self.CalPulse_list.append([self.BCcounter, channel_list])
-                else:
-                    self.FCC_list.append([self.BCcounter, command])
+                # if command == "CalPulse":
+                #     channel_list = []
+                #     for i in range(0, 129):
+                #         if not self.register[i].mask:
+                #             if self.register[i].cal:
+                #                 channel_list.append(i)
+                #     self.CalPulse_list.append([self.BCcounter, channel_list])
+                # else:
+                #     self.FCC_list.append([self.BCcounter, command])
 
             # READ
             elif command_type == "READ":
@@ -102,7 +102,7 @@ class instruction_object:
                     self.add_instruction(self.output_file, 1, FCC_LUT[paketti[x]], 0)
                     self.BCcounter = self.BCcounter + 1
 
-                self.Register_read_list.append([self.BCcounter,addr])
+            #    self.Register_read_list.append([self.BCcounter,addr])
 
             # WRITE
             elif command_type == "WRITE" or command_type == "WRITE_REPEAT":   			# ######### Need a read repeat.
@@ -143,7 +143,7 @@ class instruction_object:
                 paketti = output[0]
                 trans_id = output[1]
                 # Snapshots of register changes for the decoding of the outputdata.
-                self.Register_change_list.append([self.BCcounter, str_reg, new_value, trans_id])
+                # self.Register_change_list.append([self.BCcounter, str_reg, new_value, trans_id])
  
                 # Write instructions
                 self.add_instruction(self.output_file, BCd, FCC_LUT[paketti[0]], 0)  # To get the right starting BCd

@@ -2,9 +2,9 @@
 # Created by Henri Petrow 2017
 # Lappeenranta University of Technology
 ###########################################
+
 from Tkinter import *
 import ttk
-
 import time
 import sys
 import os
@@ -23,19 +23,19 @@ class VFAT3_GUI:
     def __init__(self, master):
         if len(sys.argv) >= 2:
             if sys.argv[1] == '-s':
-                self.interfaceFW = FW_interface(1)      #  1 - Simulation mode(with simulation model)
+                self.interfaceFW = FW_interface(1)      # 1 - Simulation mode
                 self.mode = 1
             elif sys.argv[1] == '-a':
-                self.interfaceFW = FW_interface(2)      #  1 - Simulation mode(with simulation model)
+                self.interfaceFW = FW_interface(2)      # 1 - Serial mode
                 self.mode = 2
             elif sys.argv[1] == '-j':
-                self.interfaceFW = FW_interface(0)      # 0 - Normal mode(with Firmware)
+                self.interfaceFW = FW_interface(0)      # 0 - IPbus mode
                 self.mode = 0
             else:
                 print "Unrecognised option."
-                self.interfaceFW = FW_interface(2)      # 0 - Normal mode(with Firmware)
+                self.interfaceFW = FW_interface(0)      # 0 - IPbus mode
         else:
-            self.interfaceFW = FW_interface(2)          # 0 - Normal mode(with Firmware)         
+            self.interfaceFW = FW_interface(0)          # 0 - IPbus mode
         self.SC_encoder = SC_encode()
         self.register = register
         self.channel_register = 0
@@ -61,18 +61,18 @@ class VFAT3_GUI:
         # create a top level menu
         menubar = Menu(self.master)
 
-        # create a pulldown menu, and add it to the menu bar
+        # create a pull down menu, and add it to the menu bar
         filemenu = Menu(menubar, tearoff=0)
         filemenu.add_command(label="Quit", command=master.quit)
         menubar.add_cascade(label="File", menu=filemenu)
 
-        # create more pulldown menus
+        # create more pull down menus
         modemenu = Menu(menubar, tearoff=0)
         modemenu.add_command(label="Interactive", command=lambda: self.change_mode("interactive"))
         modemenu.add_command(label="Routines", command=lambda: self.change_mode("scans_tests"))
         modemenu.add_separator()
         modemenu.add_command(label="Production", command=lambda: self.change_mode("production"))
-        #modemenu.entryconfig(1, state=DISABLED)
+        # modemenu.entryconfig(1, state=DISABLED)
         modemenu.entryconfig(3, state=DISABLED)
         menubar.add_cascade(label="Mode", menu=modemenu)
 
@@ -107,46 +107,46 @@ class VFAT3_GUI:
         self.label = Label(self.FCC_frame, text="Send Fast Control Commands (FCC)")
         self.label.grid(columnspan=2)
 
-        self.EC0_button = Button(self.FCC_frame, text="EC0", command=lambda: self.send_FCC("EC0"), width=bwidth)
+        self.EC0_button = Button(self.FCC_frame, text="EC0", command=lambda: self.send_fcc("EC0"), width=bwidth)
         self.EC0_button.grid()
 
-        self.BC0_button = Button(self.FCC_frame, text="BC0", command=lambda: self.send_FCC("BC0"), width=bwidth)
+        self.BC0_button = Button(self.FCC_frame, text="BC0", command=lambda: self.send_fcc("BC0"), width=bwidth)
         self.BC0_button.grid()
 
-        self.calpulse_button = Button(self.FCC_frame, text="CalPulse", command=lambda: self.send_FCC("CalPulse"), width=bwidth)
+        self.calpulse_button = Button(self.FCC_frame, text="CalPulse", command=lambda: self.send_fcc("CalPulse"), width=bwidth)
         self.calpulse_button.grid()
 
-        self.resync_button = Button(self.FCC_frame, text="ReSync", command=lambda: self.send_FCC("ReSync"), width=bwidth)
+        self.resync_button = Button(self.FCC_frame, text="ReSync", command=lambda: self.send_fcc("ReSync"), width=bwidth)
         self.resync_button.grid()
 
-        self.sconly_button = Button(self.FCC_frame, text="SCOnly", command=lambda: self.send_FCC("SCOnly"), width=bwidth)
+        self.sconly_button = Button(self.FCC_frame, text="SCOnly", command=lambda: self.send_fcc("SCOnly"), width=bwidth)
         self.sconly_button.grid()
 
-        self.runmode_button = Button(self.FCC_frame, text="RunMode", command=lambda: self.send_FCC("RunMode"), width=bwidth)
+        self.runmode_button = Button(self.FCC_frame, text="RunMode", command=lambda: self.send_fcc("RunMode"), width=bwidth)
         self.runmode_button.grid()
 
-        self.lv1a_button = Button(self.FCC_frame, text="LV1A", command=lambda: self.send_FCC("LV1A"), width=bwidth)
+        self.lv1a_button = Button(self.FCC_frame, text="LV1A", command=lambda: self.send_fcc("LV1A"), width=bwidth)
         self.lv1a_button.grid()
 
-        self.sc0_button = Button(self.FCC_frame, text="SC0", command=lambda: self.send_FCC("SC0"), width=bwidth)
+        self.sc0_button = Button(self.FCC_frame, text="SC0", command=lambda: self.send_fcc("SC0"), width=bwidth)
         self.sc0_button.grid()
 
-        self.sc1_button = Button(self.FCC_frame, text="SC1", command=lambda: self.send_FCC("SC1"), width=bwidth)
+        self.sc1_button = Button(self.FCC_frame, text="SC1", command=lambda: self.send_fcc("SC1"), width=bwidth)
         self.sc1_button.grid()
 
-        self.resc_button = Button(self.FCC_frame, text="ReSC", command=lambda: self.send_FCC("ReSC"), width=bwidth)
+        self.resc_button = Button(self.FCC_frame, text="ReSC", command=lambda: self.send_fcc("ReSC"), width=bwidth)
         self.resc_button.grid()
 
-        self.lv1aec0_button = Button(self.FCC_frame, text="LV1A+EC0", command=lambda: self.send_FCC("LV1A+EC0"), width=bwidth)
+        self.lv1aec0_button = Button(self.FCC_frame, text="LV1A+EC0", command=lambda: self.send_fcc("LV1A+EC0"), width=bwidth)
         self.lv1aec0_button.grid()
 
-        self.lv1abc0_button = Button(self.FCC_frame, text="LV1A+BC0", command=lambda: self.send_FCC("LV1A+BC0"), width=bwidth)
+        self.lv1abc0_button = Button(self.FCC_frame, text="LV1A+BC0", command=lambda: self.send_fcc("LV1A+BC0"), width=bwidth)
         self.lv1abc0_button.grid()
 
-        self.lv1aec0bc0_button = Button(self.FCC_frame, text="LV1A+EC0+BC0", command=lambda: self.send_FCC("LV1A+EC0+BC0"), width=bwidth)
+        self.lv1aec0bc0_button = Button(self.FCC_frame, text="LV1A+EC0+BC0", command=lambda: self.send_fcc("LV1A+EC0+BC0"), width=bwidth)
         self.lv1aec0bc0_button.grid()
 
-        self.EC0BC0_button = Button(self.FCC_frame, text="EC0+BC0", command=lambda: self.send_FCC("EC0+BC0"), width=bwidth)
+        self.EC0BC0_button = Button(self.FCC_frame, text="EC0+BC0", command=lambda: self.send_fcc("EC0+BC0"), width=bwidth)
         self.EC0BC0_button.grid()
 
         # #################REGISTERS TAB###################################
@@ -210,7 +210,7 @@ class VFAT3_GUI:
         self.refresh_button = Button(self.register_button_frame, text="Refresh", command=lambda: self.update_registers(self.value))
         self.refresh_button.grid(column=3, row=0)
 
-        self.channel_label = Label(self.register_data_frame, text = "Channel:")
+        self.channel_label = Label(self.register_data_frame, text="Channel:")
         self.channel_label.grid(column=0, row=0, sticky='e')
 
         self.channel_entry = Entry(self.register_data_frame, width=5)
@@ -226,46 +226,52 @@ class VFAT3_GUI:
 
         # ###############MISC TAB #######################################
         # Read ADCs
-        self.close_button = Button(self.misc_frame, text="Read ADCs", command= lambda: self.read_ADCs(), width = bwidth)
-        self.close_button.grid(column = 1, row= 0, sticky='e')
+        self.close_button = Button(self.misc_frame, text="Read ADCs", command= lambda: self.read_adcs(), width = bwidth)
+        self.close_button.grid(column=1, row=0, sticky='e')
 
         self.idle_button = Button(self.misc_frame, text="SC Idle character", command= lambda: self.send_idle(), width = bwidth)
-        self.idle_button.grid(column = 1, row= 1, sticky='e')
+        self.idle_button.grid(column=1, row=1, sticky='e')
 
         self.sync_button = Button(self.misc_frame, text="Sync", command= lambda: self.send_sync(), width = bwidth)
-        self.sync_button.grid(column = 1, row= 2, sticky='e')
+        self.sync_button.grid(column=1, row=2, sticky='e')
 
-        self.sync_check_button = Button(self.misc_frame, text="Sync check", command= lambda: self.send_FCC("CC-B"), width=bwidth)
-        self.sync_check_button.grid(column = 1, row = 3, sticky='e')
+        self.sync_check_button = Button(self.misc_frame, text="Sync check", command= lambda: self.send_fcc("CC-B"), width=bwidth)
+        self.sync_check_button.grid(column=1, row=3, sticky='e')
 
-        self.CalPulse_LV1A_button = Button(self.misc_frame, text="CalPulse+LV1A", command=self.send_Cal_trigger, width=bwidth)
-        self.CalPulse_LV1A_button.grid(column = 1, row = 4, sticky='e')
+        self.CalPulse_LV1A_button = Button(self.misc_frame, text="CalPulse+LV1A", command=self.send_cal_trigger, width=bwidth)
+        self.CalPulse_LV1A_button.grid(column=1, row=4, sticky='e')
 
-        self.CalPulse_LV1A_label0 = Label(self.misc_frame, text = "Latency")
+        self.CalPulse_LV1A_label0 = Label(self.misc_frame, text="Latency")
         self.CalPulse_LV1A_label0.grid(column=2, row=4, sticky='e')
 
         self.CalPulse_LV1A_entry = Entry(self.misc_frame, width=5)
         self.CalPulse_LV1A_entry.grid(column=3, row=4, sticky='e')
         self.CalPulse_LV1A_entry.insert(0, self.CalPulseLV1A_latency)
 
-        self.CalPulse_LV1A_label0 = Label(self.misc_frame, text = "BC")
+        self.CalPulse_LV1A_label0 = Label(self.misc_frame, text="BC")
         self.CalPulse_LV1A_label0.grid(column=4, row=4, sticky='e')
 
-        self.FE_button = Button(self.misc_frame, text="Set FE nominal values", command=lambda: self.set_FE_nominal_values(), width=bwidth)
+        self.FE_button = Button(self.misc_frame, text="Set FE nominal values", command=lambda: self.set_fe_nominal_values(), width=bwidth)
         self.FE_button.grid(column=1, row=5, sticky='e')
 
         self.Trig1_set_button = Button(self.misc_frame, text="Set trigger pattern 1", command=lambda: set_up_trigger_pattern(self, 0), width=bwidth)
         self.Trig1_set_button.grid(column=1, row=6, sticky='e')
 
-        self.Trig2_set_button = Button(self.misc_frame, text="Set trigger pattern 2", command=lambda: set_up_trigger_pattern(self, 1), width=bwidth)
-        self.Trig2_set_button.grid(column=1, row=7, sticky='e')
-
         self.Trig_clear_button = Button(self.misc_frame, text="Clear trigger pattern", command=lambda: set_up_trigger_pattern(self, 2), width=bwidth)
-        self.Trig_clear_button.grid(column=1, row=8, sticky='e')
+        self.Trig_clear_button.grid(column=1, row=7, sticky='e')
+
+        self.VFAT3_reset_button = Button(self.misc_frame, text="Reset VFAT3", command=lambda: self.send_reset(), width=bwidth)
+        self.VFAT3_reset_button.grid(column=1, row=8, sticky='e')
+
+        self.cont_trig_button = Button(self.misc_frame, text="Continuous triggers", command=lambda: continuous_trigger(self), width=bwidth)
+        self.cont_trig_button.grid(column=1, row=9, sticky='e')
+
+        self.cal_button = Button(self.misc_frame, text="Calibration", command=lambda: calibration(self), width=bwidth)
+        self.cal_button.grid(column=1, row=10, sticky='e')
 
         # ############### FW CONFIGURE TAB #######################################
 
-        self.fwsync_button = Button(self.FW_frame, text="ReSync Firmware", command= lambda: self.FW_sync(), width = bwidth)
+        self.fwsync_button = Button(self.FW_frame, text="ReSync Firmware", command=lambda: self.FW_sync(), width=bwidth)
         self.fwsync_button.grid(column=1, row=2, sticky='e')
         self.fwsync_button.config(state="disabled")
 
@@ -284,18 +290,12 @@ class VFAT3_GUI:
                 ]
         self.chosen_serial_port = self.serial_options[7]
         self.serial_port_variable = StringVar(master)
-        self.serial_port_variable.set(self.serial_options[7]) # default value
+        self.serial_port_variable.set(self.serial_options[7])  # default value
 
         # SERIAL PORT DROP DOWN MENU
         serial_port_drop_menu = OptionMenu(self.FW_frame, self.serial_port_variable, *self.serial_options, command=self.change_com_port)
         serial_port_drop_menu.config(width=30)
         serial_port_drop_menu.grid(column=1, row=3)
-
-        # self.write_BCd_as_fillers = IntVar()
-        # BCDfillers_check_button = Checkbutton(self.FW_frame, text="Write BCd as fillers", variable=self.write_BCd_as_fillers)
-        # BCDfillers_check_button.grid(column = 1,row=4)
-
-
 
         # ADD TABS
         self.nb.add(self.FCC_frame, text="FCC")
@@ -304,8 +304,6 @@ class VFAT3_GUI:
         if self.mode == 2:
             self.nb.add(self.FW_frame, text="Firmware")
         self.nb.grid(column=0, row=0)
-
-        #self.nb.grid_forget()
 
         ###############################################################################################################
         # ##################################################SCAN MODE##################################################
@@ -318,21 +316,22 @@ class VFAT3_GUI:
         self.scan_label.grid(column=0, row=0)
 
         self.scan_options = [
-                # "ZCC_DAC scan",
-                # "ARM_DAC scan",
-                # "HYST_DAC scan",
-                # "CFD_DAC_1 scan",
-                # "CFD_DAC_2 scan",
-                # "PRE_I_BSF scan",
-                # "PRE_I_BIT scan",
-                # "PRE_I_BLCC scan",
-                # "PRE_VREF scan",
-                # "SH_I_BFCAS scan",
-                # "SH_I_BDIFF scan",
-                # "SD_I_BDIFF scan",
-                # "SD_I_BSF scan",
-                # "SD_I_BFCAS scan",
-                # "Counter Resets",
+                "ZCC_DAC scan",
+                "ARM_DAC scan",
+                "HYST_DAC scan",
+                "CFD_DAC_1 scan",
+                "CFD_DAC_2 scan",
+                "PRE_I_BSF scan",
+                "PRE_I_BIT scan",
+                "PRE_I_BLCC scan",
+                "PRE_VREF scan",
+                "SH_I_BFCAS scan",
+                "SH_I_BDIFF scan",
+                "SD_I_BDIFF scan",
+                "SD_I_BSF scan",
+                "SD_I_BFCAS scan",
+                "CAL_DAC scan",
+                "Counter Resets",
                 "S-curve",
                 "S-curve all ch",
                 "S-curve all ch cont."
@@ -358,9 +357,9 @@ class VFAT3_GUI:
 
         self.modify_button = Button(self.scan_button_frame, text="Modify", command=self.modify_scan)
         self.modify_button.grid(column=0, row=0)
-        self.generate_button = Button(self.scan_button_frame, text="Generate", command=self.generate_scan)
+        self.generate_button = Button(self.scan_button_frame, text="Generate", command=self.generate_routine)
         self.generate_button.grid(column=1, row=0)
-        self.run_button = Button(self.scan_button_frame, text="RUN", command=self.run_scan)
+        self.run_button = Button(self.scan_button_frame, text="RUN", command=self.run_routine)
         self.run_button.grid(column=2, row=0)
 
         self.scan_frame.grid_forget()
@@ -508,6 +507,11 @@ class VFAT3_GUI:
 
 # ################ MISC-TAB FUNCTIONS ################################
 
+    def send_reset(self):
+        text = "->Sending Reset to the chip.\n"
+        self.add_to_interactive_screen(text)
+        self.interfaceFW.reset_vfat3()
+
     def send_sync(self):
         text =  "->Sending sync request.\n"
         self.add_to_interactive_screen(text)
@@ -536,7 +540,7 @@ class VFAT3_GUI:
             write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
         self.execute()
 
-    def read_ADCs(self):
+    def read_adcs(self):
         text =  "->Reading the ADCs.\n"
         self.add_to_interactive_screen(text)
 
@@ -582,7 +586,7 @@ class VFAT3_GUI:
             else:
                 print "No ADC1 values found"
 
-    def send_Cal_trigger(self):
+    def send_cal_trigger(self):
         latency = int(self.CalPulse_LV1A_entry.get())
         self.CalPulseLV1A_latency = latency
         self.CalPulse_LV1A_entry.delete(0, END)
@@ -596,7 +600,7 @@ class VFAT3_GUI:
         write_instruction(self.interactive_output_file,latency, LV1A_encoded, 0)
         self.execute()
 
-    def set_FE_nominal_values(self):
+    def set_fe_nominal_values(self):
         register[141].PRE_I_BSF[0] = 13
         register[141].PRE_I_BIT[0] = 150
         register[142].PRE_I_BLCC[0] = 25
@@ -707,12 +711,12 @@ class VFAT3_GUI:
                     continue
             if flag == 1:
                 break
-    def generate_scan(self):
+
+    def generate_routine(self):
             text =  "->Generating the scan instruction file: %s\n" % self.chosen_scan
             self.add_to_interactive_screen(text)
             scan_name = self.chosen_scan
             modified = scan_name.replace(" ", "_")
-            file_name = "./routines/%s.txt" % modified
             output = generator(scan_name, self.write_BCd_as_fillers, self.register)
 
             if self.verbose_var.get() == 1:
@@ -724,14 +728,14 @@ class VFAT3_GUI:
             self.add_to_interactive_screen("Generated file:\n")
             self.add_to_interactive_screen(text)
 
-    def run_scan(self):
+    def run_routine(self):
         text = "->Running the scan: %s\n" % self.chosen_scan
         self.add_to_interactive_screen(text)
         scan_name = self.chosen_scan
         modified = scan_name.replace(" ", "_")
         generation_events = list(csv.reader(open("./routines/%s/output_events.csv" % modified)))
         if self.chosen_scan == "Counter Resets":
-            self.counter_resets_execute(scan_name, generation_events)
+            self.counter_resets_execute(scan_name)
         elif self.chosen_scan == "S-curve":
             scurve_execute(self, scan_name)
         elif self.chosen_scan == "S-curve all ch":
@@ -740,7 +744,7 @@ class VFAT3_GUI:
             while True:
 
                 scurve_all_ch_execute(self, scan_name)
-                for i in range(0, 30):
+                for i in range(0, 5):
                     print "->Sending sync request."
                     command_encoded = FCC_LUT["CC-A"]
                     write_instruction(self.interactive_output_file, 1, command_encoded, 1)
@@ -758,71 +762,24 @@ class VFAT3_GUI:
                         print "Synch fail."
                     time.sleep(60)
         else:
-            self.scan_execute(scan_name, generation_events)
+            scan_execute(self, scan_name, generation_events)
 
-    def counter_resets_execute(self, scan_name, generation_events):
+    def counter_resets_execute(self, scan_name):
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
-        output = self.interfaceFW.launch(register,file_name,self.COM_port)
+        output = self.interfaceFW.launch(register, file_name, self.COM_port)
         if output[0] == "Error":
-            text =  "%s: %s\n" %(output[0],output[1])
+            text = "%s: %s\n" % (output[0], output[1])
             self.add_to_interactive_screen(text)
         else:
-            text =  "Received Packets:\n"
+            text = "Received Packets:\n"
             self.add_to_interactive_screen(text)
             text = "SystemBC|EC|BC\n"
             self.add_to_interactive_screen(text)
 
             for i in output[1]:
-                text = "%d|%d|%d\n" %(i.systemBC,i.EC,i.BC)
+                text = "%d|%d|%d\n" %(i.systemBC, i.EC, i.BC)
                 self.add_to_interactive_screen(text)
-
-    def scan_execute(self, scan_name, generation_events):
-        SC_writes = generation_events[3]
-        modified = scan_name.replace(" ", "_")
-        file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
-        output = self.interfaceFW.launch(register,file_name,self.COM_port)
-        if output[0] == "Error":
-            text =  "%s: %s\n" %(output[0],output[1])
-            self.add_to_interactive_screen(text)
-        else:
-            text =  "Received Values:\n"
-            self.add_to_interactive_screen(text)
-            ADC_flag = 0
-            text = "%s|ADC0|ADC1|BC1|BC2|BC3|TransID1|TransID2|TransID3|\n" %scan_name[:-5]
-            self.add_to_interactive_screen(text)
-
-            for i in output[0]:
-                for k in generation_events[2]:
-                    k = k.lstrip('[')
-                    k = k.rstrip(']')
-                    k = k.replace(" ","")
-                    k = k.split(",")
-                    if k[1].strip('\'') != modified[:-5]:
-                        continue
-                    elif int(k[0]) > i.BCd:
-                        break
-                    else:
-                        reg_value = int(k[2])
-                        bc_value = int(k[0])
-                        trans_id = int(k[3])
-        
-                if i.type_ID  == 0:
-                    if ADC_flag == 0:   
-                        first_ADC_value = int(''.join(map(str, i.data)), 2)
-                        first_BC = i.BCd
-                        first_trans_id = i.transaction_ID
-                        ADC_flag = 1
-                    else:
-                        second_ADC_value = int(''.join(map(str, i.data)), 2)
-                        second_BC = i.BCd
-                        second_trans_id = i.transaction_ID
-                        text = "%d %d %d %d %d %d %d %d %d\n" % (reg_value, first_ADC_value, second_ADC_value, bc_value, first_BC,second_BC, trans_id, first_trans_id, second_trans_id)
-                        self.add_to_interactive_screen(text)
-                        ADC_flag = 0
-
-
-        return output 
 
     def modify_scan(self):
         text =  "->Modifying the scan: %s\n" % self.chosen_scan
@@ -837,9 +794,9 @@ class VFAT3_GUI:
 
 # ####################### FCC-TAB FUNCTIONS ##########################
 
-    def send_FCC(self, command):
-        text = "->Sending %s.\n" % command
-        self.add_to_interactive_screen(text)
+    def send_fcc(self, command):
+        # text = "->Sending %s.\n" % command
+        # self.add_to_interactive_screen(text)
         command_encoded = FCC_LUT[command]
         write_instruction(self.interactive_output_file, 1, command_encoded, 1)
         self.execute()
@@ -1010,43 +967,43 @@ class VFAT3_GUI:
             mask = "mask%d" % self.channel_register
             zcc_dac = "zcc_dac%d" % self.channel_register
             arm_dac = "arm_dac%d" % self.channel_register
-            self.register_names = [cal,mask,zcc_dac,arm_dac]
+            self.register_names = [cal, mask, zcc_dac, arm_dac]
 
-            self.channel_label.grid(column = 0, row= 0, sticky='e')
-            self.channel_entry.grid(column = 1, row= 0, sticky='e')
+            self.channel_label.grid(column=0, row=0, sticky='e')
+            self.channel_entry.grid(column=1, row=0, sticky='e')
             self.channel_entry.delete(0, END)
             self.channel_entry.insert(0, self.channel_register)
-            self.channel_button.grid(column = 2, row = 0, sticky='e')
+            self.channel_button.grid(column=2, row=0, sticky='e')
 
         elif self.value == "Control Logic":
             self.register_mode = 'rw'
             register_nr = 129
             description = "Settings for the control logic."
-            self.register_names = ["PS","SyncLevelEnable","ST","DDR"]
+            self.register_names = ["PS", "SyncLevelEnable", "ST", "DDR"]
 
         elif self.value == "Data Packet":
             self.register_mode = 'rw'
             register_nr = 130
             description = "Settings for the data packets."
-            self.register_names = ["P16","PAR","DT","SZP","SZD","TT","ECb","BCb"]
+            self.register_names = ["P16", "PAR", "DT", "SZP", "SZD", "TT", "ECb", "BCb"]
 
         elif self.value == "Front End":
             self.register_mode = 'rw'
             register_nr = 131
             description = "Settings for the Front End."
-            self.register_names = ["TP_FE","RES_PRE","CAP_PRE"]
+            self.register_names = ["TP_FE", "RES_PRE", "CAP_PRE"]
 
         elif self.value == "CFD":
             self.register_mode = 'rw'
             register_nr = 132
             description = "Settings for the CFD."
-            self.register_names = ["PT","EN_HYST","SEL_POL","Force_En_ZCC","Force_TH","SEL_COMP_MODE"]
+            self.register_names = ["PT", "EN_HYST", "SEL_POL", "Force_En_ZCC", "Force_TH", "SEL_COMP_MODE"]
 
         elif self.value == "Monitoring":
             self.register_mode = 'rw'
             register_nr = 133
             description = "Settings for the Monitoring."
-            self.register_names = ["VREF_ADC","Mon_Gain","Monitor_Sel"]
+            self.register_names = ["VREF_ADC", "Mon_Gain", "Monitor_Sel"]
 
         elif self.value == "Global reference current":
             self.register_mode = 'rw'
@@ -1058,7 +1015,7 @@ class VFAT3_GUI:
             self.register_mode = 'rw'
             register_nr = 135
             description = "Settings for the global thresholds."
-            self.register_names = ["ZCC_DAC","ARM_DAC"]
+            self.register_names = ["ZCC_DAC", "ARM_DAC"]
 
         elif self.value == "Global Hysteresis":
             self.register_mode = 'rw'
@@ -1076,37 +1033,37 @@ class VFAT3_GUI:
             self.register_mode = 'rw'
             register_nr = 138
             description = "Settings for the Calibration Pulse."
-            self.register_names = ["CAL_SEL_POL","CAL_PHI","CAL_EXT","CAL_DAC","CAL_MODE"]
+            self.register_names = ["CAL_SEL_POL", "CAL_PHI", "CAL_EXT", "CAL_DAC", "CAL_MODE"]
 
         elif self.value == "Calibration 1":
             self.register_mode = 'rw'
             register_nr = 139
             description = "Settings for the Calibration Pulse."
-            self.register_names = ["CAL_FS","CAL_DUR"]
+            self.register_names = ["CAL_FS", "CAL_DUR"]
 
         elif self.value == "Biasing 0":
             self.register_mode = 'rw'
             register_nr = 140
             description = "Settings for the CFD biasing."
-            self.register_names = ["CFD_DAC_2","CFD_DAC_1"]
+            self.register_names = ["CFD_DAC_2", "CFD_DAC_1"]
 
         elif self.value == "Biasing 1":
             self.register_mode = 'rw'
             register_nr = 141
             description = "Settings for the Front End biasing."
-            self.register_names = ["PRE_I_BSF","PRE_I_BIT"]
+            self.register_names = ["PRE_I_BSF", "PRE_I_BIT"]
 
         elif self.value == "Biasing 2":
             self.register_mode = 'rw'
             register_nr = 142
             description = "Settings for the Front End biasing."
-            self.register_names = ["PRE_I_BLCC","PRE_VREF"]
+            self.register_names = ["PRE_I_BLCC", "PRE_VREF"]
 
         elif self.value == "Biasing 3":
             self.register_mode = 'rw'
             register_nr = 143
             description = "Settings for the Front End biasing."
-            self.register_names = ["SH_I_BFCAS","SH_I_BDIFF"]
+            self.register_names = ["SH_I_BFCAS", "SH_I_BDIFF"]
 
         elif self.value == "Biasing 4":
             self.register_mode = 'rw'
@@ -1118,13 +1075,13 @@ class VFAT3_GUI:
             self.register_mode = 'rw'
             register_nr = 145
             description = "Settings for the Front End biasing."
-            self.register_names = ["SD_I_BSF","SD_I_BFCAS"]
+            self.register_names = ["SD_I_BSF", "SD_I_BFCAS"]
 
         elif self.value == "Biasing 6":
             self.register_mode = 'rw'
             register_nr = 146
             description = "Settings for the SLVS biasing."
-            self.register_names = ["SLVS_IBIAS","SLVS_VREF"]
+            self.register_names = ["SLVS_IBIAS", "SLVS_VREF"]
 
         elif self.value == "SLEEP/RUN":
             self.register_mode = 'rw'
@@ -1156,17 +1113,11 @@ class VFAT3_GUI:
             description = "ID number of the chip."
             self.register_names = ["CHIP_ID"]
 
-
         elif self.value == "Front End Settings":
             self.register_mode = 'rw'
             register_nr = "FED"
             description = "Front End related registers."
-            self.register_names = ["TP_FE","RES_PRE","CAP_PRE","PRE_I_BSF","PRE_I_BIT","PRE_I_BLCC","PRE_VREF","SH_I_BFCAS","SH_I_BDIFF","SD_I_BDIFF","SD_I_BSF","SD_I_BFCAS"]
-
-
-
-
-
+            self.register_names = ["TP_FE", "RES_PRE", "CAP_PRE", "PRE_I_BSF", "PRE_I_BIT", "PRE_I_BLCC", "PRE_VREF", "SH_I_BFCAS", "SH_I_BDIFF", "SD_I_BDIFF", "SD_I_BSF", "SD_I_BFCAS"]
 
         else:
             self.register_names = []
@@ -1216,7 +1167,7 @@ class VFAT3_GUI:
                 write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
             output = self.execute()
             if output[0] == "Error":
-                text = "%s: %s\n" %(output[0], output[1])
+                text = "%s: %s\n" % (output[0], output[1])
                 self.add_to_interactive_screen(text)
                 text = "Register values might be incorrect.\n"
                 self.add_to_interactive_screen(text)
@@ -1251,14 +1202,14 @@ class VFAT3_GUI:
                 text = "No read data found. Register values might be incorrect.\n"
                 self.add_to_interactive_screen(text)
             elif output[0] == "Error":
-                text = "%s: %s\n" %(output[0],output[1])
-                text = "Register values might be incorrect.\n"
+                text = "%s: %s\n" %(output[0], output[1])
+                text += "Register values might be incorrect.\n"
                 self.add_to_interactive_screen(text)
             else:
                 print "Read data:"
                 new_data = output[0][0].data
                 print new_data
-                if register_nr in [65536,65537,65538,65539]:
+                if register_nr in [65536, 65537, 65538, 65539]:
                     new_data = ''.join(str(e) for e in new_data)
                 else:
                     new_data = ''.join(str(e) for e in new_data[-16:])
@@ -1275,8 +1226,8 @@ class VFAT3_GUI:
             variable = key[1]
             current_value = register[addr].reg_array[variable][0]
             self.label.append(Label(self.register_data_frame, text=i))
-            self.label[j].grid(column=0,row = j+3, sticky='e')
-            if register_nr in [65536,65537,65538,65539]:
+            self.label[j].grid(column=0, row=j+3, sticky='e')
+            if register_nr in [65536, 65537, 65538, 65539]:
                 entry_width = 12
             else:
                 entry_width = 5
