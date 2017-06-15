@@ -31,8 +31,8 @@ def scurve_all_ch_execute(obj, scan_name):
     obj.register[132].SEL_COMP_MODE[0] = 0
     obj.write_register(132)
 
-    obj.register[134].Iref[0] = 32
-    obj.write_register(134)
+    # obj.register[134].Iref[0] = 32
+    # obj.write_register(134)
 
     obj.register[135].ZCC_DAC[0] = 10
     obj.register[135].ARM_DAC[0] = 100
@@ -252,11 +252,184 @@ def calibration(obj):
                 else:
                     step_value = int(''.join(map(str, i.data)), 2)
                     print "Step value: %d" % step_value
-                    cal_value = step_value -base_value
+                    cal_value = step_value - base_value
                     print "Cal value: %d" % cal_value
                     cal_values.append(cal_value)
 
     print cal_values
+
+
+def iref_adjust(obj):
+
+    # Read the current Iref dac value.
+    output = obj.SC_encoder.create_SC_packet(134, 0, "READ", 0)
+    paketti = output[0]
+    write_instruction(obj.interactive_output_file, 150, FCC_LUT[paketti[0]], 1)
+    for x in range(1, len(paketti)):
+        write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+    output = obj.execute()
+    if not output[0]:
+        print "No read data found. Register values might be incorrect.\n"
+    elif output[0] == "Error":
+        text = "%s: %s\n" % (output[0], output[1])
+        text += "Register values might be incorrect.\n"
+        print text
+    else:
+        print "Read data:"
+        new_data = output[0][0].data
+        print new_data
+
+        new_data = ''.join(str(e) for e in new_data[-16:])
+        register[134].change_values(new_data)
+
+    obj.register[133].Monitor_Sel[0] = 0
+    obj.write_register(133)
+
+    obj.register[65535].RUN[0] = 1
+    obj.write_register(65535)
+    time.sleep(1)
+    previous_diff = 100
+    while True:
+
+        time.sleep(1)
+        output = obj.interfaceFW.ext_adc()
+        print "Iref: %f, target: 100 mV. DAC: %d" % (output, register[134].Iref[0])
+        new_diff = abs(100 - output)
+
+        if previous_diff < new_diff:
+            print "->Difference increasing. Choose previous value: %d." % previous_value
+            register[134].Iref[0] = previous_value
+            obj.write_register(134)
+            break
+        previous_value = register[134].Iref[0]
+        if output < 100:
+            print "->Value too low, increase Iref register by 1."
+            register[134].Iref[0] += 1
+        else:
+            print "->Value too high, decrease Iref register by 1."
+            register[134].Iref[0] -= 1
+        obj.write_register(134)
+        previous_diff = new_diff
+
+    obj.register[65535].RUN[0] = 0
+    obj.write_register(65535)
+    time.sleep(1)
+
+
+def adc_lsb(obj):
+
+    obj.register[133].Monitor_Sel[0] = 33
+    obj.write_register(133)
+
+    obj.register[65535].RUN[0] = 1
+    obj.write_register(65535)
+    time.sleep(1)
+
+    # CAL_DAC 0
+    register[138].CAL_DAC[0] = 0
+    obj.write_register(138)
+
+    addr0 = 131073  # ADC0 address
+    time.sleep(2)
+    output = obj.SC_encoder.create_SC_packet(addr0, 0, "READ", 0)
+    paketti = output[0]
+    write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
+    for x in range(1, len(paketti)):
+        write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+
+    output = obj.execute()
+    if output[0] == "Error":
+        print "Error."
+    else:
+        if output[0]:
+            int_adc_output_0 = int(''.join(map(str, output[0][0].data)), 2)
+    time.sleep(2)
+    ext_adc_output0 = obj.interfaceFW.ext_adc()
+
+    # CAL_DAC 100
+    register[138].CAL_DAC[0] = 100
+    obj.write_register(138)
+    time.sleep(2)
+    output = obj.SC_encoder.create_SC_packet(addr0, 0, "READ", 0)
+    paketti = output[0]
+    write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
+    for x in range(1, len(paketti)):
+        write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+
+    output = obj.execute()
+    if output[0] == "Error":
+        print "Error."
+    else:
+        if output[0]:
+            int_adc_output_1 = int(''.join(map(str, output[0][0].data)), 2)
+    time.sleep(2)
+    ext_adc_output1 = obj.interfaceFW.ext_adc()
+
+
+    # CAL_DAC 200
+    register[138].CAL_DAC[0] = 200
+    obj.write_register(138)
+    time.sleep(2)
+    output = obj.SC_encoder.create_SC_packet(addr0, 0, "READ", 0)
+    paketti = output[0]
+    write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
+    for x in range(1, len(paketti)):
+        write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+
+    output = obj.execute()
+    if output[0] == "Error":
+        print "Error."
+    else:
+        if output[0]:
+            int_adc_output_2 = int(''.join(map(str, output[0][0].data)), 2)
+    time.sleep(2)
+    ext_adc_output2 = obj.interfaceFW.ext_adc()
+
+
+
+    # CAL_DAC 255
+    register[138].CAL_DAC[0] = 255
+    obj.write_register(138)
+    time.sleep(2)
+    output = obj.SC_encoder.create_SC_packet(addr0, 0, "READ", 0)
+    paketti = output[0]
+    write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
+    for x in range(1, len(paketti)):
+        write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+
+    output = obj.execute()
+    if output[0] == "Error":
+        print "Error."
+    else:
+        if output[0]:
+            int_adc_output_3 = int(''.join(map(str, output[0][0].data)), 2)
+    time.sleep(2)
+    ext_adc_output3 = obj.interfaceFW.ext_adc()
+
+    lsb0 = ext_adc_output0/int_adc_output_0
+    lsb1 = ext_adc_output1/int_adc_output_1
+    lsb2 = ext_adc_output2/int_adc_output_2
+    lsb3 = ext_adc_output3/int_adc_output_3
+
+    print "Internal ADC counts at 0: %d" % int_adc_output_0
+    print "External voltage at 0: %f" % ext_adc_output0
+    print "LSB: %f" % lsb0
+    print "Internal ADC counts at 100: %d" % int_adc_output_1
+    print "External voltage at 100: %f" % ext_adc_output1
+    print "LSB: %f" % lsb1
+    print "Internal ADC counts at 200: %d" % int_adc_output_2
+    print "External voltage at 200: %f" % ext_adc_output2
+    print "LSB: %f" % lsb2
+    print "Internal ADC counts at 255: %d" % int_adc_output_3
+    print "External voltage at 255: %f" % ext_adc_output3
+    print "LSB: %f" % lsb3
+
+    obj.register[133].Monitor_Sel[0] = 0
+    obj.write_register(133)
+
+    obj.register[65535].RUN[0] = 0
+    obj.write_register(65535)
+    time.sleep(1)
 
 
 def scurve_execute(obj, scan_name):
@@ -278,8 +451,8 @@ def scurve_execute(obj, scan_name):
     obj.register[132].SEL_COMP_MODE[0] = 0
     obj.write_register(132)
 
-    obj.register[134].Iref[0] = 27
-    obj.write_register(134)
+    # obj.register[134].Iref[0] = 27
+    # obj.write_register(134)
 
     obj.register[135].ZCC_DAC[0] = 10
     obj.register[135].ARM_DAC[0] = 100
@@ -334,19 +507,19 @@ def scurve_execute(obj, scan_name):
 
 def set_up_trigger_pattern(obj, option):
 
-    trigger_pattern = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0]
+    trigger_pattern = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                       0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
     if option == 2:
         text = "Clearing trigger patterns\n"
         obj.add_to_interactive_screen(text)
         for k in range(0, 128):
-                print "Clear channel: %d" %k
+                print "Clear channel: %d" % k
                 obj.register[k].cal[0] = 0
                 obj.write_register(k)
                 time.sleep(0.1)
@@ -523,7 +696,7 @@ def mask_bit_test(obj):
     obj.write_register(129)
 
 
-def scan_execute(obj, scan_name, generation_events):
+def scan_execute(obj, scan_name):
     scan_values0 = []
     scan_values1 = []
     modified = scan_name.replace(" ", "_")
@@ -627,5 +800,5 @@ def continuous_trigger(obj):
         obj.send_fcc("RunMode")
         while True:
             obj.send_fcc("CalPulse")
-            time.sleep(0.0001)
+            time.sleep(0.000000025)
 

@@ -51,6 +51,18 @@ class FW_interface:
     def reset_vfat3(self):
         self.glib.set("reset", 1)
 
+    def ext_adc(self):
+        while True:
+            self.glib.set("ext_adc", 1)
+            time.sleep(0.01)
+            value = self.glib.get("ext_adc")
+            if value != 0:
+                break
+        return value*0.0625  # ext ADC LSB is 62.5 uV
+
+    def start_ext_adc(self):
+        self.glib.set("ext_adc_on", 1)
+
     def write_control(self, input_value):
         self.glib.set("state_fw", input_value)
 
@@ -81,8 +93,11 @@ class FW_interface:
         data_list = []
         while True:
             line = self.glib.get("test_fifo")
+            # print line
             if line == 0 or line is None:
                 break
+            if len(data_list) > 132000:
+                    break
             else:
                 line = dec_to_bin_with_stuffing(line, 32)
                 line1 = ''.join(str(e) for e in line[0:24])
@@ -184,7 +199,7 @@ class FW_interface:
 
             ser.write(bytearray(output_byte_list))
             data_list = []
-            for i in range(0,700):
+            for i in range(0, 700):
                 data = ser.read()
                 data = ord(data)
                 data = dec_to_bin_with_stuffing(data, 8)

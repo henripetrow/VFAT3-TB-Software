@@ -152,7 +152,7 @@ class datapacket:
         # print "System BC: %d" % self.systemBC
         # print self.data
         if dataformat_register.SZP[0] == 0:
-            self.received_crc = int(self.crc,2)
+            self.received_crc = int(self.crc, 2)
             crc_calculation = []  
             crc_calculation.extend(list(self.header))
             crc_calculation.extend(list(self.EC))
