@@ -26,8 +26,8 @@ def scurve_all_ch_execute(obj, scan_name):
     obj.register[130].DT[0] = 0
     obj.write_register(130)
 
-    # register[138].CAL_MODE[0] = 2
-    # obj.write_register(138)
+    register[138].CAL_MODE[0] = 1
+    obj.write_register(138)
 
     obj.register[132].SEL_COMP_MODE[0] = 0
     obj.write_register(132)
@@ -241,6 +241,73 @@ def calibration(obj):
     print cal_values
 
 
+def cal_dac_steps(obj):
+
+    start_dac_value = 220
+    stop_dac_value = 255
+    samples_per_dac_value = 200
+    steps = stop_dac_value - start_dac_value
+
+    instruction_text = []
+    instruction_text.append("1 Send SCOnly")
+    instruction_text.append("1 Write CAL_MODE")
+    instruction_text.append("1 400 Write CAL_DAC %d" % start_dac_value)
+    instruction_text.append("500 Send EC0")
+    instruction_text.append("1 Send RunMode")
+    instruction_text.append("1000 Repeat %d" % steps)
+    instruction_text.append("5000 Send_Repeat CalPulse_LV1A %d 5000" % samples_per_dac_value)
+    instruction_text.append("5000 Send SCOnly")
+    instruction_text.append("5000 Write CAL_DAC 1")
+    instruction_text.append("200 Send RunMode")
+    instruction_text.append("1 End_Repeat")
+    instruction_text.append("1 Send SCOnly")
+
+    with open('input_file.txt', "w") as mfile:
+        for item in instruction_text:
+            mfile.write("%s\n" % item)
+
+    obj.register[133].Monitor_Sel[0] = 33
+    obj.write_register(133)
+
+    obj.register[65535].RUN[0] = 1
+    obj.write_register(65535)
+    time.sleep(1)
+
+    register[138].CAL_SEL_POL[0] = 1
+    obj.write_register(138)
+    time.sleep(1)
+    base = obj.interfaceFW.ext_adc()
+
+    register[138].CAL_SEL_POL[0] = 0
+    obj.write_register(138)
+    time.sleep(1)
+
+    dac_values = []
+    charge_values = []
+
+    for i in range(start_dac_value, stop_dac_value):
+        register[138].CAL_DAC[0] = i
+        obj.write_register(138)
+        time.sleep(0.5)
+
+        step = obj.interfaceFW.ext_adc()
+
+        difference = step-base
+        charge = (difference/1000.0) * 100  # 100 fF capacitor.
+
+        dac_values.append(i)
+        charge_values.append(charge)
+        print "DAC value: %d" % i
+        print "Base value: %f mV, step value: %f mV" % (base, step)
+        print "Difference: %f mV, CHARGE: %f fC" % (difference, charge)
+        print "--------------------------------"
+
+    print dac_values
+    print charge_values
+
+    return [dac_values, charge_values]
+
+
 def iref_adjust(obj):
 
     # Read the current Iref dac value.
@@ -275,6 +342,9 @@ def iref_adjust(obj):
 
         time.sleep(1)
         output = obj.interfaceFW.ext_adc()
+        if output == "Error":
+            print "No response from ADC, aborting Iref adjustment."
+            break
         print "Iref: %f, target: 100 mV. DAC: %d" % (output, register[134].Iref[0])
         new_diff = abs(100 - output)
 

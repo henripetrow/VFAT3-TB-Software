@@ -52,13 +52,22 @@ class FW_interface:
         self.glib.set("reset", 1)
 
     def ext_adc(self):
+        counter = 0
         while True:
+            if counter == 10:
+                print "No answer from ADC."
+                print "Are ADC inputs connected?"
+                rvalue = "Error"
+                break
             self.glib.set("ext_adc", 1)
             time.sleep(0.01)
             value = self.glib.get("ext_adc")
             if value != 0:
+                rvalue = value * 0.0625  # ext ADC LSB is 62.5 uV
                 break
-        return value*0.0625  # ext ADC LSB is 62.5 uV
+            print "ADC returned 0, trying again."
+            counter += 1
+        return rvalue
 
     def start_ext_adc(self):
         self.glib.set("ext_adc_on", 1)
