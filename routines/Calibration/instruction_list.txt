@@ -1,0 +1,18 @@
+1 Write CAL_SEL_POL 1
+200 Write RUN 1
+2000 Write Monitor_Sel 33
+2000 Read 131072
+
+2000 Write CAL_SEL_POL 0
+4000 Write CAL_DAC 0
+2000 Read 131072
+
+
+200 Repeat 255
+5000 Write CAL_DAC 1
+2000 Read 131072
+1 End_Repeat
+
+
+500 Write Monitor_Sel 0
+200 Write RUN 0

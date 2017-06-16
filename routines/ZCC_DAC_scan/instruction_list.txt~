@@ -1,0 +1,22 @@
+1 Write Monitor_Sel 36 
+200 Write ST 0
+200 Write RUN 1
+200 Write ZCC_DAC 0
+
+1000 Send BC0
+
+1000 Read 131072
+1000 Read 131073
+
+
+200 Repeat 270
+
+200 Write ZCC_DAC 1
+1000 Read 131072
+1000 Read 131073
+
+10 End_Repeat
+
+200 Write ZCC_DAC 32
+500 Write Monitor_Sel 0
+200 Write RUN 0
