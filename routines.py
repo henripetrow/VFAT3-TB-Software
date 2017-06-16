@@ -4,6 +4,7 @@
 ###########################################
 
 
+import ROOT as r
 import math
 import time
 import matplotlib.pyplot as plt
@@ -136,95 +137,76 @@ def scurve_analyze(obj, scurve_data, folder):
     fig = plt.figure(figsize=(10, 20))
     sub1 = plt.subplot(411)
 
+    Nhits_h = {}
+    Nev_h = {}
+
     for i in range(2, 130):
         diff = []
 
-        mean_calc = 0
-        summ = 0
+        Nhits_h[i-2] = r.TH1D('Nhits%i_h'%(i-2),'Nhits%i_h'%(i-2),256,-0.5,255.5)
+        Nev_h[i-2] = r.TH1D('Nev%i_h'%(i-2),'Nev%i_h'%(i-2),256,-0.5,255.5)
+
         data = scurve_data[i][1:]
         channel = scurve_data[i][0]
 
-        diff.append(channel)
-        diff.append("")
-        l = 0
-        for j in data:
-            if l != 0:
-                diff_value = j - previous_value
-                diff.append(diff_value)
-                mean_calc += dac_values[l] * diff_value
-                summ += diff_value
-            previous_value = j
-            l += 1
-        mean = mean_calc / float(summ)
-        mean_list.append(mean)
-        l = 1
-        rms = 0
-        for r in diff[2:]:
-            rms += r * (mean - dac_values[l]) ** 2
-            l += 1
-        rms = math.sqrt(rms / summ)
-        rms_list.append(rms)
-        diff.append(mean)
-        diff.append(rms)
-        full_data.append(diff)
-        plt.plot(dac_values, data)
+        for j,Nhits in enumerate(data): 
+            Nhits_h[i-2].AddBinContent(dac_values[j]-1,Nhits)
+            Nev_h[i-2].AddBinContent(dac_values[j]-1,100)
+            pass
 
-    rms_mean = numpy.mean(rms_list)
-    rms_rms = numpy.std(rms_list)
+        pass
+    
+    outF = r.TFile('results/scurves.root','RECREATE')
+    enc_h = r.TH1D('enc_h','ENC of all Channels;ENC [DAC Units];Number of Channels',100,0.0,1.0)
+    thr_h = r.TH1D('thr_h','Threshold of all Channels;ENC [DAC Units];Number of Channels',160,0.0,80.0)
+    chi2_h = r.TH1D('fitChi2_h','Fit #chi^{2};#chi^{2};Number of Channels / 0.001',100,0.0,1.0)
+    scurves_ag = {}
+    for ch in range(128):
+        scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch],Nev_h[ch])
+        scurves_ag[ch].SetName('scurve%i_ag'%ch)
+        scurves_ag[ch].Write()
+        fit_f = fitScurve(scurves_ag[ch])
+        thr_h.Fill(fit_f.GetParameter(0))
+        enc_h.Fill(fit_f.GetParameter(1))
+        chi2_h.Fill(fit_f.GetChisquare())
+        pass
 
-    mean_mean = numpy.mean(mean_list)
-    mean_rms = numpy.std(mean_list)
+    cc = r.TCanvas('canv','canv',1000,1000)
 
-    sub1.set_xlabel('255-CAL_DAC')
-    sub1.set_ylabel('%')
-    sub1.set_title('S-curves of all channels')
-    sub1.grid(True)
+    drawHisto(thr_h,cc,'results/threshHiso.png')
+    outF.cd()
+    thr_h.Write()
+    drawHisto(enc_h,cc,'results/encHisto.png')
+    outF.cd()
+    enc_h.Write()
+    drawHisto(chi2_h,cc,'results/chi2Histo.png')
+    outF.cd()
+    chi2_h.Write()
+    outF.Write()
+    outF.Close()
 
-    text = "%s \n S-curves, 128 channels, N=100, HG, 25 ns." % timestamp
-    sub1.text(25, 140, text, horizontalalignment='center', verticalalignment='center')
+def drawHisto(hist,canv,filename):
+    canv.cd()
+    hist.SetLineWidth(2)
+    hist.Draw()
+    canv.SaveAs(filename)
+    
 
-    sub2 = plt.subplot(413)
-    sub2.plot(range(0, 128), rms_list)
-    sub2.set_xlabel('Channel')
-    sub2.set_ylabel('RMS')
-    sub2.set_title('RMS of all channels')
-    sub2.grid(True)
-    text = "mean: %.2f RMS: %.2f" % (rms_mean, rms_rms)
-    y_placement = max(rms_list) - 0.05
-    sub2.text(10, y_placement, text, horizontalalignment='center', verticalalignment='center', bbox=dict(alpha=0.5))
-
-    sub3 = plt.subplot(412)
-    sub3.plot(range(0, 128), mean_list)
-    sub3.set_xlabel('Channel')
-    sub3.set_ylabel('255-CAL_DAC')
-    sub3.set_title('mean of all channels')
-    sub3.grid(True)
-    text = "Mean: %.2f RMS: %.2f" % (mean_mean, mean_rms)
-    y_placement = max(mean_list) - 1
-    sub3.text(10, y_placement, text, horizontalalignment='center', verticalalignment='center', bbox=dict(alpha=0.5))
-
-    sub4 = plt.subplot(427)
-    sub4.hist(mean_list, bins=30)
-    sub3.grid(True)
-
-
-    sub5 = plt.subplot(428)
-    sub5.hist(rms_list, bins=30)
-    sub3.grid(True)
-
-    fig.subplots_adjust(hspace=.5)
-
-    timestamp = time.strftime("%Y%m%d_%H%M")
-
-    fig.savefig("%s%sS-curve_plot.pdf" % (folder, timestamp))
-
-    with open("%s%sS-curve_data.csv" % (folder, timestamp), "ab") as f:
-        writer = csv.writer(f)
-        writer.writerows(full_data)
-
-    text = "Results were saved to the folder:\n %s \n" % folder
-    obj.add_to_interactive_screen(text)
-
+def fitScurve(scurve_g):
+    import copy
+    erf_f = r.TF1('erf_f','0.5*TMath::Erf((x-[0])/(TMath::Sqrt(2)*[1]))+0.5',0.0,80.0)
+    minChi2 = 9999.9
+    for i in range(40):
+        erf_f.SetParameter(0,2.0*i+1.0)
+        erf_f.SetParameter(1,2.0)
+        scurve_g.Fit(erf_f)
+        chi2 = erf_f.GetChisquare()
+        if chi2 < minChi2 and chi2 > 0.0:
+            minChi2 = chi2
+            bestFit_f = copy.deepcopy(erf_f)
+            pass
+        pass
+    return bestFit_f
 
 def calibration(obj):
 
