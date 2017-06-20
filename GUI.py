@@ -34,8 +34,10 @@ class VFAT3_GUI:
             else:
                 print "Unrecognised option."
                 self.interfaceFW = FW_interface(0)      # 0 - IPbus mode
+                self.mode = 0
         else:
             self.interfaceFW = FW_interface(0)          # 0 - IPbus mode
+            self.mode = 0
         self.SC_encoder = SC_encode()
         self.register = register
         self.channel_register = 0

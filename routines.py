@@ -17,10 +17,51 @@ from generator import *
 def scurve_all_ch_execute(obj, scan_name):
     start = time.time()
 
+    # Adjust the global reference current of the chip.
+    iref_adjust(obj)
+
+
     modified = scan_name.replace(" ", "_")
     file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
 
-    # Setting the needed registers.
+
+    # Define the scan.
+    start_dac_value = 220
+    stop_dac_value = 240
+    samples_per_dac_value = 100
+
+
+    # Create the instructions for the specified scan values.
+
+    steps = stop_dac_value - start_dac_value
+
+    instruction_text = []
+    instruction_text.append("1 Send SCOnly")
+    instruction_text.append("1 Write CAL_MODE 1")
+    instruction_text.append("400 Write CAL_DAC %d" % start_dac_value)
+    instruction_text.append("500 Send EC0")
+    instruction_text.append("1 Send RunMode")
+    instruction_text.append("1000 Repeat %d" % steps)
+    instruction_text.append("5000 Send_Repeat CalPulse_LV1A %d 5000" % samples_per_dac_value)
+    instruction_text.append("5000 Send SCOnly")
+    instruction_text.append("5000 Write CAL_DAC 1")
+    instruction_text.append("200 Send RunMode")
+    instruction_text.append("1 End_Repeat")
+    instruction_text.append("1 Send SCOnly")
+
+    # Write the instructions to the file.
+
+    output_file_name = "./routines/%s/instruction_list.txt" % modified
+    with open(output_file_name, "w") as mfile:
+        for item in instruction_text:
+            mfile.write("%s\n" % item)
+
+    # Generate the instruction list for the FPGA.
+    generator(scan_name, obj.write_BCd_as_fillers, obj.register)
+
+
+
+    # Set the needed registers.
     obj.set_fe_nominal_values()
 
     obj.register[130].DT[0] = 0
@@ -31,9 +72,6 @@ def scurve_all_ch_execute(obj, scan_name):
 
     obj.register[132].SEL_COMP_MODE[0] = 0
     obj.write_register(132)
-
-    # obj.register[134].Iref[0] = 32
-    # obj.write_register(134)
 
     obj.register[135].ZCC_DAC[0] = 10
     obj.register[135].ARM_DAC[0] = 100
@@ -51,13 +89,19 @@ def scurve_all_ch_execute(obj, scan_name):
     obj.register[129].PS[0] = 7
     obj.write_register(129)
 
+    # Find the charge of the CAL_DAC steps with external ADC.
+    dac_values, charge_values = cal_dac_steps(obj, start_dac_value, stop_dac_value)
+
+
     all_ch_data = []
-    all_ch_data.append(["", "255-CAL_DAC"])
-    all_ch_data.append(["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35])
+    all_ch_data.append(["255-CAL_DAC"])
+    charge_values.reverse()
+    charge_values.insert(0,"Channels")
+    all_ch_data.append(charge_values)
     for k in range(0, 128):
         print "Channel: %d" % k
         while True:
-            # Set calibration to right channel.
+            # Set calibration to the right channel.
             obj.register[k].cal[0] = 1
             obj.write_register(k)
             time.sleep(0.5)
@@ -82,7 +126,7 @@ def scurve_all_ch_execute(obj, scan_name):
             print scurve_data
 
             # Check that there is enough data and it is not all zeroes.
-            if len(scurve_data) != 22:
+            if len(scurve_data) != steps + 2:
                 print "Not enough values, trying again."
                 continue
             if scurve_data[3] == 0:
@@ -194,7 +238,7 @@ def drawHisto(hist,canv,filename):
 
 def fitScurve(scurve_g):
     import copy
-    erf_f = r.TF1('erf_f','0.5*TMath::Erf((x-[0])/(TMath::Sqrt(2)*[1]))+0.5',0.0,80.0)
+    erf_f = r.TF1('erf_f','0.5*TMath::Erf((x-[0])/(2TMath::Sqrt(2)*[1]))+0.5',0.0,80.0)
     minChi2 = 9999.9
     for i in range(40):
         erf_f.SetParameter(0,2.0*i+1.0)
@@ -241,30 +285,7 @@ def calibration(obj):
     print cal_values
 
 
-def cal_dac_steps(obj):
-
-    start_dac_value = 220
-    stop_dac_value = 255
-    samples_per_dac_value = 200
-    steps = stop_dac_value - start_dac_value
-
-    instruction_text = []
-    instruction_text.append("1 Send SCOnly")
-    instruction_text.append("1 Write CAL_MODE")
-    instruction_text.append("1 400 Write CAL_DAC %d" % start_dac_value)
-    instruction_text.append("500 Send EC0")
-    instruction_text.append("1 Send RunMode")
-    instruction_text.append("1000 Repeat %d" % steps)
-    instruction_text.append("5000 Send_Repeat CalPulse_LV1A %d 5000" % samples_per_dac_value)
-    instruction_text.append("5000 Send SCOnly")
-    instruction_text.append("5000 Write CAL_DAC 1")
-    instruction_text.append("200 Send RunMode")
-    instruction_text.append("1 End_Repeat")
-    instruction_text.append("1 Send SCOnly")
-
-    with open('input_file.txt', "w") as mfile:
-        for item in instruction_text:
-            mfile.write("%s\n" % item)
+def cal_dac_steps(obj,start_dac_value,stop_dac_value):
 
     obj.register[133].Monitor_Sel[0] = 33
     obj.write_register(133)
@@ -302,10 +323,10 @@ def cal_dac_steps(obj):
         print "Difference: %f mV, CHARGE: %f fC" % (difference, charge)
         print "--------------------------------"
 
-    print dac_values
-    print charge_values
+    # print dac_values
+    # print charge_values
 
-    return [dac_values, charge_values]
+    return dac_values, charge_values
 
 
 def iref_adjust(obj):
@@ -338,6 +359,7 @@ def iref_adjust(obj):
     obj.write_register(65535)
     time.sleep(1)
     previous_diff = 100
+    print "Adjusting the global reference current."
     while True:
 
         time.sleep(1)

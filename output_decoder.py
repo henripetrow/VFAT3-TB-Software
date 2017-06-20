@@ -138,11 +138,13 @@ class datapacket:
         self.spzs_packet = 0
         self.partitions = 0
         self.spzs_data = ""
+        self.crc_calc = ""
         self.crc = ""
         self.crc_error = 0
         self.received_crc = 0
         self.calculated_crc = 0
         self.hit_found = 0
+
 
     def ready(self, dataformat_register):
         # print "****************"
@@ -151,16 +153,10 @@ class datapacket:
         # print "FIFO warning: %d" % self.FIFO_warning
         # print "System BC: %d" % self.systemBC
         # print self.data
-        if dataformat_register.SZP[0] == 0:
-            self.received_crc = int(self.crc, 2)
-            crc_calculation = []  
-            crc_calculation.extend(list(self.header))
-            crc_calculation.extend(list(self.EC))
-            crc_calculation.extend(list(self.BC))
-            crc_calculation.extend(list(self.partition_table))
-            crc_calculation.extend(list(self.spzs_data))
-            crc_calculation.extend(list(self.data))
-            self.calculated_crc = crc_remainder(crc_calculation)
+
+        received_crc = self.crc[8:16]+self.crc[0:8]
+        self.received_crc = int(received_crc[::-1], 2)
+        self.calculated_crc = crc_citt_remainder(int(self.data,2))
 
         if self.EC:
             self.EC = int(self.EC, 2)
@@ -199,7 +195,8 @@ class datapacket:
         #        print self.data[i*8:(1+i)*8]
         #else:
         #    print "No data."
-
+        print self.calculated_crc
+        print self.received_crc
         # if self.received_crc != self.calculated_crc:
         #     self.crc_error = 1
         #     print("!-> CRC error.")
@@ -244,7 +241,7 @@ def decode_output_data(filename, register):
     hdlc_data = []
 
     dataformat_register = register[130] 
-
+    FPGA_output = []
     with open(filename, 'r') as f:
         for line in f:
             # print line
@@ -277,6 +274,7 @@ def decode_output_data(filename, register):
             # print [i[1] for i in SC_shift_register]
             # print hdlc_state
             input_value = split_line[1]
+            FPGA_output.append(input_value)
             # print input_value
             # print hdlc_flag_bit
             BCcounter = BCcounter + BCd
@@ -293,11 +291,15 @@ def decode_output_data(filename, register):
             # print ""
             # print "Reading line: %s" % input_value
             # print "datapacket byte counter: %d" % datapacket_byte_counter
- 
+            if datapacket_status != "IDLE" and datapacket_status != "CRC":
+                data_packet.crc_calc = input_value
+
+
             if (input_value == HDR_1 or input_value == HDR_1W) and datapacket_status == "IDLE": # See if the read line is Header 1.
                 # print("Header I found.")
                 data_header = 1                               # Type of header. To be used to stop after EC or BC.
-                data_packet = datapacket()                    # Create a new data packet object. 
+                data_packet = datapacket()                    # Create a new data packet object.
+                data_packet.crc_calc = input_value
                 if input_value == HDR_1W:                     # Check if FIFO warning was given.
                     data_packet.FIFO_warning = 1              # Set the FIFO warning to the object.
                 data_packet.header = input_value              # Set the binary header to the new object.
@@ -312,6 +314,7 @@ def decode_output_data(filename, register):
                 # print("Header II found.")
                 data_header = 2                               # Type of header.
                 data_packet = datapacket()                    # Create a new data packet object.
+                data_packet.crc_calc = input_value
                 if input_value == HDR_2W:                     # Check if FIFO warning was given.
                     data_packet.FIFO_warning = 1              # Set the FIFO warning to the object.
                 data_packet.header = input_value              # Set the binary header to the new object.
@@ -441,7 +444,7 @@ def decode_output_data(filename, register):
 
 
 
-    output_data = [IPbus_transaction_list, datapacket_list, sync_response_list, transaction_list]
+    output_data = [IPbus_transaction_list, datapacket_list, sync_response_list, transaction_list,FPGA_output]
     return output_data
 
 
