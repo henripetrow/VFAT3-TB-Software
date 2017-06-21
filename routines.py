@@ -203,13 +203,13 @@ def scurve_analyze(obj, scurve_data, folder):
     outF = r.TFile('results/scurves.root','RECREATE')
     enc_h = r.TH1D('enc_h','ENC of all Channels;ENC [DAC Units];Number of Channels',100,0.0,1.0)
     thr_h = r.TH1D('thr_h','Threshold of all Channels;ENC [DAC Units];Number of Channels',160,0.0,80.0)
-    chi2_h = r.TH1D('fitChi2_h','Fit #chi^{2};#chi^{2};Number of Channels / 0.001',100,0.0,1.0)
+    chi2_h = r.TH1D('chi2_h','Fit #chi^{2};#chi^{2};Number of Channels / 0.001',100,0.0,1.0)
     scurves_ag = {}
     for ch in range(128):
         scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch],Nev_h[ch])
         scurves_ag[ch].SetName('scurve%i_ag'%ch)
-        scurves_ag[ch].Write()
         fit_f = fitScurve(scurves_ag[ch])
+        scurves_ag[ch].Write()
         thr_h.Fill(fit_f.GetParameter(0))
         enc_h.Fill(fit_f.GetParameter(1))
         chi2_h.Fill(fit_f.GetChisquare())
@@ -218,20 +218,18 @@ def scurve_analyze(obj, scurve_data, folder):
     cc = r.TCanvas('canv','canv',1000,1000)
 
     drawHisto(thr_h,cc,'results/threshHiso.png')
-    outF.cd()
     thr_h.Write()
     drawHisto(enc_h,cc,'results/encHisto.png')
-    outF.cd()
     enc_h.Write()
     drawHisto(chi2_h,cc,'results/chi2Histo.png')
-    outF.cd()
     chi2_h.Write()
-    outF.Write()
     outF.Close()
 
 def drawHisto(hist,canv,filename):
     canv.cd()
     hist.SetLineWidth(2)
+    hist.GetXaxis().CenterTitle()
+    hist.GetYaxis().CenterTitle()
     hist.Draw()
     canv.SaveAs(filename)
     
@@ -240,16 +238,21 @@ def fitScurve(scurve_g):
     import copy
     erf_f = r.TF1('erf_f','0.5*TMath::Erf((x-[0])/(2TMath::Sqrt(2)*[1]))+0.5',0.0,80.0)
     minChi2 = 9999.9
-    for i in range(40):
-        erf_f.SetParameter(0,2.0*i+1.0)
+    bestI = -1
+    for i in range(20):
+        erf_f.SetParameter(0,1.0*i+15.0)
         erf_f.SetParameter(1,2.0)
         scurve_g.Fit(erf_f)
         chi2 = erf_f.GetChisquare()
         if chi2 < minChi2 and chi2 > 0.0:
+            bestI = i
             minChi2 = chi2
             bestFit_f = copy.deepcopy(erf_f)
             pass
         pass
+    erf_f.SetParameter(0,2.0*bestI+1.0)
+    erf_f.SetParameter(1,2.0)
+    scurve_g.Fit(erf_f)
     return bestFit_f
 
 def calibration(obj):
