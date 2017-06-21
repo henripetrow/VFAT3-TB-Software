@@ -226,16 +226,16 @@ class VFAT3_GUI:
 
         # ###############MISC TAB #######################################
         # Read ADCs
-        self.close_button = Button(self.misc_frame, text="Read ADCs", command= lambda: self.read_adcs(), width = bwidth)
+        self.close_button = Button(self.misc_frame, text="Read ADCs", command=lambda: self.read_adcs(), width = bwidth)
         self.close_button.grid(column=1, row=0, sticky='e')
 
-        self.idle_button = Button(self.misc_frame, text="SC Idle character", command= lambda: self.send_idle(), width = bwidth)
+        self.idle_button = Button(self.misc_frame, text="SC Idle character", command=lambda: self.send_idle(), width = bwidth)
         self.idle_button.grid(column=1, row=1, sticky='e')
 
-        self.sync_button = Button(self.misc_frame, text="Sync", command= lambda: self.send_sync(), width = bwidth)
+        self.sync_button = Button(self.misc_frame, text="Sync", command=lambda: self.send_sync(), width=bwidth)
         self.sync_button.grid(column=1, row=2, sticky='e')
 
-        self.sync_check_button = Button(self.misc_frame, text="Sync check", command= lambda: self.send_fcc("CC-B"), width=bwidth)
+        self.sync_check_button = Button(self.misc_frame, text="Sync check", command=lambda: self.send_fcc("CC-B"), width=bwidth)
         self.sync_check_button.grid(column=1, row=3, sticky='e')
 
         self.CalPulse_LV1A_button = Button(self.misc_frame, text="CalPulse+LV1A", command=self.send_cal_trigger, width=bwidth)
@@ -275,8 +275,8 @@ class VFAT3_GUI:
         self.cal_button = Button(self.misc_frame, text="Adjust Iref", command=lambda: iref_adjust(self), width=bwidth)
         self.cal_button.grid(column=1, row=12, sticky='e')
 
-        # self.cal_button = Button(self.misc_frame, text="Read int ADC LSB", command=lambda: adc_lsb(self), width=bwidth)
-        # self.cal_button.grid(column=1, row=13, sticky='e')
+        self.cal_button = Button(self.misc_frame, text="CAL_DAC step", command=lambda: cal_dac_steps(self), width=bwidth)
+        self.cal_button.grid(column=1, row=13, sticky='e')
 
         # ############### FW CONFIGURE TAB #######################################
 
@@ -707,7 +707,7 @@ class VFAT3_GUI:
                 if output[0]:
                     for i in output[0]:
                         if i.info_code == 0:
-                            print "Transaction ok."
+                            # print "Transaction ok."
                             flag = 1
                         else:
                             print "Transaction error. Error code."

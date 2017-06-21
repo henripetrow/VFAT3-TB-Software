@@ -1,7 +1,12 @@
-#1 Send EC0
-#1 Send BC0
+1 Write ST 0
+200 Write RUN 1
+200 Send RunMode
+1 Send EC0
+1 Send BC0
 1 Send ReSync
-1 Send LV1A
 10 Send LV1A
 10 Send LV1A
 10 Send LV1A
+10 Send LV1A
+2000 Write RUN 0
+200 Send SCOnly

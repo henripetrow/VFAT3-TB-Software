@@ -1,0 +1,23 @@
+100 Send CC-A
+1 Send CC-A
+1 Send CC-A
+
+
+10 Write Monitor_Sel 3
+
+10 Write PRE_I_BLCC 0
+
+10 Repeat 63
+
+10 Read 131072
+10 Read 131073
+
+10 Write PRE_I_BLCC 1
+
+
+
+
+10 End_Repeat
+
+10 Read 131072
+10 Read 131073

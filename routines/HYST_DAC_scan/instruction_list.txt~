@@ -1,0 +1,23 @@
+1 Write Monitor_Sel 12
+200 Send SCOnly
+200 Write ST 0
+200 Write RUN 1
+200 Write HYST_DAC 0
+
+1000 Send BC0
+
+1000 Read 131072
+1000 Read 131073
+
+
+200 Repeat 64
+
+200 Write HYST_DAC 1
+1000 Read 131072
+1000 Read 131073
+
+10 End_Repeat
+
+200 Write HYST_DAC 5
+500 Write Monitor_Sel 0
+200 Write RUN 0

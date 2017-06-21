@@ -1,0 +1,13 @@
+1 Write CAL_DAC 220
+500 Send EC0
+1 Send RunMode
+
+1000 Repeat 20
+
+5000 Send_Repeat CalPulse_LV1A 100 5000 
+
+5000 Write CAL_DAC 1
+
+1 End_Repeat
+
+500 Send SCOnly

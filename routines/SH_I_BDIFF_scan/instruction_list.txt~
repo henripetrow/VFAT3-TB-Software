@@ -1,0 +1,20 @@
+100 Send CC-A
+1 Send CC-A
+1 Send CC-A
+
+
+10 Write Monitor_Sel 6
+
+10 Write SH_I_BDIFF 0
+
+150 Read 131072
+150 Read 131073
+
+10 Repeat 154
+
+150 Write SH_I_BDIFF 1
+
+150 Read 131072
+150 Read 131073
+
+10 End_Repeat

@@ -1,0 +1,18 @@
+100 Send CC-A
+1 Send CC-A
+1 Send CC-A
+
+
+10 Write Monitor_Sel 34
+
+10 Write PRE_VREF 0
+
+10 Repeat 254
+
+10 Write PRE_VREF 1
+
+10 Read 131072
+10 Read 131073
+
+
+10 End_Repeat
