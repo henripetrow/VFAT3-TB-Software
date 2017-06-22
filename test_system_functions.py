@@ -3,6 +3,7 @@
 # Lappeenranta University of Technology
 ###########################################
 
+#from crc16pure import *
 
 def write_instruction(input_file, BCd, command, erase):
     if erase == 1:
@@ -87,10 +88,6 @@ def crc_remainder(input_package):
         input_bitstring.reverse()
         input_bitstring = ''.join(str(e) for e in input_bitstring)
 
-
-
-
-
         for i in range(7,-1,-1):
 
             crc_bin = bin(crc)				# Convert CRC dec to bin.
@@ -108,3 +105,7 @@ def crc_remainder(input_package):
                 crc = int(crc_bin,2)
     return crc
 
+# def crc_citt_remainder(input_value):
+#     inputr = str(input_value)
+#     crc = crc16xmodem(inputr,65535)
+#     return crc

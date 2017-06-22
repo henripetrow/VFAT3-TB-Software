@@ -34,8 +34,10 @@ class VFAT3_GUI:
             else:
                 print "Unrecognised option."
                 self.interfaceFW = FW_interface(0)      # 0 - IPbus mode
+                self.mode = 0
         else:
             self.interfaceFW = FW_interface(0)          # 0 - IPbus mode
+            self.mode = 0
         self.SC_encoder = SC_encode()
         self.register = register
         self.channel_register = 0
@@ -260,8 +262,8 @@ class VFAT3_GUI:
         self.Trig_clear_button = Button(self.misc_frame, text="Clear trigger pattern", command=lambda: set_up_trigger_pattern(self, 2), width=bwidth)
         self.Trig_clear_button.grid(column=1, row=7, sticky='e')
 
-        # self.VFAT3_reset_button = Button(self.misc_frame, text="Reset VFAT3", command=lambda: self.send_reset(), width=bwidth)
-        # self.VFAT3_reset_button.grid(column=1, row=8, sticky='e')
+        self.VFAT3_reset_button = Button(self.misc_frame, text="Reset des", command=lambda: self.send_reset(), width=bwidth)
+        self.VFAT3_reset_button.grid(column=1, row=8, sticky='e')
 
         self.cont_trig_button = Button(self.misc_frame, text="Continuous triggers", command=lambda: continuous_trigger(self), width=bwidth)
         self.cont_trig_button.grid(column=1, row=9, sticky='e')
@@ -340,6 +342,7 @@ class VFAT3_GUI:
                 "SD_I_BSF scan",
                 "SD_I_BFCAS scan",
                 "CAL_DAC scan",
+                "CAL_DAC scan, fC",
                 "Counter Resets",
                 "S-curve",
                 "S-curve all ch",
@@ -714,6 +717,7 @@ class VFAT3_GUI:
 
                 else:
                     print "Transaction error. No reply."
+                    print output[4]
                     print "Trying again."
                     continue
             if flag == 1:
@@ -742,13 +746,14 @@ class VFAT3_GUI:
         modified = scan_name.replace(" ", "_")
         if self.chosen_scan == "Counter Resets":
             self.counter_resets_execute(scan_name)
+        elif self.chosen_scan == "CAL_DAC scan, fC":
+            scan_cal_dac_fc(self, scan_name)
         elif self.chosen_scan == "S-curve":
             scurve_execute(self, scan_name)
         elif self.chosen_scan == "S-curve all ch":
             scurve_all_ch_execute(self, scan_name)
         elif self.chosen_scan == "S-curve all ch cont.":
             while True:
-
                 scurve_all_ch_execute(self, scan_name)
                 for i in range(0, 5):
                     print "->Sending sync request."
@@ -797,6 +802,12 @@ class VFAT3_GUI:
 
     def choose_scan(self, value):
        self.chosen_scan = value
+       if self.chosen_scan == "S-curve all ch" or self.chosen_scan == "S-curve all ch cont." or self.chosen_scan == "CAL_DAC scan, fC":
+           self.modify_button.config(state="disabled")
+           self.generate_button.config(state="disabled")
+       else:
+           self.modify_button.config(state="normal")
+           self.generate_button.config(state="normal")
 
 # ####################### FCC-TAB FUNCTIONS ##########################
 
