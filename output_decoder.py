@@ -100,30 +100,18 @@ class IPbus_response:
         if self.info_code != 0:
             print "!-> Transaction error: %d " % self.info_code
 
-
-        received_crc_lsb = ''.join(map(str, data[-16:-8]))
-        received_crc_msb = ''.join(map(str, data[-8:]))
-        received_crc_bin = received_crc_msb+received_crc_lsb
-        # received_crc_bin = ''.join(map(str, received_crc_bin))
-        received_crc = int(received_crc_bin,2) # Extract the CRC value from the received message. CRC is the last 16 bits of the data
-
-        crc_calculation = []
-        crc_calculation.extend(hdlc_address_bin)
-        crc_calculation.extend(hdlc_control_bin)
-        crc_calculation.extend(info_code_bin)
-        crc_calculation.extend(type_ID_bin)
-        crc_calculation.extend(transaction_ID_bin)
-        crc_calculation.extend(words_bin)
-        crc_calculation.extend(protocol_bin)
-        # print crc_calculation
-        calculated_crc = crc_remainder(data[:-16]) # Calculate the CRC for the message.
-        # calculated_crc = crc_remainder(crc_calculation) # Calculate the CRC for the message.
-        # if received_crc == calculated_crc:
-        #     print "CRC check ok."
-        # else:
-        #     print "!-> CRC error."
-        # print "****************"
-
+        crc = []
+        for i in data[-16:]: # Invert bits.
+            if i == 0:
+                crc.append(1)
+            elif i == 1:
+                crc.append(0)
+        received_crc = ''.join(map(str, crc))
+        received_crc = int(received_crc,2) # Extract the CRC value from the received message. CRC is the last 16 bits of the data
+        crc_data = data[:-16]
+        calculated_crc = crc_remainder(crc_data) # Calculate the CRC for the message.
+        if received_crc != calculated_crc:
+            print "!-> HDLC CRC error."
 
 class datapacket:
     def __init__(self):
@@ -145,7 +133,6 @@ class datapacket:
         self.calculated_crc = 0
         self.hit_found = 0
 
-
     def ready(self, dataformat_register):
         # print "****************"
         # print "DATA PACKET RECEIVED"
@@ -154,9 +141,14 @@ class datapacket:
         # print "System BC: %d" % self.systemBC
         # print self.data
 
-        received_crc = self.crc[8:16]+self.crc[0:8]
-        self.received_crc = int(received_crc[::-1], 2)
-        self.calculated_crc = crc_citt_remainder(int(self.data,2))
+        #received_crc = self.crc[8:16]+self.crc[0:8]
+        #print int(received_crc[::-1], 2)
+        #print int(received_crc, 2)
+        #print int(self.crc,2)
+        # self.received_crc = int(received_crc[::-1], 2)
+        #self.received_crc = int(received_crc, 2)
+        #print self.crc_calc
+        #self.calculated_crc = crc_remainder(self.crc_calc[-16:])
 
         if self.EC:
             self.EC = int(self.EC, 2)
@@ -195,8 +187,8 @@ class datapacket:
         #        print self.data[i*8:(1+i)*8]
         #else:
         #    print "No data."
-        print self.calculated_crc
-        print self.received_crc
+        # print self.calculated_crc
+        # print self.received_crc
         # if self.received_crc != self.calculated_crc:
         #     self.crc_error = 1
         #     print("!-> CRC error.")
@@ -239,6 +231,8 @@ def decode_output_data(filename, register):
     hdlc_flag_bit = 0
     hdlc_flag = [0, 1, 1, 1, 1, 1, 1, 0]
     hdlc_data = []
+    SC_flag = 0
+    flag_nr = 0
 
     dataformat_register = register[130] 
     FPGA_output = []
@@ -274,7 +268,7 @@ def decode_output_data(filename, register):
             # print [i[1] for i in SC_shift_register]
             # print hdlc_state
             input_value = split_line[1]
-            FPGA_output.append(input_value)
+            # FPGA_output.append(input_value)
             # print input_value
             # print hdlc_flag_bit
             BCcounter = BCcounter + BCd
@@ -291,15 +285,17 @@ def decode_output_data(filename, register):
             # print ""
             # print "Reading line: %s" % input_value
             # print "datapacket byte counter: %d" % datapacket_byte_counter
-            if datapacket_status != "IDLE" and datapacket_status != "CRC":
-                data_packet.crc_calc = input_value
+            if datapacket_status != "IDLE":
+                # print input_value
+                data_packet.crc_calc += input_value[::-1]
 
 
             if (input_value == HDR_1 or input_value == HDR_1W) and datapacket_status == "IDLE": # See if the read line is Header 1.
                 # print("Header I found.")
                 data_header = 1                               # Type of header. To be used to stop after EC or BC.
                 data_packet = datapacket()                    # Create a new data packet object.
-                data_packet.crc_calc = input_value
+                data_packet.crc_calc += input_value[::-1]
+                # print input_value
                 if input_value == HDR_1W:                     # Check if FIFO warning was given.
                     data_packet.FIFO_warning = 1              # Set the FIFO warning to the object.
                 data_packet.header = input_value              # Set the binary header to the new object.
@@ -314,7 +310,8 @@ def decode_output_data(filename, register):
                 # print("Header II found.")
                 data_header = 2                               # Type of header.
                 data_packet = datapacket()                    # Create a new data packet object.
-                data_packet.crc_calc = input_value
+                data_packet.crc_calc += input_value[::-1]
+                # print input_value
                 if input_value == HDR_2W:                     # Check if FIFO warning was given.
                     data_packet.FIFO_warning = 1              # Set the FIFO warning to the object.
                 data_packet.header = input_value              # Set the binary header to the new object.
@@ -400,47 +397,68 @@ def decode_output_data(filename, register):
             # SLOW CONTROL
 
             if input_value == SC0:
+                # print "SC0"
                 if SC1_counter == 5 and hdlc_state == "DATA":
                     # print "Bit stuffing detected, Ignoring one SC0."
+                    # FPGA_output.append("Bit stuffing.")
                     SC1_counter = 0
-                    bit_stuffing_flag = 1
-                    continue
+                    if SC_bit_counter != 0:
+                        bit_stuffing_flag = 1
+
                 else:
                     SC_shift_register = SC_shift_register[1:]
                     SC_shift_register.append([BCcounter, 0])
                     SC_bit_counter += 1
-                SC1_counter = 0
+                    SC1_counter = 0
+                    SC_flag = 1
                 
             if input_value == SC1:
+                # print "SC1"
                 SC1_counter += 1
                 SC_shift_register = SC_shift_register[1:]
                 SC_shift_register.append([BCcounter, 1])
                 SC_bit_counter += 1
+                SC_flag = 1
 
-            if [i[1] for i in SC_shift_register] == hdlc_flag and bit_stuffing_flag == 0:
-                if hdlc_flag_bit == 0:
-                    hdlc_start_BCd = SC_shift_register[0][0]
-                    hdlc_state = "DATA"
-                    # print 'HDLC flag found, start collecting data.'
-                    SC_bit_counter = 0
-                elif hdlc_flag_bit == 1:
-                    # print 'HDLC flag found, stop collecting data. Analysing data..'
-                    hdlc_flag_bit = 0
-                    if len(hdlc_data) >= 17:
-                        new_IPbus_packt = IPbus_response(hdlc_start_BCd, hdlc_data)
-                        IPbus_transaction_list.append(new_IPbus_packt)
-                        transaction_list.append(new_IPbus_packt)
-                    hdlc_state = "IDLE"
-                    SC_bit_counter = 0
-                    del hdlc_data[:]
-                SC_shift_register = [[0, 0]]*8
+            if SC_flag == 1:
+                if [i[1] for i in SC_shift_register] == hdlc_flag and bit_stuffing_flag == 0 and flag_nr < 2:
+                    if hdlc_flag_bit == 0:
+                        hdlc_start_BCd = SC_shift_register[0][0]
+                        # FPGA_output.append("Start flag")
+                        hdlc_state = "DATA"
+                        # print 'HDLC flag found, start collecting data.'
+                        SC_bit_counter = 0
+                        flag_nr += 1
+                        SC_shift_register = [[0, 0]]*8
 
-            if SC_bit_counter == 8 and hdlc_state == "DATA":
-                # print 'Collecting a byte of SC data: %s' % str([i[1] for i in SC_shift_register])
-                hdlc_flag_bit = 1
-                hdlc_data.extend([i[1] for i in SC_shift_register])
-                SC_bit_counter = 0
-                bit_stuffing_flag = 0
+                if SC_bit_counter == 8 and hdlc_state == "DATA":
+                    if [i[1] for i in SC_shift_register] == hdlc_flag and bit_stuffing_flag == 0:
+                        # FPGA_output.append("Stop flag")
+                        # print 'HDLC flag found, stop collecting data. Analysing data..'
+                        hdlc_flag_bit = 0
+                        if len(hdlc_data) >= 63:
+                            new_IPbus_packt = IPbus_response(hdlc_start_BCd, hdlc_data)
+                            IPbus_transaction_list.append(new_IPbus_packt)
+                            transaction_list.append(new_IPbus_packt)
+                        else:
+                            # FPGA_output.append("Too Short:%d." % len(hdlc_data))
+                            print "Too short."
+                        hdlc_state = "IDLE"
+                        SC_bit_counter = 0
+                        bit_stuffing_flag = 0
+                        del hdlc_data[:]
+                        flag_nr = 0
+                        SC_shift_register = [[0, 0]] * 8
+                    else:
+                        # print 'Collecting a byte of SC data: %s' % str([i[1] for i in SC_shift_register])
+                        hdlc_flag_bit = 1
+                        hdlc_data.extend([i[1] for i in SC_shift_register])
+                        SC_bit_counter = 0
+                        bit_stuffing_flag = 0
+                        flag_nr = 0
+                        SC_shift_register = [[0, 0]] * 8
+
+                SC_flag = 0
 
 
 

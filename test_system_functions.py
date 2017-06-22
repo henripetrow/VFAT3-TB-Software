@@ -3,7 +3,7 @@
 # Lappeenranta University of Technology
 ###########################################
 
-from crc16pure import *
+#from crc16pure import *
 
 def write_instruction(input_file, BCd, command, erase):
     if erase == 1:
@@ -105,7 +105,7 @@ def crc_remainder(input_package):
                 crc = int(crc_bin,2)
     return crc
 
-def crc_citt_remainder(input_value):
-    input = str(input_value)
-    crc = crc16xmodem(input,65535)
-    return crc
+# def crc_citt_remainder(input_value):
+#     inputr = str(input_value)
+#     crc = crc16xmodem(inputr,65535)
+#     return crc

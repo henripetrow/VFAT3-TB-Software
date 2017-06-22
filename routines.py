@@ -25,7 +25,7 @@ def scurve_all_ch_execute(obj, scan_name):
     file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
 
 
-    # Define the scan.
+    # Define the scan. (Not fully implemented, don't change values.)
     start_dac_value = 220
     stop_dac_value = 240
     samples_per_dac_value = 100
@@ -89,19 +89,17 @@ def scurve_all_ch_execute(obj, scan_name):
     obj.register[129].PS[0] = 7
     obj.write_register(129)
 
-    # Find the charge of the CAL_DAC steps with external ADC.
+    # Find the charge of the CAL_DAC steps with external ADC. (Not yet used.)
     dac_values, charge_values = cal_dac_steps(obj, start_dac_value, stop_dac_value)
 
 
     all_ch_data = []
-    all_ch_data.append(["255-CAL_DAC"])
-    charge_values.reverse()
-    charge_values.insert(0,"Channels")
-    all_ch_data.append(charge_values)
+    all_ch_data.append(["", "255-CAL_DAC"])
+    all_ch_data.append(["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35])
     for k in range(0, 128):
         print "Channel: %d" % k
         while True:
-            # Set calibration to the right channel.
+            # Set calibration to right channel.
             obj.register[k].cal[0] = 1
             obj.write_register(k)
             time.sleep(0.5)
@@ -126,7 +124,7 @@ def scurve_all_ch_execute(obj, scan_name):
             print scurve_data
 
             # Check that there is enough data and it is not all zeroes.
-            if len(scurve_data) != steps + 2:
+            if len(scurve_data) != 22:
                 print "Not enough values, trying again."
                 continue
             if scurve_data[3] == 0:
@@ -236,7 +234,7 @@ def drawHisto(hist,canv,filename):
 
 def fitScurve(scurve_g):
     import copy
-    erf_f = r.TF1('erf_f','0.5*TMath::Erf((x-[0])/(2TMath::Sqrt(2)*[1]))+0.5',0.0,80.0)
+    erf_f = r.TF1('erf_f','0.5*TMath::Erf((x-[0])/(TMath::Sqrt(2)*[1]))+0.5',0.0,80.0)
     minChi2 = 9999.9
     bestI = -1
     for i in range(20):
@@ -270,7 +268,6 @@ def calibration(obj):
         obj.add_to_interactive_screen(text)
     else:
         flag = 0
-        print "Here"
         print len(output[0])
         for i in output[0]:
             if i.type_ID == 0:
@@ -309,7 +306,7 @@ def cal_dac_steps(obj,start_dac_value,stop_dac_value):
     dac_values = []
     charge_values = []
 
-    for i in range(start_dac_value, stop_dac_value):
+    for i in range(start_dac_value, stop_dac_value+1):
         register[138].CAL_DAC[0] = i
         obj.write_register(138)
         time.sleep(0.5)
@@ -319,7 +316,7 @@ def cal_dac_steps(obj,start_dac_value,stop_dac_value):
         difference = step-base
         charge = (difference/1000.0) * 100  # 100 fF capacitor.
 
-        dac_values.append(i)
+        dac_values.append(255-i)
         charge_values.append(charge)
         print "DAC value: %d" % i
         print "Base value: %f mV, step value: %f mV" % (base, step)
@@ -774,53 +771,60 @@ def mask_bit_test(obj):
 
 
 def scan_execute(obj, scan_name):
+
+    start = time.time()
+
+    reg_values = []
     scan_values0 = []
     scan_values1 = []
     modified = scan_name.replace(" ", "_")
     file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
-    output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1)
+
+    output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 0)
+
     if output[0] == "Error":
         text = "%s: %s\n" % (output[0], output[1])
         obj.add_to_interactive_screen(text)
     else:
-        text = "Received Values:\n"
+        text = "DAC scan values:\n"
         obj.add_to_interactive_screen(text)
         adc_flag = 0
-        text = "%s|ADC0|ADC1|BC1|BC2|BC3|TransID1|TransID2|TransID3|\n" % scan_name[:-5]
+        text = "%s|ADC0|ADC1|\n" % scan_name[:-5]
         obj.add_to_interactive_screen(text)
         reg_value = 0
-        bc_value = 0
-        trans_id = 0
-        print len(output[0])
         for i in output[0]:
-            # for k in generation_events[2]:
-            #     k = k.lstrip('[')
-            #     k = k.rstrip(']')
-            #     k = k.replace(" ", "")
-            #     k = k.split(",")
-            #     if k[1].strip('\'') != modified[:-5]:
-            #         continue
-            #     elif int(k[0]) > i.BCd:
-            #         break
-            #     else:
-            #         reg_value = int(k[2])
-            #         bc_value = int(k[0])
-            #         trans_id = int(k[3])
             if i.type_ID == 0:
                 if adc_flag == 0:
                     first_adc_value = int(''.join(map(str, i.data)), 2)
-                    first_bc = i.BCd
-                    first_trans_id = i.transaction_ID
                     adc_flag = 1
                 else:
                     second_adc_value = int(''.join(map(str, i.data)), 2)
-                    second_bc = i.BCd
-                    second_trans_id = i.transaction_ID
-                    text = "%d %d %d %d %d %d %d %d %d\n" % (reg_value, first_adc_value, second_adc_value, bc_value, first_bc, second_bc, trans_id, first_trans_id, second_trans_id)
+                    text = "%d %d %d\n" % (reg_value, first_adc_value, second_adc_value)
                     obj.add_to_interactive_screen(text)
                     scan_values0.append(first_adc_value)
                     scan_values1.append(second_adc_value)
+                    reg_values.append(reg_value)
+                    reg_value += 1
                     adc_flag = 0
+        for i in output[4]:
+            print i
+
+
+
+    # Save the results.
+    data = [reg_values,scan_values0,scan_values1]
+    timestamp = time.strftime("%Y%m%d%H%M")
+    folder = "./results/"
+    filename = "%s%s_%s_scan_data.csv" % (folder, timestamp, modified)
+    text = "Results were saved to the folder:\n %s \n" % filename
+
+    with open(filename, "wb") as f:
+        writer = csv.writer(f)
+        writer.writerows(data)
+    obj.add_to_interactive_screen(text)
+
+
+
     nr_points = len(scan_values0)
     x = range(0, nr_points)
     fig = plt.figure(1)
@@ -832,7 +836,52 @@ def scan_execute(obj, scan_name):
     plt.title(modified)
     plt.grid(True)
     fig.show()
+
+    stop = time.time()
+    run_time = (stop - start) / 60
+    text = "Scan duration: %f min\n" % run_time
+    obj.add_to_interactive_screen(text)
+
     return output
+
+def scan_cal_dac_fc(obj, scan_name):
+
+    start = time.time()
+
+    modified = scan_name.replace(" ", "_")
+
+    dac_values, charge_values = cal_dac_steps(obj, 0, 255)
+
+    # Plot the results.
+    fig = plt.figure(1)
+    plt.plot(dac_values, charge_values, label="CAL_DAC")
+    plt.ylabel('Charge [fC]')
+    plt.xlabel('DAC counts')
+    plt.legend()
+    plt.title(modified)
+    plt.grid(True)
+    fig.show()
+
+    # Save the results.
+    dac_values.insert(0,"DAC count")
+    charge_values.insert(0,"Charge [fC]")
+
+    data = [dac_values, charge_values]
+    timestamp = time.strftime("%Y%m%d%H%M")
+    folder = "./results/"
+    filename = "%s%s_%s_scan_data.csv" % (folder, timestamp, modified)
+    text = "Results were saved to the file:\n %s \n" % filename
+
+    with open(filename, "wb") as f:
+        writer = csv.writer(f)
+        writer.writerows(data)
+    obj.add_to_interactive_screen(text)
+
+
+    stop = time.time()
+    run_time = (stop - start) / 60
+    text = "Scan duration: %f min\n" % run_time
+    obj.add_to_interactive_screen(text)
 
 
 def continuous_trigger(obj):
