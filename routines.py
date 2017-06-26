@@ -14,7 +14,48 @@ from test_system_functions import *
 from generator import *
 
 
-def scurve_all_ch_execute(obj, scan_name):
+def gain_measurement(obj):
+
+    arm_dac0 = 100
+    arm_dac1 = 200
+
+
+    # Set monitoring to ARM_DAC
+    obj.register[133].Monitor_Sel[0] = 14
+    obj.write_register(133)
+
+    # Set RUN bit 1 to power up analog part of the chip
+    obj.register[65535].RUN[0] = 1
+    obj.write_register(65535)
+    time.sleep(1)
+
+
+    obj.register[135].ARM_DAC[0] = arm_dac0
+    obj.write_register(135)
+
+    threshold_mv0 = obj.interfaceFW.ext_adc()
+
+    threshold_fc0 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac0)
+
+
+    obj.register[135].ARM_DAC[0] = arm_dac1
+    obj.write_register(135)
+
+    threshold_mv1 = obj.interfaceFW.ext_adc()
+
+    threshold_fc1 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac1)
+
+    # Calculate the gain for each channel.
+
+    gain_all_ch = []
+
+    for i in len(threshold_fc1):
+        channel_gain = (threshold_mv1 - threshold_mv0)/(threshold_fc1[i] - threshold_fc0[i])
+        gain_all_ch.append(channel_gain)
+
+
+
+def scurve_all_ch_execute(obj, scan_name, arm_dac=100):
     start = time.time()
 
     # Adjust the global reference current of the chip.
@@ -74,7 +115,7 @@ def scurve_all_ch_execute(obj, scan_name):
     obj.write_register(132)
 
     obj.register[135].ZCC_DAC[0] = 10
-    obj.register[135].ARM_DAC[0] = 100
+    obj.register[135].ARM_DAC[0] = arm_dac
     obj.write_register(135)
 
     obj.register[139].CAL_FS[0] = 0
@@ -102,13 +143,16 @@ def scurve_all_ch_execute(obj, scan_name):
             # Set calibration to right channel.
             obj.register[k].cal[0] = 1
             obj.write_register(k)
-            time.sleep(0.5)
+            # time.sleep(0.1)
 
             scurve_data = []
             # Run the predefined routine.
+
             output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1)
 
+
             # Check the received data from the routine.
+
             if output[0] == "Error":
                 text = "%s: %s\n" % (output[0], output[1])
                 obj.add_to_interactive_screen(text)
@@ -136,7 +180,7 @@ def scurve_all_ch_execute(obj, scan_name):
         # Unset the calibration to the channel.
         obj.register[k].cal[0] = 0
         obj.write_register(k)
-        time.sleep(0.5)
+        # time.sleep(0.1)
 
         # Modify the decoded data.
         saved_data = []
@@ -157,27 +201,20 @@ def scurve_all_ch_execute(obj, scan_name):
     obj.add_to_interactive_screen(text)
 
     # Analyze data.
-    scurve_analyze(obj, all_ch_data, folder)
+    scurve_analyze(obj, all_ch_data, charge_values)
     stop = time.time()
     run_time = (stop - start) / 60
     text = "Run time (minutes): %f\n" % run_time
     obj.add_to_interactive_screen(text)
 
+    return [0]*128
 
-def scurve_analyze(obj, scurve_data, folder):
+
+def scurve_analyze(obj, scurve_data, charge_values):
     timestamp = time.strftime("%d.%m.%Y %H:%M")
-    full_data = []
-    mean_list = []
-    rms_list = []
-    full_data.append([""])
-    full_data.append(["Differential data"])
-    full_data.append(["", "255-CAL_DAC"])
-    full_data.append(
-        ["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, "mean", "RMS"])
+
     dac_values = scurve_data[1][1:]
 
-    fig = plt.figure(figsize=(10, 20))
-    sub1 = plt.subplot(411)
 
     Nhits_h = {}
     Nev_h = {}

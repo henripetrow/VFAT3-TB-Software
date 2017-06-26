@@ -31,6 +31,9 @@ class VFAT3_GUI:
             elif sys.argv[1] == '-j':
                 self.interfaceFW = FW_interface(0)      # 0 - IPbus mode
                 self.mode = 0
+            elif sys.argv[1] == '-u':
+                self.interfaceFW = FW_interface(3)  # 0 - IPbus/uHal mode
+                self.mode = 3
             else:
                 print "Unrecognised option."
                 self.interfaceFW = FW_interface(0)      # 0 - IPbus mode

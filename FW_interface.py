@@ -17,7 +17,7 @@ class FW_interface:
 
     def __init__(self, mode):
         self.connection_mode = mode
-        if self.connection_mode == 0:  # IPbus mode
+        if self.connection_mode == 0:  # IPbus/pyChips mode
             print "Entering normal mode"
             self.glib = GLIB()
         if self.connection_mode == 1:  # Simulation mode
@@ -26,6 +26,21 @@ class FW_interface:
                 myfile.write("0")
         if self.connection_mode == 2:  # Serial mode
             print "Entering Aamir mode."
+
+        if self.connection_mode == 3: # IPbus/uHal mode
+            self.glib = GLIB()
+            self.glib.get("ext_adc")
+            import uhal
+            self.hw = uhal.getDevice("VFAT3_TB", "ipbusudp-2.0://192.168.0.222:5001", "file://IPbus_address_table.xml")
+            print self.hw
+
+            self.hw.getNode("STATE").write(1)
+            self.hw.dispatch()
+
+            reg = self.hw.getNode("STATE").read()
+            self.hw.dispatch()
+            print reg
+
 
         self.FCC_LUT_L = {
         "AAAA":"00000000",
@@ -48,8 +63,10 @@ class FW_interface:
         "1110":"11110000"
         }
 
+
     def reset_vfat3(self):
-        self.glib.set("reset", 1)
+        if self.connection_mode == 0:
+            self.glib.set("reset", 1)
 
     def ext_adc(self):
         counter = 0
@@ -59,9 +76,11 @@ class FW_interface:
                 print "Are ADC inputs connected?"
                 rvalue = "Error"
                 break
-            self.glib.set("ext_adc", 1)
+            if self.connection_mode == 0:
+                self.glib.set("ext_adc", 1)
             time.sleep(0.01)
-            value = self.glib.get("ext_adc")
+            if self.connection_mode == 0:
+                value = self.glib.get("ext_adc")
             if value != 0:
                 rvalue = value * 0.0625  # ext ADC LSB is 62.5 uV
                 break
@@ -70,13 +89,16 @@ class FW_interface:
         return rvalue
 
     def start_ext_adc(self):
-        self.glib.set("ext_adc_on", 1)
+        if self.connection_mode == 0:
+            self.glib.set("ext_adc_on", 1)
 
     def write_control(self, input_value):
-        self.glib.set("state_fw", input_value)
+        if self.connection_mode == 0:
+            self.glib.set("state_fw", input_value)
 
     def read_control(self):
-        value = self.glib.get("state_fw")
+        if self.connection_mode == 0:
+            value = self.glib.get("state_fw")
         return value
 
     def write_fifo(self):
@@ -84,24 +106,28 @@ class FW_interface:
             for line in f:
                 line = line.rstrip('\n')
                 data_line = "0000000000000000" + line
-                self.glib.set("test_fifo", int(data_line, 2))
+                if self.connection_mode == 0:
+                    self.glib.set("test_fifo", int(data_line, 2))
 
     def empty_fifo(self):
         while True:
-            line = self.glib.get("test_fifo")
+            if self.connection_mode == 0:
+                line = self.glib.get("test_fifo")
             if line == 0 or line is None:
                 break
 
     def empty_full_fifo(self):
         print "Emptying FIFO"
-        self.glib.fifoRead("test_fifo", 131000)
+        if self.connection_mode == 0:
+            self.glib.fifoRead("test_fifo", 131000)
         print "FIFO empty"
 
     def read_fifo(self):
         open("./data/FPGA_output.dat", 'w').close()
         data_list = []
         while True:
-            line = self.glib.get("test_fifo")
+            if self.connection_mode == 0:
+                line = self.glib.get("test_fifo")
             # print line
             if line == 0 or line is None:
                 break
@@ -120,7 +146,8 @@ class FW_interface:
 
     def read_routine_fifo(self):
         open("./data/FPGA_output.dat", 'w').close()
-        data_list = self.glib.fifoRead("test_fifo", 130074)
+        if self.connection_mode == 0:
+            data_list = self.glib.fifoRead("test_fifo", 130074)
 
         open("./data/FPGA_output_list.dat", 'w').close()
         with open("./data/FPGA_output_list.dat", "a") as myfile:
@@ -132,11 +159,12 @@ class FW_interface:
                 myfile.write(line)
 
     def launch(self, register, file_name, serial_port, routine=0):
+
         open("./data/FPGA_output_list.dat", 'w').close()
         if file_name != "./data/FPGA_instruction_list.dat":
             shutil.copy2(file_name, "./data/FPGA_instruction_list.dat")
         timeout = 0
-
+        transaction_start = time.time()
         # ########## NORMAL MODE ##########
         if self.connection_mode == 0:
             if routine == 2:
@@ -146,7 +174,7 @@ class FW_interface:
             self.write_control(0)
             self.write_fifo()
             self.write_control(1)
-            time.sleep(0.1)
+            #time.sleep(0.1)
             if routine == 1:
                 self.read_routine_fifo()
             else:
@@ -223,7 +251,14 @@ class FW_interface:
             timeout = 0
 
         if not timeout:
+            transaction_stop = time.time()
+            analysis_start = time.time()
             output_data = decode_output_data('./data/FPGA_output_list.dat', register)
+            analysis_stop = time.time()
+            analysis_time = analysis_stop - analysis_start
+            transaction_time = transaction_stop - transaction_start
+
+            print "Transactions: %f s, Analysis: %f s" % (transaction_time, analysis_time)
         else:
             print "not Decoding output data."
             output_data = ['Error', 'Timeout, no response from the firmware.']
