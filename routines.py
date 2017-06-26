@@ -207,6 +207,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100):
     text = "Run time (minutes): %f\n" % run_time
     obj.add_to_interactive_screen(text)
 
+
     return [0]*128
 
 
