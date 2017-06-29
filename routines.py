@@ -14,6 +14,40 @@ from test_system_functions import *
 from generator import *
 
 
+
+def adjust_local_thresholds(obj):
+    # Measure the mean threshold of the channels, that will be used as a target.
+    mean_threshold = scurve_all_ch_execute(obj, "S-curve all ch")
+
+    for k in range(0, 128):
+        # Read the current dac values
+        obj.read_register(k)
+        print "Adjusting the channel %d local arm_dac." % k
+        previous_diff = 100
+        while True:
+            threshold = scurve_all_ch_execute(obj, "S-curve ch%d" % k, arm_dac=100, ch=k)
+            print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac)
+
+            new_diff = abs(mean_threshold - threshold)
+            if previous_diff < new_diff:
+                print "->Difference increasing. Choose previous value: %d." % previous_value
+                obj.register[k].arm_dac[0] = previous_value
+                obj.write_register(k)
+                print "-> Channel calibrated."
+                break
+            previous_value = obj.register[k].arm_dac[0]
+
+            if threshold < mean_threshold:
+                print "->Value too low, increase arm_dac register by 1."
+                obj.register[k].arm_dac[0] += 1
+                obj.write_register(k)
+            if threshold > mean_threshold:
+                print "->Value too high, decrease arm_dac register by 1."
+                obj.register[k].arm_dac[0] -= 1
+                obj.write_register(k)
+            previous_diff = new_diff
+
+
 def gain_measurement(obj):
 
     arm_dac0 = 100
@@ -49,21 +83,29 @@ def gain_measurement(obj):
 
     gain_all_ch = []
 
-    for i in len(threshold_fc1):
-        channel_gain = (threshold_mv1 - threshold_mv0)/(threshold_fc1[i] - threshold_fc0[i])
+    for ik in len(threshold_fc1):
+        channel_gain = (threshold_mv1 - threshold_mv0)/(threshold_fc1[ik] - threshold_fc0[ik])
         gain_all_ch.append(channel_gain)
 
 
 
-def scurve_all_ch_execute(obj, scan_name, arm_dac=100):
+def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="yes"):
     start = time.time()
 
-    # Adjust the global reference current of the chip.
-    iref_adjust(obj)
-
+    if configuration == "yes":
+        # Adjust the global reference current of the chip.
+        iref_adjust(obj)
 
     modified = scan_name.replace(" ", "_")
     file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
+
+    # scan either all of the channels or just the oe defined by ch.
+    if ch == "all":
+        start_ch = 0
+        stop_ch = 127
+    else:
+        start_ch = ch
+        stop_ch = ch
 
 
     # Define the scan. (Not fully implemented, don't change values.)
@@ -130,14 +172,20 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100):
     obj.register[129].PS[0] = 7
     obj.write_register(129)
 
-    # Find the charge of the CAL_DAC steps with external ADC. (Not yet used.)
-    dac_values, charge_values = cal_dac_steps(obj, start_dac_value, stop_dac_value)
+    if configuration == "yes":
+        # Find the charge of the CAL_DAC steps with external ADC. (Not yet used.)
+        if all([ v == 0 for v in obj.cal_dac_fc_values ]):
+            print "Calibration pulse steps are not calibrated. Running calibration..."
+            cal_dac_steps(obj)
 
+    charge_values = obj.cal_dac_fc_values[start_dac_value:stop_dac_value]
+    charge_values.reverse()
 
+    # if ch = "all":
     all_ch_data = []
     all_ch_data.append(["", "255-CAL_DAC"])
     all_ch_data.append(["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35])
-    for k in range(0, 128):
+    for k in range(start_ch, stop_ch+1):
         print "Channel: %d" % k
         while True:
             # Set calibration to right channel.
@@ -147,12 +195,9 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100):
 
             scurve_data = []
             # Run the predefined routine.
-
             output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1)
 
-
             # Check the received data from the routine.
-
             if output[0] == "Error":
                 text = "%s: %s\n" % (output[0], output[1])
                 obj.add_to_interactive_screen(text)
@@ -165,16 +210,17 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100):
                     elif i.type == "data_packet":
                         if i.data[127 - k] == "1":
                             hits += 1
+            scurve_data = scurve_data[2:]
+            scurve_data.reverse()
             print scurve_data
-
             # Check that there is enough data and it is not all zeroes.
-            if len(scurve_data) != 22:
+            if len(scurve_data) != 20:
                 print "Not enough values, trying again."
                 continue
-            if scurve_data[3] == 0:
+            if scurve_data[-3] == 0:
                 print "All zeroes, trying again."
                 continue
-            if len(scurve_data) == 22 and scurve_data[3] != 0:
+            if len(scurve_data) == 20 and scurve_data[-3] != 0:
                 break
 
         # Unset the calibration to the channel.
@@ -185,9 +231,9 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100):
         # Modify the decoded data.
         saved_data = []
         saved_data.append(k)
-        scurve = scurve_data[2:]
-        scurve.reverse()
-        saved_data.extend(scurve)
+        #scurve = scurve_data[2:]
+        #scurve.reverse()
+        saved_data.extend(scurve_data)
         all_ch_data.append(saved_data)
 
     # Save the results.
@@ -199,14 +245,15 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100):
         writer = csv.writer(f)
         writer.writerows(all_ch_data)
     obj.add_to_interactive_screen(text)
-
-    # Analyze data.
-    scurve_analyze(obj, all_ch_data, charge_values)
-    stop = time.time()
-    run_time = (stop - start) / 60
-    text = "Run time (minutes): %f\n" % run_time
-    obj.add_to_interactive_screen(text)
-
+    if ch == "all":
+        # Analyze data.
+        scurve_analyze(obj, all_ch_data, charge_values)
+        stop = time.time()
+        run_time = (stop - start) / 60
+        text = "Run time (minutes): %f\n" % run_time
+        obj.add_to_interactive_screen(text)
+    else:
+        print all_ch_data
 
     return [0]*128
 
@@ -323,7 +370,10 @@ def calibration(obj):
     print cal_values
 
 
-def cal_dac_steps(obj,start_dac_value,stop_dac_value):
+def cal_dac_steps(obj):
+
+    start_dac_value = 0
+    stop_dac_value = 255
 
     obj.register[133].Monitor_Sel[0] = 33
     obj.write_register(133)
@@ -363,39 +413,24 @@ def cal_dac_steps(obj,start_dac_value,stop_dac_value):
 
     # print dac_values
     # print charge_values
-
+    obj.cal_dac_fc_values = charge_values
     return dac_values, charge_values
 
 
 def iref_adjust(obj):
 
     # Read the current Iref dac value.
-    output = obj.SC_encoder.create_SC_packet(134, 0, "READ", 0)
-    paketti = output[0]
-    write_instruction(obj.interactive_output_file, 150, FCC_LUT[paketti[0]], 1)
-    for x in range(1, len(paketti)):
-        write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-    output = obj.execute()
-    if not output[0]:
-        print "No read data found. Register values might be incorrect.\n"
-    elif output[0] == "Error":
-        text = "%s: %s\n" % (output[0], output[1])
-        text += "Register values might be incorrect.\n"
-        print text
-    else:
-        print "Read data:"
-        new_data = output[0][0].data
-        print new_data
+    obj.read_register(134)
 
-        new_data = ''.join(str(e) for e in new_data[-16:])
-        register[134].change_values(new_data)
-
+    # Set monitoring to Iref
     obj.register[133].Monitor_Sel[0] = 0
     obj.write_register(133)
 
+    # Set RUN bit to activate analog part.
     obj.register[65535].RUN[0] = 1
     obj.write_register(65535)
     time.sleep(1)
+
     previous_diff = 100
     print "Adjusting the global reference current."
     while True:
@@ -888,20 +923,20 @@ def scan_cal_dac_fc(obj, scan_name):
 
     modified = scan_name.replace(" ", "_")
 
-    dac_values, charge_values = cal_dac_steps(obj, 0, 255)
+    dac_values, charge_values = cal_dac_steps(obj)
 
     # Plot the results.
     fig = plt.figure(1)
     plt.plot(dac_values, charge_values, label="CAL_DAC")
     plt.ylabel('Charge [fC]')
-    plt.xlabel('DAC counts')
+    plt.xlabel('DAC counts (255-CAL_DAC)')
     plt.legend()
     plt.title(modified)
     plt.grid(True)
     fig.show()
 
     # Save the results.
-    dac_values.insert(0,"DAC count")
+    dac_values.insert(0,"DAC count 255-CAL_DAC")
     charge_values.insert(0,"Charge [fC]")
 
     data = [dac_values, charge_values]
