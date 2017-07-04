@@ -175,7 +175,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
     if configuration == "yes":
         # Find the charge of the CAL_DAC steps with external ADC. (Not yet used.)
         if all([ v == 0 for v in obj.cal_dac_fc_values ]):
-            print "Calibration pulse steps are not calibrated. Running calibration..."
+            print 'Calibration pulse steps are not calibrated. Running calibration...'
             cal_dac_steps(obj)
 
     charge_values = obj.cal_dac_fc_values[start_dac_value:stop_dac_value]
@@ -247,15 +247,16 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
     obj.add_to_interactive_screen(text)
     if ch == "all":
         # Analyze data.
-        scurve_analyze(obj, all_ch_data, charge_values)
+        mean_th = scurve_analyze(obj, all_ch_data, charge_values)
         stop = time.time()
         run_time = (stop - start) / 60
         text = "Run time (minutes): %f\n" % run_time
         obj.add_to_interactive_screen(text)
+        threshold = mean_th
     else:
         print all_ch_data
-
-    return [0]*128
+        threshold = scurve_analyze_one_ch(all_ch_data)
+    return threshold
 
 
 def scurve_analyze(obj, scurve_data, charge_values):
@@ -307,6 +308,7 @@ def scurve_analyze(obj, scurve_data, charge_values):
     drawHisto(chi2_h,cc,'results/chi2Histo.png')
     chi2_h.Write()
     outF.Close()
+    return thr_h.getmean()
 
 def drawHisto(hist,canv,filename):
     canv.cd()
@@ -666,10 +668,10 @@ def set_up_trigger_pattern(obj, option):
         text = "Clearing trigger patterns\n"
         obj.add_to_interactive_screen(text)
         for k in range(0, 128):
-                print "Clear channel: %d" % k
-                obj.register[k].cal[0] = 0
-                obj.write_register(k)
-                time.sleep(0.1)
+            print "Clear channel: %d" % k
+            obj.register[k].cal[0] = 0
+            obj.write_register(k)
+            time.sleep(0.1)
         obj.register[130].DT[0] = 0
         obj.write_register(130)
 
@@ -1001,3 +1003,23 @@ def continuous_trigger(obj):
             obj.send_fcc("CalPulse")
             time.sleep(0.000000025)
 
+
+def scurve_analyze_one_ch(scurve_data):
+    dac_values = scurve_data[1][1:]
+
+    Nhits_h = r.TH1D('Nhitsi_h', 'Nhitsi_h', 256, -0.5, 255.5)
+    Nev_h = r.TH1D('Nevi_h', 'Nevi_h', 256, -0.5, 255.5)
+
+    data = scurve_data[i][1:]
+
+    for j, Nhits in enumerate(data):
+        Nhits_h.AddBinContent(dac_values[j] - 1, Nhits)
+        Nev_h.AddBinContent(dac_values[j] - 1, 100)
+
+    scurves_ag = r.TGraphAsymmErrors(Nhits_h, Nev_h)
+    scurves_ag.SetName('scurvei_ag')
+    fit_f = fitScurve(scurves_ag)
+    scurves_ag.Write()
+    thr_h = fit_f.GetParameter(0)
+
+    return thr_h
