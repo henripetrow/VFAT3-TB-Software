@@ -1,24 +1,12 @@
-1 Write Monitor_Sel 36 
-500 Write ST 0
-500 Write RUN 1
-500 Write ZCC_DAC 0
-
-
-1000 Send BC0
-200 Send SCOnly
-
-2000 Read 131072
-2000 Read 131073
-
-
-200 Repeat 255
-
-200 Write ZCC_DAC 1
-2000 Read 131072
-2000 Read 131073
-
-10 End_Repeat
-
-200 Write ZCC_DAC 32
-500 Write Monitor_Sel 0
-200 Write RUN 0
+1 Send SCOnly
+1 Write CAL_MODE 1
+400 Write CAL_DAC 220
+500 Send EC0
+1 Send RunMode
+1000 Repeat 20
+5000 Send_Repeat CalPulse_LV1A 100 5000
+5000 Send SCOnly
+5000 Write CAL_DAC 1
+200 Send RunMode
+1 End_Repeat
+1 Send SCOnly

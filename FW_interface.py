@@ -28,16 +28,16 @@ class FW_interface:
             print "Entering Aamir mode."
 
         if self.connection_mode == 3: # IPbus/uHal mode
-            self.glib = GLIB()
-            self.glib.get("ext_adc")
+            #self.glib = GLIB()
+            #self.glib.get("ext_adc")
             import uhal
-            self.hw = uhal.getDevice("VFAT3_TB", "ipbusudp-2.0://192.168.0.222:5001", "file://IPbus_address_table.xml")
+            self.hw = uhal.getDevice("VFAT3_TB", "ipbusudp-2.0://192.168.0.222:5000", "file://IPbus_address_table.xml")
             print self.hw
 
-            self.hw.getNode("STATE").write(1)
-            self.hw.dispatch()
+            #self.hw.getNode("STATE").write(1)
+            #self.hw.dispatch()
 
-            reg = self.hw.getNode("STATE").read()
+            reg = self.hw.getNode("CONTROL").read()
             self.hw.dispatch()
             print reg
 
@@ -258,7 +258,7 @@ class FW_interface:
             analysis_time = analysis_stop - analysis_start
             transaction_time = transaction_stop - transaction_start
 
-            print "Transactions: %f s, Analysis: %f s" % (transaction_time, analysis_time)
+            # print "Transactions: %f s, Analysis: %f s" % (transaction_time, analysis_time)
         else:
             print "not Decoding output data."
             output_data = ['Error', 'Timeout, no response from the firmware.']

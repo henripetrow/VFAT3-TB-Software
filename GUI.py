@@ -32,7 +32,7 @@ class VFAT3_GUI:
                 self.interfaceFW = FW_interface(0)      # 0 - IPbus mode
                 self.mode = 0
             elif sys.argv[1] == '-u':
-                self.interfaceFW = FW_interface(3)  # 0 - IPbus/uHal mode
+                self.interfaceFW = FW_interface(3)      # 0 - IPbus/uHal mode
                 self.mode = 3
             else:
                 print "Unrecognised option."
@@ -46,6 +46,7 @@ class VFAT3_GUI:
         self.channel_register = 0
         self.value = ""
         self.write_BCd_as_fillers = 0
+        self.cal_dac_fc_values = [0]*256
         self.CalPulseLV1A_latency = 4
         self.transaction_ID = 0
         self.interactive_output_file = "./data/FPGA_instruction_list.dat"
@@ -283,6 +284,9 @@ class VFAT3_GUI:
         self.cal_button = Button(self.misc_frame, text="CAL_DAC step", command=lambda: cal_dac_steps(self), width=bwidth)
         self.cal_button.grid(column=1, row=13, sticky='e')
 
+        self.cal_button = Button(self.misc_frame, text="One ch. S-curve", command=lambda: scurve_all_ch_execute(self, self.chosen_scan, arm_dac=100, ch=64, configuration="no"), width=bwidth)
+        self.cal_button.grid(column=1, row=14, sticky='e')
+
         # ############### FW CONFIGURE TAB #######################################
 
         self.fwsync_button = Button(self.FW_frame, text="ReSync Firmware", command=lambda: self.FW_sync(), width=bwidth)
@@ -413,22 +417,24 @@ class VFAT3_GUI:
         text =  "Reading all of the chips registers:\n"
         self.add_to_interactive_screen(text)
         for i in range(129,146):
-            output = self.SC_encoder.create_SC_packet(i,0,"READ",0)
-            paketti = output[0]
-            write_instruction(self.interactive_output_file,150, FCC_LUT[paketti[0]], 1)
-            for x in range(1,len(paketti)):
-                write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
-            output = self.execute()
-            if output[0] == "Error":
-                text =  "%s: %s\n" %(output[0],output[1])
-                text =  "Register values might be incorrect.\n"
-                self.add_to_interactive_screen(text)
-                break
-            else:
-                new_data = output[0][0].data
-                new_data = ''.join(str(e) for e in new_data)
-                register[i].change_values(new_data)
+            self.read_register(i)
         self.clear_interactive_screen()
+
+    def read_register(self, reg):
+        output = self.SC_encoder.create_SC_packet(reg, 0, "READ", 0)
+        paketti = output[0]
+        write_instruction(self.interactive_output_file, 150, FCC_LUT[paketti[0]], 1)
+        for x in range(1, len(paketti)):
+            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+        output = self.execute()
+        if output[0] == "Error":
+            text = "%s: %s\n" % (output[0], output[1])
+            text += "Register values might be incorrect.\n"
+            self.add_to_interactive_screen(text)
+        else:
+            new_data = output[0][0].data
+            new_data = ''.join(str(e) for e in new_data)
+            self.register[reg].change_values(new_data)
 
     def add_to_interactive_screen(self, text):
         self.interactive_screen.insert(END,text)
