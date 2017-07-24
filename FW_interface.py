@@ -78,12 +78,14 @@ class FW_interface:
                 break
             if self.connection_mode == 0:
                 self.glib.set("ext_adc", 1)
-            time.sleep(0.01)
+            time.sleep(0.2)
             if self.connection_mode == 0:
                 value = self.glib.get("ext_adc")
             if value != 0:
                 rvalue = value * 0.0625  # ext ADC LSB is 62.5 uV
+                print "value is %i"%value
                 break
+            print "counter is %i"%counter
             print "ADC returned 0, trying again."
             counter += 1
         return rvalue
