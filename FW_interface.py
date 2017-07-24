@@ -19,7 +19,6 @@ class FW_interface:
         self.connection_mode = mode
         if self.connection_mode == 0:  # IPbus/pyChips mode
             print "Entering normal mode"
-            self.glib = GLIB()
         if self.connection_mode == 1:  # Simulation mode
             with open("./data/FPGA_statusfile.dat", "w") as myfile:
                 print "Entering Simulation mode."
@@ -63,12 +62,13 @@ class FW_interface:
         "1110":"11110000"
         }
 
-
     def reset_vfat3(self):
+        glib = GLIB()
         if self.connection_mode == 0:
-            self.glib.set("reset", 1)
+            glib.set("reset", 1)
 
     def ext_adc(self):
+        glib = GLIB()
         counter = 0
         while True:
             if counter == 10:
@@ -77,10 +77,10 @@ class FW_interface:
                 rvalue = "Error"
                 break
             if self.connection_mode == 0:
-                self.glib.set("ext_adc", 1)
-            time.sleep(0.01)
+                glib.set("ext_adc", 1)
+            time.sleep(0.1)
             if self.connection_mode == 0:
-                value = self.glib.get("ext_adc")
+                value = glib.get("ext_adc")
             if value != 0:
                 rvalue = value * 0.0625  # ext ADC LSB is 62.5 uV
                 break
@@ -89,45 +89,52 @@ class FW_interface:
         return rvalue
 
     def start_ext_adc(self):
+        glib = GLIB()
         if self.connection_mode == 0:
-            self.glib.set("ext_adc_on", 1)
+            glib.set("ext_adc_on", 1)
 
     def write_control(self, input_value):
+        glib = GLIB()
         if self.connection_mode == 0:
-            self.glib.set("state_fw", input_value)
+            glib.set("state_fw", input_value)
 
     def read_control(self):
+        glib = GLIB()
         if self.connection_mode == 0:
-            value = self.glib.get("state_fw")
+            value = glib.get("state_fw")
         return value
 
     def write_fifo(self):
+        glib = GLIB()
         with open("./data/FPGA_instruction_list.dat", 'r') as f:
             for line in f:
                 line = line.rstrip('\n')
                 data_line = "0000000000000000" + line
                 if self.connection_mode == 0:
-                    self.glib.set("test_fifo", int(data_line, 2))
+                    glib.set("test_fifo", int(data_line, 2))
 
     def empty_fifo(self):
+        glib = GLIB()
         while True:
             if self.connection_mode == 0:
-                line = self.glib.get("test_fifo")
+                line = glib.get("test_fifo")
             if line == 0 or line is None:
                 break
 
     def empty_full_fifo(self):
+        glib = GLIB()
         print "Emptying FIFO"
         if self.connection_mode == 0:
-            self.glib.fifoRead("test_fifo", 131000)
+            glib.fifoRead("test_fifo", 131000)
         print "FIFO empty"
 
     def read_fifo(self):
+        glib = GLIB()
         open("./data/FPGA_output.dat", 'w').close()
         data_list = []
         while True:
             if self.connection_mode == 0:
-                line = self.glib.get("test_fifo")
+                line = glib.get("test_fifo")
             # print line
             if line == 0 or line is None:
                 break
@@ -145,18 +152,22 @@ class FW_interface:
                 myfile.write(i)
 
     def read_routine_fifo(self):
+        glib = GLIB()
         open("./data/FPGA_output.dat", 'w').close()
         if self.connection_mode == 0:
-            data_list = self.glib.fifoRead("test_fifo", 130074)
+            data_list = glib.fifoRead("test_fifo", 130074)
 
         open("./data/FPGA_output_list.dat", 'w').close()
         with open("./data/FPGA_output_list.dat", "a") as myfile:
-            for i in data_list:
-                line = dec_to_bin_with_stuffing(i, 32)
-                line1 = ''.join(str(e) for e in line[0:24])
-                line2 = ''.join(str(e) for e in line[-8:])
-                line = "%s,%s \n" % (int(line1, 2), line2)
-                myfile.write(line)
+            if any(data_list):
+                for i in data_list:
+                    line = dec_to_bin_with_stuffing(i, 32)
+                    line1 = ''.join(str(e) for e in line[0:24])
+                    line2 = ''.join(str(e) for e in line[-8:])
+                    line = "%s,%s \n" % (int(line1, 2), line2)
+                    myfile.write(line)
+            else:
+                print "!-> read_routine_fifo received a value: None."
 
     def launch(self, register, file_name, serial_port, routine=0):
 
@@ -174,7 +185,6 @@ class FW_interface:
             self.write_control(0)
             self.write_fifo()
             self.write_control(1)
-            #time.sleep(0.1)
             if routine == 1:
                 self.read_routine_fifo()
             else:

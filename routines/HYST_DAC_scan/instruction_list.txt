@@ -10,7 +10,7 @@
 1000 Read 131073
 
 
-200 Repeat 10
+200 Repeat 64
 
 200 Write HYST_DAC 1
 1000 Read 131072

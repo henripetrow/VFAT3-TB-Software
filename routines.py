@@ -14,45 +14,84 @@ from test_system_functions import *
 from generator import *
 
 
-
 def adjust_local_thresholds(obj):
+    start = time.time()
     # Measure the mean threshold of the channels, that will be used as a target.
     mean_threshold = scurve_all_ch_execute(obj, "S-curve all ch")
-
+    print "Found the mean threshold for the 128 channels: %f" % mean_threshold
     for k in range(0, 128):
-        # Read the current dac values
-        obj.read_register(k)
-        print "Adjusting the channel %d local arm_dac." % k
-        previous_diff = 100
-        while True:
-            threshold = scurve_all_ch_execute(obj, "S-curve ch%d" % k, arm_dac=100, ch=k)
-            print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac)
 
+        thresholds = []
+        diff_values = []
+
+        # Read the current dac values
+        #obj.read_register(k)
+        print "Adjusting the channel %d local arm_dac." % k
+        threshold = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=k, configuration="no")
+        print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac[0])
+        previous_diff = abs(mean_threshold - threshold)
+        previous_value = 0
+        thresholds.append(threshold)
+        diff_values.append(previous_diff)
+        if threshold < mean_threshold:
+            print "->Value too low, increase arm_dac register."
+            obj.register[k].arm_dac[0] = 0
+            obj.write_register(k)
+            max_value = 63
+            direction = "up"
+        if threshold > mean_threshold:
+            print "->Value too high, decrease arm_dac register."
+            obj.register[k].arm_dac[0] = 64
+            obj.write_register(k)
+            max_value = 128
+            direction = "down"
+
+        while True:
+            obj.register[k].arm_dac[0] += 1
+            obj.write_register(k)
+
+            threshold = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=k, configuration="no")
+            print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac[0])
+            thresholds.append(threshold)
             new_diff = abs(mean_threshold - threshold)
-            if previous_diff < new_diff:
-                print "->Difference increasing. Choose previous value: %d." % previous_value
-                obj.register[k].arm_dac[0] = previous_value
-                obj.write_register(k)
+            diff_values.append(new_diff)
+            print thresholds
+            print diff_values
+            if direction == "up" and threshold > mean_threshold:
+                if previous_diff < new_diff:
+                    print "->Difference increasing. Choose previous value: %d." % previous_value
+                    obj.register[k].arm_dac[0] = previous_value
                 print "-> Channel calibrated."
                 break
-            previous_value = obj.register[k].arm_dac[0]
+            if direction == "down" and threshold < mean_threshold:
+                if previous_diff < new_diff:
+                    print "->Difference increasing. Choose previous value: %d." % previous_value
+                    obj.register[k].arm_dac[0] = previous_value
+                print "-> Channel calibrated."
+                break
 
-            if threshold < mean_threshold:
-                print "->Value too low, increase arm_dac register by 1."
-                obj.register[k].arm_dac[0] += 1
-                obj.write_register(k)
-            if threshold > mean_threshold:
-                print "->Value too high, decrease arm_dac register by 1."
-                obj.register[k].arm_dac[0] -= 1
-                obj.write_register(k)
+            previous_value = obj.register[k].arm_dac[0]
             previous_diff = new_diff
+
+    # Save the channel calibration settings to a file.
+    open("./data/channel_registers.dat", 'w').close()
+    for register_nr in range(0, 128):
+        data = []
+        for x in register[register_nr].reg_array:
+            data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
+        data = ''.join(str(e) for e in data)
+        with open("./data/channel_registers.dat", "a") as mfile:
+            mfile.write("%s\n" % data)
+
+    stop = time.time()
+    run_time = (stop - start) / 60
+    print "Run time (minutes): %f\n" % run_time
 
 
 def gain_measurement(obj):
 
     arm_dac0 = 100
     arm_dac1 = 200
-
 
     # Set monitoring to ARM_DAC
     obj.register[133].Monitor_Sel[0] = 14
@@ -63,36 +102,48 @@ def gain_measurement(obj):
     obj.write_register(65535)
     time.sleep(1)
 
+    # Set monitoring to ARM_DAC
+    obj.register[133].Monitor_Sel[0] = 14
+    obj.write_register(133)
 
     obj.register[135].ARM_DAC[0] = arm_dac0
     obj.write_register(135)
-
+    time.sleep(1)
     threshold_mv0 = obj.interfaceFW.ext_adc()
+    # High gain
+    threshold_fc0 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac0, dac_range=[220, 240])
+    # Medium gain
+    # threshold_fc0 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac0, dac_range=[190, 210])
 
-    threshold_fc0 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac0)
+    obj.register[65535].RUN[0] = 1
+    obj.write_register(65535)
+    time.sleep(1)
 
+    obj.register[133].Monitor_Sel[0] = 14
+    obj.write_register(133)
 
     obj.register[135].ARM_DAC[0] = arm_dac1
     obj.write_register(135)
-
+    time.sleep(1)
     threshold_mv1 = obj.interfaceFW.ext_adc()
-
-    threshold_fc1 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac1)
-
-    # Calculate the gain for each channel.
-
-    gain_all_ch = []
-
-    for ik in len(threshold_fc1):
-        channel_gain = (threshold_mv1 - threshold_mv0)/(threshold_fc1[ik] - threshold_fc0[ik])
-        gain_all_ch.append(channel_gain)
+    # High gain
+    threshold_fc1 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac1, dac_range=[200, 220])
+    # Medium gain
+    # threshold_fc1 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac1, dac_range=[125, 145])
 
 
+    # Calculate the gain.
 
-def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="yes"):
+    print "Thresholds in mV TH0: %f and TH1: %f" % (threshold_mv0, threshold_mv1)
+    print "Thresholds in fC TH0: %f and TH1: %f" % (threshold_fc0, threshold_fc1)
+    gain = (threshold_mv1 - threshold_mv0)/(threshold_fc1 - threshold_fc0)
+    print gain
+
+
+def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="yes", dac_range=[220, 240]):
     start = time.time()
 
-    if configuration == "yes":
+    if obj.Iref == 0:
         # Adjust the global reference current of the chip.
         iref_adjust(obj)
 
@@ -109,43 +160,50 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
 
 
     # Define the scan. (Not fully implemented, don't change values.)
-    start_dac_value = 220
-    stop_dac_value = 240
+    # start_dac_value = 220
+    # stop_dac_value = 240
+    start_dac_value = dac_range[0]
+    stop_dac_value = dac_range[1]
     samples_per_dac_value = 100
 
 
     # Create the instructions for the specified scan values.
 
     steps = stop_dac_value - start_dac_value
+    if configuration == "yes":
+        instruction_text = []
+        instruction_text.append("1 Send SCOnly")
+        instruction_text.append("1 Write CAL_MODE 1")
+        instruction_text.append("400 Write CAL_DAC %d" % start_dac_value)
+        instruction_text.append("500 Send EC0")
+        instruction_text.append("1 Send RunMode")
+        instruction_text.append("1000 Repeat %d" % steps)
+        instruction_text.append("5000 Send_Repeat CalPulse_LV1A %d 10000" % samples_per_dac_value)
+        instruction_text.append("5000 Send SCOnly")
+        instruction_text.append("5000 Write CAL_DAC 1")
+        instruction_text.append("200 Send RunMode")
+        instruction_text.append("1 End_Repeat")
+        instruction_text.append("1 Send SCOnly")
 
-    instruction_text = []
-    instruction_text.append("1 Send SCOnly")
-    instruction_text.append("1 Write CAL_MODE 1")
-    instruction_text.append("400 Write CAL_DAC %d" % start_dac_value)
-    instruction_text.append("500 Send EC0")
-    instruction_text.append("1 Send RunMode")
-    instruction_text.append("1000 Repeat %d" % steps)
-    instruction_text.append("5000 Send_Repeat CalPulse_LV1A %d 5000" % samples_per_dac_value)
-    instruction_text.append("5000 Send SCOnly")
-    instruction_text.append("5000 Write CAL_DAC 1")
-    instruction_text.append("200 Send RunMode")
-    instruction_text.append("1 End_Repeat")
-    instruction_text.append("1 Send SCOnly")
+        # Write the instructions to the file.
 
-    # Write the instructions to the file.
+        output_file_name = "./routines/%s/instruction_list.txt" % modified
+        with open(output_file_name, "w") as mfile:
+            for item in instruction_text:
+                mfile.write("%s\n" % item)
 
-    output_file_name = "./routines/%s/instruction_list.txt" % modified
-    with open(output_file_name, "w") as mfile:
-        for item in instruction_text:
-            mfile.write("%s\n" % item)
-
-    # Generate the instruction list for the FPGA.
-    generator(scan_name, obj.write_BCd_as_fillers, obj.register)
+        # Generate the instruction list for the FPGA.
+        generator(scan_name, obj.write_BCd_as_fillers, obj.register)
 
 
 
-    # Set the needed registers.
-    obj.set_fe_nominal_values()
+        # Set the needed registers.
+        obj.set_fe_nominal_values()
+
+    obj.register[131].TP_FE[0] = 7
+    obj.write_register(131)
+
+
 
     obj.register[130].DT[0] = 0
     obj.write_register(130)
@@ -153,14 +211,14 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
     register[138].CAL_MODE[0] = 1
     obj.write_register(138)
 
-    obj.register[132].SEL_COMP_MODE[0] = 0
+    obj.register[132].PT[0] = 15
+    obj.register[132].SEL_COMP_MODE[0] = 1
     obj.write_register(132)
 
     obj.register[135].ZCC_DAC[0] = 10
     obj.register[135].ARM_DAC[0] = arm_dac
     obj.write_register(135)
 
-    obj.register[139].CAL_FS[0] = 0
     obj.register[139].CAL_DUR[0] = 200
     obj.write_register(139)
 
@@ -172,9 +230,9 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
     obj.register[129].PS[0] = 7
     obj.write_register(129)
 
-    if configuration == "yes":
+    if configuration == "yess":
         # Find the charge of the CAL_DAC steps with external ADC. (Not yet used.)
-        if all([ v == 0 for v in obj.cal_dac_fc_values ]):
+        if all([v == 0 for v in obj.cal_dac_fc_values]):
             print 'Calibration pulse steps are not calibrated. Running calibration...'
             cal_dac_steps(obj)
 
@@ -182,9 +240,16 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
     charge_values.reverse()
 
     # if ch = "all":
+    cal_dac_values = range(start_dac_value, stop_dac_value)
+    cal_dac_values.reverse()
+    cal_dac_values[:] = [255 - x for x in cal_dac_values]
     all_ch_data = []
     all_ch_data.append(["", "255-CAL_DAC"])
-    all_ch_data.append(["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35])
+    # all_ch_data.append(["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35])
+    data_line = []
+    data_line.append("Channel")
+    data_line.extend(cal_dac_values)
+    all_ch_data.append(data_line)
     for k in range(start_ch, stop_ch+1):
         print "Channel: %d" % k
         while True:
@@ -214,13 +279,15 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
             scurve_data.reverse()
             print scurve_data
             # Check that there is enough data and it is not all zeroes.
-            if len(scurve_data) != 20:
+            if len(scurve_data) != steps:
                 print "Not enough values, trying again."
                 continue
-            if scurve_data[-3] == 0:
+            if scurve_data[-1] == 0:
                 print "All zeroes, trying again."
                 continue
-            if len(scurve_data) == 20 and scurve_data[-3] != 0:
+            # if len(scurve_data) == 20 and scurve_data[-3] != 0:
+            #     break
+            if len(scurve_data) == steps:
                 break
 
         # Unset the calibration to the channel.
@@ -247,7 +314,10 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
     obj.add_to_interactive_screen(text)
     if ch == "all":
         # Analyze data.
+        #mean_th = scurve_analyze_old(obj, all_ch_data, folder)
+
         mean_th = scurve_analyze(obj, all_ch_data, charge_values)
+        print "Mean: %f" % mean_th
         stop = time.time()
         run_time = (stop - start) / 60
         text = "Run time (minutes): %f\n" % run_time
@@ -284,14 +354,14 @@ def scurve_analyze(obj, scurve_data, charge_values):
 
         pass
     
-    outF = r.TFile('results/scurves.root','RECREATE')
-    enc_h = r.TH1D('enc_h','ENC of all Channels;ENC [DAC Units];Number of Channels',100,0.0,1.0)
-    thr_h = r.TH1D('thr_h','Threshold of all Channels;ENC [DAC Units];Number of Channels',160,0.0,80.0)
-    chi2_h = r.TH1D('chi2_h','Fit #chi^{2};#chi^{2};Number of Channels / 0.001',100,0.0,1.0)
+    outF = r.TFile('results/scurves.root', 'RECREATE')
+    enc_h = r.TH1D('enc_h', 'ENC of all Channels;ENC [DAC Units];Number of Channels', 100, 0.0, 1.0)
+    thr_h = r.TH1D('thr_h', 'Threshold of all Channels;ENC [DAC Units];Number of Channels', 160, 0.0, 80.0)
+    chi2_h = r.TH1D('chi2_h', 'Fit #chi^{2};#chi^{2};Number of Channels / 0.001', 100, 0.0, 1.0)
     scurves_ag = {}
     for ch in range(128):
-        scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch],Nev_h[ch])
-        scurves_ag[ch].SetName('scurve%i_ag'%ch)
+        scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch], Nev_h[ch])
+        scurves_ag[ch].SetName('scurve%i_ag' % ch)
         fit_f = fitScurve(scurves_ag[ch])
         scurves_ag[ch].Write()
         thr_h.Fill(fit_f.GetParameter(0))
@@ -299,18 +369,20 @@ def scurve_analyze(obj, scurve_data, charge_values):
         chi2_h.Fill(fit_f.GetChisquare())
         pass
 
-    cc = r.TCanvas('canv','canv',1000,1000)
-
-    drawHisto(thr_h,cc,'results/threshHiso.png')
+    cc = r.TCanvas('canv', 'canv', 1000, 1000)
+    drawHisto(thr_h, cc, 'results/threshHiso.png')
+    thr_mean = thr_h.GetMean()
+    print "Mean: %f" % thr_mean
     thr_h.Write()
-    drawHisto(enc_h,cc,'results/encHisto.png')
+    drawHisto(enc_h, cc, 'results/encHisto.png')
     enc_h.Write()
-    drawHisto(chi2_h,cc,'results/chi2Histo.png')
+    drawHisto(chi2_h, cc, 'results/chi2Histo.png')
     chi2_h.Write()
     outF.Close()
-    return thr_h.getmean()
+    return thr_mean
 
-def drawHisto(hist,canv,filename):
+
+def drawHisto(hist, canv, filename):
     canv.cd()
     hist.SetLineWidth(2)
     hist.GetXaxis().CenterTitle()
@@ -340,8 +412,9 @@ def fitScurve(scurve_g):
     scurve_g.Fit(erf_f)
     return bestFit_f
 
-def calibration(obj):
 
+def calibration(obj):
+    start = time.time()
     output = generator("Calibration", 0, obj.register)
     for i in output[0]:
         print i
@@ -434,7 +507,9 @@ def iref_adjust(obj):
     time.sleep(1)
 
     previous_diff = 100
-    print "Adjusting the global reference current."
+    text = "Adjusting the global reference current.\n"
+    print text
+    obj.add_to_interactive_screen(text)
     while True:
 
         time.sleep(1)
@@ -448,6 +523,7 @@ def iref_adjust(obj):
         if previous_diff < new_diff:
             print "->Difference increasing. Choose previous value: %d." % previous_value
             register[134].Iref[0] = previous_value
+            obj.Iref = previous_value
             obj.write_register(134)
             break
         previous_value = register[134].Iref[0]
@@ -463,115 +539,36 @@ def iref_adjust(obj):
     obj.register[65535].RUN[0] = 0
     obj.write_register(65535)
     time.sleep(1)
+    text = "- Iref adjusted.\n"
+    print text
+    obj.add_to_interactive_screen(text)
 
 
-def adc_lsb(obj):
+def adc_comparison(obj):
 
-    obj.register[133].Monitor_Sel[0] = 33
+    obj.register[133].Monitor_Sel[0] = 34
     obj.write_register(133)
 
     obj.register[65535].RUN[0] = 1
     obj.write_register(65535)
     time.sleep(1)
 
-    # CAL_DAC 0
-    register[138].CAL_DAC[0] = 0
-    obj.write_register(138)
+    int_adc_values = []
+    ext_adc_values = []
+    dac_values = []
+    for i in range(0, 255):
+        dac_values.append(i)
+        print "->Measuring DAC value %d" %i
+        register[142].PRE_VREF[0] = i
+        obj.write_register(142)
 
-    addr0 = 131073  # ADC0 address
-    time.sleep(2)
-    output = obj.SC_encoder.create_SC_packet(addr0, 0, "READ", 0)
-    paketti = output[0]
-    write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-    for x in range(1, len(paketti)):
-        write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+        int_adc_value = obj.read_adc1()
+        print "ADC1: %f" % int_adc_value
+        int_adc_values.append(int_adc_value)
 
-    output = obj.execute()
-    if output[0] == "Error":
-        print "Error."
-    else:
-        if output[0]:
-            int_adc_output_0 = int(''.join(map(str, output[0][0].data)), 2)
-    time.sleep(2)
-    ext_adc_output0 = obj.interfaceFW.ext_adc()
-
-    # CAL_DAC 100
-    register[138].CAL_DAC[0] = 100
-    obj.write_register(138)
-    time.sleep(2)
-    output = obj.SC_encoder.create_SC_packet(addr0, 0, "READ", 0)
-    paketti = output[0]
-    write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-    for x in range(1, len(paketti)):
-        write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-
-    output = obj.execute()
-    if output[0] == "Error":
-        print "Error."
-    else:
-        if output[0]:
-            int_adc_output_1 = int(''.join(map(str, output[0][0].data)), 2)
-    time.sleep(2)
-    ext_adc_output1 = obj.interfaceFW.ext_adc()
-
-
-    # CAL_DAC 200
-    register[138].CAL_DAC[0] = 200
-    obj.write_register(138)
-    time.sleep(2)
-    output = obj.SC_encoder.create_SC_packet(addr0, 0, "READ", 0)
-    paketti = output[0]
-    write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-    for x in range(1, len(paketti)):
-        write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-
-    output = obj.execute()
-    if output[0] == "Error":
-        print "Error."
-    else:
-        if output[0]:
-            int_adc_output_2 = int(''.join(map(str, output[0][0].data)), 2)
-    time.sleep(2)
-    ext_adc_output2 = obj.interfaceFW.ext_adc()
-
-
-
-    # CAL_DAC 255
-    register[138].CAL_DAC[0] = 255
-    obj.write_register(138)
-    time.sleep(2)
-    output = obj.SC_encoder.create_SC_packet(addr0, 0, "READ", 0)
-    paketti = output[0]
-    write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-    for x in range(1, len(paketti)):
-        write_instruction(obj.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-
-    output = obj.execute()
-    if output[0] == "Error":
-        print "Error."
-    else:
-        if output[0]:
-            int_adc_output_3 = int(''.join(map(str, output[0][0].data)), 2)
-    time.sleep(2)
-    ext_adc_output3 = obj.interfaceFW.ext_adc()
-
-    lsb0 = ext_adc_output0/int_adc_output_0
-    lsb1 = ext_adc_output1/int_adc_output_1
-    lsb2 = ext_adc_output2/int_adc_output_2
-    lsb3 = ext_adc_output3/int_adc_output_3
-
-    print "Internal ADC counts at 0: %d" % int_adc_output_0
-    print "External voltage at 0: %f" % ext_adc_output0
-    print "LSB: %f" % lsb0
-    print "Internal ADC counts at 100: %d" % int_adc_output_1
-    print "External voltage at 100: %f" % ext_adc_output1
-    print "LSB: %f" % lsb1
-    print "Internal ADC counts at 200: %d" % int_adc_output_2
-    print "External voltage at 200: %f" % ext_adc_output2
-    print "LSB: %f" % lsb2
-    print "Internal ADC counts at 255: %d" % int_adc_output_3
-    print "External voltage at 255: %f" % ext_adc_output3
-    print "LSB: %f" % lsb3
+        ext_adc_value = obj.interfaceFW.ext_adc()
+        print "ext. ADC: %f" % ext_adc_value
+        ext_adc_values.append(ext_adc_value)
 
     obj.register[133].Monitor_Sel[0] = 0
     obj.write_register(133)
@@ -579,6 +576,16 @@ def adc_lsb(obj):
     obj.register[65535].RUN[0] = 0
     obj.write_register(65535)
     time.sleep(1)
+
+    plt.plot(dac_values, ext_adc_values, label='EXT ADC')
+    plt.plot(dac_values, int_adc_values, label='ADC1')
+    plt.legend(loc='upper left')
+
+    plt.xlabel('DAC[counts]')
+    plt.ylabel('Voltage [mV]')
+    plt.title('Ext ADC vs. Int ADC1')
+    plt.grid(True)
+    plt.show()
 
 
 def scurve_execute(obj, scan_name):
@@ -743,108 +750,6 @@ def set_up_trigger_pattern(obj, option):
         obj.add_to_interactive_screen(text)
 
 
-def mask_bit_test(obj):
-
-
-    obj.set_fe_nominal_values()
-    print "Set FE nominal values."
-
-    obj.register[130].DT[0] = 0
-    obj.write_register(130)
-
-    obj.register[138].CAL_DAC[0] = 200
-    obj.register[138].CAL_MODE[0] = 1
-    obj.write_register(138)
-    print "Set CAL_DAC to: %d and CAL_MODE to: %d" % (obj.register[138].CAL_DAC[0], obj.register[138].CAL_MODE[0])
-
-    obj.register[132].SEL_COMP_MODE[0] = 0
-    obj.write_register(132)
-    print "Set SEL_COMP_MODE to: %d" % obj.register[132].SEL_COMP_MODE[0]
-
-    obj.register[134].Iref[0] = 27
-    obj.write_register(134)
-    print "Set Iref to: %d" % obj.register[134].Iref[0]
-
-    obj.register[135].ZCC_DAC[0] = 10
-    obj.register[135].ARM_DAC[0] = 100
-    obj.write_register(135)
-    print "Set ZCC_DAC to: %d and Set ARM_DAC to: %d" % (obj.register[135].ZCC_DAC[0], obj.register[135].ARM_DAC[0])
-
-    obj.register[139].CAL_FS[0] = 3
-    obj.register[139].CAL_DUR[0] = 100
-    obj.write_register(139)
-    print "Set CAL_FS to: %d and Set CAL_DUR to: %d" % (obj.register[139].CAL_FS[0], obj.register[139].CAL_DUR[0])
-
-    obj.register[65535].RUN[0] = 1
-    obj.write_register(65535)
-    print "Set RUN to: %d" % obj.register[65535].RUN[0]
-
-    obj.register[129].ST[0] = 1
-    obj.register[129].PS[0] = 0
-    obj.write_register(129)
-    print "Set ST to: %d and Set PS to: %d" % (obj.register[129].ST[0], obj.register[129].PS[0])
-
-    for k in range(0, 128):
-        print "Test channel:%d" % k
-        for h in range(0, 4):
-            if h % 2 == 0:
-                obj.register[k].cal[0] = 1
-                obj.write_register(k)
-            else:
-                obj.register[k].cal[0] = 0
-                obj.write_register(k)
-
-            write_instruction(obj.interactive_output_file, 1, FCC_LUT["CalPulse"], 1)
-            output = obj.interfaceFW.launch(obj.register, obj.interactive_output_file, obj.COM_port)
-            if output[0] == "Error":
-                text = "%s: %s\n" % (output[0], output[1])
-                obj.add_to_interactive_screen(text)
-            else:
-                for i in output[1]:
-                    if i.data[127 - k] == "1":
-                        hits += 1
-
-
-
-
-        obj.register[k].mask[0] = 1
-        obj.write_register(k)
-        obj.send_fcc("CalPulse")
-        obj.register[k].mask[0] = 0
-        obj.write_register(k)
-        obj.send_fcc("CalPulse")
-        obj.register[k].cal[0] = 0
-        obj.write_register(k)
-
-    text = "Clearing trigger patterns\n"
-    obj.add_to_interactive_screen(text)
-    for k in range(0, 128):
-        print "Clear channel: %d" % k
-        obj.register[k].cal[0] = 0
-        obj.write_register(k)
-        time.sleep(0.1)
-    obj.register[130].DT[0] = 0
-    obj.write_register(130)
-
-    obj.register[138].CAL_DAC[0] = 0
-    obj.register[138].CAL_MODE[0] = 0
-    obj.write_register(138)
-
-    obj.register[132].SEL_COMP_MODE[0] = 0
-    obj.write_register(132)
-
-    obj.register[139].CAL_FS[0] = 0
-    obj.register[139].CAL_DUR[0] = 0
-    obj.write_register(139)
-
-    obj.register[65535].RUN[0] = 0
-    obj.write_register(65535)
-
-    obj.register[129].ST[0] = 0
-    obj.register[129].PS[0] = 0
-    obj.write_register(129)
-
-
 def scan_execute(obj, scan_name):
 
     start = time.time()
@@ -919,6 +824,7 @@ def scan_execute(obj, scan_name):
 
     return output
 
+
 def scan_cal_dac_fc(obj, scan_name):
 
     start = time.time()
@@ -938,8 +844,8 @@ def scan_cal_dac_fc(obj, scan_name):
     fig.show()
 
     # Save the results.
-    dac_values.insert(0,"DAC count 255-CAL_DAC")
-    charge_values.insert(0,"Charge [fC]")
+    dac_values.insert(0, "DAC count 255-CAL_DAC")
+    charge_values.insert(0, "Charge [fC]")
 
     data = [dac_values, charge_values]
     timestamp = time.strftime("%Y%m%d%H%M")
@@ -1010,7 +916,7 @@ def scurve_analyze_one_ch(scurve_data):
     Nhits_h = r.TH1D('Nhitsi_h', 'Nhitsi_h', 256, -0.5, 255.5)
     Nev_h = r.TH1D('Nevi_h', 'Nevi_h', 256, -0.5, 255.5)
 
-    data = scurve_data[i][1:]
+    data = scurve_data[2][1:]
 
     for j, Nhits in enumerate(data):
         Nhits_h.AddBinContent(dac_values[j] - 1, Nhits)
@@ -1019,7 +925,112 @@ def scurve_analyze_one_ch(scurve_data):
     scurves_ag = r.TGraphAsymmErrors(Nhits_h, Nev_h)
     scurves_ag.SetName('scurvei_ag')
     fit_f = fitScurve(scurves_ag)
-    scurves_ag.Write()
     thr_h = fit_f.GetParameter(0)
 
     return thr_h
+
+
+def scurve_analyze_old(obj, scurve_data, folder):
+    timestamp = time.strftime("%d.%m.%Y %H:%M")
+    full_data = []
+    mean_list = []
+    rms_list = []
+    full_data.append([""])
+    full_data.append(["Differential data"])
+    full_data.append(["", "255-CAL_DAC"])
+    full_data.append(
+        ["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, "mean", "RMS"])
+    dac_values = scurve_data[1][1:]
+
+    fig = plt.figure(figsize=(10, 20))
+    sub1 = plt.subplot(411)
+
+    for i in range(2, 130):
+        diff = []
+
+        mean_calc = 0
+        summ = 0
+        data = scurve_data[i][1:]
+        channel = scurve_data[i][0]
+
+        diff.append(channel)
+        diff.append("")
+        l = 0
+        for j in data:
+            if l != 0:
+                diff_value = j - previous_value
+                diff.append(diff_value)
+                mean_calc += dac_values[l] * diff_value
+                summ += diff_value
+            previous_value = j
+            l += 1
+        mean = mean_calc / float(summ)
+        mean_list.append(mean)
+        l = 1
+        rms = 0
+        for r in diff[2:]:
+            rms += r * (mean - dac_values[l]) ** 2
+            l += 1
+        rms = math.sqrt(rms / summ)
+        rms_list.append(rms)
+        diff.append(mean)
+        diff.append(rms)
+        full_data.append(diff)
+        plt.plot(dac_values, data)
+
+    rms_mean = numpy.mean(rms_list)
+    rms_rms = numpy.std(rms_list)
+
+    mean_mean = numpy.mean(mean_list)
+    mean_rms = numpy.std(mean_list)
+
+    sub1.set_xlabel('255-CAL_DAC')
+    sub1.set_ylabel('%')
+    sub1.set_title('S-curves of all channels')
+    sub1.grid(True)
+
+    text = "%s \n S-curves, 128 channels, N=100, HG, 25 ns." % timestamp
+    sub1.text(25, 140, text, horizontalalignment='center', verticalalignment='center')
+
+    sub2 = plt.subplot(413)
+    sub2.plot(range(0, 128), rms_list)
+    sub2.set_xlabel('Channel')
+    sub2.set_ylabel('RMS')
+    sub2.set_title('RMS of all channels')
+    sub2.grid(True)
+    text = "mean: %.2f RMS: %.2f" % (rms_mean, rms_rms)
+    y_placement = max(rms_list) - 0.05
+    sub2.text(10, y_placement, text, horizontalalignment='center', verticalalignment='center', bbox=dict(alpha=0.5))
+
+    sub3 = plt.subplot(412)
+    sub3.plot(range(0, 128), mean_list)
+    sub3.set_xlabel('Channel')
+    sub3.set_ylabel('255-CAL_DAC')
+    sub3.set_title('mean of all channels')
+    sub3.grid(True)
+    text = "Mean: %.2f RMS: %.2f" % (mean_mean, mean_rms)
+    y_placement = max(mean_list) - 1
+    sub3.text(10, y_placement, text, horizontalalignment='center', verticalalignment='center', bbox=dict(alpha=0.5))
+
+    sub4 = plt.subplot(427)
+    sub4.hist(mean_list, bins=30)
+    sub3.grid(True)
+
+
+    sub5 = plt.subplot(428)
+    sub5.hist(rms_list, bins=30)
+    sub3.grid(True)
+
+    fig.subplots_adjust(hspace=.5)
+
+    timestamp = time.strftime("%Y%m%d_%H%M")
+
+    fig.savefig("%s%sS-curve_plot.pdf" % (folder, timestamp))
+
+    with open("%s%sS-curve_data.csv" % (folder, timestamp), "ab") as f:
+        writer = csv.writer(f)
+        writer.writerows(full_data)
+
+    text = "Results were saved to the folder:\n %s \n" % folder
+    obj.add_to_interactive_screen(text)
+    return 0
