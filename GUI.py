@@ -577,6 +577,7 @@ class VFAT3_GUI:
         self.COM_port = port
 
 
+
 # ################ MISC-TAB FUNCTIONS ################################
 
     def send_reset(self):
