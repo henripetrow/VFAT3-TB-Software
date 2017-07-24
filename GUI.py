@@ -589,7 +589,7 @@ class VFAT3_GUI:
         text = "->Reading the verification board external ADC.\n"
         self.add_to_interactive_screen(text)
         value = self.interfaceFW.ext_adc()
-        text = "Value: %f\n mV" % value
+        text = "Value: %f mV\n" % value
         self.add_to_interactive_screen(text)
 
     def send_sync(self):
@@ -680,11 +680,11 @@ class VFAT3_GUI:
         self.add_to_interactive_screen(text)
 
         adc0_value = self.read_adc0()
-        text = "ADC0: %s\n mV" % adc0_value
+        text = "ADC0: %s mV\n" % adc0_value
         self.add_to_interactive_screen(text)
 
         adc1_value = self.read_adc1()
-        text = "ADC1: %s\n mV" % adc1_value
+        text = "ADC1: %s mV\n" % adc1_value
         self.add_to_interactive_screen(text)
 
     def send_cal_trigger(self):
