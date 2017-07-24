@@ -679,6 +679,7 @@ class VFAT3_GUI:
         text = "->Reading the ADCs.\n"
         self.add_to_interactive_screen(text)
 
+
         adc0_value = self.read_adc0()
         text = "ADC0: %d \n" % adc0_value
         self.add_to_interactive_screen(text)
