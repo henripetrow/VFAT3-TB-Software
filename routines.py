@@ -816,7 +816,7 @@ def scan_execute(obj, scan_name):
     outF = open(filename, "w")
     outF.write("regVal/I:ADC0/I:ADC1/I\n")
     for i,regVal in enumerate(reg_values):
-        outF.write('%i\t%i\t%i'%(regVal,scan_values0[i],scan_values1[i]))
+        outF.write('%i\t%i\t%i\n'%(regVal,scan_values0[i],scan_values1[i]))
         pass
     outF.close()
     
