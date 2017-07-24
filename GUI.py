@@ -47,6 +47,7 @@ class VFAT3_GUI:
         self.value = ""
         self.write_BCd_as_fillers = 0
         self.cal_dac_fc_values = [0]*256
+        self.Iref = 0
         self.CalPulseLV1A_latency = 4
         self.transaction_ID = 0
         self.interactive_output_file = "./data/FPGA_instruction_list.dat"
@@ -101,6 +102,9 @@ class VFAT3_GUI:
 
         self.register_frame = ttk.Frame(self.nb)
         self.register_frame.grid()
+
+        self.calibration_frame = ttk.Frame(self.nb)
+        self.calibration_frame.grid()
 
         self.misc_frame = ttk.Frame(self.nb)
         self.misc_frame.grid()
@@ -230,62 +234,73 @@ class VFAT3_GUI:
         self.channel_entry.grid_forget()
         self.channel_button.grid_forget()
 
-        # ###############MISC TAB #######################################
-        # Read ADCs
-        self.close_button = Button(self.misc_frame, text="Read ADCs", command=lambda: self.read_adcs(), width = bwidth)
-        self.close_button.grid(column=1, row=0, sticky='e')
 
-        self.idle_button = Button(self.misc_frame, text="SC Idle character", command=lambda: self.send_idle(), width = bwidth)
-        self.idle_button.grid(column=1, row=1, sticky='e')
+        # ###############CONFIGURATION TAB #######################################
+
+        self.FE_button = Button(self.calibration_frame, text="Set FE nominal values", command=lambda: self.set_fe_nominal_values(), width=bwidth)
+        self.FE_button.grid(column=1, row=1, sticky='e')
+
+        # self.cal_button = Button(self.misc_frame, text="Calibration", command=lambda: calibration(self), width=bwidth)
+        # self.cal_button.grid(column=1, row=2, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Adjust Iref", command=lambda: iref_adjust(self), width=bwidth)
+        self.cal_button.grid(column=1, row=3, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="CAL_DAC step", command=lambda: cal_dac_steps(self), width=bwidth)
+        self.cal_button.grid(column=1, row=4, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Channel Calibration", command=lambda: adjust_local_thresholds(self), width=bwidth)
+        self.cal_button.grid(column=1, row=6, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth)
+        self.cal_button.grid(column=1, row=7, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Gain measurement", command=lambda: gain_measurement(self), width=bwidth)
+        self.cal_button.grid(column=1, row=8, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="ADC comparison", command=lambda: adc_comparison(self), width=bwidth)
+        self.cal_button.grid(column=1, row=9, sticky='e')
+
+
+        # ###############MISC TAB #######################################
 
         self.sync_button = Button(self.misc_frame, text="Sync", command=lambda: self.send_sync(), width=bwidth)
-        self.sync_button.grid(column=1, row=2, sticky='e')
+        self.sync_button.grid(column=1, row=1, sticky='e')
 
         self.sync_check_button = Button(self.misc_frame, text="Sync check", command=lambda: self.send_fcc("CC-B"), width=bwidth)
-        self.sync_check_button.grid(column=1, row=3, sticky='e')
+        self.sync_check_button.grid(column=1, row=2, sticky='e')
+
+        self.idle_button = Button(self.misc_frame, text="SC Idle character", command=lambda: self.send_idle(), width = bwidth)
+        self.idle_button.grid(column=1, row=3, sticky='e')
+
+        self.close_button = Button(self.misc_frame, text="Read int. ADCs", command=lambda: self.read_adcs(), width = bwidth)
+        self.close_button.grid(column=1, row=4, sticky='e')
+
+        self.cal_button = Button(self.misc_frame, text="Read ext. ADC", command=lambda: self.ext_adc(), width=bwidth)
+        self.cal_button.grid(column=1, row=5, sticky='e')
 
         self.CalPulse_LV1A_button = Button(self.misc_frame, text="CalPulse+LV1A", command=self.send_cal_trigger, width=bwidth)
-        self.CalPulse_LV1A_button.grid(column=1, row=4, sticky='e')
+        self.CalPulse_LV1A_button.grid(column=1, row=6, sticky='e')
 
         self.CalPulse_LV1A_label0 = Label(self.misc_frame, text="Latency")
-        self.CalPulse_LV1A_label0.grid(column=2, row=4, sticky='e')
+        self.CalPulse_LV1A_label0.grid(column=2, row=6, sticky='e')
 
         self.CalPulse_LV1A_entry = Entry(self.misc_frame, width=5)
-        self.CalPulse_LV1A_entry.grid(column=3, row=4, sticky='e')
+        self.CalPulse_LV1A_entry.grid(column=3, row=6, sticky='e')
         self.CalPulse_LV1A_entry.insert(0, self.CalPulseLV1A_latency)
 
         self.CalPulse_LV1A_label0 = Label(self.misc_frame, text="BC")
-        self.CalPulse_LV1A_label0.grid(column=4, row=4, sticky='e')
-
-        self.FE_button = Button(self.misc_frame, text="Set FE nominal values", command=lambda: self.set_fe_nominal_values(), width=bwidth)
-        self.FE_button.grid(column=1, row=5, sticky='e')
+        self.CalPulse_LV1A_label0.grid(column=4, row=6, sticky='e')
 
         self.Trig1_set_button = Button(self.misc_frame, text="Set trigger pattern", command=lambda: set_up_trigger_pattern(self, 0), width=bwidth)
-        self.Trig1_set_button.grid(column=1, row=6, sticky='e')
+        self.Trig1_set_button.grid(column=1, row=7, sticky='e')
 
         self.Trig_clear_button = Button(self.misc_frame, text="Clear trigger pattern", command=lambda: set_up_trigger_pattern(self, 2), width=bwidth)
-        self.Trig_clear_button.grid(column=1, row=7, sticky='e')
-
-        self.VFAT3_reset_button = Button(self.misc_frame, text="Reset des", command=lambda: self.send_reset(), width=bwidth)
-        self.VFAT3_reset_button.grid(column=1, row=8, sticky='e')
+        self.Trig_clear_button.grid(column=1, row=8, sticky='e')
 
         self.cont_trig_button = Button(self.misc_frame, text="Continuous triggers", command=lambda: continuous_trigger(self), width=bwidth)
         self.cont_trig_button.grid(column=1, row=9, sticky='e')
 
-        # self.cal_button = Button(self.misc_frame, text="Calibration", command=lambda: calibration(self), width=bwidth)
-        # self.cal_button.grid(column=1, row=10, sticky='e')
-
-        self.cal_button = Button(self.misc_frame, text="Read ext. ADC", command=lambda: self.ext_adc(), width=bwidth)
-        self.cal_button.grid(column=1, row=11, sticky='e')
-
-        self.cal_button = Button(self.misc_frame, text="Adjust Iref", command=lambda: iref_adjust(self), width=bwidth)
-        self.cal_button.grid(column=1, row=12, sticky='e')
-
-        self.cal_button = Button(self.misc_frame, text="CAL_DAC step", command=lambda: cal_dac_steps(self), width=bwidth)
-        self.cal_button.grid(column=1, row=13, sticky='e')
-
-        self.cal_button = Button(self.misc_frame, text="One ch. S-curve", command=lambda: scurve_all_ch_execute(self, self.chosen_scan, arm_dac=100, ch=64, configuration="no"), width=bwidth)
-        self.cal_button.grid(column=1, row=14, sticky='e')
 
         # ############### FW CONFIGURE TAB #######################################
 
@@ -318,6 +333,7 @@ class VFAT3_GUI:
         # ADD TABS
         self.nb.add(self.FCC_frame, text="FCC")
         self.nb.add(self.register_frame, text="Registers")
+        self.nb.add(self.calibration_frame, text="Calibration")
         self.nb.add(self.misc_frame, text="misc.")
         if self.mode == 2:
             self.nb.add(self.FW_frame, text="Firmware")
@@ -403,7 +419,6 @@ class VFAT3_GUI:
         self.close_button = Button(self.ctrlButtons_frame, text="Close", command=master.quit)
         self.close_button.grid(column=2, row=0)
 
-       # self.read_all_registers()
 
 ####################################################################################
 # ##################################FUNCTIONS#######################################
@@ -411,6 +426,33 @@ class VFAT3_GUI:
 
 
 # #################### GENERAL GUI FUNCTIONS ############################
+
+    def apply_ch_local_adjustments(self):
+        filename = "./data/channel_registers.dat"
+        text = "Reading channel calibration data...\n"
+        self.add_to_interactive_screen(text)
+
+        if os.path.isfile(filename):
+            # Calculate the number of lines to verify valid data.
+            with open(filename,'r') as f:
+                for nr_lines, l in enumerate(f):
+                    pass
+            if  (nr_lines + 1) == 128:
+                with open(filename, 'r') as f:
+                    for reg, line in enumerate(f):
+                        line = line.rstrip()
+                        self.register[reg].change_values(line)
+                        print "Write:%s to register:%d" % (line,reg)
+                        self.write_register(reg)
+                text = "Channel calibration data applied successfully.\n"
+                self.add_to_interactive_screen(text)
+
+            else:
+                text = "Invalid channel calibration data.\n ->Recommended to rerun calibration.\n"
+                self.add_to_interactive_screen(text)
+        else:
+            text = "Channel calibration data not found.\n ->Recommended to run calibration.\n"
+            self.add_to_interactive_screen(text)
 
     def read_all_registers(self):
         # Read register value from the chip and save it to the register object.
@@ -426,15 +468,19 @@ class VFAT3_GUI:
         write_instruction(self.interactive_output_file, 150, FCC_LUT[paketti[0]], 1)
         for x in range(1, len(paketti)):
             write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-        output = self.execute()
-        if output[0] == "Error":
-            text = "%s: %s\n" % (output[0], output[1])
-            text += "Register values might be incorrect.\n"
-            self.add_to_interactive_screen(text)
-        else:
-            new_data = output[0][0].data
-            new_data = ''.join(str(e) for e in new_data)
-            self.register[reg].change_values(new_data)
+        while True:
+            output = self.execute()
+            if output[0] == "Error":
+                text = "%s: %s\n" % (output[0], output[1])
+                text += "Register values might be incorrect.\n"
+                self.add_to_interactive_screen(text)
+            if not output[0]:
+                print "Error trying again"
+            else:
+                new_data = output[0][0].data
+                new_data = ''.join(str(e) for e in new_data)
+                self.register[reg].change_values(new_data)
+                break
 
     def add_to_interactive_screen(self, text):
         self.interactive_screen.insert(END,text)
@@ -443,27 +489,32 @@ class VFAT3_GUI:
     def clear_interactive_screen(self):
         self.interactive_screen.delete(1.0,END)
 
-    def execute(self):
-        output = self.interfaceFW.launch(register,self.interactive_output_file,self.COM_port)
+    def execute(self, verbose="no"):
+        output = self.interfaceFW.launch(register, self.interactive_output_file, self.COM_port)
         if output[0] == "Error":
-            text =  "%s: %s\n" %(output[0],output[1])
+            text = "%s: %s\n" % (output[0], output[1])
             self.add_to_interactive_screen(text)
         else:
             if output[0]:
-                text =  "Received SC replies:\n"
-                self.add_to_interactive_screen(text)
+                #text =  "Received SC replies:\n"
+                # self.add_to_interactive_screen(text)
                 for i in output[0]:
                     if i.info_code == 0:
-                        data_ok = "Transaction ok."
+                        if verbose == "yes":
+                            text = "Transaction ok.\n"
+                            self.add_to_interactive_screen(text)
                         print "Transaction ok."
-                    else: 
-                        data_ok = "Transaction error."                     
+                    else:
+                        if verbose == "yes":
+                            text = "Transaction error.\n"
+                            self.add_to_interactive_screen(text)
 
-                    text = "Transaction ID:%d, %s\n" % (i.transaction_ID, data_ok)
-                    self.add_to_interactive_screen(text)                
+                    #text = "Transaction ID:%d, %s\n" % (i.transaction_ID, data_ok)
+                    #self.add_to_interactive_screen(text)
                     if i.type_ID == 0:
-                        text = "Data:\n %s\n" % i.data
-                        self.add_to_interactive_screen(text) 
+                        pass
+                        #text = "Data:\n %s\n" % i.data
+                        #self.add_to_interactive_screen(text)
 
             if output[1]:
                 text =  "Received data packets:\n"
@@ -526,6 +577,7 @@ class VFAT3_GUI:
         self.COM_port = port
 
 
+
 # ################ MISC-TAB FUNCTIONS ################################
 
     def send_reset(self):
@@ -537,11 +589,11 @@ class VFAT3_GUI:
         text = "->Reading the verification board external ADC.\n"
         self.add_to_interactive_screen(text)
         value = self.interfaceFW.ext_adc()
-        text = "Value: %f\n" % value
+        text = "Value: %f mV\n" % value
         self.add_to_interactive_screen(text)
 
     def send_sync(self):
-        text =  "->Sending sync request.\n"
+        text = "->Sending sync request.\n"
         self.add_to_interactive_screen(text)
         command_encoded = FCC_LUT["CC-A"]
         write_instruction(self.interactive_output_file, 1, command_encoded, 1)
@@ -552,11 +604,14 @@ class VFAT3_GUI:
             text = "%s: %s\n" % (output[0], output[1])
             self.add_to_interactive_screen(text)
         elif output[2]:
-            print "Sync ok."
+            text = "Sync ok.\n"
+            self.add_to_interactive_screen(text)
             for i in output[2]:
-                print "BC:%d, %s\n" % (i[0], i[1])
+                text = "BC:%d, %s\n" % (i[0], i[1])
+                self.add_to_interactive_screen(text)
         else:
-            print "Sync fail."
+            text = "Sync fail.\n"
+            self.add_to_interactive_screen(text)
 
     def send_idle(self):
         text = "->Sending IDLE transaction.\n"
@@ -566,51 +621,71 @@ class VFAT3_GUI:
         write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
         for x in range(1, len(paketti)):
             write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-        self.execute()
+        self.execute(verbose="yes")
+
+    def read_adc0(self):
+
+        addr = 131072  # ADC0 address
+
+        output = self.SC_encoder.create_SC_packet(addr, 0, "READ", 0)
+        paketti = output[0]
+        write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
+        for x in range(1, len(paketti)):
+            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+        counter = 0
+        while True:
+            counter += 1
+            output = self.execute()
+            if counter == 10:
+                print "No reply from ADC."
+                int_adc_value_mv = None
+                break
+            if output[0] == "Error":
+                print "Error."
+            else:
+                if output[0]:
+                    int_adc_value = int(''.join(map(str, output[0][0].data)), 2)
+                    int_adc_value_mv = 2.29 * int_adc_value - 450
+                    break
+        return int_adc_value_mv
+
+    def read_adc1(self):
+
+        addr = 131073  # ADC0 address
+
+        output = self.SC_encoder.create_SC_packet(addr, 0, "READ", 0)
+        paketti = output[0]
+        write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
+        for x in range(1, len(paketti)):
+            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+        counter = 0
+        while True:
+            counter += 1
+            output = self.execute()
+            if counter == 10:
+                print "No reply from ADC."
+                int_adc_value_mv = None
+                break
+            if output[0] == "Error":
+                print "Error."
+            else:
+                if output[0]:
+                    int_adc_value = int(''.join(map(str, output[0][0].data)), 2)
+                    int_adc_value_mv = 2.29 * int_adc_value - 450
+                    break
+        return int_adc_value_mv
 
     def read_adcs(self):
         text = "->Reading the ADCs.\n"
         self.add_to_interactive_screen(text)
 
-        addr0 = 131072  # ADC0 address
-        addr1 = 131073  # ADC1 address
+        adc0_value = self.read_adc0()
+        text = "ADC0: %s mV\n" % adc0_value
+        self.add_to_interactive_screen(text)
 
-        output = self.SC_encoder.create_SC_packet(addr0, 0, "READ", 0)
-        paketti = output[0]
-        write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-        for x in range(1, len(paketti)):
-            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-
-        output = self.execute()
-        if output[0] == "Error":
-            text = "%s: %s\n" %(output[0], output[1])
-            self.add_to_interactive_screen(text)
-        else:
-            if output[0]:
-                text = "Received Values:\n"
-                self.add_to_interactive_screen(text)
-                text = "ADC0: %s\n" % int(''.join(map(str, output[0][0].data)), 2)
-                self.add_to_interactive_screen(text) 
-
-        output = self.SC_encoder.create_SC_packet(addr1, 0, "READ", 0)
-        paketti = output[0]
-        write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-        for x in range(1, len(paketti)):
-            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-        print "Reading ADC1"
-        output = self.execute()
-        print len(output[0])
-        if output[0] == "Error":
-            text = "%s: %s\n" % (output[0], output[1])
-            self.add_to_interactive_screen(text)
-        else:
-            if output[0]:
-                text = "Received Values:\n"
-                self.add_to_interactive_screen(text)
-                text = "ADC1: %s\n" % int(''.join(map(str, output[0][0].data)), 2)
-                self.add_to_interactive_screen(text)
-            else:
-                print "No ADC1 values found"
+        adc1_value = self.read_adc1()
+        text = "ADC1: %s mV\n" % adc1_value
+        self.add_to_interactive_screen(text)
 
     def send_cal_trigger(self):
         latency = int(self.CalPulse_LV1A_entry.get())
@@ -728,6 +803,7 @@ class VFAT3_GUI:
                     print "Transaction error. No reply."
                     print output[4]
                     print "Trying again."
+                    self.send_sync()
                     continue
             if flag == 1:
                 break

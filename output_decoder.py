@@ -180,6 +180,7 @@ class datapacket:
 
         if '1' in self.data:
             self.hit_found = 1
+            # print "hit found"
 
         # if self.data:
         #    print "DATA:"
