@@ -647,7 +647,7 @@ class VFAT3_GUI:
                     int_adc_value = int(''.join(map(str, output[0][0].data)), 2)
                     int_adc_value_mv = 2.29 * int_adc_value - 450
                     break
-        return int_adc_value_mv
+        return int_adc_value
 
     def read_adc1(self):
 
@@ -673,18 +673,18 @@ class VFAT3_GUI:
                     int_adc_value = int(''.join(map(str, output[0][0].data)), 2)
                     int_adc_value_mv = 2.29 * int_adc_value - 450
                     break
-        return int_adc_value_mv
+        return int_adc_value
 
     def read_adcs(self):
         text = "->Reading the ADCs.\n"
         self.add_to_interactive_screen(text)
 
         adc0_value = self.read_adc0()
-        text = "ADC0: %s mV\n" % adc0_value
+        text = "ADC0: %d \n" % adc0_value
         self.add_to_interactive_screen(text)
 
         adc1_value = self.read_adc1()
-        text = "ADC1: %s mV\n" % adc1_value
+        text = "ADC1: %d \n" % adc1_value
         self.add_to_interactive_screen(text)
 
     def send_cal_trigger(self):
@@ -876,6 +876,7 @@ class VFAT3_GUI:
             for i in output[1]:
                 text = "%d|%d|%d\n" %(i.systemBC, i.EC, i.BC)
                 self.add_to_interactive_screen(text)
+
 
     def modify_scan(self):
         text =  "->Modifying the scan: %s\n" % self.chosen_scan
