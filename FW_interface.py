@@ -83,7 +83,9 @@ class FW_interface:
                 value = glib.get("ext_adc")
             if value != 0:
                 rvalue = value * 0.0625  # ext ADC LSB is 62.5 uV
+                print "value is %i"%value
                 break
+            print "counter is %i"%counter
             print "ADC returned 0, trying again."
             counter += 1
         return rvalue

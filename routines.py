@@ -358,6 +358,7 @@ def scurve_analyze(obj, scurve_data, charge_values):
     enc_h = r.TH1D('enc_h', 'ENC of all Channels;ENC [DAC Units];Number of Channels', 100, 0.0, 1.0)
     thr_h = r.TH1D('thr_h', 'Threshold of all Channels;ENC [DAC Units];Number of Channels', 160, 0.0, 80.0)
     chi2_h = r.TH1D('chi2_h', 'Fit #chi^{2};#chi^{2};Number of Channels / 0.001', 100, 0.0, 1.0)
+
     scurves_ag = {}
     for ch in range(128):
         scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch], Nev_h[ch])
@@ -369,9 +370,10 @@ def scurve_analyze(obj, scurve_data, charge_values):
         chi2_h.Fill(fit_f.GetChisquare())
         pass
 
-    cc = r.TCanvas('canv', 'canv', 1000, 1000)
-    drawHisto(thr_h, cc, 'results/threshHiso.png')
-    thr_mean = thr_h.GetMean()
+    cc = r.TCanvas('canv','canv',1000,1000)
+
+    meanThr = thr_h.GetMean()
+    drawHisto(thr_h,cc,'results/threshHiso.png')
     print "Mean: %f" % thr_mean
     thr_h.Write()
     drawHisto(enc_h, cc, 'results/encHisto.png')
@@ -379,8 +381,7 @@ def scurve_analyze(obj, scurve_data, charge_values):
     drawHisto(chi2_h, cc, 'results/chi2Histo.png')
     chi2_h.Write()
     outF.Close()
-    return thr_mean
-
+    return meanThr
 
 def drawHisto(hist, canv, filename):
     canv.cd()
@@ -470,10 +471,21 @@ def cal_dac_steps(obj):
     charge_values = []
 
     for i in range(start_dac_value, stop_dac_value+1):
-        register[138].CAL_DAC[0] = i
+        #newVal = raw_input("ready?")
+        register[138].CAL_DAC[0] = (i + 128)%256
         obj.write_register(138)
-        time.sleep(0.5)
+        time.sleep(0.3)
 
+        step = obj.interfaceFW.ext_adc()
+        time.sleep(0.2)
+        step = obj.interfaceFW.ext_adc()
+
+        register[138].CAL_DAC[0] = i 
+        obj.write_register(138)
+        time.sleep(0.3)
+
+        step = obj.interfaceFW.ext_adc()
+        time.sleep(0.2)
         step = obj.interfaceFW.ext_adc()
 
         difference = step-base
@@ -496,6 +508,9 @@ def iref_adjust(obj):
 
     # Read the current Iref dac value.
     obj.read_register(134)
+    register[134].Iref[0] = 1
+    obj.write_register(134)
+    previous_value = 1
 
     # Set monitoring to Iref
     obj.register[133].Monitor_Sel[0] = 0
@@ -795,15 +810,17 @@ def scan_execute(obj, scan_name):
     data = [reg_values,scan_values0,scan_values1]
     timestamp = time.strftime("%Y%m%d%H%M")
     folder = "./results/"
-    filename = "%s%s_%s_scan_data.csv" % (folder, timestamp, modified)
+    filename = "%s%s_%s_scan_data.dat" % (folder, timestamp, modified)
     text = "Results were saved to the folder:\n %s \n" % filename
 
-    with open(filename, "wb") as f:
-        writer = csv.writer(f)
-        writer.writerows(data)
+    outF = open(filename, "w")
+    outF.write("regVal/I:ADC0/I:ADC1/I\n")
+    for i,regVal in enumerate(reg_values):
+        outF.write('%i\t%i\t%i'%(regVal,scan_values0[i],scan_values1[i]))
+        pass
+    outF.close()
+    
     obj.add_to_interactive_screen(text)
-
-
 
     nr_points = len(scan_values0)
     x = range(0, nr_points)
@@ -830,6 +847,7 @@ def scan_cal_dac_fc(obj, scan_name):
     start = time.time()
 
     modified = scan_name.replace(" ", "_")
+    modified = modified.replace(",", "_")
 
     dac_values, charge_values = cal_dac_steps(obj)
 
@@ -844,18 +862,22 @@ def scan_cal_dac_fc(obj, scan_name):
     fig.show()
 
     # Save the results.
-    dac_values.insert(0, "DAC count 255-CAL_DAC")
-    charge_values.insert(0, "Charge [fC]")
+    #dac_values.insert(0,"DAC count 255-CAL_DAC")
+    #charge_values.insert(0,"Charge [fC]")
 
     data = [dac_values, charge_values]
     timestamp = time.strftime("%Y%m%d%H%M")
     folder = "./results/"
-    filename = "%s%s_%s_scan_data.csv" % (folder, timestamp, modified)
+    filename = "%s%s_%s_scan_data.dat" % (folder, timestamp, modified)
+
+    outF = open(filename, "w")
+    outF.write("dacValue/D:Q/D\n")
+    for i,dacVal in enumerate(dac_values):
+        outF.write('%f\t%f\n'%(dacVal,charge_values[i]))
+        pass
+    outF.close()
     text = "Results were saved to the file:\n %s \n" % filename
 
-    with open(filename, "wb") as f:
-        writer = csv.writer(f)
-        writer.writerows(data)
     obj.add_to_interactive_screen(text)
 
 
