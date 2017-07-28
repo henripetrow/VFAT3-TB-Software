@@ -456,41 +456,38 @@ def cal_dac_steps(obj):
 
     obj.register[65535].RUN[0] = 1
     obj.write_register(65535)
-    time.sleep(1)
+    time.sleep(0.1)
 
-    register[138].CAL_SEL_POL[0] = 1
-    obj.write_register(138)
-    time.sleep(1)
-    base = obj.interfaceFW.ext_adc()
-
-    register[138].CAL_SEL_POL[0] = 0
-    obj.write_register(138)
-    time.sleep(1)
-
+    base_values = []
+    step_values = []
     dac_values = []
     charge_values = []
 
     for i in range(start_dac_value, stop_dac_value+1):
         #newVal = raw_input("ready?")
-        register[138].CAL_DAC[0] = (i + 128)%256
+        register[138].CAL_DAC[0] = i
         obj.write_register(138)
-        time.sleep(0.3)
+        time.sleep(0.1)
 
-        step = obj.interfaceFW.ext_adc()
-        time.sleep(0.2)
-        step = obj.interfaceFW.ext_adc()
-
-        register[138].CAL_DAC[0] = i 
+        register[138].CAL_SEL_POL[0] = 1
         obj.write_register(138)
-        time.sleep(0.3)
+        time.sleep(0.1)
 
-        step = obj.interfaceFW.ext_adc()
-        time.sleep(0.2)
-        step = obj.interfaceFW.ext_adc()
+        baseADC = obj.read_adc1()
+        base = obj.adc1M*baseADC + obj.adc1B
+
+        register[138].CAL_SEL_POL[0] = 0
+        obj.write_register(138)
+        time.sleep(0.1)
+
+        stepADC = obj.read_adc1()
+        step = obj.adc1M*stepADC + obj.adc1B
 
         difference = step-base
-        charge = (difference/1000.0) * 100  # 100 fF capacitor.
+        charge = (difference/1000.0) * 100.0  # 100 fF capacitor.
 
+        base_values.append(base)
+        step_values.append(step)
         dac_values.append(255-i)
         charge_values.append(charge)
         print "DAC value: %d" % i
@@ -501,7 +498,7 @@ def cal_dac_steps(obj):
     # print dac_values
     # print charge_values
     obj.cal_dac_fc_values = charge_values
-    return dac_values, charge_values
+    return dac_values, base_values, step_values, charge_values
 
 
 def iref_adjust(obj):
@@ -849,7 +846,7 @@ def scan_cal_dac_fc(obj, scan_name):
     modified = scan_name.replace(" ", "_")
     modified = modified.replace(",", "_")
 
-    dac_values, charge_values = cal_dac_steps(obj)
+    dac_values, base_values, step_values, charge_values = cal_dac_steps(obj)
 
     # Plot the results.
     fig = plt.figure(1)
@@ -871,9 +868,9 @@ def scan_cal_dac_fc(obj, scan_name):
     filename = "%s%s_%s_scan_data.dat" % (folder, timestamp, modified)
 
     outF = open(filename, "w")
-    outF.write("dacValue/D:Q/D\n")
+    outF.write("dacValue/D:baseV/D:stepV/D:Q/D\n")
     for i,dacVal in enumerate(dac_values):
-        outF.write('%f\t%f\n'%(dacVal,charge_values[i]))
+        outF.write('%f\t%f\t%f\t%f\n'%(dacVal,base_values[i],step_values[i],charge_values[i]))
         pass
     outF.close()
     text = "Results were saved to the file:\n %s \n" % filename
