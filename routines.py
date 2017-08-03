@@ -622,9 +622,9 @@ def scurve_execute(obj, scan_name):
     # obj.register[134].Iref[0] = 27
     # obj.write_register(134)
 
-    obj.register[135].ZCC_DAC[0] = 10
-    obj.register[135].ARM_DAC[0] = 100
-    obj.write_register(135)
+    #obj.register[135].ZCC_DAC[0] = 10
+    #obj.register[135].ARM_DAC[0] = 100
+    #obj.write_register(135)
 
     obj.register[139].CAL_FS[0] = 0
     obj.register[139].CAL_DUR[0] = 200
@@ -660,9 +660,15 @@ def scurve_execute(obj, scan_name):
 
     text = "CAL_DAC|HITS \n"
     obj.add_to_interactive_screen(text)
+    outF = open('routines/scurveData.dat','w')
+    outF.write('CALDAC/I:NHits/I\n')
     for k in scurve_data[2:]:
-            text = "%d %d\n" % (k[0], k[1])
-            obj.add_to_interactive_screen(text)
+        text = "%d %d\n" % (k[0], k[1])
+        outF.write("%d\t%d\n" % (k[0], k[1]))
+        obj.add_to_interactive_screen(text)
+        pass
+    outF.close()
+
 
     obj.register[channel].cal[0] = 0
     obj.write_register(channel)
