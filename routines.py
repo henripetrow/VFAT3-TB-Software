@@ -1072,15 +1072,22 @@ def scurve_analyze_old(obj, scurve_data, folder):
     return 0
 
 
-def run_wide_scurve(obj):
-    output = scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0,127], configuration="yes", dac_range=[220, 240])
-    data1 = output[1]
-    output = scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0,127], configuration="yes", dac_range=[200, 220])
-    data2 = output[1]
-    for i in range(1,len(data1)):
-        data1.extend(data2[i][1:])
+def consecutive_triggers(obj):
+        instruction_text = []
+        instruction_text.append("500 Send EC0")
+        instruction_text.append("1 Send RunMode")
+        instruction_text.append("1000 Repeat %d" % steps)
+        instruction_text.append("1000 Send_Repeat CalPulse_LV1A")
 
-    print data1
+        # Write the instructions to the file.
+
+        output_file_name = "./routines/%s/instruction_list.txt" % modified
+        with open(output_file_name, "w") as mfile:
+            for item in instruction_text:
+                mfile.write("%s\n" % item)
+
+        # Generate the instruction list for the FPGA.
+        generator(scan_name, obj.write_BCd_as_fillers, obj.register)
 
 
 

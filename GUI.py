@@ -337,82 +337,77 @@ class VFAT3_GUI:
         self.calphi = 0
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
-        self.start_ch_label.grid(column=1, row=1, sticky='e')
+        self.start_ch_label.grid(column=1, row=1, sticky='w')
 
         self.start_ch_entry = Entry(self.scurve_frame, width=5)
         self.start_ch_entry.grid(column=2, row=1, sticky='e')
         self.start_ch_entry.insert(0, self.start_channel)
 
         self.start_ch_label0 = Label(self.scurve_frame, text="0-127")
-        self.start_ch_label0.grid(column=3, row=1, sticky='e')
-
-
+        self.start_ch_label0.grid(column=3, row=1, sticky='w')
 
         self.stop_ch_label = Label(self.scurve_frame, text="stop ch.:")
-        self.stop_ch_label.grid(column=1, row=2, sticky='e')
+        self.stop_ch_label.grid(column=1, row=2, sticky='w')
 
         self.stop_ch_entry = Entry(self.scurve_frame, width=5)
         self.stop_ch_entry.grid(column=2, row=2, sticky='e')
         self.stop_ch_entry.insert(0, self.stop_channel)
 
         self.stop_ch_label0 = Label(self.scurve_frame, text="0-127")
-        self.stop_ch_label0.grid(column=3, row=2, sticky='e')
-
+        self.stop_ch_label0.grid(column=3, row=2, sticky='w')
 
         self.delay_label = Label(self.scurve_frame, text="Pulse Delay:")
-        self.delay_label.grid(column=1, row=3, sticky='e')
+        self.delay_label.grid(column=1, row=3, sticky='w')
 
         self.delay_entry = Entry(self.scurve_frame, width=5)
         self.delay_entry.grid(column=2, row=3, sticky='e')
         self.delay_entry.insert(0, self.delay)
 
         self.delay_label0 = Label(self.scurve_frame, text="0-4000")
-        self.delay_label0.grid(column=3, row=3, sticky='e')
-
-
+        self.delay_label0.grid(column=3, row=3, sticky='w')
 
         self.interval_label = Label(self.scurve_frame, text="LV1A interval:")
-        self.interval_label.grid(column=1, row=4, sticky='e')
+        self.interval_label.grid(column=1, row=4, sticky='w')
 
         self.interval_entry = Entry(self.scurve_frame, width=5)
         self.interval_entry.grid(column=2, row=4, sticky='e')
         self.interval_entry.insert(0, self.interval)
 
         self.interval_label0 = Label(self.scurve_frame, text="0-4000")
-        self.interval_label0.grid(column=3, row=4, sticky='e')
+        self.interval_label0.grid(column=3, row=4, sticky='w')
 
         self.pulsestretch_label = Label(self.scurve_frame, text="Pulse stretch:")
-        self.pulsestretch_label.grid(column=1, row=5, sticky='e')
+        self.pulsestretch_label.grid(column=1, row=5, sticky='w')
 
         self.pulsestretch_entry = Entry(self.scurve_frame, width=5)
         self.pulsestretch_entry.grid(column=2, row=5, sticky='e')
         self.pulsestretch_entry.insert(0, self.pulsestretch)
 
         self.pulsestretch_label0 = Label(self.scurve_frame, text="0-7")
-        self.pulsestretch_label0.grid(column=3, row=5, sticky='e')
+        self.pulsestretch_label0.grid(column=3, row=5, sticky='w')
 
         self.latency_label = Label(self.scurve_frame, text="Latency:")
-        self.latency_label.grid(column=1, row=6, sticky='e')
+        self.latency_label.grid(column=1, row=6, sticky='w')
 
         self.latency_entry = Entry(self.scurve_frame, width=5)
         self.latency_entry.grid(column=2, row=6, sticky='e')
         self.latency_entry.insert(0, self.latency)
 
         self.latency_label0 = Label(self.scurve_frame, text="0-1023")
-        self.latency_label0.grid(column=3, row=6, sticky='e')
+        self.latency_label0.grid(column=3, row=6, sticky='w')
 
         self.calphi_label = Label(self.scurve_frame, text="Cal Phi:")
-        self.calphi_label.grid(column=1, row=7, sticky='e')
+        self.calphi_label.grid(column=1, row=7, sticky='w')
 
         self.calphi_entry = Entry(self.scurve_frame, width=5)
         self.calphi_entry.grid(column=2, row=7, sticky='e')
         self.calphi_entry.insert(0, self.calphi)
 
         self.calphi_label0 = Label(self.scurve_frame, text="0-7")
-        self.calphi_label0.grid(column=3, row=7, sticky='e')
+        self.calphi_label0.grid(column=3, row=7, sticky='w')
 
         self.scurve0_button = Button(self.scurve_frame, text="RUN S-curve", command=self.run_scurve, width=bwidth)
-        self.scurve0_button.grid(column=1, sticky='e')
+        self.scurve0_button.grid(column=1, sticky='e', columnspan=2)
 
         # ############### FW CONFIGURE TAB #######################################
 
@@ -479,10 +474,10 @@ class VFAT3_GUI:
                 "SD_I_BFCAS scan",
                 "CAL_DAC scan",
                 "CAL_DAC scan, fC",
-                "Counter Resets",
-                "S-curve",
-                "S-curve all ch",
-                "S-curve all ch cont."
+                "Counter Resets"
+               # "S-curve",
+               # "S-curve all ch",
+               # "S-curve all ch cont."
                 ]
         self.chosen_scan = self.scan_options[0]
         self.scan_variable = StringVar(master)
@@ -689,7 +684,19 @@ class VFAT3_GUI:
     def change_com_port(self, port):
         self.COM_port = port
 
-
+    def check_value_range(self, name, value, min, max):
+        error = 0
+        if not isinstance(value, (int, long) ):
+            print "%s value is not an integer." % name
+            error = 1
+        else:
+            if value > max:
+                print "%s value is too high. Maximun is: %d" % (name, max)
+                error = 1
+            if value < min:
+                print "%s value is too low. Minimun is: %d" % (name, min)
+                error = 1
+        return error
 
 # ################ MISC-TAB FUNCTIONS ################################
 
@@ -825,18 +832,30 @@ class VFAT3_GUI:
         self.execute()
 
     def run_scurve(self):
+        error = 0
         self.start_channel = int(self.start_ch_entry.get())
+        error += self.check_value_range("Start channel", self.start_channel, 0, 127)
         self.stop_channel = int(self.stop_ch_entry.get())
+        error += self.check_value_range("Stop channel", self.stop_channel, 0, 127)
+        if self.stop_channel < self.start_channel:
+            print "Stop channel should be higher than start channel."
+            error += 1
         self.delay = int(self.delay_entry.get())
+        error += self.check_value_range("Delay", self.delay, 0, 4000)
         self.interval = int(self.interval_entry.get())
+        error += self.check_value_range("Interval", self.interval, 0, 4000)
         self.pulsestretch = int(self.pulsestretch_entry.get())
+        error += self.check_value_range("Pulse Stretch", self.pulsestretch, 0, 7)
         self.latency = int(self.latency_entry.get())
+        error += self.check_value_range("Latency", self.latency, 0, 1023)
         self.calphi = int(self.calphi_entry.get())
-
-        text = "->Running S-curve"
-        self.add_to_interactive_screen(text)
-        scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=[self.start_channel, self.stop_channel], configuration="yes", dac_range=[200, 240], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
-
+        error += self.check_value_range("Cal Phi", self.calphi, 0, 7)
+        if error == 0:
+            text = "->Running S-curve"
+            self.add_to_interactive_screen(text)
+            scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=[self.start_channel, self.stop_channel], configuration="yes", dac_range=[200, 240], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
+        else:
+            print "Aborting s-curve run."
     def set_fe_nominal_values(self):
         register[141].PRE_I_BSF[0] = 13
         register[141].PRE_I_BIT[0] = 150
