@@ -20,14 +20,16 @@ def adjust_local_thresholds(obj):
     mean_threshold = scurve_all_ch_execute(obj, "S-curve all ch")
     print "Found the mean threshold for the 128 channels: %f" % mean_threshold
     for k in range(0, 128):
-
+        obj.send_reset()
+        obj.send_sync()
         thresholds = []
         diff_values = []
 
         # Read the current dac values
         #obj.read_register(k)
         print "Adjusting the channel %d local arm_dac." % k
-        threshold = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=k, configuration="no")
+        output = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=k, configuration="no")
+        threshold = output[0]
         print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac[0])
         previous_diff = abs(mean_threshold - threshold)
         previous_value = 0
@@ -50,7 +52,8 @@ def adjust_local_thresholds(obj):
             obj.register[k].arm_dac[0] += 1
             obj.write_register(k)
 
-            threshold = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=k, configuration="no")
+            output = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=k, configuration="no")
+            threshold = output[0]
             print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac[0])
             thresholds.append(threshold)
             new_diff = abs(mean_threshold - threshold)
@@ -140,12 +143,12 @@ def gain_measurement(obj):
     print gain
 
 
-def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="yes", dac_range=[220, 240]):
+def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="yes", dac_range=[200, 240]):
     start = time.time()
 
-    if obj.Iref == 0:
-        # Adjust the global reference current of the chip.
-        iref_adjust(obj)
+    # if obj.Iref == 0:
+    #     # Adjust the global reference current of the chip.
+    #     iref_adjust(obj)
 
     modified = scan_name.replace(" ", "_")
     file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
@@ -158,10 +161,6 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
         start_ch = ch
         stop_ch = ch
 
-
-    # Define the scan. (Not fully implemented, don't change values.)
-    # start_dac_value = 220
-    # stop_dac_value = 240
     start_dac_value = dac_range[0]
     stop_dac_value = dac_range[1]
     samples_per_dac_value = 100
@@ -254,14 +253,16 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
         print "Channel: %d" % k
         while True:
             # Set calibration to right channel.
+            # print "Set register."
             obj.register[k].cal[0] = 1
             obj.write_register(k)
             # time.sleep(0.1)
-
+            # print "Register set."
             scurve_data = []
             # Run the predefined routine.
+            # print "launch routine"
             output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1)
-
+            # print "routine done."
             # Check the received data from the routine.
             if output[0] == "Error":
                 text = "%s: %s\n" % (output[0], output[1])
@@ -273,6 +274,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
                         scurve_data.append(hits)
                         hits = 0
                     elif i.type == "data_packet":
+
                         if i.data[127 - k] == "1":
                             hits += 1
             scurve_data = scurve_data[2:]
@@ -291,7 +293,9 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
                 break
 
         # Unset the calibration to the channel.
+        # print "unset register."
         obj.register[k].cal[0] = 0
+        # print "register unset."
         obj.write_register(k)
         # time.sleep(0.1)
 
@@ -326,7 +330,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
     else:
         print all_ch_data
         threshold = scurve_analyze_one_ch(all_ch_data)
-    return threshold
+    return [threshold, all_ch_data]
 
 
 def scurve_analyze(obj, scurve_data, charge_values):
@@ -358,7 +362,7 @@ def scurve_analyze(obj, scurve_data, charge_values):
     enc_h = r.TH1D('enc_h', 'ENC of all Channels;ENC [DAC Units];Number of Channels', 100, 0.0, 1.0)
     thr_h = r.TH1D('thr_h', 'Threshold of all Channels;ENC [DAC Units];Number of Channels', 160, 0.0, 80.0)
     chi2_h = r.TH1D('chi2_h', 'Fit #chi^{2};#chi^{2};Number of Channels / 0.001', 100, 0.0, 1.0)
-
+    enc_list = []
     scurves_ag = {}
     for ch in range(128):
         scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch], Nev_h[ch])
@@ -367,6 +371,7 @@ def scurve_analyze(obj, scurve_data, charge_values):
         scurves_ag[ch].Write()
         thr_h.Fill(fit_f.GetParameter(0))
         enc_h.Fill(fit_f.GetParameter(1))
+        enc_list.append(fit_f.GetParameter(1))
         chi2_h.Fill(fit_f.GetChisquare())
         pass
 
@@ -374,13 +379,20 @@ def scurve_analyze(obj, scurve_data, charge_values):
 
     meanThr = thr_h.GetMean()
     drawHisto(thr_h,cc,'results/threshHiso.png')
-    print "Mean: %f" % thr_mean
+    #print "Mean: %f" % thr_mean
     thr_h.Write()
     drawHisto(enc_h, cc, 'results/encHisto.png')
     enc_h.Write()
     drawHisto(chi2_h, cc, 'results/chi2Histo.png')
     chi2_h.Write()
     outF.Close()
+    #fig = plt.figure()
+    #channels = range(0, 128)
+    #plt.plot(channels, enc_list)
+    #plt.ylim(0, 1)
+    #plt.grid(True)
+    #plt.show()
+    #fig.savefig("enc_channels.png")
     return meanThr
 
 def drawHisto(hist, canv, filename):
@@ -960,8 +972,8 @@ def scurve_analyze_old(obj, scurve_data, folder):
     full_data.append([""])
     full_data.append(["Differential data"])
     full_data.append(["", "255-CAL_DAC"])
-    full_data.append(
-        ["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, "mean", "RMS"])
+    # full_data.append(
+    #    ["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, "mean", "RMS"])
     dac_values = scurve_data[1][1:]
 
     fig = plt.figure(figsize=(10, 20))
@@ -986,14 +998,21 @@ def scurve_analyze_old(obj, scurve_data, folder):
                 summ += diff_value
             previous_value = j
             l += 1
-        mean = mean_calc / float(summ)
+        if summ == 0:
+            mean = 0
+        else:
+            mean = mean_calc / float(summ)
         mean_list.append(mean)
         l = 1
         rms = 0
         for r in diff[2:]:
             rms += r * (mean - dac_values[l]) ** 2
             l += 1
-        rms = math.sqrt(rms / summ)
+
+        if summ == 0:
+            rms = 0
+        else:
+            rms = math.sqrt(rms / summ)
         rms_list.append(rms)
         diff.append(mean)
         diff.append(rms)
@@ -1056,3 +1075,23 @@ def scurve_analyze_old(obj, scurve_data, folder):
     text = "Results were saved to the folder:\n %s \n" % folder
     obj.add_to_interactive_screen(text)
     return 0
+
+
+def run_wide_scurve(obj):
+    output = scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="yes", dac_range=[220, 240])
+    data1 = output[1]
+    output = scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="yes", dac_range=[200, 220])
+    data2 = output[1]
+    for i in range(1,len(data1)):
+        data1.extend(data2[i][1:])
+
+    print data1
+
+
+
+
+
+
+
+
+

@@ -261,6 +261,9 @@ class VFAT3_GUI:
         self.cal_button = Button(self.calibration_frame, text="ADC comparison", command=lambda: adc_comparison(self), width=bwidth)
         self.cal_button.grid(column=1, row=9, sticky='e')
 
+        # self.cal_button = Button(self.calibration_frame, text="Reset IPbus", command=lambda: self.interfaceFW.reset_ipbus(), width=bwidth)
+        # self.cal_button.grid(column=1, row=10, sticky='e')
+
 
         # ###############MISC TAB #######################################
 
@@ -300,6 +303,9 @@ class VFAT3_GUI:
 
         self.cont_trig_button = Button(self.misc_frame, text="Continuous triggers", command=lambda: continuous_trigger(self), width=bwidth)
         self.cont_trig_button.grid(column=1, row=9, sticky='e')
+
+        self.cont_trig_button = Button(self.misc_frame, text="sync FPGA", command=lambda: self.send_reset(), width=bwidth)
+        self.cont_trig_button.grid(column=1, row=10, sticky='e')
 
 
         # ############### FW CONFIGURE TAB #######################################
@@ -581,9 +587,16 @@ class VFAT3_GUI:
 # ################ MISC-TAB FUNCTIONS ################################
 
     def send_reset(self):
-        text = "->Sending Reset to the chip.\n"
-        self.add_to_interactive_screen(text)
-        self.interfaceFW.reset_vfat3()
+
+        counter = 0
+        while True:
+            self.interfaceFW.reset_vfat3()
+            result  = self.send_sync()
+            if result == 1:
+                break
+            if counter > 16:
+                break
+            counter += 1
 
     def ext_adc(self):
         text = "->Reading the verification board external ADC.\n"
@@ -604,6 +617,7 @@ class VFAT3_GUI:
             text = "%s: %s\n" % (output[0], output[1])
             self.add_to_interactive_screen(text)
         elif output[2]:
+            result = 1
             text = "Sync ok.\n"
             self.add_to_interactive_screen(text)
             for i in output[2]:
@@ -612,6 +626,8 @@ class VFAT3_GUI:
         else:
             text = "Sync fail.\n"
             self.add_to_interactive_screen(text)
+            result = 0
+        return result
 
     def send_idle(self):
         text = "->Sending IDLE transaction.\n"
@@ -678,7 +694,6 @@ class VFAT3_GUI:
     def read_adcs(self):
         text = "->Reading the ADCs.\n"
         self.add_to_interactive_screen(text)
-
 
         adc0_value = self.read_adc0()
         text = "ADC0: %d \n" % adc0_value
@@ -841,6 +856,7 @@ class VFAT3_GUI:
         elif self.chosen_scan == "S-curve all ch cont.":
             while True:
                 scurve_all_ch_execute(self, scan_name)
+                self.send_reset()
                 for i in range(0, 5):
                     print "->Sending sync request."
                     command_encoded = FCC_LUT["CC-A"]
