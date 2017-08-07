@@ -282,9 +282,6 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuratio
             if len(scurve_data) != steps:
                 print "Not enough values, trying again."
                 continue
-            if scurve_data[-1] == 0:
-                print "All zeroes, trying again."
-                continue
             # if len(scurve_data) == 20 and scurve_data[-3] != 0:
             #     break
             if len(scurve_data) == steps:
@@ -314,20 +311,14 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuratio
         writer = csv.writer(f)
         writer.writerows(all_ch_data)
     obj.add_to_interactive_screen(text)
-    if ch == "all":
-        # Analyze data.
-        #mean_th = scurve_analyze_old(obj, all_ch_data, folder)
-
-        mean_th = scurve_analyze(obj, all_ch_data, charge_values)
-        print "Mean: %f" % mean_th
-        stop = time.time()
-        run_time = (stop - start) / 60
-        text = "Run time (minutes): %f\n" % run_time
-        obj.add_to_interactive_screen(text)
-        threshold = mean_th
-    else:
-        print all_ch_data
-        threshold = scurve_analyze_one_ch(all_ch_data)
+    # Analyze data.
+    mean_th = scurve_analyze(obj, all_ch_data, charge_values)
+    print "Mean: %f" % mean_th
+    stop = time.time()
+    run_time = (stop - start) / 60
+    text = "Run time (minutes): %f\n" % run_time
+    obj.add_to_interactive_screen(text)
+    threshold = mean_th
     return [threshold, all_ch_data]
 
 
@@ -336,22 +327,21 @@ def scurve_analyze(obj, scurve_data, charge_values):
 
     dac_values = scurve_data[1][1:]
 
-
     Nhits_h = {}
     Nev_h = {}
 
-    for i in range(2, 130):
+    for i in range(2, len(scurve_data)):
         diff = []
-
-        Nhits_h[i-2] = r.TH1D('Nhits%i_h'%(i-2),'Nhits%i_h'%(i-2),256,-0.5,255.5)
-        Nev_h[i-2] = r.TH1D('Nev%i_h'%(i-2),'Nev%i_h'%(i-2),256,-0.5,255.5)
 
         data = scurve_data[i][1:]
         channel = scurve_data[i][0]
 
+        Nhits_h[channel] = r.TH1D('Nhits%i_h'%(channel),'Nhits%i_h'%(channel),256,-0.5,255.5)
+        Nev_h[channel] = r.TH1D('Nev%i_h'%(channel),'Nev%i_h'%(channel),256,-0.5,255.5)
+
         for j,Nhits in enumerate(data): 
-            Nhits_h[i-2].AddBinContent(dac_values[j]-1,Nhits)
-            Nev_h[i-2].AddBinContent(dac_values[j]-1,100)
+            Nhits_h[channel].AddBinContent(dac_values[j]-1,Nhits)
+            Nev_h[channel].AddBinContent(dac_values[j]-1,100)
             pass
 
         pass
@@ -362,7 +352,7 @@ def scurve_analyze(obj, scurve_data, charge_values):
     chi2_h = r.TH1D('chi2_h', 'Fit #chi^{2};#chi^{2};Number of Channels / 0.001', 100, 0.0, 1.0)
     enc_list = []
     scurves_ag = {}
-    for ch in range(128):
+    for ch in Nhits_h:
         scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch], Nev_h[ch])
         scurves_ag[ch].SetName('scurve%i_ag' % ch)
         fit_f = fitScurve(scurves_ag[ch])

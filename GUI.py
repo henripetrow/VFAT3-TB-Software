@@ -330,10 +330,10 @@ class VFAT3_GUI:
 
         self.start_channel = 0
         self.stop_channel = 127
-        self.delay = 10
+        self.delay = 50
         self.interval = 2000
-        self.pulsestretch = 7
-        self.latency = 0
+        self.pulsestretch = 3
+        self.latency = 45
         self.calphi = 0
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
