@@ -160,19 +160,28 @@ def generator(scan_name, write_BCd_as_fillers, register):
                         generation_output_list.append(text)
                         generation_error_list.append(text) 
                         continue
+                    delay = 0
+                    if command == "CalPulse_LV1A":
+                        try:
+                            delay = int(split_line[5])
+                        except ValueError:
+                            text = "-IGNORED: Invalid value for interval: %s" % split_line[4]
+                            generation_output_list.append(text)
+                            generation_error_list.append(text)
+                            continue
 
                     text = "-Send a Fast Control Command. Command: %s, Repeat: %s, Interval: %s" % (command,repeat,interval)
                     generation_output_list.append(text)                    
 
                     if repeat_flag == 1:
-                        instruction_list.add("FCC", BCd, command, 0)
+                        instruction_list.add("FCC", BCd, command, 0, delay)
                         for i in xrange(repeat-1):
-                            instruction_list.add("FCC", interval, command, 0)
+                            instruction_list.add("FCC", interval, command, 0, delay)
                     else:
                         instruction_list.clear()
-                        instruction_list.add("FCC", BCd, command, 0)
+                        instruction_list.add("FCC", BCd, command, 0, delay)
                         for i in xrange(repeat-1):
-                            instruction_list.add("FCC", interval, command, 0)
+                            instruction_list.add("FCC", interval, command, 0, delay)
                         instruction_list.write_to_file(write_BCd_as_fillers)
                         instruction_list.clear()
 

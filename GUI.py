@@ -114,6 +114,9 @@ class VFAT3_GUI:
         self.misc_frame = ttk.Frame(self.nb)
         self.misc_frame.grid()
 
+        self.scurve_frame = ttk.Frame(self.nb)
+        self.scurve_frame.grid()
+
         self.FW_frame = ttk.Frame(self.nb)
         if self.mode == 2:
             self.FW_frame.grid()
@@ -312,17 +315,104 @@ class VFAT3_GUI:
         self.cont_trig_button = Button(self.misc_frame, text="sync FPGA", command=lambda: self.send_reset(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=10, sticky='e')
 
-        self.scurve_button = Button(self.misc_frame, text="S-curve", command=self.one_ch_scurve, width=bwidth)
-        self.scurve_button.grid(column=1, row=11, sticky='e')
+        # self.scurve_button = Button(self.misc_frame, text="S-curve", command=self.one_ch_scurve, width=bwidth)
+        # self.scurve_button.grid(column=1, row=11, sticky='e')
+        #
+        # self.scurve_label0 = Label(self.misc_frame, text="Ch:")
+        # self.scurve_label0.grid(column=2, row=11, sticky='e')
+        #
+        # self.scurve_entry = Entry(self.misc_frame, width=5)
+        # self.scurve_entry.grid(column=3, row=11, sticky='e')
+        # self.scurve_entry.insert(0, self.scurve_channel)
 
-        self.scurve_label0 = Label(self.misc_frame, text="Ch:")
-        self.scurve_label0.grid(column=2, row=11, sticky='e')
 
-        self.scurve_entry = Entry(self.misc_frame, width=5)
-        self.scurve_entry.grid(column=3, row=11, sticky='e')
-        self.scurve_entry.insert(0, self.scurve_channel)
+        # ############### S-curve tab #########################################
+
+        self.start_channel = 0
+        self.stop_channel = 127
+        self.delay = 10
+        self.interval = 2000
+        self.pulsestretch = 7
+        self.latency = 0
+        self.calphi = 0
+
+        self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
+        self.start_ch_label.grid(column=1, row=1, sticky='e')
+
+        self.start_ch_entry = Entry(self.scurve_frame, width=5)
+        self.start_ch_entry.grid(column=2, row=1, sticky='e')
+        self.start_ch_entry.insert(0, self.start_channel)
+
+        self.start_ch_label0 = Label(self.scurve_frame, text="0-127")
+        self.start_ch_label0.grid(column=3, row=1, sticky='e')
 
 
+
+        self.stop_ch_label = Label(self.scurve_frame, text="stop ch.:")
+        self.stop_ch_label.grid(column=1, row=2, sticky='e')
+
+        self.stop_ch_entry = Entry(self.scurve_frame, width=5)
+        self.stop_ch_entry.grid(column=2, row=2, sticky='e')
+        self.stop_ch_entry.insert(0, self.stop_channel)
+
+        self.stop_ch_label0 = Label(self.scurve_frame, text="0-127")
+        self.stop_ch_label0.grid(column=3, row=2, sticky='e')
+
+
+        self.delay_label = Label(self.scurve_frame, text="Pulse Delay:")
+        self.delay_label.grid(column=1, row=3, sticky='e')
+
+        self.delay_entry = Entry(self.scurve_frame, width=5)
+        self.delay_entry.grid(column=2, row=3, sticky='e')
+        self.delay_entry.insert(0, self.delay)
+
+        self.delay_label0 = Label(self.scurve_frame, text="0-4000")
+        self.delay_label0.grid(column=3, row=3, sticky='e')
+
+
+
+        self.interval_label = Label(self.scurve_frame, text="LV1A interval:")
+        self.interval_label.grid(column=1, row=4, sticky='e')
+
+        self.interval_entry = Entry(self.scurve_frame, width=5)
+        self.interval_entry.grid(column=2, row=4, sticky='e')
+        self.interval_entry.insert(0, self.interval)
+
+        self.interval_label0 = Label(self.scurve_frame, text="0-4000")
+        self.interval_label0.grid(column=3, row=4, sticky='e')
+
+        self.pulsestretch_label = Label(self.scurve_frame, text="Pulse stretch:")
+        self.pulsestretch_label.grid(column=1, row=5, sticky='e')
+
+        self.pulsestretch_entry = Entry(self.scurve_frame, width=5)
+        self.pulsestretch_entry.grid(column=2, row=5, sticky='e')
+        self.pulsestretch_entry.insert(0, self.pulsestretch)
+
+        self.pulsestretch_label0 = Label(self.scurve_frame, text="0-7")
+        self.pulsestretch_label0.grid(column=3, row=5, sticky='e')
+
+        self.latency_label = Label(self.scurve_frame, text="Latency:")
+        self.latency_label.grid(column=1, row=6, sticky='e')
+
+        self.latency_entry = Entry(self.scurve_frame, width=5)
+        self.latency_entry.grid(column=2, row=6, sticky='e')
+        self.latency_entry.insert(0, self.latency)
+
+        self.latency_label0 = Label(self.scurve_frame, text="0-1023")
+        self.latency_label0.grid(column=3, row=6, sticky='e')
+
+        self.calphi_label = Label(self.scurve_frame, text="Cal Phi:")
+        self.calphi_label.grid(column=1, row=7, sticky='e')
+
+        self.calphi_entry = Entry(self.scurve_frame, width=5)
+        self.calphi_entry.grid(column=2, row=7, sticky='e')
+        self.calphi_entry.insert(0, self.calphi)
+
+        self.calphi_label0 = Label(self.scurve_frame, text="0-7")
+        self.calphi_label0.grid(column=3, row=7, sticky='e')
+
+        self.scurve0_button = Button(self.scurve_frame, text="RUN S-curve", command=self.run_scurve, width=bwidth)
+        self.scurve0_button.grid(column=1, sticky='e')
 
         # ############### FW CONFIGURE TAB #######################################
 
@@ -357,6 +447,7 @@ class VFAT3_GUI:
         self.nb.add(self.register_frame, text="Registers")
         self.nb.add(self.calibration_frame, text="Calibration")
         self.nb.add(self.misc_frame, text="misc.")
+        self.nb.add(self.scurve_frame, text="S-curve")
         if self.mode == 2:
             self.nb.add(self.FW_frame, text="Firmware")
         self.nb.grid(column=0, row=0)
@@ -720,7 +811,7 @@ class VFAT3_GUI:
         self.add_to_interactive_screen(text)
 
     def send_cal_trigger(self):
-        channel = int(self.scurve_entry.get())
+        latency = int(self.scurve_entry.get())
         self.CalPulseLV1A_latency = latency
         self.CalPulse_LV1A_entry.delete(0, END)
         self.CalPulse_LV1A_entry.insert(0, self.CalPulseLV1A_latency)
@@ -733,11 +824,18 @@ class VFAT3_GUI:
         write_instruction(self.interactive_output_file,latency, LV1A_encoded, 0)
         self.execute()
 
-    def one_ch_scurve(self):
-        channel = int(self.scurve_entry.get())
-        text = "->Running S-curve on channel: %s \n" % channel
+    def run_scurve(self):
+        self.start_channel = int(self.start_ch_entry.get())
+        self.stop_channel = int(self.stop_ch_entry.get())
+        self.delay = int(self.delay_entry.get())
+        self.interval = int(self.interval_entry.get())
+        self.pulsestretch = int(self.pulsestretch_entry.get())
+        self.latency = int(self.latency_entry.get())
+        self.calphi = int(self.calphi_entry.get())
+
+        text = "->Running S-curve"
         self.add_to_interactive_screen(text)
-        scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=channel)
+        scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=[self.start_channel, self.stop_channel], configuration="yes", dac_range=[200, 240], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
 
     def set_fe_nominal_values(self):
         register[141].PRE_I_BSF[0] = 13
@@ -915,7 +1013,6 @@ class VFAT3_GUI:
             for i in output[1]:
                 text = "%d|%d|%d\n" %(i.systemBC, i.EC, i.BC)
                 self.add_to_interactive_screen(text)
-
 
     def modify_scan(self):
         text =  "->Modifying the scan: %s\n" % self.chosen_scan

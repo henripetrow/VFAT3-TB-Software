@@ -28,7 +28,7 @@ def adjust_local_thresholds(obj):
         # Read the current dac values
         #obj.read_register(k)
         print "Adjusting the channel %d local arm_dac." % k
-        output = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=k, configuration="no")
+        output = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=[k,k], configuration="no")
         threshold = output[0]
         print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac[0])
         previous_diff = abs(mean_threshold - threshold)
@@ -52,7 +52,7 @@ def adjust_local_thresholds(obj):
             obj.register[k].arm_dac[0] += 1
             obj.write_register(k)
 
-            output = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=k, configuration="no")
+            output = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=[k,k], configuration="no")
             threshold = output[0]
             print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac[0])
             thresholds.append(threshold)
@@ -143,7 +143,7 @@ def gain_measurement(obj):
     print gain
 
 
-def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="yes", dac_range=[200, 240]):
+def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuration="yes", dac_range=[200, 240], delay=4, bc_between_calpulses=4000, pulsestretch=7, latency=0, cal_phi=0):
     start = time.time()
 
     # if obj.Iref == 0:
@@ -154,12 +154,9 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
     file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
 
     # scan either all of the channels or just the oe defined by ch.
-    if ch == "all":
-        start_ch = 0
-        stop_ch = 127
-    else:
-        start_ch = ch
-        stop_ch = ch
+
+    start_ch = ch[0]
+    stop_ch = ch[1]
 
     start_dac_value = dac_range[0]
     stop_dac_value = dac_range[1]
@@ -178,9 +175,9 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
         instruction_text.append("500 Send EC0")
         instruction_text.append("1 Send RunMode")
         instruction_text.append("1000 Repeat %d" % steps)
-        instruction_text.append("5000 Send_Repeat CalPulse_LV1A %d 10000" % samples_per_dac_value)
-        instruction_text.append("5000 Send SCOnly")
-        instruction_text.append("5000 Write CAL_DAC 1")
+        instruction_text.append("1000 Send_Repeat CalPulse_LV1A %d %d %d" % (samples_per_dac_value, bc_between_calpulses, delay))
+        instruction_text.append("1000 Send SCOnly")
+        instruction_text.append("1000 Write CAL_DAC 1")
         instruction_text.append("200 Send RunMode")
         instruction_text.append("1 End_Repeat")
         instruction_text.append("1 Send SCOnly")
@@ -201,11 +198,13 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
     obj.register[131].TP_FE[0] = 7
     obj.write_register(131)
 
-
+    register[137].LAT[0] = latency
+    obj.write_register(137)
 
     obj.register[130].DT[0] = 0
     obj.write_register(130)
 
+    register[138].CAL_PHI[0] = cal_phi
     register[138].CAL_MODE[0] = 1
     obj.write_register(138)
 
@@ -225,7 +224,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
     time.sleep(1)
 
     obj.register[129].ST[0] = 0
-    obj.register[129].PS[0] = 7
+    obj.register[129].PS[0] = pulsestretch
     obj.write_register(129)
 
     if configuration == "yess":
@@ -1074,9 +1073,9 @@ def scurve_analyze_old(obj, scurve_data, folder):
 
 
 def run_wide_scurve(obj):
-    output = scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="yes", dac_range=[220, 240])
+    output = scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0,127], configuration="yes", dac_range=[220, 240])
     data1 = output[1]
-    output = scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="yes", dac_range=[200, 220])
+    output = scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0,127], configuration="yes", dac_range=[200, 220])
     data2 = output[1]
     for i in range(1,len(data1)):
         data1.extend(data2[i][1:])
