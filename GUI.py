@@ -53,6 +53,7 @@ class VFAT3_GUI:
         self.cal_dac_fc_values = [0]*256
         self.Iref = 0
         self.CalPulseLV1A_latency = 4
+        self.scurve_channel = 0
         self.transaction_ID = 0
         self.interactive_output_file = "./data/FPGA_instruction_list.dat"
         s = ttk.Style()
@@ -310,6 +311,17 @@ class VFAT3_GUI:
 
         self.cont_trig_button = Button(self.misc_frame, text="sync FPGA", command=lambda: self.send_reset(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=10, sticky='e')
+
+        self.scurve_button = Button(self.misc_frame, text="S-curve", command=self.one_ch_scurve, width=bwidth)
+        self.scurve_button.grid(column=1, row=11, sticky='e')
+
+        self.scurve_label0 = Label(self.misc_frame, text="Ch:")
+        self.scurve_label0.grid(column=2, row=11, sticky='e')
+
+        self.scurve_entry = Entry(self.misc_frame, width=5)
+        self.scurve_entry.grid(column=3, row=11, sticky='e')
+        self.scurve_entry.insert(0, self.scurve_channel)
+
 
 
         # ############### FW CONFIGURE TAB #######################################
@@ -708,7 +720,7 @@ class VFAT3_GUI:
         self.add_to_interactive_screen(text)
 
     def send_cal_trigger(self):
-        latency = int(self.CalPulse_LV1A_entry.get())
+        channel = int(self.scurve_entry.get())
         self.CalPulseLV1A_latency = latency
         self.CalPulse_LV1A_entry.delete(0, END)
         self.CalPulse_LV1A_entry.insert(0, self.CalPulseLV1A_latency)
@@ -720,6 +732,12 @@ class VFAT3_GUI:
         write_instruction(self.interactive_output_file,1, CalPulse_encoded, 1)
         write_instruction(self.interactive_output_file,latency, LV1A_encoded, 0)
         self.execute()
+
+    def one_ch_scurve(self):
+        channel = int(self.scurve_entry.get())
+        text = "->Running S-curve on channel: %s \n" % channel
+        self.add_to_interactive_screen(text)
+        scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=channel)
 
     def set_fe_nominal_values(self):
         register[141].PRE_I_BSF[0] = 13

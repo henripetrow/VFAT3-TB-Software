@@ -166,6 +166,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
     samples_per_dac_value = 100
 
 
+
     # Create the instructions for the specified scan values.
 
     steps = stop_dac_value - start_dac_value
