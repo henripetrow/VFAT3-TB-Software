@@ -194,8 +194,6 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch="all", configuration="
         # Generate the instruction list for the FPGA.
         generator(scan_name, obj.write_BCd_as_fillers, obj.register)
 
-
-
         # Set the needed registers.
         obj.set_fe_nominal_values()
 
