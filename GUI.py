@@ -46,10 +46,10 @@ class VFAT3_GUI:
         self.channel_register = 0
         self.value = ""
         self.write_BCd_as_fillers = 0
-        self.adc0M = 1.924
-        self.adc0B = -318.0
-        self.adc1M = 2.19
-        self.adc1B = -460.2
+        self.adc0M = 1.916
+        self.adc0B = -330.2
+        self.adc1M = 2.217
+        self.adc1B = -479.0
         self.cal_dac_fc_values = [0]*256
         self.Iref = 0
         self.CalPulseLV1A_latency = 4
