@@ -36,8 +36,8 @@ class instruction_object:
             writer.writerows(self.event_list)
         return self.event_list
 
-    def add(self, command_type, BCd, command_addr_register, increment):
-        new_instruction = [command_type, BCd, command_addr_register, increment]
+    def add(self, command_type, BCd, command_addr_register, increment, delay = 0):
+        new_instruction = [command_type, BCd, command_addr_register, increment, delay]
         self.instruction_list.append(new_instruction)
 
     def clear(self):
@@ -66,12 +66,13 @@ class instruction_object:
             # FCC
             if command_type == "FCC":
                 command = line[2]
-
                 if command == "CalPulse_LV1A":
+                    delay = line[4]
+                    #delay = 10
                     command_bin = FCC_LUT["CalPulse"]  # Add error checks.  # BCd comes reversed?
                     self.add_instruction(self.output_file, BCd, command_bin, 0)
                     command_bin = FCC_LUT["LV1A"]  # Add error checks.  # BCd comes reversed?
-                    self.add_instruction(self.output_file, 10, command_bin, 0)
+                    self.add_instruction(self.output_file, delay, command_bin, 0)
                     self.BCcounter = self.BCcounter + BCd + 10
 
                 else:
