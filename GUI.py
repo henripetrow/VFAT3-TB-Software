@@ -347,6 +347,9 @@ class VFAT3_GUI:
         self.pulsestretch = 3
         self.latency = 45
         self.calphi = 0
+        self.arm_dac = 100
+        self.start_cal_dac = 200
+        self.stop_cal_dac = 240
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
         self.start_ch_label.grid(column=1, row=1, sticky='w')
@@ -417,6 +420,36 @@ class VFAT3_GUI:
 
         self.calphi_label0 = Label(self.scurve_frame, text="0-7")
         self.calphi_label0.grid(column=3, row=7, sticky='w')
+
+        self.arm_dac_label = Label(self.scurve_frame, text="ARM_DAC:")
+        self.arm_dac_label.grid(column=1, row=8, sticky='w')
+
+        self.arm_dac_entry = Entry(self.scurve_frame, width=5)
+        self.arm_dac_entry.grid(column=2, row=8, sticky='e')
+        self.arm_dac_entry.insert(0, self.arm_dac)
+
+        self.arm_dac_label0 = Label(self.scurve_frame, text="0-254")
+        self.arm_dac_label0.grid(column=3, row=8, sticky='w')
+
+        self.start_cal_dac_label = Label(self.scurve_frame, text="start CAL_DAC:")
+        self.start_cal_dac_label.grid(column=1, row=9, sticky='w')
+
+        self.start_cal_dac_entry = Entry(self.scurve_frame, width=5)
+        self.start_cal_dac_entry.grid(column=2, row=9, sticky='e')
+        self.start_cal_dac_entry.insert(0, self.start_cal_dac)
+
+        self.start_cal_dac_label0 = Label(self.scurve_frame, text="0-254")
+        self.start_cal_dac_label0.grid(column=3, row=9, sticky='w')
+
+        self.stop_cal_dac_label = Label(self.scurve_frame, text="stop CAL_DAC:")
+        self.stop_cal_dac_label.grid(column=1, row=10, sticky='w')
+
+        self.stop_cal_dac_entry = Entry(self.scurve_frame, width=5)
+        self.stop_cal_dac_entry.grid(column=2, row=10, sticky='e')
+        self.stop_cal_dac_entry.insert(0, self.stop_cal_dac)
+
+        self.stop_cal_dac_label0 = Label(self.scurve_frame, text="0-254  max diff 40")
+        self.stop_cal_dac_label0.grid(column=3, row=10, sticky='w')
 
         self.scurve0_button = Button(self.scurve_frame, text="RUN S-curve", command=self.run_scurve, width=bwidth)
         self.scurve0_button.grid(column=1, sticky='e', columnspan=2)
@@ -862,10 +895,22 @@ class VFAT3_GUI:
         error += self.check_value_range("Latency", self.latency, 0, 1023)
         self.calphi = int(self.calphi_entry.get())
         error += self.check_value_range("Cal Phi", self.calphi, 0, 7)
+        self.arm_dac = int(self.arm_dac_entry.get())
+        error += self.check_value_range("ARM_DAC", self.arm_dac, 0, 254)
+        self.start_cal_dac = int(self.start_cal_dac_entry.get())
+        error += self.check_value_range("Start CAL_DAC", self.start_cal_dac, 0, 254)
+        self.stop_cal_dac = int(self.stop_cal_dac_entry.get())
+        error += self.check_value_range("Stop CAL_DAC", self.stop_cal_dac, 0, 254)
+        if self.stop_cal_dac < self.start_cal_dac:
+            print "Stop CAL_DAC should be higher than start CAL_DAC."
+            error += 1
+        if (self.stop_cal_dac - self.start_cal_dac) > 40:
+            print "MAx CAL_DAC steps is 40."
+            error += 1
         if error == 0:
             text = "->Running S-curve"
             self.add_to_interactive_screen(text)
-            scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=[self.start_channel, self.stop_channel], configuration="yes", dac_range=[200, 240], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
+            scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel, self.stop_channel], configuration="yes", dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
         else:
             print "Aborting s-curve run."
 
