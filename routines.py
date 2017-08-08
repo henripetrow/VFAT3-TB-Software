@@ -323,7 +323,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuratio
 
 
 def scurve_analyze(obj, scurve_data, charge_values):
-    timestamp = time.strftime("%d.%m.%Y %H:%M")
+    timestamp = time.strftime("%Y%m%d%_H%M")
 
     dac_values = scurve_data[1][1:]
 
@@ -346,22 +346,26 @@ def scurve_analyze(obj, scurve_data, charge_values):
 
         pass
     
-    outF = r.TFile('results/scurves.root', 'RECREATE')
+    outF = r.TFile('results/scurves%s.root'%timestamp, 'RECREATE')
     enc_h = r.TH1D('enc_h', 'ENC of all Channels;ENC [DAC Units];Number of Channels', 100, 0.0, 1.0)
     thr_h = r.TH1D('thr_h', 'Threshold of all Channels;ENC [DAC Units];Number of Channels', 160, 0.0, 80.0)
     chi2_h = r.TH1D('chi2_h', 'Fit #chi^{2};#chi^{2};Number of Channels / 0.001', 100, 0.0, 1.0)
     enc_list = []
     scurves_ag = {}
+    txtOutF = open('results/scurveFits%s.dat'%timestamp,'w')
+    txtOutF.write('CH/I:thr/D:enc/D\n')
     for ch in Nhits_h:
         scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch], Nev_h[ch])
         scurves_ag[ch].SetName('scurve%i_ag' % ch)
         fit_f = fitScurve(scurves_ag[ch])
+        txtOutF.write('%i\t%f\t%f\n'%(ch,fit_f.GetParameter(0),fit_f.GetParameter(1)))
         scurves_ag[ch].Write()
         thr_h.Fill(fit_f.GetParameter(0))
         enc_h.Fill(fit_f.GetParameter(1))
         enc_list.append(fit_f.GetParameter(1))
         chi2_h.Fill(fit_f.GetChisquare())
         pass
+    txtOutF.close()
 
     cc = r.TCanvas('canv','canv',1000,1000)
 
