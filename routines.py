@@ -1072,28 +1072,87 @@ def scurve_analyze_old(obj, scurve_data, folder):
     return 0
 
 
-def consecutive_triggers(obj):
-        instruction_text = []
-        instruction_text.append("500 Send EC0")
-        instruction_text.append("1 Send RunMode")
-        instruction_text.append("1000 Repeat %d" % steps)
-        instruction_text.append("1000 Send_Repeat CalPulse_LV1A")
-
-        # Write the instructions to the file.
-
-        output_file_name = "./routines/%s/instruction_list.txt" % modified
-        with open(output_file_name, "w") as mfile:
-            for item in instruction_text:
-                mfile.write("%s\n" % item)
-
-        # Generate the instruction list for the FPGA.
-        generator(scan_name, obj.write_BCd_as_fillers, obj.register)
+def concecutive_triggers(obj):
+    scan_name = "Consecutive_Triggers"
+    file_name = "./routines/%s/FPGA_instruction_list.txt" % scan_name
 
 
+    instruction_text = []
+    instruction_text.append("1 Send RunMode")
+    instruction_text.append("10 Send EC0")
+    instruction_text.append("10 Send BC0")
+    instruction_text.append("100 Send_Repeat LV1A 4000 100")
+    instruction_text.append("1000 Send ReSync")
+
+    # Write the instructions to the file.
+    output_file_name = "./routines/%s/instruction_list.txt" % scan_name
+    with open(output_file_name, "w") as mfile:
+        for item in instruction_text:
+            mfile.write("%s\n" % item)
+    # Generate the instruction list for the FPGA.
+    generator("Consecutive Triggers", obj.write_BCd_as_fillers, obj.register)
 
 
+    obj.register[65535].RUN[0] = 1
+    obj.write_register(65535)
+    time.sleep(1)
+
+    obj.register[130].ECb[0] = 1
+    obj.register[130].BCb[0] = 1
+    obj.write_register(130)
+    time.sleep(1)
 
 
+    trigger_counter = 0
+    data_packet_counter = 0
+    hit_counter = 0
+    crc_error_counter = 0
+    ec_error_counter = 0
+    bc_error_counter = 0
+
+    for k in range(0,25):
+        trigger_counter += 4000
+        previous_EC = 0
+        previous_BC = 0
+        output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1)
+        if output[0] == "Error":
+            text = "%s: %s\n" % (output[0], output[1])
+            obj.add_to_interactive_screen(text)
+        else:
+
+            for i in output[3]:
+                if i.type == "data_packet":
+                    data_packet_counter += 1
+                    if i.hit_found == 1:
+                        hit_counter += 1
+                    if i.crc_error == 1:
+                        crc_error_counter += 1
+                    ec_diff = i.EC - previous_EC
+                    if ec_diff != 1:
+                        ec_error_counter += 1
+                    previous_EC = i.EC
+                    bc_diff = i.BC - previous_BC
+                    if bc_diff != 100:
+                        print bc_diff
+                        print previous_BC
+                        print i.BC
+                        bc_error_counter += 1
+                    previous_BC = i.BC
 
 
+        print "-> %d Triggers sent." % trigger_counter
+        print "%d Data packets received." % data_packet_counter
+        print "CRC errors: %d" % crc_error_counter
+        print "EC errors: %d" % ec_error_counter
+        print "BC errors: %d" % bc_error_counter
+        print "Hits found: %d" % hit_counter
+        print "***************"
 
+
+    obj.register[65535].RUN[0] = 0
+    obj.write_register(65535)
+    time.sleep(1)
+
+    obj.register[130].ECb[0] = 0
+    obj.write_register(130)
+    time.sleep(1)

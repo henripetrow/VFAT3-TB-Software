@@ -104,8 +104,3 @@ def crc_remainder(input_package):
                 crc_bin = crc_bin[1:]+'0'
                 crc = int(crc_bin,2)
     return crc
-
-# def crc_citt_remainder(input_value):
-#     inputr = str(input_value)
-#     crc = crc16xmodem(inputr,65535)
-#     return crc

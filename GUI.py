@@ -303,17 +303,20 @@ class VFAT3_GUI:
         self.CalPulse_LV1A_label0 = Label(self.misc_frame, text="BC")
         self.CalPulse_LV1A_label0.grid(column=4, row=6, sticky='e')
 
-        self.Trig1_set_button = Button(self.misc_frame, text="Set trigger pattern", command=lambda: set_up_trigger_pattern(self, 0), width=bwidth)
+        self.Trig1_set_button = Button(self.misc_frame, text="Set s-bit pattern", command=lambda: set_up_trigger_pattern(self, 0), width=bwidth)
         self.Trig1_set_button.grid(column=1, row=7, sticky='e')
 
-        self.Trig_clear_button = Button(self.misc_frame, text="Clear trigger pattern", command=lambda: set_up_trigger_pattern(self, 2), width=bwidth)
+        self.Trig_clear_button = Button(self.misc_frame, text="Clear s-bit pattern", command=lambda: set_up_trigger_pattern(self, 2), width=bwidth)
         self.Trig_clear_button.grid(column=1, row=8, sticky='e')
 
-        self.cont_trig_button = Button(self.misc_frame, text="Continuous triggers", command=lambda: continuous_trigger(self), width=bwidth)
+        self.cont_trig_button = Button(self.misc_frame, text="Continuous CalPulses", command=lambda: continuous_trigger(self), width=bwidth)
         self.cont_trig_button.grid(column=1, row=9, sticky='e')
 
         self.cont_trig_button = Button(self.misc_frame, text="sync FPGA", command=lambda: self.send_reset(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=10, sticky='e')
+
+        self.cont_trig_button = Button(self.misc_frame, text="Concecutive Triggers", command=lambda: concecutive_triggers(self), width=bwidth)
+        self.cont_trig_button.grid(column=1, row=11, sticky='e')
 
         # self.scurve_button = Button(self.misc_frame, text="S-curve", command=self.one_ch_scurve, width=bwidth)
         # self.scurve_button.grid(column=1, row=11, sticky='e')
