@@ -141,15 +141,6 @@ class datapacket:
         # print "System BC: %d" % self.systemBC
         # print self.data
 
-        #received_crc = self.crc[8:16]+self.crc[0:8]
-        #print int(received_crc[::-1], 2)
-        #print int(received_crc, 2)
-        #print int(self.crc,2)
-        # self.received_crc = int(received_crc[::-1], 2)
-        #self.received_crc = int(received_crc, 2)
-        #print self.crc_calc
-        #self.calculated_crc = crc_remainder(self.crc_calc[-16:])
-
         if self.EC:
             self.EC = int(self.EC, 2)
             # print "EC: %d" % self.EC
@@ -175,26 +166,20 @@ class datapacket:
 
                 else:
                     self.data += "00000000"
-                    
-        # print "****************"
+
 
         if '1' in self.data:
             self.hit_found = 1
-            # print "hit found"
 
-        # if self.data:
-        #    print "DATA:"
-        #    for i in range(0,(len(self.data)/8)):
-        #        print self.data[i*8:(1+i)*8]
-        #else:
-        #    print "No data."
-        # print self.calculated_crc
-        # print self.received_crc
-        # if self.received_crc != self.calculated_crc:
-        #     self.crc_error = 1
-        #     print("!-> CRC error.")
-        # else:
-        #     print("CRC ok.")
+        received_crc_int = int(self.crc, 2)
+        self.calculated_crc = crc_remainder(list(self.crc_calc[:-16]))
+
+        if received_crc_int != self.calculated_crc:
+            self.crc_error = 1
+            print("!-> data packet CRC error.")
+        else:
+            pass
+            #print("CRC ok.")
 
 
 def decode_output_data(filename, register):
@@ -288,14 +273,14 @@ def decode_output_data(filename, register):
             # print "datapacket byte counter: %d" % datapacket_byte_counter
             if datapacket_status != "IDLE":
                 # print input_value
-                data_packet.crc_calc += input_value[::-1]
-
+                #data_packet.crc_calc += input_value[::-1]
+                data_packet.crc_calc += input_value
 
             if (input_value == HDR_1 or input_value == HDR_1W) and datapacket_status == "IDLE": # See if the read line is Header 1.
                 # print("Header I found.")
                 data_header = 1                               # Type of header. To be used to stop after EC or BC.
                 data_packet = datapacket()                    # Create a new data packet object.
-                data_packet.crc_calc += input_value[::-1]
+                data_packet.crc_calc += input_value
                 # print input_value
                 if input_value == HDR_1W:                     # Check if FIFO warning was given.
                     data_packet.FIFO_warning = 1              # Set the FIFO warning to the object.
@@ -311,7 +296,7 @@ def decode_output_data(filename, register):
                 # print("Header II found.")
                 data_header = 2                               # Type of header.
                 data_packet = datapacket()                    # Create a new data packet object.
-                data_packet.crc_calc += input_value[::-1]
+                data_packet.crc_calc += input_value
                 # print input_value
                 if input_value == HDR_2W:                     # Check if FIFO warning was given.
                     data_packet.FIFO_warning = 1              # Set the FIFO warning to the object.

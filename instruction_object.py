@@ -68,7 +68,6 @@ class instruction_object:
                 command = line[2]
                 if command == "CalPulse_LV1A":
                     delay = line[4]
-                    #delay = 10
                     command_bin = FCC_LUT["CalPulse"]  # Add error checks.  # BCd comes reversed?
                     self.add_instruction(self.output_file, BCd, command_bin, 0)
                     command_bin = FCC_LUT["LV1A"]  # Add error checks.  # BCd comes reversed?
