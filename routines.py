@@ -1068,10 +1068,12 @@ def scurve_analyze_old(obj, scurve_data, folder):
     return 0
 
 
-def concecutive_triggers(obj):
+def concecutive_triggers(obj, nr_loops=25):
+    timestamp = time.strftime("%Y%m%d_%H%M")
     scan_name = "Consecutive_Triggers"
     file_name = "./routines/%s/FPGA_instruction_list.txt" % scan_name
-
+    output_file = "./results/%s_concecutive_triggers.dat" % timestamp
+    open(output_file, 'w').close()
 
     instruction_text = []
     instruction_text.append("1 Send RunMode")
@@ -1105,8 +1107,11 @@ def concecutive_triggers(obj):
     crc_error_counter = 0
     ec_error_counter = 0
     bc_error_counter = 0
+    start = time.time()
 
-    for k in range(0,25):
+
+
+    for k in range(0, nr_loops):
         trigger_counter += 4000
         previous_EC = 0
         previous_BC = 0
@@ -1125,33 +1130,41 @@ def concecutive_triggers(obj):
                         crc_error_counter += 1
                     ec_diff = i.EC - previous_EC
                     if ec_diff != 1:
-                        print "EC error"
+                        print "->EC error"
                         print "Previous EC: %d" % previous_BC
                         print "Current EC: %d" % i.BC
                         ec_error_counter += 1
                     previous_EC = i.EC
                     bc_diff = i.BC - previous_BC
                     if bc_diff != 100:
-                        print "BC error"
+                        print "->BC error"
                         print "Previous BC: %d" % previous_BC
                         print "Current BC: %d" % i.BC
                         bc_error_counter += 1
                     previous_BC = i.BC
 
+        stop = time.time()
+        run_time = (stop - start) / 60
+        result = []
+        result.append("-> %d Triggers sent." % trigger_counter)
+        result.append("%d Data packets received." % data_packet_counter)
+        result.append("CRC errors: %d" % crc_error_counter)
+        result.append("EC errors: %d" % ec_error_counter)
+        result.append("BC errors: %d" % bc_error_counter)
+        result.append("Hits found: %d" % hit_counter)
+        result.append("Time elapsed: %f min" % run_time)
+        result.append("***************")
 
-        print "-> %d Triggers sent." % trigger_counter
-        print "%d Data packets received." % data_packet_counter
-        print "CRC errors: %d" % crc_error_counter
-        print "EC errors: %d" % ec_error_counter
-        print "BC errors: %d" % bc_error_counter
-        print "Hits found: %d" % hit_counter
-        print "***************"
-
+        with open(output_file, "a") as myfile:
+            for line in result:
+                print line
+                myfile.write("%s\n" % line)
 
     obj.register[65535].RUN[0] = 0
     obj.write_register(65535)
     time.sleep(1)
 
     obj.register[130].ECb[0] = 0
+    obj.register[130].BCb[0] = 0
     obj.write_register(130)
     time.sleep(1)

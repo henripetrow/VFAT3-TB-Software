@@ -315,8 +315,17 @@ class VFAT3_GUI:
         self.cont_trig_button = Button(self.misc_frame, text="sync FPGA", command=lambda: self.send_reset(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=10, sticky='e')
 
-        self.cont_trig_button = Button(self.misc_frame, text="Concecutive Triggers", command=lambda: concecutive_triggers(self), width=bwidth)
+        self.cont_trig_button = Button(self.misc_frame, text="Concecutive Triggers", command=lambda: self.run_concecutive_triggers(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=11, sticky='e')
+
+        self.nr_trigger_loops = 25
+
+        self.cont_trig_entry = Entry(self.misc_frame, width=5)
+        self.cont_trig_entry.grid(column=3, row=11, sticky='e')
+        self.cont_trig_entry.insert(0, self.nr_trigger_loops)
+
+        self.cont_trig_label0 = Label(self.misc_frame, text="loops")
+        self.cont_trig_label0.grid(column=4, row=11, sticky='e')
 
         # self.scurve_button = Button(self.misc_frame, text="S-curve", command=self.one_ch_scurve, width=bwidth)
         # self.scurve_button.grid(column=1, row=11, sticky='e')
@@ -859,6 +868,7 @@ class VFAT3_GUI:
             scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=[self.start_channel, self.stop_channel], configuration="yes", dac_range=[200, 240], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
         else:
             print "Aborting s-curve run."
+
     def set_fe_nominal_values(self):
         register[141].PRE_I_BSF[0] = 13
         register[141].PRE_I_BIT[0] = 150
@@ -924,6 +934,10 @@ class VFAT3_GUI:
         for x in range(1, len(paketti)):
             write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
         self.execute()
+
+    def run_concecutive_triggers(self):
+        self.nr_trigger_loops = int(self.cont_trig_entry.get())
+        concecutive_triggers(self, self.nr_trigger_loops)
 
 
 # ################# SCAN/TEST -FUNCTIONS #############################
