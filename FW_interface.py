@@ -230,7 +230,7 @@ class FW_interface:
 
 
 
-    def launch(self, register, file_name, serial_port, routine=0):
+    def launch(self, register, file_name, serial_port, routine=0, save_data=0):
 
         open("./data/FPGA_output_list.dat", 'w').close()
         if file_name != "./data/FPGA_instruction_list.dat":
@@ -324,7 +324,14 @@ class FW_interface:
             with open("./data/FPGA_output_list.dat", "a") as myfile:
                 for i in data_list:
                     myfile.write(i)
+
             timeout = 0
+        if save_data != 0:
+            timestamp = time.strftime("%Y%m%d_%H%M%s")
+            FPGA_output = "./data/FPGA_output_list.dat"
+            dump_file = "./results/dump/%s_concecutive_trigger_data_dump.dat" % timestamp
+            shutil.copy2(FPGA_output, dump_file)
+
 
         if not timeout:
             transaction_stop = time.time()
