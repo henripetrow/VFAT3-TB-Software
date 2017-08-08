@@ -1125,13 +1125,16 @@ def concecutive_triggers(obj):
                         crc_error_counter += 1
                     ec_diff = i.EC - previous_EC
                     if ec_diff != 1:
+                        print "EC error"
+                        print "Previous EC: %d" % previous_BC
+                        print "Current EC: %d" % i.BC
                         ec_error_counter += 1
                     previous_EC = i.EC
                     bc_diff = i.BC - previous_BC
                     if bc_diff != 100:
-                        print bc_diff
-                        print previous_BC
-                        print i.BC
+                        print "BC error"
+                        print "Previous BC: %d" % previous_BC
+                        print "Current BC: %d" % i.BC
                         bc_error_counter += 1
                     previous_BC = i.BC
 
