@@ -46,10 +46,10 @@ class VFAT3_GUI:
         self.channel_register = 0
         self.value = ""
         self.write_BCd_as_fillers = 0
-        self.adc0M = 1.924
-        self.adc0B = -318.0
-        self.adc1M = 2.19
-        self.adc1B = -460.2
+        self.adc0M = 1.916
+        self.adc0B = -330.2
+        self.adc1M = 2.217
+        self.adc1B = -479.0
         self.cal_dac_fc_values = [0]*256
         self.Iref = 0
         self.CalPulseLV1A_latency = 4
@@ -333,10 +333,10 @@ class VFAT3_GUI:
 
         self.start_channel = 0
         self.stop_channel = 127
-        self.delay = 10
+        self.delay = 50
         self.interval = 2000
-        self.pulsestretch = 7
-        self.latency = 0
+        self.pulsestretch = 3
+        self.latency = 45
         self.calphi = 0
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
