@@ -1171,6 +1171,7 @@ class VFAT3_GUI:
                                               dac_range=[200, 240], delay=50, bc_between_calpulses=2000, pulsestretch=7,
                                              latency=45, cal_phi=0)
             gain_measurement(self, adc="int1")
+            concecutive_triggers(self, self.nr_trigger_loops)
             time.sleep(300)
             flag = 1
 
