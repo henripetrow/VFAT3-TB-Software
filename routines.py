@@ -103,7 +103,9 @@ def gain_measurement(obj,adc ="ext"):
     obj.write_register(133)
 
     arm_dac_values = []
-    threshold_mv = []
+    extADC = []
+    ADC0 = []
+    ADC1 = []
     threshold_fc = []
 
     for arm_dac in range(100, 151, 10):
@@ -111,19 +113,15 @@ def gain_measurement(obj,adc ="ext"):
         obj.register[135].ARM_DAC[0] = arm_dac
         obj.write_register(135)
         time.sleep(1)
-        if adc == "ext":
-            threshold_mv.append(obj.interfaceFW.ext_adc())
-        elif adc == "int0":
-            threshold_mv.append(obj.read_adc0())
-        elif adc == "int1":
-            threshold_mv.append(obj.read_adc1())
-        output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, ch=[41, 42], configuration="yes",
+        extADC.append(obj.interfaceFW.ext_adc())
+        ADC0.append(obj.read_adc0())
+        ADC1.append(obj.read_adc1())
+        output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, ch=[41, 46], configuration="yes",
                                               dac_range=[200, 240], delay=50, bc_between_calpulses=2000, pulsestretch=7,
-                                             latency=45, cal_phi=0)
+                                             latency=45, cal_phi=0, folder="gain_meas")
         threshold_fc.append(output[0])
-
-    timestamp = time.strftime("%Y%m%d%H%M")
-    filename = "%sgain_meas/%s_gain_meas.dat" % (obj.data_folder, timestamp)
+    timestamp = time.strftime("%Y%m%d_%H%M")
+    filename = "%s%s/%sgain_measurement.dat" % (obj.data_folder, "gain_meas", timestamp)
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -132,9 +130,9 @@ def gain_measurement(obj,adc ="ext"):
     text = "Results were saved to the folder:\n %s \n" % filename
 
     outF = open(filename, "w")
-    outF.write("arm_dac/I:thr_adc/I:thr_scurve/f\n")
+    outF.write("arm_dac/I:ADC0/I:ADC1/I:extADC/I:thr_scurve/fDn")
     for i, armdac in enumerate(arm_dac_values):
-        outF.write('%i\t%i\t%i\n' % (armdac, threshold_mv[i], threshold_fc[i]))
+        outF.write('%i\t%i\t%i\t%i\t%f\n' % (armdac, ADC0[i], ADC1[i], extADC[i],threshold_fc[i]))
         pass
     outF.close()
 
@@ -337,6 +335,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuratio
 def scurve_analyze(obj, scurve_data,folder):
     timestamp = time.strftime("%d.%m.%Y %H:%M")
 
+
     dac_values = scurve_data[1][1:]
 
     Nhits_h = {}
@@ -357,7 +356,8 @@ def scurve_analyze(obj, scurve_data,folder):
             pass
 
         pass
-    filename = '%s%s/scurves.root' %(obj.data_folder, folder)
+    timestamp = time.strftime("%Y%m%d_%H%M%s")
+    filename = '%s%s/scurves%s.root' %(obj.data_folder, folder,timestamp)
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -365,31 +365,36 @@ def scurve_analyze(obj, scurve_data,folder):
             print "Unable to create directory"
 
     outF = r.TFile(filename, 'RECREATE')
+
     enc_h = r.TH1D('enc_h', 'ENC of all Channels;ENC [DAC Units];Number of Channels', 100, 0.0, 1.0)
     thr_h = r.TH1D('thr_h', 'Threshold of all Channels;ENC [DAC Units];Number of Channels', 160, 0.0, 80.0)
     chi2_h = r.TH1D('chi2_h', 'Fit #chi^{2};#chi^{2};Number of Channels / 0.001', 100, 0.0, 1.0)
     enc_list = []
     scurves_ag = {}
+    txtOutF = open('%s%s/scurveFits%s.dat'%(obj.data_folder, folder,timestamp),'w')
+    txtOutF.write('CH/I:thr/D:enc/D\n')
     for ch in Nhits_h:
         scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch], Nev_h[ch])
         scurves_ag[ch].SetName('scurve%i_ag' % ch)
         fit_f = fitScurve(scurves_ag[ch])
+        txtOutF.write('%i\t%f\t%f\n'%(ch,fit_f.GetParameter(0),fit_f.GetParameter(1)))
         scurves_ag[ch].Write()
         thr_h.Fill(fit_f.GetParameter(0))
         enc_h.Fill(fit_f.GetParameter(1))
         enc_list.append(fit_f.GetParameter(1))
         chi2_h.Fill(fit_f.GetChisquare())
         pass
+    txtOutF.close()
 
     cc = r.TCanvas('canv','canv',1000,1000)
 
     meanThr = thr_h.GetMean()
-    drawHisto(thr_h,cc,'%s%s/threshHiso.png' %(obj.data_folder, folder))
+    drawHisto(thr_h,cc,'%s%s/threshHiso%s.png' %(obj.data_folder, folder,timestamp))
     #print "Mean: %f" % thr_mean
     thr_h.Write()
-    drawHisto(enc_h, cc, '%s%s/encHisto.png' %(obj.data_folder, folder))
+    drawHisto(enc_h, cc, '%s%s/encHisto%s.png' %(obj.data_folder, folder,timestamp))
     enc_h.Write()
-    drawHisto(chi2_h, cc, '%s%s/chi2Histo.png' %(obj.data_folder, folder))
+    drawHisto(chi2_h, cc, '%s%s/chi2Histo%s.png' %(obj.data_folder, folder,timestamp))
     chi2_h.Write()
     outF.Close()
     #fig = plt.figure()

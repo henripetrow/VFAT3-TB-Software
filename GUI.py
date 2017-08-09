@@ -344,7 +344,7 @@ class VFAT3_GUI:
         self.data_dir_entry.grid(column=1, row=14, sticky='w')
         self.data_dir_entry.insert(0, self.data_folder)
 
-        self.cont_trig_button = Button(self.misc_frame, text="Browse", command=lambda: self.ask_directory(), width=5)
+        self.cont_trig_button = Button(self.misc_frame, text="Ok", command=lambda: self.change_directory(), width=5)
         self.cont_trig_button.grid(column=3, row=14, sticky='e',columnspan=2)
 
         # self.scurve_button = Button(self.misc_frame, text="S-curve", command=self.one_ch_scurve, width=bwidth)
@@ -600,14 +600,8 @@ class VFAT3_GUI:
 
 # #################### GENERAL GUI FUNCTIONS ############################
 
-    def ask_directory(self):
-        dir_opt = {}
-        dir_opt['initialdir'] = os.environ["HOME"] + '\\'
-        dir_opt['mustexist'] = False
-        dir_opt['parent'] = self
-        dir_opt['title'] = 'Please select directory'
-        result = root.tkFileDialog.askdirectory(**dir_opt)
-        self.data_folder.set(result)
+    def change_directory(self):
+        self.data_folder =self.data_dir_entry.get()
 
     def apply_ch_local_adjustments(self):
         filename = "./data/channel_registers.dat"
