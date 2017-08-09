@@ -1172,7 +1172,7 @@ class VFAT3_GUI:
                                              latency=45, cal_phi=0)
             gain_measurement(self, adc="int1")
             concecutive_triggers(self, 25)
-            time.sleep(300)
+            time.sleep(2100)
             flag = 1
 
 
