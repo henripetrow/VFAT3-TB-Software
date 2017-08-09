@@ -130,7 +130,7 @@ def gain_measurement(obj,adc ="ext"):
     text = "Results were saved to the folder:\n %s \n" % filename
 
     outF = open(filename, "w")
-    outF.write("arm_dac/I:ADC0/I:ADC1/I:extADC/I:thr_scurve/fDn")
+    outF.write("arm_dac/I:ADC0/I:ADC1/I:extADC/I:thr_scurve/D\n")
     for i, armdac in enumerate(arm_dac_values):
         outF.write('%i\t%i\t%i\t%i\t%f\n' % (armdac, ADC0[i], ADC1[i], extADC[i],threshold_fc[i]))
         pass
