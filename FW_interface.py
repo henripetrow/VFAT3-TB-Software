@@ -230,7 +230,7 @@ class FW_interface:
 
 
 
-    def launch(self, register, file_name, serial_port, routine=0, save_data=0):
+    def launch(self, register, file_name, serial_port, routine=0, save_data=0,obj=0):
 
         open("./data/FPGA_output_list.dat", 'w').close()
         if file_name != "./data/FPGA_instruction_list.dat":
@@ -329,7 +329,12 @@ class FW_interface:
         if save_data != 0:
             timestamp = time.strftime("%Y%m%d_%H%M%s")
             FPGA_output = "./data/FPGA_output_list.dat"
-            dump_file = "./results/dump/%s_concecutive_trigger_data_dump.dat" % timestamp
+            dump_file = "%sconcecutive_tiggers/data_dump/%s_concecutive_trigger_data_dump.dat" % (obj.data_folder, timestamp)
+            if not os.path.exists(os.path.dirname(dump_file)):
+                try:
+                    os.makedirs(os.path.dirname(dump_file))
+                except OSError as exc:  # Guard against race condition
+                    print "Unable to create directory"
             shutil.copy2(FPGA_output, dump_file)
 
 

@@ -4,12 +4,12 @@
 ###########################################
 
 from Tkinter import *
+import tkFileDialog
 import ttk
 import time
 import sys
 import os
 import subprocess  # For opening scans for edit in the system default editor.
-
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
 from ipbus import *
 from VFAT3_registers import *
@@ -56,6 +56,7 @@ class VFAT3_GUI:
         self.scurve_channel = 0
         self.transaction_ID = 0
         self.interactive_output_file = "./data/FPGA_instruction_list.dat"
+        self.data_folder = "./results/"
         s = ttk.Style()
         s.configure('My.TFrame', background='white')
         self.COM_port = "/dev/ttyUSB0"
@@ -275,8 +276,8 @@ class VFAT3_GUI:
         self.cal_button = Button(self.calibration_frame, text="ADC comparison", command=lambda: adc_comparison(self), width=bwidth)
         self.cal_button.grid(column=1, row=11, sticky='e')
 
-        # self.cal_button = Button(self.calibration_frame, text="Reset IPbus", command=lambda: self.interfaceFW.reset_ipbus(), width=bwidth)
-        # self.cal_button.grid(column=1, row=10, sticky='e')
+        self.cal_button = Button(self.calibration_frame, text="X-ray routine cont.", command=lambda: self.run_xray_tests(), width=bwidth)
+        self.cal_button.grid(column=1, row=12, sticky='e')
 
 
         # ###############MISC TAB #######################################
@@ -332,6 +333,19 @@ class VFAT3_GUI:
 
         self.cont_trig_label0 = Label(self.misc_frame, text="loops")
         self.cont_trig_label0.grid(column=4, row=11, sticky='e')
+
+        self.cont_trig_button = Button(self.misc_frame, text="Scan all DACs", command=lambda: self.run_all_dac_scans(), width=bwidth)
+        self.cont_trig_button.grid(column=1, row=12, sticky='e')
+
+        self.data_dir_label0 = Label(self.misc_frame, text="Data directory:")
+        self.data_dir_label0.grid(column=1, row=13, sticky='w')
+
+        self.data_dir_entry = Entry(self.misc_frame, width=18)
+        self.data_dir_entry.grid(column=1, row=14, sticky='w')
+        self.data_dir_entry.insert(0, self.data_folder)
+
+        self.cont_trig_button = Button(self.misc_frame, text="Browse", command=lambda: self.ask_directory(), width=5)
+        self.cont_trig_button.grid(column=3, row=14, sticky='e',columnspan=2)
 
         # self.scurve_button = Button(self.misc_frame, text="S-curve", command=self.one_ch_scurve, width=bwidth)
         # self.scurve_button.grid(column=1, row=11, sticky='e')
@@ -524,8 +538,8 @@ class VFAT3_GUI:
                 "SD_I_BSF scan",
                 "SD_I_BFCAS scan",
                 "CAL_DAC scan",
-                "CAL_DAC scan, fC",
-                "Counter Resets"
+                #"CAL_DAC scan, fC",
+                #"Counter Resets"
                # "S-curve",
                # "S-curve all ch",
                # "S-curve all ch cont."
@@ -585,6 +599,15 @@ class VFAT3_GUI:
 
 
 # #################### GENERAL GUI FUNCTIONS ############################
+
+    def ask_directory(self):
+        dir_opt = {}
+        dir_opt['initialdir'] = os.environ["HOME"] + '\\'
+        dir_opt['mustexist'] = False
+        dir_opt['parent'] = self
+        dir_opt['title'] = 'Please select directory'
+        result = root.tkFileDialog.askdirectory(**dir_opt)
+        self.data_folder.set(result)
 
     def apply_ch_local_adjustments(self):
         filename = "./data/channel_registers.dat"
@@ -990,6 +1013,9 @@ class VFAT3_GUI:
         self.nr_trigger_loops = int(self.cont_trig_entry.get())
         concecutive_triggers(self, self.nr_trigger_loops)
 
+    def run_xray_tests(self):
+        print
+        scan_execute(self, scan_name)
 
 # ################# SCAN/TEST -FUNCTIONS #############################
 
@@ -1126,6 +1152,28 @@ class VFAT3_GUI:
         command_encoded = FCC_LUT[command]
         write_instruction(self.interactive_output_file, 1, command_encoded, 1)
         self.execute()
+
+    def run_all_dac_scans(self):
+        start = time.time()
+        for scan in self.scan_options:
+            print "Running %s" % scan
+            scan_execute(self, scan, plot=0)
+            print "Scan done."
+        stop = time.time()
+        run_time = (stop - start) / 60
+        print "Runtime: %f" % run_time
+
+    def run_xray_tests(self):
+        while True:
+            timestamp = time.strftime("%Y%m%d%H%M")
+            folder = "%s%sresults/" % (self.data_folder, timestamp)
+            self.data_folder = folder
+            self.run_all_dac_scans()
+            scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=[0, 127], configuration="yes",
+                                              dac_range=[200, 240], delay=50, bc_between_calpulses=2000, pulsestretch=7,
+                                             latency=45, cal_phi=0)
+            gain_measurement(self, adc="int1")
+            time.sleep(300)
 
 # ######################## REGISTER-TAB FUNCTIONS ####################
 

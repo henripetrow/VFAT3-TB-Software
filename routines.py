@@ -93,35 +93,7 @@ def adjust_local_thresholds(obj):
 
 def gain_measurement(obj,adc ="ext"):
 
-    arm_dac0 = 100
-    arm_dac1 = 200
-
-    # Set monitoring to ARM_DAC
-    obj.register[133].Monitor_Sel[0] = 14
-    obj.write_register(133)
-
-    # Set RUN bit 1 to power up analog part of the chip
-    obj.register[65535].RUN[0] = 1
-    obj.write_register(65535)
-    time.sleep(1)
-
-    # Set monitoring to ARM_DAC
-    obj.register[133].Monitor_Sel[0] = 14
-    obj.write_register(133)
-
-    obj.register[135].ARM_DAC[0] = arm_dac0
-    obj.write_register(135)
-    time.sleep(1)
-    if adc == "ext":
-        threshold_mv0 = obj.interfaceFW.ext_adc()
-    elif adc == "int0":
-        threshold_mv0 = obj.read_adc0()
-    elif adc == "int1":
-        threshold_mv0 = obj.read_adc1()
-    # High gain
-    threshold_fc0 = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac0, ch=[0, 127], configuration="yes", dac_range=[220, 240], delay=10, bc_between_calpulses=4000, pulsestretch=7, latency=0, cal_phi=0)
-    # Medium gain
-    # threshold_fc0 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac0, dac_range=[190, 210])
+    start = time.time()
 
     obj.register[65535].RUN[0] = 1
     obj.write_register(65535)
@@ -130,32 +102,56 @@ def gain_measurement(obj,adc ="ext"):
     obj.register[133].Monitor_Sel[0] = 14
     obj.write_register(133)
 
-    obj.register[135].ARM_DAC[0] = arm_dac1
-    obj.write_register(135)
-    time.sleep(1)
-    if adc == "ext":
-        threshold_mv1 = obj.interfaceFW.ext_adc()
-    elif adc == "int0":
-        threshold_mv1 = obj.read_adc0()
-    elif adc == "int1":
-        threshold_mv1= obj.read_adc1()
-    # High gain
-    threshold_fc1 = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac1, dac_range=[180, 200])
-    # Medium gain
-    # threshold_fc1 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac1, dac_range=[125, 145])
+    arm_dac_values = []
+    threshold_mv = []
+    threshold_fc = []
+
+    for arm_dac in range(100, 151, 10):
+        arm_dac_values.append(arm_dac)
+        obj.register[135].ARM_DAC[0] = arm_dac
+        obj.write_register(135)
+        time.sleep(1)
+        if adc == "ext":
+            threshold_mv.append(obj.interfaceFW.ext_adc())
+        elif adc == "int0":
+            threshold_mv.append(obj.read_adc0())
+        elif adc == "int1":
+            threshold_mv.append(obj.read_adc1())
+        output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, ch=[41, 42], configuration="yes",
+                                              dac_range=[200, 240], delay=50, bc_between_calpulses=2000, pulsestretch=7,
+                                             latency=45, cal_phi=0)
+        threshold_fc.append(output[0])
+
+    timestamp = time.strftime("%Y%m%d%H%M")
+    filename = "%sgain_meas/%s_gain_meas.dat" % (obj.data_folder, timestamp)
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+    text = "Results were saved to the folder:\n %s \n" % filename
+
+    outF = open(filename, "w")
+    outF.write("arm_dac/I:thr_adc/I:thr_scurve/f\n")
+    for i, armdac in enumerate(arm_dac_values):
+        outF.write('%i\t%i\t%i\n' % (armdac, threshold_mv[i], threshold_fc[i]))
+        pass
+    outF.close()
+
+    stop = time.time()
+    run_time = (stop - start) / 60
+    print "Runtime: %f" % run_time
+    # # Calculate the gain.
+    # if adc == "ext":
+    #     print "Thresholds in mV TH0: %f and TH1: %f" % (threshold_mv0, threshold_mv1)
+    # else:
+    #     print "Thresholds in dac counts TH0: %f and TH1: %f" % (threshold_mv0, threshold_mv1)
+    # print "Thresholds in fC TH0: %f and TH1: %f" % (threshold_fc0, threshold_fc1)
+    # gain = (threshold_mv1 - threshold_mv0)/(threshold_fc1 - threshold_fc0)
+    # print gain
 
 
-    # Calculate the gain.
-    if adc == "ext":
-        print "Thresholds in mV TH0: %f and TH1: %f" % (threshold_mv0, threshold_mv1)
-    else:
-        print "Thresholds in dac counts TH0: %f and TH1: %f" % (threshold_mv0, threshold_mv1)
-    print "Thresholds in fC TH0: %f and TH1: %f" % (threshold_fc0, threshold_fc1)
-    gain = (threshold_mv1 - threshold_mv0)/(threshold_fc1 - threshold_fc0)
-    print gain
-
-
-def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuration="yes", dac_range=[200, 240], delay=10, bc_between_calpulses=4000, pulsestretch=7, latency=0, cal_phi=0):
+def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuration="yes", dac_range=[200, 240], delay=10, bc_between_calpulses=4000, pulsestretch=7, latency=0, cal_phi=0,folder="scurve"):
     start = time.time()
 
     # if obj.Iref == 0:
@@ -316,15 +312,19 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuratio
 
     # Save the results.
     timestamp = time.strftime("%Y%m%d_%H%M")
-    folder = "./results/"
     text = "Results were saved to the folder:\n %s \n" % folder
-
-    with open("%s%sS-curve_data.csv" % (folder, timestamp), "wb") as f:
+    filename = "%s%s/%sS-curve_data.csv" % (obj.data_folder, folder, timestamp)
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+    with open(filename, "wb") as f:
         writer = csv.writer(f)
         writer.writerows(all_ch_data)
     obj.add_to_interactive_screen(text)
     # Analyze data.
-    mean_th = scurve_analyze(obj, all_ch_data, charge_values)
+    mean_th = scurve_analyze(obj, all_ch_data,folder)
     print "Mean: %f" % mean_th
     stop = time.time()
     run_time = (stop - start) / 60
@@ -334,7 +334,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuratio
     return [threshold, all_ch_data]
 
 
-def scurve_analyze(obj, scurve_data, charge_values):
+def scurve_analyze(obj, scurve_data,folder):
     timestamp = time.strftime("%d.%m.%Y %H:%M")
 
     dac_values = scurve_data[1][1:]
@@ -357,8 +357,14 @@ def scurve_analyze(obj, scurve_data, charge_values):
             pass
 
         pass
-    
-    outF = r.TFile('results/scurves.root', 'RECREATE')
+    filename = '%s%s/scurves.root' %(obj.data_folder, folder)
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+
+    outF = r.TFile(filename, 'RECREATE')
     enc_h = r.TH1D('enc_h', 'ENC of all Channels;ENC [DAC Units];Number of Channels', 100, 0.0, 1.0)
     thr_h = r.TH1D('thr_h', 'Threshold of all Channels;ENC [DAC Units];Number of Channels', 160, 0.0, 80.0)
     chi2_h = r.TH1D('chi2_h', 'Fit #chi^{2};#chi^{2};Number of Channels / 0.001', 100, 0.0, 1.0)
@@ -378,12 +384,12 @@ def scurve_analyze(obj, scurve_data, charge_values):
     cc = r.TCanvas('canv','canv',1000,1000)
 
     meanThr = thr_h.GetMean()
-    drawHisto(thr_h,cc,'results/threshHiso.png')
+    drawHisto(thr_h,cc,'%s%s/threshHiso.png' %(obj.data_folder, folder))
     #print "Mean: %f" % thr_mean
     thr_h.Write()
-    drawHisto(enc_h, cc, 'results/encHisto.png')
+    drawHisto(enc_h, cc, '%s%s/encHisto.png' %(obj.data_folder, folder))
     enc_h.Write()
-    drawHisto(chi2_h, cc, 'results/chi2Histo.png')
+    drawHisto(chi2_h, cc, '%s%s/chi2Histo.png' %(obj.data_folder, folder))
     chi2_h.Write()
     outF.Close()
     #fig = plt.figure()
@@ -780,7 +786,7 @@ def set_up_trigger_pattern(obj, option):
         obj.add_to_interactive_screen(text)
 
 
-def scan_execute(obj, scan_name):
+def scan_execute(obj, scan_name, plot=1,):
 
     start = time.time()
 
@@ -796,11 +802,11 @@ def scan_execute(obj, scan_name):
         text = "%s: %s\n" % (output[0], output[1])
         obj.add_to_interactive_screen(text)
     else:
-        text = "DAC scan values:\n"
-        obj.add_to_interactive_screen(text)
+        #text = "DAC scan values:\n"
+        #obj.add_to_interactive_screen(text)
         adc_flag = 0
-        text = "%s|ADC0|ADC1|\n" % scan_name[:-5]
-        obj.add_to_interactive_screen(text)
+        #text = "%s|ADC0|ADC1|\n" % scan_name[:-5]
+       # obj.add_to_interactive_screen(text)
         reg_value = 0
         for i in output[0]:
             if i.type_ID == 0:
@@ -809,8 +815,8 @@ def scan_execute(obj, scan_name):
                     adc_flag = 1
                 else:
                     second_adc_value = int(''.join(map(str, i.data)), 2)
-                    text = "%d %d %d\n" % (reg_value, first_adc_value, second_adc_value)
-                    obj.add_to_interactive_screen(text)
+                    #text = "%d %d %d\n" % (reg_value, first_adc_value, second_adc_value)
+                    #obj.add_to_interactive_screen(text)
                     scan_values0.append(first_adc_value)
                     scan_values1.append(second_adc_value)
                     reg_values.append(reg_value)
@@ -824,8 +830,12 @@ def scan_execute(obj, scan_name):
     # Save the results.
     data = [reg_values,scan_values0,scan_values1]
     timestamp = time.strftime("%Y%m%d%H%M")
-    folder = "./results/"
-    filename = "%s%s_%s_scan_data.dat" % (folder, timestamp, modified)
+    filename = "%sdac_scans/%s_%s_scan_data.dat" % (obj.data_folder, timestamp, modified)
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
     text = "Results were saved to the folder:\n %s \n" % filename
 
     outF = open(filename, "w")
@@ -837,17 +847,18 @@ def scan_execute(obj, scan_name):
     
     obj.add_to_interactive_screen(text)
 
-    nr_points = len(scan_values0)
-    x = range(0, nr_points)
-    fig = plt.figure(1)
-    plt.plot(x, scan_values0, label="ADC0")
-    plt.plot(x, scan_values1, label="ADC1")
-    plt.ylabel('ADC counts')
-    plt.xlabel('DAC counts')
-    plt.legend()
-    plt.title(modified)
-    plt.grid(True)
-    fig.show()
+    if plot == 1:
+        nr_points = len(scan_values0)
+        x = range(0, nr_points)
+        fig = plt.figure(1)
+        plt.plot(x, scan_values0, label="ADC0")
+        plt.plot(x, scan_values1, label="ADC1")
+        plt.ylabel('ADC counts')
+        plt.xlabel('DAC counts')
+        plt.legend()
+        plt.title(modified)
+        plt.grid(True)
+        fig.show()
 
     stop = time.time()
     run_time = (stop - start) / 60
@@ -1084,7 +1095,12 @@ def concecutive_triggers(obj, nr_loops=25):
     timestamp = time.strftime("%Y%m%d_%H%M")
     scan_name = "Consecutive_Triggers"
     file_name = "./routines/%s/FPGA_instruction_list.txt" % scan_name
-    output_file = "./results/%s_concecutive_triggers.dat" % timestamp
+    output_file = "%sconcecutive_tiggers/%s_concecutive_triggers.dat" % (obj.data_folder, timestamp)
+    if not os.path.exists(os.path.dirname(output_file)):
+        try:
+            os.makedirs(os.path.dirname(output_file))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
     open(output_file, 'w').close()
 
     instruction_text = []
@@ -1127,7 +1143,7 @@ def concecutive_triggers(obj, nr_loops=25):
         trigger_counter += 4000
         previous_EC = 0
         previous_BC = 0
-        output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1, save_data=1)
+        output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1, save_data=1, obj=obj)
         if output[0] == "Error":
             text = "%s: %s\n" % (output[0], output[1])
             obj.add_to_interactive_screen(text)
