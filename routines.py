@@ -91,7 +91,7 @@ def adjust_local_thresholds(obj):
     print "Run time (minutes): %f\n" % run_time
 
 
-def gain_measurement(obj):
+def gain_measurement(obj,adc ="ext"):
 
     arm_dac0 = 100
     arm_dac1 = 200
@@ -112,9 +112,14 @@ def gain_measurement(obj):
     obj.register[135].ARM_DAC[0] = arm_dac0
     obj.write_register(135)
     time.sleep(1)
-    threshold_mv0 = obj.interfaceFW.ext_adc()
+    if adc == "ext":
+        threshold_mv0 = obj.interfaceFW.ext_adc()
+    elif adc == "int0":
+        threshold_mv0 = obj.read_adc0()
+    elif adc == "int1":
+        threshold_mv0 = obj.read_adc1()
     # High gain
-    threshold_fc0 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac0, dac_range=[220, 240])
+    threshold_fc0 = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac0, ch=[0, 127], configuration="yes", dac_range=[220, 240], delay=10, bc_between_calpulses=4000, pulsestretch=7, latency=0, cal_phi=0)
     # Medium gain
     # threshold_fc0 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac0, dac_range=[190, 210])
 
@@ -128,22 +133,29 @@ def gain_measurement(obj):
     obj.register[135].ARM_DAC[0] = arm_dac1
     obj.write_register(135)
     time.sleep(1)
-    threshold_mv1 = obj.interfaceFW.ext_adc()
+    if adc == "ext":
+        threshold_mv1 = obj.interfaceFW.ext_adc()
+    elif adc == "int0":
+        threshold_mv1 = obj.read_adc0()
+    elif adc == "int1":
+        threshold_mv1= obj.read_adc1()
     # High gain
-    threshold_fc1 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac1, dac_range=[200, 220])
+    threshold_fc1 = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac1, dac_range=[180, 200])
     # Medium gain
     # threshold_fc1 = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac1, dac_range=[125, 145])
 
 
     # Calculate the gain.
-
-    print "Thresholds in mV TH0: %f and TH1: %f" % (threshold_mv0, threshold_mv1)
+    if adc == "ext":
+        print "Thresholds in mV TH0: %f and TH1: %f" % (threshold_mv0, threshold_mv1)
+    else:
+        print "Thresholds in dac counts TH0: %f and TH1: %f" % (threshold_mv0, threshold_mv1)
     print "Thresholds in fC TH0: %f and TH1: %f" % (threshold_fc0, threshold_fc1)
     gain = (threshold_mv1 - threshold_mv0)/(threshold_fc1 - threshold_fc0)
     print gain
 
 
-def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuration="yes", dac_range=[200, 240], delay=4, bc_between_calpulses=4000, pulsestretch=7, latency=0, cal_phi=0):
+def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuration="yes", dac_range=[200, 240], delay=10, bc_between_calpulses=4000, pulsestretch=7, latency=0, cal_phi=0):
     start = time.time()
 
     # if obj.Iref == 0:
@@ -1119,7 +1131,7 @@ def concecutive_triggers(obj, nr_loops=25):
         trigger_counter += 4000
         previous_EC = 0
         previous_BC = 0
-        output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1)
+        output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1, save_data=1)
         if output[0] == "Error":
             text = "%s: %s\n" % (output[0], output[1])
             obj.add_to_interactive_screen(text)

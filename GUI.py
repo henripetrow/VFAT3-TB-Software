@@ -263,11 +263,17 @@ class VFAT3_GUI:
         self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth)
         self.cal_button.grid(column=1, row=7, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="Gain measurement", command=lambda: gain_measurement(self), width=bwidth)
+        self.cal_button = Button(self.calibration_frame, text="Gain meas. ext ADC", command=lambda: gain_measurement(self,adc="ext"), width=bwidth)
         self.cal_button.grid(column=1, row=8, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="ADC comparison", command=lambda: adc_comparison(self), width=bwidth)
+        self.cal_button = Button(self.calibration_frame, text="Gain meas. int ADC0", command=lambda: gain_measurement(self,adc="int0"), width=bwidth)
         self.cal_button.grid(column=1, row=9, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Gain meas. int ADC1", command=lambda: gain_measurement(self,adc="int1"), width=bwidth)
+        self.cal_button.grid(column=1, row=10, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="ADC comparison", command=lambda: adc_comparison(self), width=bwidth)
+        self.cal_button.grid(column=1, row=11, sticky='e')
 
         # self.cal_button = Button(self.calibration_frame, text="Reset IPbus", command=lambda: self.interfaceFW.reset_ipbus(), width=bwidth)
         # self.cal_button.grid(column=1, row=10, sticky='e')
