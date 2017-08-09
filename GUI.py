@@ -1158,9 +1158,13 @@ class VFAT3_GUI:
         print "Runtime: %f" % run_time
 
     def run_xray_tests(self):
+        flag = 0
         while True:
             timestamp = time.strftime("%Y%m%d%H%M")
-            folder = "%s%sresults/" % (self.data_folder, timestamp)
+            if flag == 0:
+                folder = "%s%sresults/" % (self.data_folder, timestamp)
+            else:
+                folder = "%s%sresults/" % (self.data_folder[:-20], timestamp)
             self.data_folder = folder
             self.run_all_dac_scans()
             scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=[0, 127], configuration="yes",
@@ -1168,6 +1172,7 @@ class VFAT3_GUI:
                                              latency=45, cal_phi=0)
             gain_measurement(self, adc="int1")
             time.sleep(300)
+            flag = 1
 
 # ######################## REGISTER-TAB FUNCTIONS ####################
 

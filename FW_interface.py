@@ -195,7 +195,9 @@ class FW_interface:
             self.hw.dispatch()
         open("./data/FPGA_output_list.dat", 'w').close()
         with open("./data/FPGA_output_list.dat", "a") as myfile:
-            if any(data_list):
+            if data_list is None:
+                pass
+            elif any(data_list):
                 for i in data_list:
                     line = dec_to_bin_with_stuffing(i, 32)
                     # print "routine: %s" % line

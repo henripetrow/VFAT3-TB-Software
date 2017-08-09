@@ -114,6 +114,8 @@ def gain_measurement(obj,adc ="ext"):
         obj.write_register(135)
         time.sleep(1)
         extADC.append(obj.interfaceFW.ext_adc())
+        # if not isinstance(extADC,(int, long)):
+        #extADC.append(0)
         ADC0.append(obj.read_adc0())
         ADC1.append(obj.read_adc1())
         output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, ch=[41, 46], configuration="yes",
