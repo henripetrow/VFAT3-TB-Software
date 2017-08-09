@@ -1175,6 +1175,7 @@ class VFAT3_GUI:
             time.sleep(300)
             flag = 1
 
+
 # ######################## REGISTER-TAB FUNCTIONS ####################
 
     def apply_register_values(self):
