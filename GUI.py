@@ -948,60 +948,65 @@ class VFAT3_GUI:
         register[145].SD_I_BSF[0] = 15
         register[145].SD_I_BFCAS[0] = 255
 
-        filler_16bits = [0]*16
-        full_data = []
-        data = []
-
-        for x in register[141].reg_array:
-            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-            data.extend(data_intermediate)
-        data.reverse()
-        data.extend(filler_16bits)
-        print data
-        full_data.extend(data)
-
-        data = []
-        for x in register[142].reg_array:
-            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-            data.extend(data_intermediate)
-        data.reverse()
-        data.extend(filler_16bits)
-        print data
-        full_data.extend(data)
-
-        data = []
-        for x in register[143].reg_array:
-            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-            data.extend(data_intermediate)
-        data.reverse()
-        data.extend(filler_16bits)
-        print data
-        full_data.extend(data)
-
-        data = []
-        for x in register[144].reg_array:
-            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-            data.extend(data_intermediate)
-        data.reverse()
-        data.extend(filler_16bits)
-        print data
-        full_data.extend(data)
-
-        data = []
-        for x in register[145].reg_array:
-            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-            data.extend(data_intermediate)
-        data.reverse()
-        data.extend(filler_16bits)
-        print data
-        full_data.extend(data)
-
-        output = self.SC_encoder.create_SC_packet(141, full_data, "MULTI_WRITE", 0)
-        paketti = output[0]
-        write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-        for x in range(1, len(paketti)):
-            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-        self.execute()
+        self.write_register(141)
+        self.write_register(142)
+        self.write_register(143)
+        self.write_register(144)
+        self.write_register(145)
+        # filler_16bits = [0]*16
+        # full_data = []
+        # data = []
+        #
+        # for x in register[141].reg_array:
+        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+        #     data.extend(data_intermediate)
+        # data.reverse()
+        # data.extend(filler_16bits)
+        # print data
+        # full_data.extend(data)
+        #
+        # data = []
+        # for x in register[142].reg_array:
+        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+        #     data.extend(data_intermediate)
+        # data.reverse()
+        # data.extend(filler_16bits)
+        # print data
+        # full_data.extend(data)
+        #
+        # data = []
+        # for x in register[143].reg_array:
+        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+        #     data.extend(data_intermediate)
+        # data.reverse()
+        # data.extend(filler_16bits)
+        # print data
+        # full_data.extend(data)
+        #
+        # data = []
+        # for x in register[144].reg_array:
+        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+        #     data.extend(data_intermediate)
+        # data.reverse()
+        # data.extend(filler_16bits)
+        # print data
+        # full_data.extend(data)
+        #
+        # data = []
+        # for x in register[145].reg_array:
+        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+        #     data.extend(data_intermediate)
+        # data.reverse()
+        # data.extend(filler_16bits)
+        # print data
+        # full_data.extend(data)
+        #
+        # output = self.SC_encoder.create_SC_packet(141, full_data, "MULTI_WRITE", 0)
+        # paketti = output[0]
+        # write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
+        # for x in range(1, len(paketti)):
+        #     write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+        # self.execute()
 
     def run_concecutive_triggers(self):
         self.nr_trigger_loops = int(self.cont_trig_entry.get())
