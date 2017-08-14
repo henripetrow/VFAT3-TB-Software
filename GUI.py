@@ -53,6 +53,7 @@ class VFAT3_GUI:
         self.cal_dac_fc_values = [0]*256
         self.Iref = 0
         self.CalPulseLV1A_latency = 4
+        self.xray_routine_flag = 0
         self.scurve_channel = 0
         self.transaction_ID = 0
         self.interactive_output_file = "./data/FPGA_instruction_list.dat"
@@ -602,6 +603,7 @@ class VFAT3_GUI:
 
     def change_directory(self):
         self.data_folder =self.data_dir_entry.get()
+        self.xray_routine_flag = 0
 
     def apply_ch_local_adjustments(self):
         filename = "./data/channel_registers.dat"
@@ -1012,9 +1014,9 @@ class VFAT3_GUI:
         self.nr_trigger_loops = int(self.cont_trig_entry.get())
         concecutive_triggers(self, self.nr_trigger_loops)
 
-    def run_xray_tests(self):
-        print
-        scan_execute(self, scan_name)
+ #   def run_xray_tests(self):
+ #       print
+ #       scan_execute(self, scan_name)
 
 # ################# SCAN/TEST -FUNCTIONS #############################
 
@@ -1163,14 +1165,14 @@ class VFAT3_GUI:
         print "Runtime: %f" % run_time
 
     def run_xray_tests(self):
-        flag = 0
         while True:
             timestamp = time.strftime("%Y%m%d%H%M")
-            if flag == 0:
+            if self.xray_routine_flag == 0:
                 folder = "%s%sresults/" % (self.data_folder, timestamp)
             else:
                 folder = "%s%sresults/" % (self.data_folder[:-20], timestamp)
             self.data_folder = folder
+            self.xray_routine_flag = 1
             self.run_all_dac_scans()
             scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=[0, 127], configuration="yes",
                                               dac_range=[200, 240], delay=50, bc_between_calpulses=2000, pulsestretch=7,
@@ -1178,7 +1180,6 @@ class VFAT3_GUI:
             gain_measurement(self, adc="int1")
             concecutive_triggers(self, 25)
             time.sleep(2100)
-            flag = 1
 
 
 # ######################## REGISTER-TAB FUNCTIONS ####################
