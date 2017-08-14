@@ -3,8 +3,8 @@
 # Lappeenranta University of Technology
 ###########################################
 
+import Tkinter, tkFileDialog, Tkconstants
 from Tkinter import *
-import tkFileDialog
 import ttk
 import time
 import sys
@@ -57,7 +57,7 @@ class VFAT3_GUI:
         self.scurve_channel = 0
         self.transaction_ID = 0
         self.interactive_output_file = "./data/FPGA_instruction_list.dat"
-        self.data_folder = "./results/"
+        self.data_folder = "./results"
         s = ttk.Style()
         s.configure('My.TFrame', background='white')
         self.COM_port = "/dev/ttyUSB0"
@@ -345,8 +345,8 @@ class VFAT3_GUI:
         self.data_dir_entry.grid(column=1, row=14, sticky='w')
         self.data_dir_entry.insert(0, self.data_folder)
 
-        self.cont_trig_button = Button(self.misc_frame, text="Ok", command=lambda: self.change_directory(), width=5)
-        self.cont_trig_button.grid(column=3, row=14, sticky='e',columnspan=2)
+        self.cont_trig_button = Button(self.misc_frame, text="Browse", command=lambda: self.ask_directory(), width=5)
+        self.cont_trig_button.grid(column=3, row=14, sticky='e', columnspan=2)
 
         # self.scurve_button = Button(self.misc_frame, text="S-curve", command=self.one_ch_scurve, width=bwidth)
         # self.scurve_button.grid(column=1, row=11, sticky='e')
@@ -604,6 +604,14 @@ class VFAT3_GUI:
     def change_directory(self):
         self.data_folder =self.data_dir_entry.get()
         self.xray_routine_flag = 0
+
+    def ask_directory(self):
+        dirtext = "Test"
+        self.data_folder = tkFileDialog.askdirectory(parent=root, initialdir='/home/', title=dirtext)
+        self.xray_routine_flag = 0
+        self.data_dir_entry.delete(0, 'end')
+        self.data_dir_entry.insert(0, self.data_folder)
+
 
     def apply_ch_local_adjustments(self):
         filename = "./data/channel_registers.dat"
@@ -1168,9 +1176,9 @@ class VFAT3_GUI:
         while True:
             timestamp = time.strftime("%Y%m%d%H%M")
             if self.xray_routine_flag == 0:
-                folder = "%s%sresults/" % (self.data_folder, timestamp)
+                folder = "%s/%sresults/" % (self.data_folder, timestamp)
             else:
-                folder = "%s%sresults/" % (self.data_folder[:-20], timestamp)
+                folder = "%s/%sresults/" % (self.data_folder[:-20], timestamp)
             self.data_folder = folder
             self.xray_routine_flag = 1
             self.run_all_dac_scans()
@@ -1180,7 +1188,7 @@ class VFAT3_GUI:
             gain_measurement(self, adc="int1")
             concecutive_triggers(self, 25)
             time.sleep(2100)
-
+            #time.sleep(30)
 
 # ######################## REGISTER-TAB FUNCTIONS ####################
 

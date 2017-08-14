@@ -331,7 +331,7 @@ class FW_interface:
         if save_data != 0:
             timestamp = time.strftime("%Y%m%d_%H%M%s")
             FPGA_output = "./data/FPGA_output_list.dat"
-            dump_file = "%sconcecutive_tiggers/data_dump/%s_concecutive_trigger_data_dump.dat" % (obj.data_folder, timestamp)
+            dump_file = "%s/concecutive_tiggers/data_dump/%s_concecutive_trigger_data_dump.dat" % (obj.data_folder, timestamp)
             if not os.path.exists(os.path.dirname(dump_file)):
                 try:
                     os.makedirs(os.path.dirname(dump_file))

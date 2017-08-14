@@ -123,7 +123,7 @@ def gain_measurement(obj,adc ="ext"):
                                              latency=45, cal_phi=0, folder="gain_meas")
         threshold_fc.append(output[0])
     timestamp = time.strftime("%Y%m%d_%H%M")
-    filename = "%s%s/%sgain_measurement.dat" % (obj.data_folder, "gain_meas", timestamp)
+    filename = "%s/%s/%sgain_measurement.dat" % (obj.data_folder, "gain_meas", timestamp)
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -313,7 +313,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuratio
     # Save the results.
     timestamp = time.strftime("%Y%m%d_%H%M")
     text = "Results were saved to the folder:\n %s \n" % folder
-    filename = "%s%s/%sS-curve_data.csv" % (obj.data_folder, folder, timestamp)
+    filename = "%s/%s/%sS-curve_data.csv" % (obj.data_folder, folder, timestamp)
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -359,7 +359,7 @@ def scurve_analyze(obj, scurve_data,folder):
 
         pass
     timestamp = time.strftime("%Y%m%d_%H%M%s")
-    filename = '%s%s/scurves%s.root' %(obj.data_folder, folder,timestamp)
+    filename = '%s/%s/scurves%s.root' %(obj.data_folder, folder,timestamp)
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -373,7 +373,7 @@ def scurve_analyze(obj, scurve_data,folder):
     chi2_h = r.TH1D('chi2_h', 'Fit #chi^{2};#chi^{2};Number of Channels / 0.001', 100, 0.0, 1.0)
     enc_list = []
     scurves_ag = {}
-    txtOutF = open('%s%s/scurveFits%s.dat'%(obj.data_folder, folder,timestamp),'w')
+    txtOutF = open('%s/%s/scurveFits%s.dat'%(obj.data_folder, folder,timestamp),'w')
     txtOutF.write('CH/I:thr/D:enc/D\n')
     for ch in Nhits_h:
         scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch], Nev_h[ch])
@@ -391,12 +391,12 @@ def scurve_analyze(obj, scurve_data,folder):
     cc = r.TCanvas('canv','canv',1000,1000)
 
     meanThr = thr_h.GetMean()
-    drawHisto(thr_h,cc,'%s%s/threshHiso%s.png' %(obj.data_folder, folder,timestamp))
+    drawHisto(thr_h,cc,'%s/%s/threshHiso%s.png' %(obj.data_folder, folder,timestamp))
     #print "Mean: %f" % thr_mean
     thr_h.Write()
-    drawHisto(enc_h, cc, '%s%s/encHisto%s.png' %(obj.data_folder, folder,timestamp))
+    drawHisto(enc_h, cc, '%s/%s/encHisto%s.png' %(obj.data_folder, folder,timestamp))
     enc_h.Write()
-    drawHisto(chi2_h, cc, '%s%s/chi2Histo%s.png' %(obj.data_folder, folder,timestamp))
+    drawHisto(chi2_h, cc, '%s/%s/chi2Histo%s.png' %(obj.data_folder, folder,timestamp))
     chi2_h.Write()
     outF.Close()
     #fig = plt.figure()
@@ -837,7 +837,7 @@ def scan_execute(obj, scan_name, plot=1,):
     # Save the results.
     data = [reg_values,scan_values0,scan_values1]
     timestamp = time.strftime("%Y%m%d%H%M")
-    filename = "%sdac_scans/%s_%s_scan_data.dat" % (obj.data_folder, timestamp, modified)
+    filename = "%s/dac_scans/%s_%s_scan_data.dat" % (obj.data_folder, timestamp, modified)
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -1102,7 +1102,7 @@ def concecutive_triggers(obj, nr_loops=25):
     timestamp = time.strftime("%Y%m%d_%H%M")
     scan_name = "Consecutive_Triggers"
     file_name = "./routines/%s/FPGA_instruction_list.txt" % scan_name
-    output_file = "%sconcecutive_tiggers/%s_concecutive_triggers.dat" % (obj.data_folder, timestamp)
+    output_file = "%s/concecutive_tiggers/%s_concecutive_triggers.dat" % (obj.data_folder, timestamp)
     if not os.path.exists(os.path.dirname(output_file)):
         try:
             os.makedirs(os.path.dirname(output_file))
