@@ -3,8 +3,8 @@
 # Lappeenranta University of Technology
 ###########################################
 
+import Tkinter, tkFileDialog, Tkconstants
 from Tkinter import *
-import tkFileDialog
 import ttk
 import time
 import sys
@@ -53,10 +53,11 @@ class VFAT3_GUI:
         self.cal_dac_fc_values = [0]*256
         self.Iref = 0
         self.CalPulseLV1A_latency = 4
+        self.xray_routine_flag = 0
         self.scurve_channel = 0
         self.transaction_ID = 0
         self.interactive_output_file = "./data/FPGA_instruction_list.dat"
-        self.data_folder = "./results/"
+        self.data_folder = "./results"
         s = ttk.Style()
         s.configure('My.TFrame', background='white')
         self.COM_port = "/dev/ttyUSB0"
@@ -344,8 +345,8 @@ class VFAT3_GUI:
         self.data_dir_entry.grid(column=1, row=14, sticky='w')
         self.data_dir_entry.insert(0, self.data_folder)
 
-        self.cont_trig_button = Button(self.misc_frame, text="Ok", command=lambda: self.change_directory(), width=5)
-        self.cont_trig_button.grid(column=3, row=14, sticky='e',columnspan=2)
+        self.cont_trig_button = Button(self.misc_frame, text="Browse", command=lambda: self.ask_directory(), width=5)
+        self.cont_trig_button.grid(column=3, row=14, sticky='e', columnspan=2)
 
         # self.scurve_button = Button(self.misc_frame, text="S-curve", command=self.one_ch_scurve, width=bwidth)
         # self.scurve_button.grid(column=1, row=11, sticky='e')
@@ -613,6 +614,15 @@ class VFAT3_GUI:
 
     def change_directory(self):
         self.data_folder =self.data_dir_entry.get()
+        self.xray_routine_flag = 0
+
+    def ask_directory(self):
+        dirtext = "Test"
+        self.data_folder = tkFileDialog.askdirectory(parent=root, initialdir='/home/', title=dirtext)
+        self.xray_routine_flag = 0
+        self.data_dir_entry.delete(0, 'end')
+        self.data_dir_entry.insert(0, self.data_folder)
+
 
     def apply_ch_local_adjustments(self):
         filename = "./data/channel_registers.dat"
@@ -961,68 +971,73 @@ class VFAT3_GUI:
         register[145].SD_I_BSF[0] = 15
         register[145].SD_I_BFCAS[0] = 255
 
-        filler_16bits = [0]*16
-        full_data = []
-        data = []
-
-        for x in register[141].reg_array:
-            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-            data.extend(data_intermediate)
-        data.reverse()
-        data.extend(filler_16bits)
-        print data
-        full_data.extend(data)
-
-        data = []
-        for x in register[142].reg_array:
-            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-            data.extend(data_intermediate)
-        data.reverse()
-        data.extend(filler_16bits)
-        print data
-        full_data.extend(data)
-
-        data = []
-        for x in register[143].reg_array:
-            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-            data.extend(data_intermediate)
-        data.reverse()
-        data.extend(filler_16bits)
-        print data
-        full_data.extend(data)
-
-        data = []
-        for x in register[144].reg_array:
-            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-            data.extend(data_intermediate)
-        data.reverse()
-        data.extend(filler_16bits)
-        print data
-        full_data.extend(data)
-
-        data = []
-        for x in register[145].reg_array:
-            data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-            data.extend(data_intermediate)
-        data.reverse()
-        data.extend(filler_16bits)
-        print data
-        full_data.extend(data)
-
-        output = self.SC_encoder.create_SC_packet(141, full_data, "MULTI_WRITE", 0)
-        paketti = output[0]
-        write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-        for x in range(1, len(paketti)):
-            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-        self.execute()
+        self.write_register(141)
+        self.write_register(142)
+        self.write_register(143)
+        self.write_register(144)
+        self.write_register(145)
+        # filler_16bits = [0]*16
+        # full_data = []
+        # data = []
+        #
+        # for x in register[141].reg_array:
+        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+        #     data.extend(data_intermediate)
+        # data.reverse()
+        # data.extend(filler_16bits)
+        # print data
+        # full_data.extend(data)
+        #
+        # data = []
+        # for x in register[142].reg_array:
+        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+        #     data.extend(data_intermediate)
+        # data.reverse()
+        # data.extend(filler_16bits)
+        # print data
+        # full_data.extend(data)
+        #
+        # data = []
+        # for x in register[143].reg_array:
+        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+        #     data.extend(data_intermediate)
+        # data.reverse()
+        # data.extend(filler_16bits)
+        # print data
+        # full_data.extend(data)
+        #
+        # data = []
+        # for x in register[144].reg_array:
+        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+        #     data.extend(data_intermediate)
+        # data.reverse()
+        # data.extend(filler_16bits)
+        # print data
+        # full_data.extend(data)
+        #
+        # data = []
+        # for x in register[145].reg_array:
+        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
+        #     data.extend(data_intermediate)
+        # data.reverse()
+        # data.extend(filler_16bits)
+        # print data
+        # full_data.extend(data)
+        #
+        # output = self.SC_encoder.create_SC_packet(141, full_data, "MULTI_WRITE", 0)
+        # paketti = output[0]
+        # write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
+        # for x in range(1, len(paketti)):
+        #     write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+        # self.execute()
 
     def run_concecutive_triggers(self):
         self.nr_trigger_loops = int(self.cont_trig_entry.get())
         concecutive_triggers(self, self.nr_trigger_loops)
 
-    def run_xray_tests(self):
-        print
-        scan_execute(self, scan_name)
+ #   def run_xray_tests(self):
+ #       print
+ #       scan_execute(self, scan_name)
 
 # ################# SCAN/TEST -FUNCTIONS #############################
 
@@ -1173,14 +1188,20 @@ class VFAT3_GUI:
     def run_xray_tests(self):
         while True:
             timestamp = time.strftime("%Y%m%d%H%M")
-            folder = "%s%sresults/" % (self.data_folder, timestamp)
+            if self.xray_routine_flag == 0:
+                folder = "%s/%sresults/" % (self.data_folder, timestamp)
+            else:
+                folder = "%s/%sresults/" % (self.data_folder[:-20], timestamp)
             self.data_folder = folder
+            self.xray_routine_flag = 1
             self.run_all_dac_scans()
             scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=[0, 127], configuration="yes",
                                               dac_range=[200, 240], delay=50, bc_between_calpulses=2000, pulsestretch=7,
                                              latency=45, cal_phi=0)
             gain_measurement(self, adc="int1")
-            time.sleep(300)
+            concecutive_triggers(self, 25)
+            time.sleep(2100)
+            #time.sleep(30)
 
 # ######################## REGISTER-TAB FUNCTIONS ####################
 

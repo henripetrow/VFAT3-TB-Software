@@ -195,7 +195,9 @@ class FW_interface:
             self.hw.dispatch()
         open("./data/FPGA_output_list.dat", 'w').close()
         with open("./data/FPGA_output_list.dat", "a") as myfile:
-            if any(data_list):
+            if data_list is None:
+                pass
+            elif any(data_list):
                 for i in data_list:
                     line = dec_to_bin_with_stuffing(i, 32)
                     # print "routine: %s" % line
@@ -329,7 +331,7 @@ class FW_interface:
         if save_data != 0:
             timestamp = time.strftime("%Y%m%d_%H%M%s")
             FPGA_output = "./data/FPGA_output_list.dat"
-            dump_file = "%sconcecutive_tiggers/data_dump/%s_concecutive_trigger_data_dump.dat" % (obj.data_folder, timestamp)
+            dump_file = "%s/concecutive_tiggers/data_dump/%s_concecutive_trigger_data_dump.dat" % (obj.data_folder, timestamp)
             if not os.path.exists(os.path.dirname(dump_file)):
                 try:
                     os.makedirs(os.path.dirname(dump_file))
