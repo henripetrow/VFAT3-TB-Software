@@ -195,6 +195,12 @@ class CurrentMonitorInterface:
         self.ch2_current_entry.delete(0, 'end')
         self.ch2_current_entry.insert(0, self.ch2_current)
 
+        ch1_voltage = self.PSU_interface.req_ch1_voltage()
+        ch2_voltage = self.PSU_interface.req_ch2_voltage()
+
+
+
+
         if self.save_data:
             # Save values to a file.
             timestamp = time.strftime("%Y/%m/%d/%H:%M:%S")
@@ -206,7 +212,7 @@ class CurrentMonitorInterface:
                     print "Unable to create directory"
 
             outf = open(filename, "a")
-            outf.write('%s\t%f\t%f\n' % (timestamp, self.ch1_current, self.ch2_current))
+            outf.write('%s\t%f\t%f\t%f\t%f\n' % (timestamp, ch1_voltage, self.ch1_current, ch2_voltage, self.ch2_current))
             outf.close()
 
 
