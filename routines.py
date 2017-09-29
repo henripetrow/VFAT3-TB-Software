@@ -151,7 +151,7 @@ def gain_measurement(obj,adc ="ext"):
     # print gain
 
 
-def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuration="yes", dac_range=[200, 240], delay=10, bc_between_calpulses=4000, pulsestretch=7, latency=0, cal_phi=0,folder="scurve"):
+def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes", dac_range=[200, 240], delay=10, bc_between_calpulses=4000, pulsestretch=7, latency=0, cal_phi=0,folder="scurve"):
     start = time.time()
 
     # if obj.Iref == 0:
@@ -255,7 +255,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuratio
     data_line.append("Channel")
     data_line.extend(cal_dac_values)
     all_ch_data.append(data_line)
-    for k in range(start_ch, stop_ch+1):
+    for k in range(start_ch, stop_ch+1, ch_step):
         print "Channel: %d" % k
         while True:
             # Set calibration to right channel.
@@ -337,6 +337,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], configuratio
 def scurve_analyze(obj, scurve_data,folder):
     timestamp = time.strftime("%d.%m.%Y %H:%M")
 
+    r.gROOT.SetBatch(True)
 
     dac_values = scurve_data[1][1:]
 
@@ -375,6 +376,7 @@ def scurve_analyze(obj, scurve_data,folder):
     scurves_ag = {}
     txtOutF = open('%s/%s/scurveFits%s.dat'%(obj.data_folder, folder,timestamp),'w')
     txtOutF.write('CH/I:thr/D:enc/D\n')
+    print 'Fitting Scurves'
     for ch in Nhits_h:
         scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch], Nev_h[ch])
         scurves_ag[ch].SetName('scurve%i_ag' % ch)
@@ -425,7 +427,7 @@ def fitScurve(scurve_g):
     for i in range(20):
         erf_f.SetParameter(0,1.0*i+15.0)
         erf_f.SetParameter(1,2.0)
-        scurve_g.Fit(erf_f)
+        scurve_g.Fit(erf_f,'Q')
         chi2 = erf_f.GetChisquare()
         if chi2 < minChi2 and chi2 > 0.0:
             bestI = i
@@ -435,7 +437,7 @@ def fitScurve(scurve_g):
         pass
     erf_f.SetParameter(0,2.0*bestI+1.0)
     erf_f.SetParameter(1,2.0)
-    scurve_g.Fit(erf_f)
+    scurve_g.Fit(erf_f,'Q')
     return bestFit_f
 
 

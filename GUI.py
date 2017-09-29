@@ -378,6 +378,7 @@ class VFAT3_GUI:
 
         self.start_channel = 0
         self.stop_channel = 127
+        self.channel_step = 1
         self.delay = 50
         self.interval = 2000
         self.pulsestretch = 3
@@ -407,85 +408,95 @@ class VFAT3_GUI:
         self.stop_ch_label0 = Label(self.scurve_frame, text="0-127")
         self.stop_ch_label0.grid(column=3, row=2, sticky='w')
 
+        self.ch_step_label = Label(self.scurve_frame, text="ch. step:")
+        self.ch_step_label.grid(column=1, row=3, sticky='w')
+
+        self.ch_step_entry = Entry(self.scurve_frame, width=5)
+        self.ch_step_entry.grid(column=2, row=3, sticky='e')
+        self.ch_step_entry.insert(0, self.channel_step)
+
+        self.ch_step_label0 = Label(self.scurve_frame, text="0-127")
+        self.ch_step_label0.grid(column=3, row=3, sticky='w')
+
         self.delay_label = Label(self.scurve_frame, text="Pulse Delay:")
-        self.delay_label.grid(column=1, row=3, sticky='w')
+        self.delay_label.grid(column=1, row=4, sticky='w')
 
         self.delay_entry = Entry(self.scurve_frame, width=5)
-        self.delay_entry.grid(column=2, row=3, sticky='e')
+        self.delay_entry.grid(column=2, row=4, sticky='e')
         self.delay_entry.insert(0, self.delay)
 
         self.delay_label0 = Label(self.scurve_frame, text="0-4000")
-        self.delay_label0.grid(column=3, row=3, sticky='w')
+        self.delay_label0.grid(column=3, row=4, sticky='w')
 
         self.interval_label = Label(self.scurve_frame, text="LV1A interval:")
-        self.interval_label.grid(column=1, row=4, sticky='w')
+        self.interval_label.grid(column=1, row=5, sticky='w')
 
         self.interval_entry = Entry(self.scurve_frame, width=5)
-        self.interval_entry.grid(column=2, row=4, sticky='e')
+        self.interval_entry.grid(column=2, row=5, sticky='e')
         self.interval_entry.insert(0, self.interval)
 
         self.interval_label0 = Label(self.scurve_frame, text="0-4000")
-        self.interval_label0.grid(column=3, row=4, sticky='w')
+        self.interval_label0.grid(column=3, row=5, sticky='w')
 
         self.pulsestretch_label = Label(self.scurve_frame, text="Pulse stretch:")
-        self.pulsestretch_label.grid(column=1, row=5, sticky='w')
+        self.pulsestretch_label.grid(column=1, row=6, sticky='w')
 
         self.pulsestretch_entry = Entry(self.scurve_frame, width=5)
-        self.pulsestretch_entry.grid(column=2, row=5, sticky='e')
+        self.pulsestretch_entry.grid(column=2, row=6, sticky='e')
         self.pulsestretch_entry.insert(0, self.pulsestretch)
 
         self.pulsestretch_label0 = Label(self.scurve_frame, text="0-7")
-        self.pulsestretch_label0.grid(column=3, row=5, sticky='w')
+        self.pulsestretch_label0.grid(column=3, row=6, sticky='w')
 
         self.latency_label = Label(self.scurve_frame, text="Latency:")
-        self.latency_label.grid(column=1, row=6, sticky='w')
+        self.latency_label.grid(column=1, row=7, sticky='w')
 
         self.latency_entry = Entry(self.scurve_frame, width=5)
-        self.latency_entry.grid(column=2, row=6, sticky='e')
+        self.latency_entry.grid(column=2, row=7, sticky='e')
         self.latency_entry.insert(0, self.latency)
 
         self.latency_label0 = Label(self.scurve_frame, text="0-1023")
-        self.latency_label0.grid(column=3, row=6, sticky='w')
+        self.latency_label0.grid(column=3, row=7, sticky='w')
 
         self.calphi_label = Label(self.scurve_frame, text="Cal Phi:")
-        self.calphi_label.grid(column=1, row=7, sticky='w')
+        self.calphi_label.grid(column=1, row=8, sticky='w')
 
         self.calphi_entry = Entry(self.scurve_frame, width=5)
-        self.calphi_entry.grid(column=2, row=7, sticky='e')
+        self.calphi_entry.grid(column=2, row=8, sticky='e')
         self.calphi_entry.insert(0, self.calphi)
 
         self.calphi_label0 = Label(self.scurve_frame, text="0-7")
-        self.calphi_label0.grid(column=3, row=7, sticky='w')
+        self.calphi_label0.grid(column=3, row=8, sticky='w')
 
         self.arm_dac_label = Label(self.scurve_frame, text="ARM_DAC:")
-        self.arm_dac_label.grid(column=1, row=8, sticky='w')
+        self.arm_dac_label.grid(column=1, row=9, sticky='w')
 
         self.arm_dac_entry = Entry(self.scurve_frame, width=5)
-        self.arm_dac_entry.grid(column=2, row=8, sticky='e')
+        self.arm_dac_entry.grid(column=2, row=9, sticky='e')
         self.arm_dac_entry.insert(0, self.arm_dac)
 
         self.arm_dac_label0 = Label(self.scurve_frame, text="0-254")
-        self.arm_dac_label0.grid(column=3, row=8, sticky='w')
+        self.arm_dac_label0.grid(column=3, row=9, sticky='w')
 
         self.start_cal_dac_label = Label(self.scurve_frame, text="start CAL_DAC:")
-        self.start_cal_dac_label.grid(column=1, row=9, sticky='w')
+        self.start_cal_dac_label.grid(column=1, row=10, sticky='w')
 
         self.start_cal_dac_entry = Entry(self.scurve_frame, width=5)
-        self.start_cal_dac_entry.grid(column=2, row=9, sticky='e')
+        self.start_cal_dac_entry.grid(column=2, row=10, sticky='e')
         self.start_cal_dac_entry.insert(0, self.start_cal_dac)
 
         self.start_cal_dac_label0 = Label(self.scurve_frame, text="0-254")
-        self.start_cal_dac_label0.grid(column=3, row=9, sticky='w')
+        self.start_cal_dac_label0.grid(column=3, row=10, sticky='w')
 
         self.stop_cal_dac_label = Label(self.scurve_frame, text="stop CAL_DAC:")
-        self.stop_cal_dac_label.grid(column=1, row=10, sticky='w')
+        self.stop_cal_dac_label.grid(column=1, row=11, sticky='w')
 
         self.stop_cal_dac_entry = Entry(self.scurve_frame, width=5)
-        self.stop_cal_dac_entry.grid(column=2, row=10, sticky='e')
+        self.stop_cal_dac_entry.grid(column=2, row=11, sticky='e')
         self.stop_cal_dac_entry.insert(0, self.stop_cal_dac)
 
         self.stop_cal_dac_label0 = Label(self.scurve_frame, text="0-254  max diff 40")
-        self.stop_cal_dac_label0.grid(column=3, row=10, sticky='w')
+        self.stop_cal_dac_label0.grid(column=3, row=11, sticky='w')
 
         self.scurve0_button = Button(self.scurve_frame, text="RUN S-curve", command=self.run_scurve, width=bwidth)
         self.scurve0_button.grid(column=1, sticky='e', columnspan=2)
@@ -1020,6 +1031,8 @@ class VFAT3_GUI:
         if self.stop_channel < self.start_channel:
             print "Stop channel should be higher than start channel."
             error += 1
+        self.channel_step = int(self.ch_step_entry.get())
+        error += self.check_value_range("Channel Step Size", self.channel_step, 0, 127)
         self.delay = int(self.delay_entry.get())
         error += self.check_value_range("Delay", self.delay, 0, 4000)
         self.interval = int(self.interval_entry.get())
@@ -1045,7 +1058,7 @@ class VFAT3_GUI:
         if error == 0:
             text = "->Running S-curve"
             self.add_to_interactive_screen(text)
-            scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel, self.stop_channel], configuration="yes", dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
+            scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel, self.stop_channel], ch_step=self.channel_step, configuration="yes", dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
         else:
             print "Aborting s-curve run."
 
