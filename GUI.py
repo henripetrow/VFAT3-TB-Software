@@ -21,6 +21,8 @@ from routines import *
 
 class VFAT3_GUI:
     def __init__(self, master):
+
+        # Communication mode selection.
         if len(sys.argv) >= 2:
             if sys.argv[1] == '-s':
                 self.interfaceFW = FW_interface(1)      # 1 - Simulation mode
@@ -41,8 +43,9 @@ class VFAT3_GUI:
         else:
             self.interfaceFW = FW_interface(0)          # 0 - IPbus mode
             self.mode = 0
-        self.SC_encoder = SC_encode()
-        self.register = register
+
+
+        # Local variables.
         self.channel_register = 0
         self.value = ""
         self.write_BCd_as_fillers = 0
@@ -50,6 +53,8 @@ class VFAT3_GUI:
         self.adc0B = -330.2
         self.adc1M = 2.217
         self.adc1B = -479.0
+        self.cal_dac_fc0M = 0
+        self.cal_dac_fc0B = 0
         self.cal_dac_fc_values = [0]*256
         self.Iref = 0
         self.CalPulseLV1A_latency = 4
@@ -58,11 +63,15 @@ class VFAT3_GUI:
         self.transaction_ID = 0
         self.interactive_output_file = "./data/FPGA_instruction_list.dat"
         self.data_folder = "./results"
-        s = ttk.Style()
-        s.configure('My.TFrame', background='white')
         self.COM_port = "/dev/ttyUSB0"
         self.register_mode = 'r'
         self.register_names = []
+
+        # Initiations
+        self.SC_encoder = SC_encode()
+        self.register = register
+        s = ttk.Style()
+        s.configure('My.TFrame', background='white')
         self.master = master
         # self.master.wm_iconbitmap('/home/a0312687/VFAT3-TB-Software/data/LUT_logo.ico')
         self.master.title("GUI for the VFAT3 test system.")
@@ -70,6 +79,8 @@ class VFAT3_GUI:
         self.master.minsize(width=680, height=450)
         self.master.configure(background='white')
         self.interfaceFW.start_ext_adc()
+
+
         # ######MENUBAR#################################
 
         # create a top level menu
@@ -256,26 +267,32 @@ class VFAT3_GUI:
         self.cal_button = Button(self.calibration_frame, text="CAL_DAC to fC", command=lambda: scan_cal_dac_fc(self, "CAL_DAC scan, fC"), width=bwidth)
         self.cal_button.grid(column=1, row=2, sticky='e')
 
+        self.cal_button = Button(self.calibration_frame, text="Save Calibration", command=lambda: self.save_calibration_values_to_file(), width=bwidth)
+        self.cal_button.grid(column=1, row=3, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Load Calibration", command=lambda: self.load_calibration_values_from_file(), width=bwidth)
+        self.cal_button.grid(column=2, row=3, sticky='e')
+
         self.FE_button = Button(self.calibration_frame, text="Set FE nominal values", command=lambda: self.set_fe_nominal_values(), width=bwidth)
-        self.FE_button.grid(column=1, row=3, sticky='e')
+        self.FE_button.grid(column=1, row=4, sticky='e')
 
         self.cal_button = Button(self.calibration_frame, text="Channel Calibration", command=lambda: adjust_local_thresholds(self), width=bwidth)
-        self.cal_button.grid(column=1, row=4, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth)
         self.cal_button.grid(column=1, row=5, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="Gain meas. ext ADC", command=lambda: gain_measurement(self,adc="ext"), width=bwidth)
-        self.cal_button.grid(column=1, row=6, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="Gain meas. int ADC0", command=lambda: gain_measurement(self,adc="int0"), width=bwidth)
-        self.cal_button.grid(column=1, row=7, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="Gain meas. int ADC1", command=lambda: gain_measurement(self,adc="int1"), width=bwidth)
-        self.cal_button.grid(column=1, row=8, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="Production test", command=lambda: self.run_production_tests(), width=bwidth)
-        self.cal_button.grid(column=1, row=9, sticky='e')
+        # self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth)
+        # self.cal_button.grid(column=1, row=5, sticky='e')
+        #
+        # self.cal_button = Button(self.calibration_frame, text="Gain meas. ext ADC", command=lambda: gain_measurement(self,adc="ext"), width=bwidth)
+        # self.cal_button.grid(column=1, row=6, sticky='e')
+        #
+        # self.cal_button = Button(self.calibration_frame, text="Gain meas. int ADC0", command=lambda: gain_measurement(self,adc="int0"), width=bwidth)
+        # self.cal_button.grid(column=1, row=7, sticky='e')
+        #
+        # self.cal_button = Button(self.calibration_frame, text="Gain meas. int ADC1", command=lambda: gain_measurement(self,adc="int1"), width=bwidth)
+        # self.cal_button.grid(column=1, row=8, sticky='e')
+        #
+        # self.cal_button = Button(self.calibration_frame, text="Production test", command=lambda: self.run_production_tests(), width=bwidth)
+        # self.cal_button.grid(column=1, row=9, sticky='e')
 
         self.cal_button = Button(self.calibration_frame, text="X-ray routine cont", command=lambda: self.run_xray_tests(), width=bwidth)
         self.cal_button.grid(column=1, row=10, sticky='e')
@@ -284,13 +301,13 @@ class VFAT3_GUI:
         self.cal_button.grid(column=1, row=11, sticky='e')
 
         self.cal_button = Button(self.calibration_frame, text="Load registers", command=lambda: self.load_register_values_from_file(), width=bwidth)
-        self.cal_button.grid(column=1, row=12, sticky='e')
+        self.cal_button.grid(column=2, row=11, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="W/R all registers", command=lambda: self.test_registers(), width=bwidth)
-        self.cal_button.grid(column=1, row=13, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="Test data packets", command=lambda: test_data_packet(self), width=bwidth)
-        self.cal_button.grid(column=1, row=14, sticky='e')
+        # self.cal_button = Button(self.calibration_frame, text="W/R all registers", command=lambda: self.test_registers(), width=bwidth)
+        # self.cal_button.grid(column=1, row=13, sticky='e')
+        #
+        # self.cal_button = Button(self.calibration_frame, text="Test data packets", command=lambda: test_data_packet(self), width=bwidth)
+        # self.cal_button.grid(column=1, row=14, sticky='e')
         # ###############MISC TAB #######################################
 
         self.sync_button = Button(self.misc_frame, text="Sync", command=lambda: self.send_sync(), width=bwidth)
@@ -627,6 +644,36 @@ class VFAT3_GUI:
         self.xray_routine_flag = 0
         self.data_dir_entry.delete(0, 'end')
         self.data_dir_entry.insert(0, self.data_folder)
+
+    def save_calibration_values_to_file(self):
+        filename = tkFileDialog.asksaveasfilename(filetypes=[('Register file', '*.reg')])
+        if filename != "":
+            self.save_calibration_values_to_file_execute(filename)
+
+    def save_calibration_values_to_file_execute(self, filename):
+        with open(filename, "w") as output_file:
+            output_file.write("adc0M/D:adc0B/D:adc1M/D:adc1B/D:cal_dac_fc0M/D:al_dac_fc0B/D:Iref/I\n")
+            output_file.write('%f\t%f\t%f\t%f\t%f\t%f\t%d\n' % (self.adc0M, self.adc0B, self.adc1M, self.adc1B, self.cal_dac_fc0M, self.cal_dac_fc0B, self.register[134].Iref[0]))
+
+    def load_calibration_values_from_file(self):
+        filename = tkFileDialog.askopenfilename(filetypes=[('Register file', '*.reg')])
+        if filename != "":
+            with open(filename, 'r') as f:
+                for i, line in enumerate(f):
+
+                    if i == 1:
+                        line = line.rstrip()
+                        line = [splits for splits in line.split("\t") if splits is not ""]
+                        self.adc0M = float(line[0])
+                        self.adc0B = float(line[1])
+                        self.adc1M = float(line[2])
+                        self.adc1B = float(line[3])
+                        self.cal_dac_fc0M = float(line[4])
+                        self.cal_dac_fc0B = float(line[5])
+                        self.register[134].Iref[0] = int(line[6])
+                        self.write_register(134)
+        else:
+            print "Invalid file. Abort."
 
     def save_register_values_to_file(self):
         filename = tkFileDialog.asksaveasfilename(filetypes=[('Register file', '*.reg')])

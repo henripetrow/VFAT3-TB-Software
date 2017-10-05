@@ -65,6 +65,8 @@ def scan_cal_dac_fc(obj, scan_name):
 
     dac_values, base_values, step_values, charge_values = cal_dac_steps(obj)
 
+    calc_cal_dac_conversion_factor(obj, dac_values, charge_values)
+
     # Plot the results.
     fig = plt.figure(1)
     plt.plot(dac_values, charge_values, label="CAL_DAC")
@@ -95,6 +97,12 @@ def scan_cal_dac_fc(obj, scan_name):
     run_time = (stop - start) / 60
     text = "Scan duration: %f min\n" % run_time
     obj.add_to_interactive_screen(text)
+
+
+def calc_cal_dac_conversion_factor(obj, dac_values, charge_values):
+    obj.cal_dac_fc0M = (charge_values[-2]-charge_values[1])/(dac_values[-2]-dac_values[1])
+    obj.cal_dac_fc0B = charge_values[0]-obj.cal_dac_fc0M*dac_values[0]
+    print "CAL_DAC to fC: %f + %f" % (obj.cal_dac_fc0M, obj.cal_dac_fc0B)
 
 
 def iref_adjust(obj):
@@ -325,7 +333,7 @@ def gain_measurement(obj):
         time.sleep(1)
         extADC.append(obj.interfaceFW.ext_adc())
         # if not isinstance(extADC,(int, long)):
-        #extADC.append(0)
+        # extADC.append(0)
         ADC0.append(obj.read_adc0())
         ADC1.append(obj.read_adc1())
         output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, ch=[41, 46], configuration="yes",
