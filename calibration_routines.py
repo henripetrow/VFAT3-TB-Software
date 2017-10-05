@@ -51,17 +51,8 @@ def cal_dac_steps(obj):
         print "Difference: %f mV, CHARGE: %f fC" % (difference, charge)
         print "--------------------------------"
 
-    # print dac_values
-    # print charge_values
     obj.cal_dac_fc_values = charge_values
 
-    # plt.plot(dac_values, charge_values, label='CAL_DAC')
-    # plt.legend()
-    # plt.xlabel('DAC[counts]')
-    # plt.ylabel('Charge [fC]')
-    # plt.title('255-CAL_DAC vs. Charge')
-    # plt.grid(True)
-    # plt.show()
     return dac_values, base_values, step_values, charge_values
 
 
@@ -84,9 +75,6 @@ def scan_cal_dac_fc(obj, scan_name):
     plt.grid(True)
     fig.show()
 
-    # Save the results.
-    #dac_values.insert(0,"DAC count 255-CAL_DAC")
-    #charge_values.insert(0,"Charge [fC]")
 
     data = [dac_values, charge_values]
     timestamp = time.strftime("%Y%m%d%H%M")

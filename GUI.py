@@ -330,12 +330,9 @@ class VFAT3_GUI:
         self.cont_trig_button = Button(self.misc_frame, text="Continuous CalPulses", command=lambda: continuous_trigger(self), width=bwidth)
         self.cont_trig_button.grid(column=1, row=9, sticky='e')
 
-
-
         self.cal_button = Button(self.misc_frame, text="Production test",
                                  command=lambda: self.run_production_tests(), width=bwidth)
         self.cal_button.grid(column=1, row=10, sticky='e')
-
 
         self.cont_trig_button = Button(self.misc_frame, text="Concecutive Triggers", command=lambda: self.run_concecutive_triggers(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=11, sticky='e')
@@ -364,17 +361,6 @@ class VFAT3_GUI:
 
         self.cont_trig_button = Button(self.misc_frame, text="Sync FPGA", command=lambda: self.send_reset(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=15, sticky='e')
-
-        # self.scurve_button = Button(self.misc_frame, text="S-curve", command=self.one_ch_scurve, width=bwidth)
-        # self.scurve_button.grid(column=1, row=11, sticky='e')
-        #
-        # self.scurve_label0 = Label(self.misc_frame, text="Ch:")
-        # self.scurve_label0.grid(column=2, row=11, sticky='e')
-        #
-        # self.scurve_entry = Entry(self.misc_frame, width=5)
-        # self.scurve_entry.grid(column=3, row=11, sticky='e')
-        # self.scurve_entry.insert(0, self.scurve_channel)
-
 
         # ############### S-curve tab #########################################
 
@@ -568,10 +554,10 @@ class VFAT3_GUI:
                 "SD_I_BFCAS scan",
                 "CAL_DAC scan",
                 "CAL_DAC scan, fC",
-                #"Counter Resets"
-               # "S-curve",
-               # "S-curve all ch",
-               # "S-curve all ch cont."
+                # "Counter Resets"
+                # "S-curve",
+                # "S-curve all ch",
+                # "S-curve all ch cont."
                 ]
         self.chosen_scan = self.scan_options[0]
         self.scan_variable = StringVar(master)
@@ -621,7 +607,7 @@ class VFAT3_GUI:
         self.close_button = Button(self.ctrlButtons_frame, text="Close", command=master.quit)
         self.close_button.grid(column=2, row=0)
 
-        #self.send_reset()
+        self.send_reset()
 
 
 ####################################################################################
@@ -632,7 +618,7 @@ class VFAT3_GUI:
 # #################### GENERAL GUI FUNCTIONS ############################
 
     def change_directory(self):
-        self.data_folder =self.data_dir_entry.get()
+        self.data_folder = self.data_dir_entry.get()
         self.xray_routine_flag = 0
 
     def ask_directory(self):
@@ -658,7 +644,6 @@ class VFAT3_GUI:
 
     def load_register_values_from_file(self):
         filename = tkFileDialog.askopenfilename(filetypes=[('Register file', '*.reg')])
-        error_counter = 1
         if filename != "":
             # Check the validity of the file.
             prev_reg_nr = -1
@@ -691,7 +676,6 @@ class VFAT3_GUI:
                     write_data = line[1]
                     self.register[reg_nr].change_values(write_data)
                     self.write_register(reg_nr)
-
         else:
             filler_16bits = [0]*16
             full_data = []
@@ -724,10 +708,10 @@ class VFAT3_GUI:
 
         if os.path.isfile(filename):
             # Calculate the number of lines to verify valid data.
-            with open(filename,'r') as f:
+            with open(filename, 'r') as f:
                 for nr_lines, l in enumerate(f):
                     pass
-            if  (nr_lines + 1) == 128:
+            if (nr_lines + 1) == 128:
                 with open(filename, 'r') as f:
                     for reg, line in enumerate(f):
                         line = line.rstrip()
