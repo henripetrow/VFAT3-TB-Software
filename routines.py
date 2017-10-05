@@ -20,15 +20,10 @@ from generator import *
 def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes", dac_range=[200, 240], delay=10, bc_between_calpulses=4000, pulsestretch=7, latency=0, cal_phi=0,folder="scurve"):
     start = time.time()
 
-    # if obj.Iref == 0:
-    #     # Adjust the global reference current of the chip.
-    #     iref_adjust(obj)
-
     modified = scan_name.replace(" ", "_")
     file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
 
-    # scan either all of the channels or just the oe defined by ch.
-
+    # scan either all of the channels or just the one defined by ch.
     start_ch = ch[0]
     stop_ch = ch[1]
 
@@ -36,10 +31,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     stop_dac_value = dac_range[1]
     samples_per_dac_value = 100
 
-
-
     # Create the instructions for the specified scan values.
-
     steps = stop_dac_value - start_dac_value
     if configuration == "yes":
         instruction_text = []
@@ -57,7 +49,6 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         instruction_text.append("1 Send SCOnly")
 
         # Write the instructions to the file.
-
         output_file_name = "./routines/%s/instruction_list.txt" % modified
         with open(output_file_name, "w") as mfile:
             for item in instruction_text:
@@ -110,13 +101,11 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     charge_values = obj.cal_dac_fc_values[start_dac_value:stop_dac_value]
     charge_values.reverse()
 
-    # if ch = "all":
     cal_dac_values = range(start_dac_value, stop_dac_value)
     cal_dac_values.reverse()
     cal_dac_values[:] = [255 - x for x in cal_dac_values]
     all_ch_data = []
     all_ch_data.append(["", "255-CAL_DAC"])
-    # all_ch_data.append(["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35])
     data_line = []
     data_line.append("Channel")
     data_line.extend(cal_dac_values)
@@ -124,18 +113,11 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     for k in range(start_ch, stop_ch+1, ch_step):
         print "Channel: %d" % k
         while True:
-            # Set calibration to right channel.
-            # print "Set register."
             obj.register[k].cal[0] = 1
             obj.write_register(k)
-            # time.sleep(0.1)
-            # print "Register set."
+
             scurve_data = []
-            # Run the predefined routine.
-            # print "launch routine"
             output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1)
-            # print "routine done."
-            # Check the received data from the routine.
             if output[0] == "Error":
                 text = "%s: %s\n" % (output[0], output[1])
                 obj.add_to_interactive_screen(text)
@@ -156,23 +138,18 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             if len(scurve_data) != steps:
                 print "Not enough values, trying again."
                 continue
-            # if len(scurve_data) == 20 and scurve_data[-3] != 0:
-            #     break
             if len(scurve_data) == steps:
                 break
 
         # Unset the calibration to the channel.
-        # print "unset register."
         obj.register[k].cal[0] = 0
-        # print "register unset."
         obj.write_register(k)
         # time.sleep(0.1)
 
         # Modify the decoded data.
         saved_data = []
         saved_data.append(k)
-        #scurve = scurve_data[2:]
-        #scurve.reverse()
+
         saved_data.extend(scurve_data)
         all_ch_data.append(saved_data)
 
@@ -276,6 +253,7 @@ def scurve_analyze(obj, scurve_data,folder):
     #fig.savefig("enc_channels.png")
     return meanThr
 
+
 def drawHisto(hist, canv, filename):
     canv.cd()
     hist.SetLineWidth(2)
@@ -307,85 +285,6 @@ def fitScurve(scurve_g):
     return bestFit_f
 
 
-def scurve_execute(obj, scan_name):
-
-    start = time.time()
-    channel = 127
-    # Set calibration to right channel.
-    obj.register[channel].cal[0] = 1
-    obj.write_register(channel)
-
-    obj.set_fe_nominal_values()
-
-    obj.register[130].DT[0] = 0
-    obj.write_register(130)
-
-    # register[138].CAL_MODE[0] = 2
-    # obj.write_register(138)
-
-    obj.register[132].SEL_COMP_MODE[0] = 0
-    obj.write_register(132)
-
-    # obj.register[134].Iref[0] = 27
-    # obj.write_register(134)
-
-    #obj.register[135].ZCC_DAC[0] = 10
-    #obj.register[135].ARM_DAC[0] = 100
-    #obj.write_register(135)
-
-    obj.register[139].CAL_FS[0] = 0
-    obj.register[139].CAL_DUR[0] = 200
-    obj.write_register(139)
-
-    obj.register[65535].RUN[0] = 1
-    obj.write_register(65535)
-    time.sleep(1)
-
-    obj.register[129].ST[0] = 0
-    obj.register[129].PS[0] = 7
-    obj.write_register(129)
-
-    modified = scan_name.replace(" ", "_")
-    file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
-    scurve_data = []
-
-    output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port)
-    if output[0] == "Error":
-        text = "%s: %s\n" % (output[0], output[1])
-        obj.add_to_interactive_screen(text)
-    else:
-        hits = 0
-        dac = 38
-        for i in output[3]:
-            if i.type == "IPbus":
-                dac -= 1
-                scurve_data.append([dac, hits])
-                hits = 0
-            elif i.type == "data_packet":
-                if i.data[127 - channel] == "1":
-                    hits += 1
-
-    text = "CAL_DAC|HITS \n"
-    obj.add_to_interactive_screen(text)
-    outF = open('routines/scurveData.dat','w')
-    outF.write('CALDAC/I:NHits/I\n')
-    for k in scurve_data[2:]:
-        text = "%d %d\n" % (k[0], k[1])
-        outF.write("%d\t%d\n" % (k[0], k[1]))
-        obj.add_to_interactive_screen(text)
-        pass
-    outF.close()
-
-
-    obj.register[channel].cal[0] = 0
-    obj.write_register(channel)
-
-    stop = time.time()
-    run_time = (stop - start) / 60
-    text = "Run time (minutes): %f" % run_time
-    obj.add_to_interactive_screen(text)
-
-
 def scan_execute(obj, scan_name, plot=1,):
 
     start = time.time()
@@ -406,7 +305,7 @@ def scan_execute(obj, scan_name, plot=1,):
         #obj.add_to_interactive_screen(text)
         adc_flag = 0
         #text = "%s|ADC0|ADC1|\n" % scan_name[:-5]
-       # obj.add_to_interactive_screen(text)
+        # obj.add_to_interactive_screen(text)
         reg_value = 0
         for i in output[0]:
             if i.type_ID == 0:
@@ -424,8 +323,6 @@ def scan_execute(obj, scan_name, plot=1,):
                     adc_flag = 0
         for i in output[4]:
             print i
-
-
 
     # Save the results.
     data = [reg_values,scan_values0,scan_values1]
@@ -488,118 +385,6 @@ def scurve_analyze_one_ch(scurve_data):
 
     return thr_h
 
-
-def scurve_analyze_old(obj, scurve_data, folder):
-    timestamp = time.strftime("%d.%m.%Y %H:%M")
-    full_data = []
-    mean_list = []
-    rms_list = []
-    full_data.append([""])
-    full_data.append(["Differential data"])
-    full_data.append(["", "255-CAL_DAC"])
-    # full_data.append(
-    #    ["Channel", 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, "mean", "RMS"])
-    dac_values = scurve_data[1][1:]
-
-    fig = plt.figure(figsize=(10, 20))
-    sub1 = plt.subplot(411)
-
-    for i in range(2, 130):
-        diff = []
-
-        mean_calc = 0
-        summ = 0
-        data = scurve_data[i][1:]
-        channel = scurve_data[i][0]
-
-        diff.append(channel)
-        diff.append("")
-        l = 0
-        for j in data:
-            if l != 0:
-                diff_value = j - previous_value
-                diff.append(diff_value)
-                mean_calc += dac_values[l] * diff_value
-                summ += diff_value
-            previous_value = j
-            l += 1
-        if summ == 0:
-            mean = 0
-        else:
-            mean = mean_calc / float(summ)
-        mean_list.append(mean)
-        l = 1
-        rms = 0
-        for r in diff[2:]:
-            rms += r * (mean - dac_values[l]) ** 2
-            l += 1
-
-        if summ == 0:
-            rms = 0
-        else:
-            rms = math.sqrt(rms / summ)
-        rms_list.append(rms)
-        diff.append(mean)
-        diff.append(rms)
-        full_data.append(diff)
-        plt.plot(dac_values, data)
-
-    rms_mean = numpy.mean(rms_list)
-    rms_rms = numpy.std(rms_list)
-
-    mean_mean = numpy.mean(mean_list)
-    mean_rms = numpy.std(mean_list)
-
-    sub1.set_xlabel('255-CAL_DAC')
-    sub1.set_ylabel('%')
-    sub1.set_title('S-curves of all channels')
-    sub1.grid(True)
-
-    text = "%s \n S-curves, 128 channels, N=100, HG, 25 ns." % timestamp
-    sub1.text(25, 140, text, horizontalalignment='center', verticalalignment='center')
-
-    sub2 = plt.subplot(413)
-    sub2.plot(range(0, 128), rms_list)
-    sub2.set_xlabel('Channel')
-    sub2.set_ylabel('RMS')
-    sub2.set_title('RMS of all channels')
-    sub2.grid(True)
-    text = "mean: %.2f RMS: %.2f" % (rms_mean, rms_rms)
-    y_placement = max(rms_list) - 0.05
-    sub2.text(10, y_placement, text, horizontalalignment='center', verticalalignment='center', bbox=dict(alpha=0.5))
-
-    sub3 = plt.subplot(412)
-    sub3.plot(range(0, 128), mean_list)
-    sub3.set_xlabel('Channel')
-    sub3.set_ylabel('255-CAL_DAC')
-    sub3.set_title('mean of all channels')
-    sub3.grid(True)
-    text = "Mean: %.2f RMS: %.2f" % (mean_mean, mean_rms)
-    y_placement = max(mean_list) - 1
-    sub3.text(10, y_placement, text, horizontalalignment='center', verticalalignment='center', bbox=dict(alpha=0.5))
-
-    sub4 = plt.subplot(427)
-    sub4.hist(mean_list, bins=30)
-    sub3.grid(True)
-
-
-    sub5 = plt.subplot(428)
-    sub5.hist(rms_list, bins=30)
-    sub3.grid(True)
-
-    fig.subplots_adjust(hspace=.5)
-
-    timestamp = time.strftime("%Y%m%d_%H%M")
-
-    fig.savefig("%s%sS-curve_plot.pdf" % (folder, timestamp))
-
-    with open("%s%sS-curve_data.csv" % (folder, timestamp), "ab") as f:
-        writer = csv.writer(f)
-        writer.writerows(full_data)
-
-    text = "Results were saved to the folder:\n %s \n" % folder
-    obj.add_to_interactive_screen(text)
-    return 0
 
 
 
