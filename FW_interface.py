@@ -78,21 +78,18 @@ class FW_interface:
         glib = GLIB()
         counter = 0
         while True:
+            time.sleep(1)
             if counter == 10:
                 print "No answer from ADC."
                 print "Are ADC inputs connected?"
                 rvalue = "Error"
                 break
             if self.connection_mode == 0:
-                glib.set("ext_adc", 1)
-            time.sleep(0.1)
-            if self.connection_mode == 0:
                 value = glib.get("ext_adc")
             if value != 0:
                 rvalue = value * 0.0625  # ext ADC LSB is 62.5 uV
-                print "value is %i"%value
                 break
-            print "counter is %i"%counter
+            # print "counter is %i"%counter
             print "ADC returned 0, trying again."
             counter += 1
         return rvalue
