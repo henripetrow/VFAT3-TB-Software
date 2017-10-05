@@ -55,14 +55,58 @@ def cal_dac_steps(obj):
     # print charge_values
     obj.cal_dac_fc_values = charge_values
 
-    plt.plot(dac_values, charge_values, label='CAL_DAC')
-    plt.legend()
-    plt.xlabel('DAC[counts]')
-    plt.ylabel('Charge [fC]')
-    plt.title('255-CAL_DAC vs. Charge')
-    plt.grid(True)
-    plt.show()
+    # plt.plot(dac_values, charge_values, label='CAL_DAC')
+    # plt.legend()
+    # plt.xlabel('DAC[counts]')
+    # plt.ylabel('Charge [fC]')
+    # plt.title('255-CAL_DAC vs. Charge')
+    # plt.grid(True)
+    # plt.show()
     return dac_values, base_values, step_values, charge_values
+
+
+def scan_cal_dac_fc(obj, scan_name):
+
+    start = time.time()
+
+    modified = scan_name.replace(" ", "_")
+    modified = modified.replace(",", "_")
+
+    dac_values, base_values, step_values, charge_values = cal_dac_steps(obj)
+
+    # Plot the results.
+    fig = plt.figure(1)
+    plt.plot(dac_values, charge_values, label="CAL_DAC")
+    plt.ylabel('Charge [fC]')
+    plt.xlabel('DAC counts (255-CAL_DAC)')
+    plt.legend()
+    plt.title(modified)
+    plt.grid(True)
+    fig.show()
+
+    # Save the results.
+    #dac_values.insert(0,"DAC count 255-CAL_DAC")
+    #charge_values.insert(0,"Charge [fC]")
+
+    data = [dac_values, charge_values]
+    timestamp = time.strftime("%Y%m%d%H%M")
+    folder = "./results/"
+    filename = "%s%s_%s_scan_data.dat" % (folder, timestamp, modified)
+
+    outF = open(filename, "w")
+    outF.write("dacValue/D:baseV/D:stepV/D:Q/D\n")
+    for i,dacVal in enumerate(dac_values):
+        outF.write('%f\t%f\t%f\t%f\n'%(dacVal,base_values[i],step_values[i],charge_values[i]))
+        pass
+    outF.close()
+    text = "Results were saved to the file:\n %s \n" % filename
+
+    obj.add_to_interactive_screen(text)
+
+    stop = time.time()
+    run_time = (stop - start) / 60
+    text = "Scan duration: %f min\n" % run_time
+    obj.add_to_interactive_screen(text)
 
 
 def iref_adjust(obj):
@@ -133,7 +177,7 @@ def adc_calibration(obj):
     int_adc1_values = []
     ext_adc_values = []
     dac_values = []
-    for i in range(0, 252, 1):
+    for i in range(0, 252, 5):
         value = i
         dac_values.append(value)
         print "->Measuring DAC value %d" % value

@@ -253,7 +253,7 @@ class VFAT3_GUI:
         self.adc_calibration_button = Button(self.calibration_frame, text="ADC calibration", command=lambda: adc_calibration(self), width=bwidth)
         self.adc_calibration_button.grid(column=1, row=1, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="CAL_DAC to fC", command=lambda: cal_dac_steps(self), width=bwidth)
+        self.cal_button = Button(self.calibration_frame, text="CAL_DAC to fC", command=lambda: scan_cal_dac_fc(self, "CAL_DAC scan, fC"), width=bwidth)
         self.cal_button.grid(column=1, row=2, sticky='e')
 
         self.FE_button = Button(self.calibration_frame, text="Set FE nominal values", command=lambda: self.set_fe_nominal_values(), width=bwidth)
@@ -1265,7 +1265,7 @@ class VFAT3_GUI:
         if self.chosen_scan == "Counter Resets":
             self.counter_resets_execute(scan_name)
         elif self.chosen_scan == "CAL_DAC scan, fC":
-            scan_cal_dac_fc(self, scan_name)
+            scan_cal_dac_fc(self, "CAL_DAC scan, fC")
         elif self.chosen_scan == "S-curve":
             scurve_execute(self, scan_name)
         elif self.chosen_scan == "S-curve all ch":
