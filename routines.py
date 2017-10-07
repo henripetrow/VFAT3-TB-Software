@@ -301,11 +301,7 @@ def scan_execute(obj, scan_name, plot=1,):
         text = "%s: %s\n" % (output[0], output[1])
         obj.add_to_interactive_screen(text)
     else:
-        #text = "DAC scan values:\n"
-        #obj.add_to_interactive_screen(text)
         adc_flag = 0
-        #text = "%s|ADC0|ADC1|\n" % scan_name[:-5]
-        # obj.add_to_interactive_screen(text)
         reg_value = 0
         for i in output[0]:
             if i.type_ID == 0:
@@ -314,10 +310,8 @@ def scan_execute(obj, scan_name, plot=1,):
                     adc_flag = 1
                 else:
                     second_adc_value = int(''.join(map(str, i.data)), 2)
-                    #text = "%d %d %d\n" % (reg_value, first_adc_value, second_adc_value)
-                    #obj.add_to_interactive_screen(text)
-                    scan_values0.append(first_adc_value)
-                    scan_values1.append(second_adc_value)
+                    scan_values0.append(obj.adc0M * first_adc_value + obj.adc0B)
+                    scan_values1.append(obj.adc1M * second_adc_value + obj.adc1B)
                     reg_values.append(reg_value)
                     reg_value += 1
                     adc_flag = 0
@@ -350,13 +344,13 @@ def scan_execute(obj, scan_name, plot=1,):
         fig = plt.figure(1)
         plt.plot(x, scan_values0, label="ADC0")
         plt.plot(x, scan_values1, label="ADC1")
-        plt.ylabel('ADC counts')
+        plt.ylabel('mV')
         plt.xlabel('DAC counts')
         plt.legend()
         plt.title(modified)
         plt.grid(True)
         fig.savefig(filename)
-        plt.close(fig)
+        #plt.close(fig)
 
     stop = time.time()
     run_time = (stop - start) / 60

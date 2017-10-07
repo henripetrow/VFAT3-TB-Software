@@ -49,14 +49,14 @@ class VFAT3_GUI:
         self.channel_register = 0
         self.value = ""
         self.write_BCd_as_fillers = 0
-        self.adc0M = 1.916
-        self.adc0B = -330.2
-        self.adc1M = 2.217
-        self.adc1B = -479.0
-        self.cal_dac_fc0M = 0
-        self.cal_dac_fc0B = 0
+        self.adc0M = 0.0
+        self.adc0B = 0.0
+        self.adc1M = 0.0
+        self.adc1B = 0.0
+        self.cal_dac_fcM = 0.0
+        self.cal_dac_fcB = 0.0
         self.cal_dac_fc_values = [0]*256
-        self.Iref = 0
+        self.Iref_cal = 0
         self.CalPulseLV1A_latency = 4
         self.xray_routine_flag = 0
         self.scurve_channel = 0
@@ -652,8 +652,8 @@ class VFAT3_GUI:
 
     def save_calibration_values_to_file_execute(self, filename):
         with open(filename, "w") as output_file:
-            output_file.write("adc0M/D:adc0B/D:adc1M/D:adc1B/D:cal_dac_fc0M/D:al_dac_fc0B/D:Iref/I\n")
-            output_file.write('%f\t%f\t%f\t%f\t%f\t%f\t%d\n' % (self.adc0M, self.adc0B, self.adc1M, self.adc1B, self.cal_dac_fc0M, self.cal_dac_fc0B, self.register[134].Iref[0]))
+            output_file.write("adc0M/D:adc0B/D:adc1M/D:adc1B/D:cal_dac_fcM/D:cal_dac_fcB/D:Iref/I\n")
+            output_file.write('%f\t%f\t%f\t%f\t%f\t%f\t%d\n' % (self.adc0M, self.adc0B, self.adc1M, self.adc1B, self.cal_dac_fcM, self.cal_dac_fcB, self.register[134].Iref[0]))
 
     def load_calibration_values_from_file(self):
         filename = tkFileDialog.askopenfilename(filetypes=[('Register file', '*.reg')])
@@ -668,10 +668,15 @@ class VFAT3_GUI:
                         self.adc0B = float(line[1])
                         self.adc1M = float(line[2])
                         self.adc1B = float(line[3])
-                        self.cal_dac_fc0M = float(line[4])
-                        self.cal_dac_fc0B = float(line[5])
+                        self.cal_dac_fcM = float(line[4])
+                        self.cal_dac_fcB = float(line[5])
                         self.register[134].Iref[0] = int(line[6])
                         self.write_register(134)
+                        text = "\nCalibration values were loaded from file.\n"
+                        text += "ADC0: %f + %f\n" % (self.adc0M, self.adc0B)
+                        text += "ADC1: %f + %f\n" % (self.adc1M, self.adc1B)
+                        text += "CAL_DAC: %f + %f\n" % (self.cal_dac_fcM, self.cal_dac_fcB)
+                        self.add_to_interactive_screen(text)
         else:
             print "Invalid file. Abort."
 
@@ -827,7 +832,7 @@ class VFAT3_GUI:
                     if i.info_code == 0:
                         if verbose == "yes":
                             text = "Transaction ok.\n"
-                            self.add_to_interactive_screen(text)
+                            #self.add_to_interactive_screen(text)
                         print "Transaction ok."
                     else:
                         if verbose == "yes":
@@ -1034,11 +1039,11 @@ class VFAT3_GUI:
         self.add_to_interactive_screen(text)
 
         adc0_value = self.read_adc0()
-        text = "ADC0: %d \n" % adc0_value
+        text = "ADC0: %d\t %f mV\n" % (adc0_value, self.adc0M*adc0_value+self.adc0B)
         self.add_to_interactive_screen(text)
 
         adc1_value = self.read_adc1()
-        text = "ADC1: %d \n" % adc1_value
+        text = "ADC1: %d\t %f mV\n" % (adc1_value, self.adc1M * adc1_value + self.adc1B)
         self.add_to_interactive_screen(text)
 
     def send_cal_trigger(self):

@@ -1,6 +1,7 @@
 from routines import *
 from generator import *
-
+import ROOT as r
+import numpy as np
 
 def cal_dac_steps(obj):
 
@@ -19,22 +20,22 @@ def cal_dac_steps(obj):
     dac_values = []
     charge_values = []
 
-    for i in range(start_dac_value, stop_dac_value+1):
+    obj.register[138].CAL_SEL_POL[0] = 1
+    obj.write_register(138)
+    time.sleep(0.1)
+
+    baseADC = obj.read_adc1()
+    base = obj.adc1M * baseADC + obj.adc1B
+
+    obj.register[138].CAL_SEL_POL[0] = 0
+    obj.write_register(138)
+    time.sleep(0.1)
+
+    for i in range(0, 255, 5):
         #newVal = raw_input("ready?")
         obj.register[138].CAL_DAC[0] = i
         obj.write_register(138)
-        time.sleep(0.1)
 
-        obj.register[138].CAL_SEL_POL[0] = 1
-        obj.write_register(138)
-        time.sleep(0.1)
-
-        baseADC = obj.read_adc1()
-        base = obj.adc1M*baseADC + obj.adc1B
-
-        obj.register[138].CAL_SEL_POL[0] = 0
-        obj.write_register(138)
-        time.sleep(0.1)
 
         stepADC = obj.read_adc1()
         step = obj.adc1M*stepADC + obj.adc1B
@@ -42,9 +43,9 @@ def cal_dac_steps(obj):
         difference = step-base
         charge = (difference/1000.0) * 100.0  # 100 fF capacitor.
 
-        base_values.append(base)
+        #base_values.append(base)
         step_values.append(step)
-        dac_values.append(255-i)
+        dac_values.append(float(255-i))
         charge_values.append(charge)
         print "DAC value: %d" % i
         print "Base value: %f mV, step value: %f mV" % (base, step)
@@ -53,56 +54,68 @@ def cal_dac_steps(obj):
 
     obj.cal_dac_fc_values = charge_values
 
-    return dac_values, base_values, step_values, charge_values
+    return dac_values, base, step_values, charge_values
 
 
 def scan_cal_dac_fc(obj, scan_name):
+    if obj.adc0M == 0 or obj.adc0B == 0 or obj.adc1M == 0 or obj.adc1B == 0:
+        text = "\nADCs are not calibrated. Run ADC calibration first.\n"
+        obj.add_to_interactive_screen(text)
+    else:
+        start = time.time()
+        modified = scan_name.replace(" ", "_")
+        modified = modified.replace(",", "_")
+        dac_values, base_value, step_values, charge_values = cal_dac_steps(obj)
 
-    start = time.time()
+        calc_cal_dac_conversion_factor(obj, dac_values, charge_values)
 
-    modified = scan_name.replace(" ", "_")
-    modified = modified.replace(",", "_")
+        # data = [dac_values, charge_values]
+        # timestamp = time.strftime("%Y%m%d%H%M")
+        # folder = "./results/"
+        # filename = "%s%s_%s_scan_data.dat" % (folder, timestamp, modified)
+        #
+        # outF = open(filename, "w")
+        # outF.write("dacValue/D:baseV/D:stepV/D:Q/D\n")
+        # for i,dacVal in enumerate(dac_values):
+        #     outF.write('%f\t%f\t%f\t%f\n'%(dacVal,base_values[i],step_values[i],charge_values[i]))
+        #     pass
+        # outF.close()
+        # text = "\nResults were saved to the file:\n %s \n" % filename
+        #
+        # obj.add_to_interactive_screen(text)
 
-    dac_values, base_values, step_values, charge_values = cal_dac_steps(obj)
-
-    calc_cal_dac_conversion_factor(obj, dac_values, charge_values)
-
-    # Plot the results.
-    fig = plt.figure(1)
-    plt.plot(dac_values, charge_values, label="CAL_DAC")
-    plt.ylabel('Charge [fC]')
-    plt.xlabel('DAC counts (255-CAL_DAC)')
-    plt.legend()
-    plt.title(modified)
-    plt.grid(True)
-    fig.show()
-
-
-    data = [dac_values, charge_values]
-    timestamp = time.strftime("%Y%m%d%H%M")
-    folder = "./results/"
-    filename = "%s%s_%s_scan_data.dat" % (folder, timestamp, modified)
-
-    outF = open(filename, "w")
-    outF.write("dacValue/D:baseV/D:stepV/D:Q/D\n")
-    for i,dacVal in enumerate(dac_values):
-        outF.write('%f\t%f\t%f\t%f\n'%(dacVal,base_values[i],step_values[i],charge_values[i]))
-        pass
-    outF.close()
-    text = "Results were saved to the file:\n %s \n" % filename
-
-    obj.add_to_interactive_screen(text)
-
-    stop = time.time()
-    run_time = (stop - start) / 60
-    text = "Scan duration: %f min\n" % run_time
-    obj.add_to_interactive_screen(text)
+        stop = time.time()
+        run_time = (stop - start) / 60
+        text = "\nScan duration: %f min\n" % run_time
+        obj.add_to_interactive_screen(text)
 
 
 def calc_cal_dac_conversion_factor(obj, dac_values, charge_values):
-    obj.cal_dac_fc0M = (charge_values[-2]-charge_values[1])/(dac_values[-2]-dac_values[1])
-    obj.cal_dac_fc0B = charge_values[0]-obj.cal_dac_fc0M*dac_values[0]
-    print "CAL_DAC to fC: %f + %f" % (obj.cal_dac_fc0M, obj.cal_dac_fc0B)
+
+    r.gStyle.SetStatX(0.5)
+    r.gStyle.SetStatY(0.8)
+    r.gStyle.SetOptFit(True)
+
+    cal_dac_fc_g = r.TGraph(len(dac_values), np.array(dac_values), np.array(charge_values))
+
+    cal_dac_fc_g.SetName('cal_dac_fc_g')
+    cal_dac_fc_g.SetTitle('CAL_DAC Calibration;255-CAL_DAC;Charge [fC]')
+    cal_dac_fc_g.SetMarkerStyle(3)
+
+    cal_dac_fc_fitR = cal_dac_fc_g.Fit('pol1','S')
+
+    obj.cal_dac_fcM = cal_dac_fc_fitR.GetParams()[1]
+    obj.cal_dac_fcB = cal_dac_fc_fitR.GetParams()[0]
+
+    canv = r.TCanvas('canv','canv', 1000, 1000)
+    canv.cd()
+
+    cal_dac_fc_g.Draw('ap')
+    canv.SaveAs('cal_dac_fc.png')
+
+    text = "\nCAL_DAC conversion completed.\n"
+    text += "CAL_DAC to fC: %f + %f\n" % (obj.cal_dac_fcM, obj.cal_dac_fcB)
+    obj.add_to_interactive_screen(text)
 
 
 def iref_adjust(obj):
@@ -123,12 +136,12 @@ def iref_adjust(obj):
     time.sleep(1)
 
     previous_diff = 100
-    text = "Adjusting the global reference current.\n"
+    text = "\nAdjusting the global reference current.\n"
     print text
     obj.add_to_interactive_screen(text)
     while True:
 
-        time.sleep(1)
+        time.sleep(0.1)
         output = obj.interfaceFW.ext_adc()
         if output == "Error":
             print "No response from ADC, aborting Iref adjustment."
@@ -156,80 +169,103 @@ def iref_adjust(obj):
     obj.write_register(65535)
     time.sleep(1)
     text = "- Iref adjusted.\n"
+    obj.Iref_cal = 1
     print text
     obj.add_to_interactive_screen(text)
 
 
 def adc_calibration(obj):
 
-    obj.register[133].Monitor_Sel[0] = 2
-    obj.write_register(133)
+    if obj.Iref_cal == 0:
+        text = "\nIref is not calibrated. Run Iref calibration first.\n"
+        obj.add_to_interactive_screen(text)
+    else:
+        obj.register[133].Monitor_Sel[0] = 2
+        obj.write_register(133)
 
-    obj.register[65535].RUN[0] = 1
-    obj.write_register(65535)
-    time.sleep(1)
+        obj.register[65535].RUN[0] = 1
+        obj.write_register(65535)
+        time.sleep(1)
 
-    int_adc0_values = []
-    int_adc1_values = []
-    ext_adc_values = []
-    dac_values = []
-    for i in range(0, 252, 5):
-        value = i
-        dac_values.append(value)
-        print "->Measuring DAC value %d" % value
-        obj.register[141].PRE_I_BIT[0] = value
-        obj.write_register(141)
+        int_adc0_values = []
+        int_adc1_values = []
+        ext_adc_values = []
+        dac_values = []
+        for i in range(0, 252, 10):
+            value = i
+            dac_values.append(value)
+            print "->Measuring DAC value %d" % value
+            obj.register[141].PRE_I_BIT[0] = value
+            obj.write_register(141)
 
-        int_adc0_value = obj.read_adc0()
-        int_adc0_values.append(int_adc0_value)
+            int_adc0_value = float(obj.read_adc0())
+            int_adc0_values.append(int_adc0_value)
 
-        int_adc1_value = obj.read_adc1()
-        int_adc1_values.append(int_adc1_value)
-        ext_adc_value = obj.interfaceFW.ext_adc()
-        print "ext. ADC: %f" % ext_adc_value
-        ext_adc_values.append(ext_adc_value)
+            int_adc1_value = float(obj.read_adc1())
+            int_adc1_values.append(int_adc1_value)
 
-    obj.register[133].Monitor_Sel[0] = 0
-    obj.write_register(133)
+            ext_adc_value = obj.interfaceFW.ext_adc()
 
-    obj.register[65535].RUN[0] = 0
-    obj.write_register(65535)
-    time.sleep(1)
+            print "ext. ADC: %f" % ext_adc_value
+            ext_adc_values.append(ext_adc_value)
 
-    calc_adc_conversion_constants(obj, ext_adc_values, int_adc0_values, int_adc1_values)
+        obj.register[133].Monitor_Sel[0] = 0
+        obj.write_register(133)
 
-    adc0_values_conv = []
-    for item in int_adc0_values:
-        adc0_values_conv.append(item*obj.adc0M+obj.adc0B)
+        obj.register[65535].RUN[0] = 0
+        obj.write_register(65535)
+        time.sleep(1)
 
-    adc1_values_conv = []
-    for item in int_adc1_values:
-        adc1_values_conv.append(item*obj.adc1M+obj.adc1B)
+        calc_adc_conversion_constants(obj, ext_adc_values, int_adc0_values, int_adc1_values)
 
-    print "ADC0: %f + %f" % (obj.adc0M, obj.adc0B)
-    print "ADC1: %f + %f" % (obj.adc1M, obj.adc1B)
+        adc0_values_conv = []
+        for item in int_adc0_values:
+            adc0_values_conv.append(item*obj.adc0M+obj.adc0B)
 
-    plt.plot(dac_values, ext_adc_values, label='EXT ADC')
-    plt.plot(dac_values, int_adc0_values, label='ADC0_pre')
-    plt.plot(dac_values, adc0_values_conv, label='ADC0_cal')
-    plt.plot(dac_values, int_adc1_values, label='ADC1_pre')
-    plt.plot(dac_values, adc1_values_conv, label='ADC1_cal')
-    plt.legend(loc='upper left')
+        adc1_values_conv = []
+        for item in int_adc1_values:
+            adc1_values_conv.append(item*obj.adc1M+obj.adc1B)
 
-    plt.xlabel('DAC[counts]')
-    plt.ylabel('Voltage [mV]')
-    plt.title('Ext ADC vs. Int ADCs')
-    plt.grid(True)
-    plt.show()
+        text = "\nInternal ADCs calibrated. Values:\n"
+        text += "ADC0: %f + %f\n" % (obj.adc0M, obj.adc0B)
+        text += "ADC1: %f + %f\n" % (obj.adc1M, obj.adc1B)
+        obj.add_to_interactive_screen(text)
 
 
 def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1):
 
-    obj.adc0M = (ext_adc[-2]-ext_adc[1])/(int_adc0[-2]-int_adc0[1])
-    obj.adc0B = ext_adc[0]-obj.adc0M*int_adc0[0]
+    r.gStyle.SetStatX(0.5)
+    r.gStyle.SetStatY(0.8)
+    r.gStyle.SetOptFit(True)
 
-    obj.adc1M = (ext_adc[-2]-ext_adc[1])/(int_adc1[-2]-int_adc1[1])
-    obj.adc1B = ext_adc[1]-obj.adc1M*int_adc1[1]
+    adc0_Conv_g = r.TGraph(len(ext_adc), np.array(int_adc0), np.array(ext_adc))
+    adc1_Conv_g = r.TGraph(len(ext_adc), np.array(int_adc1), np.array(ext_adc))
+
+    adc0_Conv_g.SetName('adc0_Conv_g')
+    adc1_Conv_g.SetName('adc1_Conv_g')
+    adc0_Conv_g.SetTitle('ADC0 Calibration;ADC0;Vmean [mV]')
+    adc1_Conv_g.SetTitle('ADC1 Calibration;ADC1;Vmean [mV]')
+    adc0_Conv_g.SetMarkerStyle(3)
+    adc1_Conv_g.SetMarkerStyle(3)
+
+    adc0fitR = adc0_Conv_g.Fit('pol1','S')
+    adc1fitR = adc1_Conv_g.Fit('pol1','S')
+
+    obj.adc0M = adc0fitR.GetParams()[1]
+    obj.adc0B = adc0fitR.GetParams()[0]
+
+    obj.adc1M = adc1fitR.GetParams()[1]
+    obj.adc1B = adc1fitR.GetParams()[0]
+
+    canv = r.TCanvas('canv','canv', 1000, 1000)
+    canv.cd()
+
+    adc0_Conv_g.Draw('ap')
+    canv.SaveAs('adc0_cal.png')
+
+    adc1_Conv_g.Draw('ap')
+    canv.SaveAs('adc1_cal.png')
+
 
 
 def adjust_local_thresholds(obj):

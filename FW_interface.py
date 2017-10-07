@@ -78,7 +78,6 @@ class FW_interface:
         glib = GLIB()
         counter = 0
         while True:
-            time.sleep(1)
             if counter == 10:
                 print "No answer from ADC."
                 print "Are ADC inputs connected?"
