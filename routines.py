@@ -310,8 +310,10 @@ def scan_execute(obj, scan_name, plot=1,):
                     adc_flag = 1
                 else:
                     second_adc_value = int(''.join(map(str, i.data)), 2)
-                    scan_values0.append(obj.adc0M * first_adc_value + obj.adc0B)
-                    scan_values1.append(obj.adc1M * second_adc_value + obj.adc1B)
+                    # scan_values0.append(obj.adc0M * first_adc_value + obj.adc0B)
+                    # scan_values1.append(obj.adc1M * second_adc_value + obj.adc1B)
+                    scan_values0.append(first_adc_value)
+                    scan_values1.append(second_adc_value)
                     reg_values.append(reg_value)
                     reg_value += 1
                     adc_flag = 0
@@ -341,15 +343,16 @@ def scan_execute(obj, scan_name, plot=1,):
     if plot == 1:
         nr_points = len(scan_values0)
         x = range(0, nr_points)
-        fig = plt.figure(1)
+        #fig = plt.figure(1)
+        plt.clf()
         plt.plot(x, scan_values0, label="ADC0")
         plt.plot(x, scan_values1, label="ADC1")
-        plt.ylabel('mV')
+        plt.ylabel('ADC counts')
         plt.xlabel('DAC counts')
         plt.legend()
         plt.title(modified)
         plt.grid(True)
-        fig.savefig(filename)
+        plt.savefig(filename)
         #plt.close(fig)
 
     stop = time.time()

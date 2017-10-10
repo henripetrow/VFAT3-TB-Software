@@ -98,6 +98,11 @@ class FW_interface:
         if self.connection_mode == 0:
             glib.set("ext_adc_on", 1)
 
+    def stop_ext_adc(self):
+        glib = GLIB()
+        if self.connection_mode == 0:
+            glib.set("ext_adc_on", 0)
+
     def write_control(self, input_value):
         glib = GLIB()
         glib.set("state_fw", input_value)
@@ -138,7 +143,6 @@ class FW_interface:
                     break
             else:
                 line = dec_to_bin_with_stuffing(line, 32)
-                # print line
                 line1 = ''.join(str(e) for e in line[0:24])
                 line2 = ''.join(str(e) for e in line[-8:])
                 line = "%s,%s \n" % (int(line1, 2), line2)

@@ -78,7 +78,6 @@ class VFAT3_GUI:
         bwidth = 15
         self.master.minsize(width=680, height=450)
         self.master.configure(background='white')
-        self.interfaceFW.start_ext_adc()
 
 
         # ######MENUBAR#################################
@@ -944,7 +943,10 @@ class VFAT3_GUI:
     def ext_adc(self):
         text = "->Reading the verification board external ADC.\n"
         self.add_to_interactive_screen(text)
+        self.interfaceFW.start_ext_adc()
+        time.sleep(0.1)
         value = self.interfaceFW.ext_adc()
+        self.interfaceFW.stop_ext_adc()
         text = "Value: %f mV\n" % value
         self.add_to_interactive_screen(text)
 
@@ -997,14 +999,12 @@ class VFAT3_GUI:
             output = self.execute(verbose="yes")
             if counter == 10:
                 print "No reply from ADC."
-                int_adc_value_mv = None
                 break
             if output[0] == "Error":
                 print "Error."
             else:
                 if output[0]:
                     int_adc_value = int(''.join(map(str, output[0][0].data)), 2)
-                    int_adc_value_mv = 2.29 * int_adc_value - 450
                     break
         return int_adc_value
 
@@ -1023,14 +1023,12 @@ class VFAT3_GUI:
             output = self.execute(verbose="yes")
             if counter == 10:
                 print "No reply from ADC."
-                int_adc_value_mv = None
                 break
             if output[0] == "Error":
                 print "Error."
             else:
                 if output[0]:
                     int_adc_value = int(''.join(map(str, output[0][0].data)), 2)
-                    int_adc_value_mv = 2.29 * int_adc_value - 450
                     break
         return int_adc_value
 

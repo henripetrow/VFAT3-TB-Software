@@ -3,6 +3,7 @@ from generator import *
 import ROOT as r
 import numpy as np
 
+
 def cal_dac_steps(obj):
 
     start_dac_value = 0
@@ -15,7 +16,6 @@ def cal_dac_steps(obj):
     obj.write_register(65535)
     time.sleep(0.1)
 
-    base_values = []
     step_values = []
     dac_values = []
     charge_values = []
@@ -24,8 +24,8 @@ def cal_dac_steps(obj):
     obj.write_register(138)
     time.sleep(0.1)
 
-    baseADC = obj.read_adc1()
-    base = obj.adc1M * baseADC + obj.adc1B
+    baseADC = obj.read_adc0()
+    base = obj.adc0M * baseADC + obj.adc0B
 
     obj.register[138].CAL_SEL_POL[0] = 0
     obj.write_register(138)
@@ -36,17 +36,16 @@ def cal_dac_steps(obj):
         obj.register[138].CAL_DAC[0] = i
         obj.write_register(138)
 
-
-        stepADC = obj.read_adc1()
-        step = obj.adc1M*stepADC + obj.adc1B
+        stepADC = obj.read_adc0()
+        step = obj.adc0M*stepADC + obj.adc0B
 
         difference = step-base
         charge = (difference/1000.0) * 100.0  # 100 fF capacitor.
 
-        #base_values.append(base)
         step_values.append(step)
         dac_values.append(float(255-i))
         charge_values.append(charge)
+
         print "DAC value: %d" % i
         print "Base value: %f mV, step value: %f mV" % (base, step)
         print "Difference: %f mV, CHARGE: %f fC" % (difference, charge)
@@ -65,6 +64,7 @@ def scan_cal_dac_fc(obj, scan_name):
         start = time.time()
         modified = scan_name.replace(" ", "_")
         modified = modified.replace(",", "_")
+
         dac_values, base_value, step_values, charge_values = cal_dac_steps(obj)
 
         calc_cal_dac_conversion_factor(obj, dac_values, charge_values)
@@ -122,9 +122,9 @@ def iref_adjust(obj):
 
     # Read the current Iref dac value.
     obj.read_register(134)
-    obj.register[134].Iref[0] = 1
+    obj.register[134].Iref[0] = 10
     obj.write_register(134)
-    previous_value = 1
+    previous_value = 10
 
     # Set monitoring to Iref
     obj.register[133].Monitor_Sel[0] = 0
@@ -135,10 +135,11 @@ def iref_adjust(obj):
     obj.write_register(65535)
     time.sleep(1)
 
-    previous_diff = 100
+    previous_diff = 1000
     text = "\nAdjusting the global reference current.\n"
     print text
     obj.add_to_interactive_screen(text)
+    obj.interfaceFW.start_ext_adc()
     while True:
 
         time.sleep(0.1)
@@ -165,6 +166,7 @@ def iref_adjust(obj):
         obj.write_register(134)
         previous_diff = new_diff
 
+    obj.interfaceFW.stop_ext_adc()
     obj.register[65535].RUN[0] = 0
     obj.write_register(65535)
     time.sleep(1)
@@ -191,13 +193,14 @@ def adc_calibration(obj):
         int_adc1_values = []
         ext_adc_values = []
         dac_values = []
+        obj.interfaceFW.start_ext_adc()
         for i in range(0, 252, 10):
             value = i
             dac_values.append(value)
             print "->Measuring DAC value %d" % value
             obj.register[141].PRE_I_BIT[0] = value
             obj.write_register(141)
-
+            time.sleep(0.1)
             int_adc0_value = float(obj.read_adc0())
             int_adc0_values.append(int_adc0_value)
 
@@ -209,6 +212,7 @@ def adc_calibration(obj):
             print "ext. ADC: %f" % ext_adc_value
             ext_adc_values.append(ext_adc_value)
 
+        obj.interfaceFW.stop_ext_adc()
         obj.register[133].Monitor_Sel[0] = 0
         obj.write_register(133)
 
@@ -248,8 +252,8 @@ def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1):
     adc0_Conv_g.SetMarkerStyle(3)
     adc1_Conv_g.SetMarkerStyle(3)
 
-    adc0fitR = adc0_Conv_g.Fit('pol1','S')
-    adc1fitR = adc1_Conv_g.Fit('pol1','S')
+    adc0fitR = adc0_Conv_g.Fit('pol1', 'S')
+    adc1fitR = adc1_Conv_g.Fit('pol1', 'S')
 
     obj.adc0M = adc0fitR.GetParams()[1]
     obj.adc0B = adc0fitR.GetParams()[0]
@@ -257,7 +261,7 @@ def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1):
     obj.adc1M = adc1fitR.GetParams()[1]
     obj.adc1B = adc1fitR.GetParams()[0]
 
-    canv = r.TCanvas('canv','canv', 1000, 1000)
+    canv = r.TCanvas('canv', 'canv', 1000, 1000)
     canv.cd()
 
     adc0_Conv_g.Draw('ap')
@@ -265,7 +269,6 @@ def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1):
 
     adc1_Conv_g.Draw('ap')
     canv.SaveAs('adc1_cal.png')
-
 
 
 def adjust_local_thresholds(obj):
@@ -388,7 +391,7 @@ def gain_measurement(obj):
     outF = open(filename, "w")
     outF.write("arm_dac/I:ADC0/I:ADC1/I:extADC/I:thr_scurve/D\n")
     for i, armdac in enumerate(arm_dac_values):
-        outF.write('%i\t%i\t%i\t%i\t%f\n' % (armdac, ADC0[i], ADC1[i], extADC[i],threshold_fc[i]))
+        outF.write('%i\t%i\t%i\t%i\t%f\n' % (armdac, ADC0[i], ADC1[i], extADC[i], threshold_fc[i]))
         pass
     outF.close()
 
