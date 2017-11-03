@@ -77,6 +77,8 @@ class FW_interface:
     def ext_adc(self):
         glib = GLIB()
         counter = 0
+        self.start_ext_adc()
+        time.sleep(0.1)
         while True:
             if counter == 10:
                 print "No answer from ADC."
@@ -91,12 +93,16 @@ class FW_interface:
             # print "counter is %i"%counter
             print "ADC returned 0, trying again."
             counter += 1
+        self.stop_ext_adc()
         return rvalue
 
     def start_ext_adc(self):
         glib = GLIB()
         if self.connection_mode == 0:
             glib.set("ext_adc_on", 1)
+
+
+
 
     def stop_ext_adc(self):
         glib = GLIB()

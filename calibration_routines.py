@@ -24,20 +24,20 @@ def cal_dac_steps(obj):
     obj.write_register(138)
     time.sleep(0.1)
 
-    baseADC = obj.read_adc0()
-    base = obj.adc0M * baseADC + obj.adc0B
+    baseADC = obj.read_adc1()
+    base = obj.adc1M * baseADC + obj.adc1B
 
     obj.register[138].CAL_SEL_POL[0] = 0
     obj.write_register(138)
     time.sleep(0.1)
 
-    for i in range(0, 255, 5):
+    for i in range(0, 255, 1):
         #newVal = raw_input("ready?")
         obj.register[138].CAL_DAC[0] = i
         obj.write_register(138)
 
-        stepADC = obj.read_adc0()
-        step = obj.adc0M*stepADC + obj.adc0B
+        stepADC = obj.read_adc1()
+        step = obj.adc1M*stepADC + obj.adc1B
 
         difference = step-base
         charge = (difference/1000.0) * 100.0  # 100 fF capacitor.
@@ -107,11 +107,20 @@ def calc_cal_dac_conversion_factor(obj, dac_values, charge_values):
     obj.cal_dac_fcM = cal_dac_fc_fitR.GetParams()[1]
     obj.cal_dac_fcB = cal_dac_fc_fitR.GetParams()[0]
 
-    canv = r.TCanvas('canv','canv', 1000, 1000)
+    canv = r.TCanvas('canv', 'canv', 1000, 1000)
     canv.cd()
 
+    timestamp = time.strftime("%Y%m%d_%H%M")
+    output_file = '%s/calibration/%scal_dac_fc.png' % (obj.data_folder, timestamp)
+    if not os.path.exists(os.path.dirname(output_file)):
+        try:
+            os.makedirs(os.path.dirname(output_file))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+    open(output_file, 'w').close()
     cal_dac_fc_g.Draw('ap')
-    canv.SaveAs('cal_dac_fc.png')
+    canv.SaveAs(output_file)
+
 
     text = "\nCAL_DAC conversion completed.\n"
     text += "CAL_DAC to fC: %f + %f\n" % (obj.cal_dac_fcM, obj.cal_dac_fcB)
@@ -139,7 +148,6 @@ def iref_adjust(obj):
     text = "\nAdjusting the global reference current.\n"
     print text
     obj.add_to_interactive_screen(text)
-    obj.interfaceFW.start_ext_adc()
     while True:
 
         time.sleep(0.1)
@@ -166,7 +174,6 @@ def iref_adjust(obj):
         obj.write_register(134)
         previous_diff = new_diff
 
-    obj.interfaceFW.stop_ext_adc()
     obj.register[65535].RUN[0] = 0
     obj.write_register(65535)
     time.sleep(1)
@@ -193,8 +200,7 @@ def adc_calibration(obj):
         int_adc1_values = []
         ext_adc_values = []
         dac_values = []
-        obj.interfaceFW.start_ext_adc()
-        for i in range(0, 252, 10):
+        for i in range(0, 252, 1):
             value = i
             dac_values.append(value)
             print "->Measuring DAC value %d" % value
@@ -208,18 +214,20 @@ def adc_calibration(obj):
             int_adc1_values.append(int_adc1_value)
 
             ext_adc_value = obj.interfaceFW.ext_adc()
-
+            #ext_adc_value = 0
+            print "ADC0: %d" % int_adc0_value
             print "ext. ADC: %f" % ext_adc_value
             ext_adc_values.append(ext_adc_value)
 
-        obj.interfaceFW.stop_ext_adc()
+        #obj.interfaceFW.stop_ext_adc()
         obj.register[133].Monitor_Sel[0] = 0
         obj.write_register(133)
 
         obj.register[65535].RUN[0] = 0
         obj.write_register(65535)
         time.sleep(1)
-
+        print int_adc0_values
+        print dac_values
         calc_adc_conversion_constants(obj, ext_adc_values, int_adc0_values, int_adc1_values)
 
         adc0_values_conv = []
@@ -264,11 +272,26 @@ def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1):
     canv = r.TCanvas('canv', 'canv', 1000, 1000)
     canv.cd()
 
+    timestamp = time.strftime("%Y%m%d_%H%M")
+    output_file = '%s/calibration/%sadc0_cal.png' % (obj.data_folder, timestamp)
+    if not os.path.exists(os.path.dirname(output_file)):
+        try:
+            os.makedirs(os.path.dirname(output_file))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+    open(output_file, 'w').close()
     adc0_Conv_g.Draw('ap')
-    canv.SaveAs('adc0_cal.png')
+    canv.SaveAs(output_file)
 
+    output_file = '%s/calibration/%sadc1_cal.png' % (obj.data_folder, timestamp)
+    if not os.path.exists(os.path.dirname(output_file)):
+        try:
+            os.makedirs(os.path.dirname(output_file))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+    open(output_file, 'w').close()
     adc1_Conv_g.Draw('ap')
-    canv.SaveAs('adc1_cal.png')
+    canv.SaveAs(output_file)
 
 
 def adjust_local_thresholds(obj):

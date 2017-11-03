@@ -104,6 +104,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     cal_dac_values = range(start_dac_value, stop_dac_value)
     cal_dac_values.reverse()
     cal_dac_values[:] = [255 - x for x in cal_dac_values]
+    cal_dac_values[:] = [obj.cal_dac_fcM * x + obj.cal_dac_fcB for x in cal_dac_values]
     all_ch_data = []
     all_ch_data.append(["", "255-CAL_DAC"])
     data_line = []
@@ -183,7 +184,7 @@ def scurve_analyze(obj, scurve_data,folder):
     r.gROOT.SetBatch(True)
 
     dac_values = scurve_data[1][1:]
-
+    print dac_values
     Nhits_h = {}
     Nev_h = {}
 
@@ -310,10 +311,10 @@ def scan_execute(obj, scan_name, plot=1,):
                     adc_flag = 1
                 else:
                     second_adc_value = int(''.join(map(str, i.data)), 2)
-                    # scan_values0.append(obj.adc0M * first_adc_value + obj.adc0B)
-                    # scan_values1.append(obj.adc1M * second_adc_value + obj.adc1B)
-                    scan_values0.append(first_adc_value)
-                    scan_values1.append(second_adc_value)
+                    scan_values0.append(obj.adc0M * first_adc_value + obj.adc0B)
+                    scan_values1.append(obj.adc1M * second_adc_value + obj.adc1B)
+                    #scan_values0.append(first_adc_value)
+                    #scan_values1.append(second_adc_value)
                     reg_values.append(reg_value)
                     reg_value += 1
                     adc_flag = 0

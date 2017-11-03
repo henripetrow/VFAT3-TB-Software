@@ -56,7 +56,7 @@ class VFAT3_GUI:
         self.cal_dac_fcM = 0.0
         self.cal_dac_fcB = 0.0
         self.cal_dac_fc_values = [0]*256
-        self.Iref_cal = 0
+        self.Iref_cal = 1
         self.CalPulseLV1A_latency = 4
         self.xray_routine_flag = 0
         self.scurve_channel = 0
@@ -569,7 +569,7 @@ class VFAT3_GUI:
                 "SD_I_BSF scan",
                 "SD_I_BFCAS scan",
                 "CAL_DAC scan",
-                "CAL_DAC scan, fC",
+                #"CAL_DAC scan, fC",
                 # "Counter Resets"
                 # "S-curve",
                 # "S-curve all ch",
@@ -644,10 +644,20 @@ class VFAT3_GUI:
         self.data_dir_entry.delete(0, 'end')
         self.data_dir_entry.insert(0, self.data_folder)
 
-    def save_calibration_values_to_file(self):
-        filename = tkFileDialog.asksaveasfilename(filetypes=[('Register file', '*.reg')])
-        if filename != "":
-            self.save_calibration_values_to_file_execute(filename)
+    def save_calibration_values_to_file(self, filename=""):
+        if filename == "":
+            filename = tkFileDialog.asksaveasfilename(filetypes=[('Register file', '*.reg')])
+        else:
+            timestamp = time.strftime("%Y%m%d_%H%M")
+            filename = '%s/calibration/%scalibration.dat' % (self.data_folder, timestamp)
+            if not os.path.exists(os.path.dirname(filename)):
+                try:
+                    os.makedirs(os.path.dirname(filename))
+                except OSError as exc:  # Guard against race condition
+                    print "Unable to create directory"
+            open(filename, 'w').close()
+
+        self.save_calibration_values_to_file_execute(filename)
 
     def save_calibration_values_to_file_execute(self, filename):
         with open(filename, "w") as output_file:
@@ -943,10 +953,8 @@ class VFAT3_GUI:
     def ext_adc(self):
         text = "->Reading the verification board external ADC.\n"
         self.add_to_interactive_screen(text)
-        self.interfaceFW.start_ext_adc()
-        time.sleep(0.1)
         value = self.interfaceFW.ext_adc()
-        self.interfaceFW.stop_ext_adc()
+
         text = "Value: %f mV\n" % value
         self.add_to_interactive_screen(text)
 
@@ -1174,12 +1182,16 @@ class VFAT3_GUI:
         concecutive_triggers(self, self.nr_trigger_loops)
 
     def run_production_tests(self):
-        self.load_register_values_from_file_execute("./data/default_register_values.reg", multiwrite=1)
+        iref_adjust(self)
+        adc_calibration(self)
+        scan_cal_dac_fc(self, "CAL_DAC scan, fC")
+        self.save_calibration_values_to_file("s")
         self.test_registers()
         #test_data_packet(self)
-        self.run_concecutive_triggers()
+        #self.run_concecutive_triggers()
+        #self.run_all_dac_scans()
         self.run_scurve()
-        self.run_all_dac_scans()
+
 
 # ################# SCAN/TEST -FUNCTIONS #############################
 

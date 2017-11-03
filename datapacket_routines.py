@@ -109,6 +109,7 @@ def concecutive_triggers(obj, nr_loops=25):
     obj.write_register(130)
     time.sleep(1)
 
+
 def check_data_packet(data_packet, ec_size=1, bc_size=2, data="", szp=0):
     error = 0
 
