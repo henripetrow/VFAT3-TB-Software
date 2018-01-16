@@ -38,6 +38,7 @@ def decode_scurve_data(data_list, channel, nr_triggers=100, nr_dac_values=20):
                     data_packet_counter = 0
                     hit_counter = 0
 
+
                 input_value = line[-8:]
 
                 if datapacket_status != "IDLE":
