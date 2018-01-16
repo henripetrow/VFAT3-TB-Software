@@ -16,7 +16,10 @@ from VFAT3_registers import *
 from generator import *
 from test_system_functions import *
 from FW_interface import *
+from DatabaseInterface import *
 from routines import *
+from calibration_routines import *
+from tti_serial_interface import *
 
 
 class VFAT3_GUI:
@@ -40,12 +43,28 @@ class VFAT3_GUI:
                 print "Unrecognised option."
                 self.interfaceFW = FW_interface(0)      # 0 - IPbus mode
                 self.mode = 0
+
+            if sys.argv[1] == '-db':
+                self.read_chip_id()
+                print "Using Hybrid: %s" % self.chip_id
+
+            else:
+                self.database = 0
         else:
             self.interfaceFW = FW_interface(0)          # 0 - IPbus mode
             self.mode = 0
 
+        self.tti_if = TtiSerialInterface()
+        print "Device ID:"
+        print self.tti_if.req_device_id()
+        self.tti_if.set_outputs_on()
+        self.tti_if.set_ch1_current_limit(0.2)
+        self.tti_if.set_ch2_current_limit(0.2)
+        self.tti_if.set_ch1_voltage(1.2)
+        self.tti_if.set_ch2_voltage(1.2)
 
         # Local variables.
+        self.barcode_id = ""
         self.channel_register = 0
         self.value = ""
         self.write_BCd_as_fillers = 0
@@ -53,6 +72,8 @@ class VFAT3_GUI:
         self.adc0B = 0.0
         self.adc1M = 0.0
         self.adc1B = 0.0
+        self.adcM = 0.0
+        self.adcB = 0.0
         self.cal_dac_fcM = 0.0
         self.cal_dac_fcB = 0.0
         self.cal_dac_fc_values = [0]*256
@@ -97,7 +118,7 @@ class VFAT3_GUI:
         modemenu.add_separator()
         modemenu.add_command(label="Production", command=lambda: self.change_mode("production"))
         # modemenu.entryconfig(1, state=DISABLED)
-        modemenu.entryconfig(3, state=DISABLED)
+        # modemenu.entryconfig(3, state=DISABLED)
         menubar.add_cascade(label="Mode", menu=modemenu)
 
         helpmenu = Menu(menubar, tearoff=0)
@@ -120,18 +141,9 @@ class VFAT3_GUI:
         self.register_frame = ttk.Frame(self.nb)
         self.register_frame.grid()
 
-        self.calibration_frame = ttk.Frame(self.nb)
-        self.calibration_frame.grid()
-
         self.misc_frame = ttk.Frame(self.nb)
         self.misc_frame.grid()
 
-        self.scurve_frame = ttk.Frame(self.nb)
-        self.scurve_frame.grid()
-
-        self.FW_frame = ttk.Frame(self.nb)
-        if self.mode == 2:
-            self.FW_frame.grid()
 
         # #########FCC TAB################################
         self.label = Label(self.FCC_frame, text="Send Fast Control Commands (FCC)")
@@ -255,58 +267,6 @@ class VFAT3_GUI:
         self.channel_button.grid_forget()
 
 
-        # ###############CONFIGURATION TAB #######################################
-
-        self.cal_button = Button(self.calibration_frame, text="Adjust Iref", command=lambda: iref_adjust(self), width=bwidth)
-        self.cal_button.grid(column=1, row=0, sticky='e')
-
-        self.adc_calibration_button = Button(self.calibration_frame, text="ADC calibration", command=lambda: adc_calibration(self), width=bwidth)
-        self.adc_calibration_button.grid(column=1, row=1, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="CAL_DAC to fC", command=lambda: scan_cal_dac_fc(self, "CAL_DAC scan, fC"), width=bwidth)
-        self.cal_button.grid(column=1, row=2, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="Save Calibration", command=lambda: self.save_calibration_values_to_file(), width=bwidth)
-        self.cal_button.grid(column=1, row=3, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="Load Calibration", command=lambda: self.load_calibration_values_from_file(), width=bwidth)
-        self.cal_button.grid(column=2, row=3, sticky='e')
-
-        self.FE_button = Button(self.calibration_frame, text="Set FE nominal values", command=lambda: self.set_fe_nominal_values(), width=bwidth)
-        self.FE_button.grid(column=1, row=4, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="Channel Calibration", command=lambda: adjust_local_thresholds(self), width=bwidth)
-        self.cal_button.grid(column=1, row=5, sticky='e')
-
-        # self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth)
-        # self.cal_button.grid(column=1, row=5, sticky='e')
-        #
-        # self.cal_button = Button(self.calibration_frame, text="Gain meas. ext ADC", command=lambda: gain_measurement(self,adc="ext"), width=bwidth)
-        # self.cal_button.grid(column=1, row=6, sticky='e')
-        #
-        # self.cal_button = Button(self.calibration_frame, text="Gain meas. int ADC0", command=lambda: gain_measurement(self,adc="int0"), width=bwidth)
-        # self.cal_button.grid(column=1, row=7, sticky='e')
-        #
-        # self.cal_button = Button(self.calibration_frame, text="Gain meas. int ADC1", command=lambda: gain_measurement(self,adc="int1"), width=bwidth)
-        # self.cal_button.grid(column=1, row=8, sticky='e')
-        #
-        # self.cal_button = Button(self.calibration_frame, text="Production test", command=lambda: self.run_production_tests(), width=bwidth)
-        # self.cal_button.grid(column=1, row=9, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="X-ray routine cont", command=lambda: self.run_xray_tests(), width=bwidth)
-        self.cal_button.grid(column=1, row=10, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="Save registers", command=lambda: self.save_register_values_to_file(), width=bwidth)
-        self.cal_button.grid(column=1, row=11, sticky='e')
-
-        self.cal_button = Button(self.calibration_frame, text="Load registers", command=lambda: self.load_register_values_from_file(), width=bwidth)
-        self.cal_button.grid(column=2, row=11, sticky='e')
-
-        # self.cal_button = Button(self.calibration_frame, text="W/R all registers", command=lambda: self.test_registers(), width=bwidth)
-        # self.cal_button.grid(column=1, row=13, sticky='e')
-        #
-        # self.cal_button = Button(self.calibration_frame, text="Test data packets", command=lambda: test_data_packet(self), width=bwidth)
-        # self.cal_button.grid(column=1, row=14, sticky='e')
         # ###############MISC TAB #######################################
 
         self.sync_button = Button(self.misc_frame, text="Sync", command=lambda: self.send_sync(), width=bwidth)
@@ -315,10 +275,10 @@ class VFAT3_GUI:
         self.sync_check_button = Button(self.misc_frame, text="Sync check", command=lambda: self.send_fcc("CC-B"), width=bwidth)
         self.sync_check_button.grid(column=1, row=2, sticky='e')
 
-        self.idle_button = Button(self.misc_frame, text="SC Idle character", command=lambda: self.send_idle(), width = bwidth)
+        self.idle_button = Button(self.misc_frame, text="SC Idle character", command=lambda: self.send_idle(), width=bwidth)
         self.idle_button.grid(column=1, row=3, sticky='e')
 
-        self.close_button = Button(self.misc_frame, text="Read int. ADCs", command=lambda: self.read_adcs(), width = bwidth)
+        self.close_button = Button(self.misc_frame, text="Read int. ADCs", command=lambda: self.read_adcs(), width=bwidth)
         self.close_button.grid(column=1, row=4, sticky='e')
 
         self.cal_button = Button(self.misc_frame, text="Read ext. ADC", command=lambda: self.ext_adc(), width=bwidth)
@@ -337,46 +297,165 @@ class VFAT3_GUI:
         self.CalPulse_LV1A_label0 = Label(self.misc_frame, text="BC")
         self.CalPulse_LV1A_label0.grid(column=4, row=6, sticky='e')
 
-        self.Trig1_set_button = Button(self.misc_frame, text="Set s-bit pattern", command=lambda: set_up_trigger_pattern(self, 0), width=bwidth)
+        self.cont_trig_button = Button(self.misc_frame, text="Sync FPGA", command=lambda: self.send_reset(), width=bwidth)
+        self.cont_trig_button.grid(column=1, row=15, sticky='e')
+
+
+        # ADD TABS
+        self.nb.add(self.FCC_frame, text="FCC")
+        self.nb.add(self.register_frame, text="Registers")
+        self.nb.add(self.misc_frame, text="misc.")
+
+        self.nb.grid_forget()
+
+        ###############################################################################################################
+        # ##################################################SCAN MODE##################################################
+        ###############################################################################################################
+
+        self.scan_mode_nb = ttk.Notebook(master, width=300, height=400)
+
+        self.calibration_frame = ttk.Frame(self.scan_mode_nb)
+        self.calibration_frame.grid()
+        self.scurve_frame = ttk.Frame(self.scan_mode_nb)
+        self.scurve_frame.grid()
+        self.routines_frame = ttk.Frame(self.scan_mode_nb)
+        self.routines_frame.grid()
+        self.scan_frame = ttk.Frame(self.scan_mode_nb)
+        self.scan_frame.grid(column=0, row=0)
+        self.scan_frame.grid_propagate(False)
+        self.scan_label = ttk.Label(self.scan_frame, text="Available scans and tests.")
+        self.scan_label.grid(column=0, row=0)
+
+        self.scan_options = [
+                "ZCC_DAC scan",
+                "ARM_DAC scan",
+                "HYST_DAC scan",
+                "CFD_DAC_1 scan",
+                "CFD_DAC_2 scan",
+                "PRE_I_BSF scan",
+                "PRE_I_BIT scan",
+                "PRE_I_BLCC scan",
+                "PRE_VREF scan",
+                "SH_I_BFCAS scan",
+                "SH_I_BDIFF scan",
+                "SD_I_BDIFF scan",
+                "SD_I_BSF scan",
+                "SD_I_BFCAS scan",
+                "CAL_DAC scan",
+                #"CAL_DAC scan, fC",
+                # "Counter Resets"
+                # "S-curve",
+                # "S-curve all ch",
+                # "S-curve all ch cont."
+                ]
+        self.chosen_scan = self.scan_options[0]
+        self.scan_variable = StringVar(master)
+        self.scan_variable.set(self.scan_options[0])  # default value
+
+        # SCAN DROP DOWN MENU
+        scan_drop_menu = OptionMenu(self.scan_frame, self.scan_variable, *self.scan_options, command=self.choose_scan)
+        scan_drop_menu.config(width=30)
+        scan_drop_menu.grid(row=1)
+        
+        self.verbose_var = IntVar()
+
+        verbose_check_button = Checkbutton(self.scan_frame, text="Verbose", variable=self.verbose_var)
+        verbose_check_button.grid()
+
+        # SCAN RUN AND MODIFY BUTTONS
+        self.scan_button_frame = ttk.Frame(self.scan_frame, width=302, height=200)
+        self.scan_button_frame.grid()  
+        self.scan_button_frame.grid_propagate(False)
+
+        self.modify_button = Button(self.scan_button_frame, text="Modify", command=self.modify_scan)
+        self.modify_button.grid(column=0, row=0)
+        self.generate_button = Button(self.scan_button_frame, text="Generate", command=self.generate_routine)
+        self.generate_button.grid(column=1, row=0)
+        self.run_button = Button(self.scan_button_frame, text="RUN", command=self.run_routine)
+        self.run_button.grid(column=2, row=0)
+
+        # ###############CALIBRATION TAB #######################################
+
+        self.cal_button = Button(self.calibration_frame, text="Adjust Iref", command=lambda: iref_adjust(self), width=bwidth)
+        self.cal_button.grid(column=1, row=0, sticky='e')
+
+        self.adc_calibration_button = Button(self.calibration_frame, text="ADC calibration", command=lambda: adc_calibration(self), width=bwidth)
+        self.adc_calibration_button.grid(column=1, row=1, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="CAL_DAC to fC", command=lambda: scan_cal_dac_fc(self, "CAL_DAC scan, fC"), width=bwidth)
+        self.cal_button.grid(column=1, row=2, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Save Calibration", command=lambda: self.save_calibration_values_to_file(), width=bwidth)
+        self.cal_button.grid(column=1, row=3, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Load Calibration", command=lambda: self.load_calibration_values_from_file(filename="/home/a0312687/cernbox/Hybrid_tests/hbrdnp026/calibration/20171114_1416calibration.dat"), width=bwidth)
+        self.cal_button.grid(column=2, row=3, sticky='e')
+
+        self.FE_button = Button(self.calibration_frame, text="Set FE nominal values", command=lambda: self.set_fe_nominal_values(), width=bwidth)
+        self.FE_button.grid(column=1, row=4, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Channel Calibration", command=lambda: adjust_local_thresholds(self), width=bwidth)
+        self.cal_button.grid(column=1, row=5, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth)
+        self.cal_button.grid(column=2, row=5, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Gain measurement", command=lambda: gain_measurement(self), width=bwidth)
+        self.cal_button.grid(column=1, row=6, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Save registers", command=lambda: self.save_register_values_to_file(), width=bwidth)
+        self.cal_button.grid(column=1, row=11, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Load registers", command=lambda: self.load_register_values_from_file(), width=bwidth)
+        self.cal_button.grid(column=2, row=11, sticky='e')
+
+
+
+        # ###############Routines-TAB #######################################
+
+        self.Trig1_set_button = Button(self.routines_frame, text="Set s-bit pattern", command=lambda: set_up_trigger_pattern(self, 0), width=bwidth)
         self.Trig1_set_button.grid(column=1, row=7, sticky='e')
 
-        # self.Trig_clear_button = Button(self.misc_frame, text="Clear s-bit pattern", command=lambda: set_up_trigger_pattern(self, 2), width=bwidth)
-        # self.Trig_clear_button.grid(column=1, row=8, sticky='e')
+        self.Trig_clear_button = Button(self.routines_frame, text="Clear s-bit pattern", command=lambda: set_up_trigger_pattern(self, 2), width=bwidth)
+        self.Trig_clear_button.grid(column=1, row=8, sticky='e')
 
-        self.cont_trig_button = Button(self.misc_frame, text="Continuous CalPulses", command=lambda: continuous_trigger(self), width=bwidth)
+        self.cont_trig_button = Button(self.routines_frame, text="Continuous CalPulses", command=lambda: continuous_trigger(self), width=bwidth)
         self.cont_trig_button.grid(column=1, row=9, sticky='e')
 
-        self.cal_button = Button(self.misc_frame, text="Production test",
+        self.cal_button = Button(self.routines_frame, text="Production test",
                                  command=lambda: self.run_production_tests(), width=bwidth)
         self.cal_button.grid(column=1, row=10, sticky='e')
 
-        self.cont_trig_button = Button(self.misc_frame, text="Concecutive Triggers", command=lambda: self.run_concecutive_triggers(), width=bwidth)
+        self.cont_trig_button = Button(self.routines_frame, text="Test data packets", command=lambda: self.run_concecutive_triggers(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=11, sticky='e')
 
         self.nr_trigger_loops = 25
 
-        self.cont_trig_entry = Entry(self.misc_frame, width=5)
+        self.cont_trig_entry = Entry(self.routines_frame, width=5)
         self.cont_trig_entry.grid(column=3, row=11, sticky='e')
         self.cont_trig_entry.insert(0, self.nr_trigger_loops)
 
-        self.cont_trig_label0 = Label(self.misc_frame, text="loops")
+        self.cont_trig_label0 = Label(self.routines_frame, text="loops")
         self.cont_trig_label0.grid(column=4, row=11, sticky='e')
 
-        self.cont_trig_button = Button(self.misc_frame, text="Scan all DACs", command=lambda: self.run_all_dac_scans(), width=bwidth)
+        self.cont_trig_button = Button(self.routines_frame, text="Scan all DACs", command=lambda: self.run_all_dac_scans(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=12, sticky='e')
 
-        self.data_dir_label0 = Label(self.misc_frame, text="Data directory:")
-        self.data_dir_label0.grid(column=1, row=13, sticky='w')
+        self.cal_button = Button(self.routines_frame, text="W/R all registers", command=lambda: self.test_registers(), width=bwidth)
+        self.cal_button.grid(column=1, row=13, sticky='e')
 
-        self.data_dir_entry = Entry(self.misc_frame, width=18)
-        self.data_dir_entry.grid(column=1, row=14, sticky='w')
+        self.cal_button = Button(self.routines_frame, text="X-ray routine cont", command=lambda: self.run_xray_tests(), width=bwidth)
+        self.cal_button.grid(column=1, row=14, sticky='e')
+
+        self.data_dir_label0 = Label(self.routines_frame, text="Data directory:")
+        self.data_dir_label0.grid(column=1, row=15, sticky='w')
+
+        self.data_dir_entry = Entry(self.routines_frame, width=18)
+        self.data_dir_entry.grid(column=1, row=15, sticky='w')
         self.data_dir_entry.insert(0, self.data_folder)
 
-        self.cont_trig_button = Button(self.misc_frame, text="Browse", command=lambda: self.ask_directory(), width=5)
-        self.cont_trig_button.grid(column=3, row=14, sticky='e', columnspan=2)
-
-        self.cont_trig_button = Button(self.misc_frame, text="Sync FPGA", command=lambda: self.send_reset(), width=bwidth)
-        self.cont_trig_button.grid(column=1, row=15, sticky='e')
+        self.cont_trig_button = Button(self.routines_frame, text="Browse", command=lambda: self.ask_directory(), width=5)
+        self.cont_trig_button.grid(column=3, row=15, sticky='e', columnspan=2)
 
         # ############### S-curve tab #########################################
 
@@ -505,103 +584,62 @@ class VFAT3_GUI:
         self.scurve0_button = Button(self.scurve_frame, text="RUN S-curve", command=self.run_scurve, width=bwidth)
         self.scurve0_button.grid(column=1, sticky='e', columnspan=2)
 
-        # ############### FW CONFIGURE TAB #######################################
-
-        self.fwsync_button = Button(self.FW_frame, text="ReSync Firmware", command=lambda: self.FW_sync(), width=bwidth)
-        self.fwsync_button.grid(column=1, row=2, sticky='e')
-        self.fwsync_button.config(state="disabled")
-
-        self.serial_options = [
-                "COM0",
-                "COM1",
-                "COM2",
-                "COM3",
-                "COM4",
-                "COM5",
-                "COM6",
-                "/dev/ttyUSB0",
-                "/dev/ttyUSB1",
-                "/dev/ttyUSB2",
-                "/dev/ttyUSB3"
-                ]
-        self.chosen_serial_port = self.serial_options[7]
-        self.serial_port_variable = StringVar(master)
-        self.serial_port_variable.set(self.serial_options[7])  # default value
-
-        # SERIAL PORT DROP DOWN MENU
-        serial_port_drop_menu = OptionMenu(self.FW_frame, self.serial_port_variable, *self.serial_options, command=self.change_com_port)
-        serial_port_drop_menu.config(width=30)
-        serial_port_drop_menu.grid(column=1, row=3)
-
         # ADD TABS
-        self.nb.add(self.FCC_frame, text="FCC")
-        self.nb.add(self.register_frame, text="Registers")
-        self.nb.add(self.calibration_frame, text="Calibration")
-        self.nb.add(self.misc_frame, text="misc.")
-        self.nb.add(self.scurve_frame, text="S-curve")
-        if self.mode == 2:
-            self.nb.add(self.FW_frame, text="Firmware")
-        self.nb.grid(column=0, row=0)
 
-        ###############################################################################################################
-        # ##################################################SCAN MODE##################################################
-        ###############################################################################################################
+        self.scan_mode_nb.add(self.scan_frame, text="DAC Scans")
+        self.scan_mode_nb.add(self.calibration_frame, text="Calibration")
+        self.scan_mode_nb.add(self.routines_frame, text="Routines")
+        self.scan_mode_nb.add(self.scurve_frame, text="S-curve")
 
-        self.scan_frame = ttk.Frame(master, width=302, height=450)
-        self.scan_frame.grid(column=0, row=0)
-        self.scan_frame.grid_propagate(False)
-        self.scan_label = ttk.Label(self.scan_frame, text="Available scans and tests.")
-        self.scan_label.grid(column=0, row=0)
+        self.scan_mode_nb.grid_forget()
 
-        self.scan_options = [
-                "ZCC_DAC scan",
-                "ARM_DAC scan",
-                "HYST_DAC scan",
-                "CFD_DAC_1 scan",
-                "CFD_DAC_2 scan",
-                "PRE_I_BSF scan",
-                "PRE_I_BIT scan",
-                "PRE_I_BLCC scan",
-                "PRE_VREF scan",
-                "SH_I_BFCAS scan",
-                "SH_I_BDIFF scan",
-                "SD_I_BDIFF scan",
-                "SD_I_BSF scan",
-                "SD_I_BFCAS scan",
-                "CAL_DAC scan",
-                #"CAL_DAC scan, fC",
-                # "Counter Resets"
-                # "S-curve",
-                # "S-curve all ch",
-                # "S-curve all ch cont."
-                ]
-        self.chosen_scan = self.scan_options[0]
-        self.scan_variable = StringVar(master)
-        self.scan_variable.set(self.scan_options[0])  # default value
+        ##############################################################################################################
+        # ##################################################PRODUCTION MODE###########################################
+        ##############################################################################################################
 
-        # SCAN DROP DOWN MENU
-        scan_drop_menu = OptionMenu(self.scan_frame, self.scan_variable, *self.scan_options, command=self.choose_scan)
-        scan_drop_menu.config(width=30)
-        scan_drop_menu.grid(row=1)
-        
-        self.verbose_var = IntVar()
+        self.production_frame = ttk.Frame(master, width=302, height=550)
+        self.production_frame.grid(column=0, row=0)
+        self.production_frame.grid_propagate(False)
+        self.production_label = ttk.Label(self.production_frame, text="Production Test")
+        self.production_label.grid(column=0, row=0)
 
-        verbose_check_button = Checkbutton(self.scan_frame, text="Verbose", variable=self.verbose_var)
-        verbose_check_button.grid()
 
         # SCAN RUN AND MODIFY BUTTONS
-        self.scan_button_frame = ttk.Frame(self.scan_frame, width=302, height=200)
-        self.scan_button_frame.grid()  
-        self.scan_button_frame.grid_propagate(False)
+        self.production_button_frame = ttk.Frame(self.production_frame, width=302, height=50)
+        self.production_button_frame.grid()
+        self.production_button_frame.grid_propagate(False)
 
-        self.modify_button = Button(self.scan_button_frame, text="Modify", command=self.modify_scan)
-        self.modify_button.grid(column=0, row=0)
-        self.generate_button = Button(self.scan_button_frame, text="Generate", command=self.generate_routine)
-        self.generate_button.grid(column=1, row=0)
-        self.run_button = Button(self.scan_button_frame, text="RUN", command=self.run_routine)
-        self.run_button.grid(column=2, row=0)
+        self.chip_id_label = Label(self.production_frame, text="Chip ID:")
+        self.chip_id_label.grid()
+        self.chip_id_entry = Entry(self.production_frame, width=20)
+        self.chip_id_entry.grid()
+        self.chip_id_entry.insert(0, self.chip_id)
+        self.chip_id_entry.config(state='disabled')
 
-        self.scan_frame.grid_forget()
+        self.barcode_label = Label(self.production_frame, text="Barcode ID:")
+        self.barcode_label.grid()
+        self.barcode_entry = Entry(self.production_frame, width=20)
+        self.barcode_entry.grid()
+        self.barcode_entry.insert(0, self.barcode_id)
+
+        self.p_run_button = Button(self.production_frame, text="RUN", command=lambda: self.run_production_tests())
+        self.p_run_button.grid()
+
+        self.checks_label = Label(self.production_frame, text="\nTests:", width=25)
+        self.checks_label.grid()
+
+        tests = ['Check Short Circuit', 'Sync', 'ext ADC check', 'Save Barcode', 'BIST', 'Scan Chain', 'Iref adjustment', 'SLEEP power measurement', 'Internal ADC calibration',
+                 'CAL_DAC conversion', 'Register Test', 'Chip ID write', 'Data packet test', 'Scan of all DACs',
+                 'All Channel S-curves']
+        self.test_label = []
+        for i, test in enumerate(tests):
+            self.test_label.append(Label(self.production_frame, text=test, width=25))
+            self.test_label[i].grid()
+
+        # self.production_frame.grid_forget()
+
+
+
 
         # INTERACTIVE SCREEN
         self.interactive_screen = Text(master, bg="black", fg="white", height=30, width=60)
@@ -622,8 +660,6 @@ class VFAT3_GUI:
         self.close_button.grid(column=1, row=0)
         self.close_button = Button(self.ctrlButtons_frame, text="Close", command=master.quit)
         self.close_button.grid(column=2, row=0)
-
-        self.send_reset()
 
 
 ####################################################################################
@@ -660,12 +696,19 @@ class VFAT3_GUI:
         self.save_calibration_values_to_file_execute(filename)
 
     def save_calibration_values_to_file_execute(self, filename):
-        with open(filename, "w") as output_file:
-            output_file.write("adc0M/D:adc0B/D:adc1M/D:adc1B/D:cal_dac_fcM/D:cal_dac_fcB/D:Iref/I\n")
-            output_file.write('%f\t%f\t%f\t%f\t%f\t%f\t%d\n' % (self.adc0M, self.adc0B, self.adc1M, self.adc1B, self.cal_dac_fcM, self.cal_dac_fcB, self.register[134].Iref[0]))
+        if self.database:
+            self.database.save_adc0(self.adc0M, self.adc0B)
+            self.database.save_adc1(self.adc1M, self.adc1B)
+            self.database.save_cal_dac(self.cal_dac_fcM, self.cal_dac_fcB)
+            self.database.save_iref(self.register[134].Iref[0])
+        else:
+            with open(filename, "w") as output_file:
+                output_file.write("adc0M/D:adc0B/D:adc1M/D:adc1B/D:cal_dac_fcM/D:cal_dac_fcB/D:Iref/I\n")
+                output_file.write('%f\t%f\t%f\t%f\t%f\t%f\t%d\n' % (self.adc0M, self.adc0B, self.adc1M, self.adc1B, self.cal_dac_fcM, self.cal_dac_fcB, self.register[134].Iref[0]))
 
-    def load_calibration_values_from_file(self):
-        filename = tkFileDialog.askopenfilename(filetypes=[('Register file', '*.reg')])
+    def load_calibration_values_from_file(self, filename=""):
+        if filename == "":
+            filename = tkFileDialog.askopenfilename(filetypes=[('Register file', '*.dat')])
         if filename != "":
             with open(filename, 'r') as f:
                 for i, line in enumerate(f):
@@ -685,6 +728,7 @@ class VFAT3_GUI:
                         text += "ADC0: %f + %f\n" % (self.adc0M, self.adc0B)
                         text += "ADC1: %f + %f\n" % (self.adc1M, self.adc1B)
                         text += "CAL_DAC: %f + %f\n" % (self.cal_dac_fcM, self.cal_dac_fcB)
+                        text += "Iref: %i\n" % self.register[134].Iref[0]
                         self.add_to_interactive_screen(text)
         else:
             print "Invalid file. Abort."
@@ -900,23 +944,29 @@ class VFAT3_GUI:
 
     def change_mode(self, mode):
         if mode == "interactive":
-            self.scan_frame.grid_forget()
-            self.nb.grid(column=0,row=0)
+            self.scan_mode_nb.grid_forget()
+            self.production_frame.grid_forget()
+            self.nb.grid(column=0, row=0)
         if mode == "scans_tests":
             self.nb.grid_forget()
-            self.scan_frame.grid(column=0,row=0)
-            self.scan_frame.grid_propagate(False)
+            self.production_frame.grid_forget()
+            self.scan_mode_nb.grid(column=0, row=0)
+        if mode == "production":
+            self.nb.grid_forget()
+            self.scan_mode_nb.grid_forget()
+            self.production_frame.grid(column=0, row=0)
+            self.production_frame.grid_propagate(False)
 
 
-################# FW-TAB FUNCTIONS ################################
+# ################ FW-TAB FUNCTIONS ################################
 
     def FW_sync(self):
-        text =  "-> Resynchronising Firmware.\n"
+        text = "-> Resynchronising Firmware.\n"
         self.add_to_interactive_screen(text)
         command_encoded = FCC_LUT["CC-A"]
-        write_instruction(self.interactive_output_file,1, command_encoded,1)
-        write_instruction(self.interactive_output_file,1, command_encoded,0)
-        write_instruction(self.interactive_output_file,1, command_encoded,0)
+        write_instruction(self.interactive_output_file, 1, command_encoded, 1)
+        write_instruction(self.interactive_output_file, 1, command_encoded, 0)
+        write_instruction(self.interactive_output_file, 1, command_encoded, 0)
         self.execute(verbose="yes")
 
     def change_com_port(self, port):
@@ -936,50 +986,133 @@ class VFAT3_GUI:
                 error = 1
         return error
 
+
 # ################ MISC-TAB FUNCTIONS ################################
 
-    def send_reset(self):
+    def read_chip_id(self):
+        with open('./data/chip_id.dat', 'r') as f:
+            self.chip_id = int(f.readline())
 
+    def increment_chip_id(self):
+        self.read_chip_id()
+        self.chip_id += 1
+        with open('./data/chip_id.dat', 'w') as f:
+            f.write(str(self.chip_id))
+        self.read_chip_id()
+        self.chip_id_entry.config(state='normal')
+        self.chip_id_entry.delete(0, 'end')
+        self.chip_id_entry.insert(0, self.chip_id)
+        self.chip_id_entry.config(state='disabled')
+
+    def unset_calibration_variables(self):
+        self.adc0M = 0.0
+        self.adc0B = 0.0
+        self.adc1M = 0.0
+        self.adc1B = 0.0
+        self.adcM = 0.0
+        self.adcB = 0.0
+        self.cal_dac_fcM = 0.0
+        self.cal_dac_fcB = 0.0
+
+    def check_short_circuit(self):
+        error = 0
+        ch1_current = self.tti_if.req_ch1_current()
+        ch2_current = self.tti_if.req_ch2_current()
+        print ch1_current
+        print ch2_current
+        if ch1_current > 0.1 or ch2_current > 0.1:
+            text = "Short circuit detected.\n"
+            self.add_to_interactive_screen(text)
+            error = 1
+        return error
+
+    def measure_power(self, mode):
+        error = 0
+        ch1_current = self.tti_if.req_ch1_current()
+        ch2_current = self.tti_if.req_ch2_current()
+        ch1_voltage = self.tti_if.req_ch1_voltage()
+        ch2_voltage = self.tti_if.req_ch2_voltage()
+        ch1_power = ch1_voltage * ch1_current
+        ch2_power = ch2_voltage * ch2_current
+        print "Power Measurements:"
+        print ch1_power
+        print ch2_power
+
+        self.database.save_power(ch1_power, ch2_power, mode)
+        if ch1_power > 0.1:
+            error = 1
+        if ch2_power > 0.1:
+            error = 1
+        return error
+
+    def send_reset(self):
         counter = 0
+        error = 0
         while True:
             self.interfaceFW.reset_vfat3()
-            result  = self.send_sync()
+            time.sleep(0.1)
+            result = self.send_sync(verbose='no')
             if result == 1:
+                text = "->Sync success.\n"
+                self.add_to_interactive_screen(text)
                 break
             if counter > 16:
+                error = 1
+                text = "->Sync fail.\n"
+                self.add_to_interactive_screen(text)
                 break
             counter += 1
+        return error
 
-    def ext_adc(self):
-        text = "->Reading the verification board external ADC.\n"
-        self.add_to_interactive_screen(text)
+    def ext_adc(self, verbose='yes'):
+        if verbose == 'yes':
+            text = "->Reading the verification board external ADC.\n"
+            self.add_to_interactive_screen(text)
         value = self.interfaceFW.ext_adc()
+        if verbose == 'yes':
+            s_value = str(value)
+            text = "Value: %s mV\n" % s_value
+            self.add_to_interactive_screen(text)
+        return value
 
-        text = "Value: %f mV\n" % value
-        self.add_to_interactive_screen(text)
+    def test_ext_adc(self):
+        error = 0
+        value = self.ext_adc(verbose='no')
+        if value > 50 and value < 150:
+            pass
+        else:
+            error = 1
+            text = "External ADC returned value: %f mV. should be 50-150mV\n" % value
+            self.add_to_interactive_screen(text)
+        return error
 
-    def send_sync(self):
-        text = "->Sending sync request.\n"
-        self.add_to_interactive_screen(text)
+    def send_sync(self, verbose='yes'):
+        result = 0
+        if verbose == 'yes':
+            text = "->Sending sync request.\n"
+            self.add_to_interactive_screen(text)
         command_encoded = FCC_LUT["CC-A"]
         write_instruction(self.interactive_output_file, 1, command_encoded, 1)
         write_instruction(self.interactive_output_file, 1, command_encoded, 0)
         write_instruction(self.interactive_output_file, 1, command_encoded, 0)
         output = self.interfaceFW.launch(register, self.interactive_output_file, self.COM_port, 2)
         if output[0] == "Error":
-            text = "%s: %s\n" % (output[0], output[1])
-            self.add_to_interactive_screen(text)
+            if verbose == 'yes':
+                text = "%s: %s\n" % (output[0], output[1])
+                self.add_to_interactive_screen(text)
         elif output[2]:
             result = 1
-            text = "Sync ok.\n"
-            self.add_to_interactive_screen(text)
-            for i in output[2]:
-                text = "BC:%d, %s\n" % (i[0], i[1])
+            if verbose == 'yes':
+                text = "Sync ok.\n"
                 self.add_to_interactive_screen(text)
+            for i in output[2]:
+                if verbose == 'yes':
+                    text = "BC:%d, %s\n" % (i[0], i[1])
+                    self.add_to_interactive_screen(text)
         else:
-            text = "Sync fail.\n"
-            self.add_to_interactive_screen(text)
-            result = 0
+            if verbose == 'yes':
+                text = "Sync fail.\n"
+                self.add_to_interactive_screen(text)
         return result
 
     def send_idle(self):
@@ -1040,12 +1173,23 @@ class VFAT3_GUI:
                     break
         return int_adc_value
 
+    def read_adc(self):
+        if self.adc0M != 0:
+            adc0_value = self.read_adc0()
+            adc_value = adc0_value
+        elif self.adc1M != 0:
+            adc1_value = self.read_adc1()
+            adc_value = adc1_value
+        else:
+            adc_value = 'n'
+        return adc_value
+
     def read_adcs(self):
         text = "->Reading the ADCs.\n"
         self.add_to_interactive_screen(text)
 
         adc0_value = self.read_adc0()
-        text = "ADC0: %d\t %f mV\n" % (adc0_value, self.adc0M*adc0_value+self.adc0B)
+        text = "ADC0: %d\t %f mV\n" % (adc0_value, self.adc0M * adc0_value + self.adc0B)
         self.add_to_interactive_screen(text)
 
         adc1_value = self.read_adc1()
@@ -1067,6 +1211,7 @@ class VFAT3_GUI:
         self.execute(verbose="yes")
 
     def run_scurve(self):
+        prod_error = 0
         error = 0
         self.start_channel = int(self.start_ch_entry.get())
         error += self.check_value_range("Start channel", self.start_channel, 0, 127)
@@ -1102,9 +1247,14 @@ class VFAT3_GUI:
         if error == 0:
             text = "->Running S-curve"
             self.add_to_interactive_screen(text)
-            scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel, self.stop_channel], ch_step=self.channel_step, configuration="yes", dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
+            output = scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel, self.stop_channel], ch_step=self.channel_step, configuration="yes", dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
+            if output[2] != "":
+                prod_error = 'y'
+            if output[2] == "n":
+                prod_error = 1
         else:
             print "Aborting s-curve run."
+        return prod_error
 
     def set_fe_nominal_values(self):
         register[141].PRE_I_BSF[0] = 13
@@ -1181,19 +1331,92 @@ class VFAT3_GUI:
         self.nr_trigger_loops = int(self.cont_trig_entry.get())
         concecutive_triggers(self, self.nr_trigger_loops)
 
-    def run_production_tests(self):
-        iref_adjust(self)
-        adc_calibration(self)
-        scan_cal_dac_fc(self, "CAL_DAC scan, fC")
-        self.save_calibration_values_to_file("s")
-        self.test_registers()
-        #test_data_packet(self)
-        #self.run_concecutive_triggers()
-        #self.run_all_dac_scans()
-        self.run_scurve()
+    def test_bist(self):
+        if self.database:
+            self.database.save_bist()
+        return 1
 
+    def test_scan_chain(self):
+        if self.database:
+            self.database.save_scanchain()
+        return 1
+
+    def run_production_tests(self):
+        start = time.time()
+        self.database = DatabaseInterface(self.chip_id)
+        self.unset_calibration_variables()
+        self.tti_if.set_outputs_on()
+        result = []
+        time.sleep(2)
+        result.append(self.check_short_circuit())
+        print "Short Circuit test ok"
+        if result[0] == 0:
+            result.append(self.send_reset())
+            result.append(self.test_ext_adc())
+            result.append(self.save_barcode())
+            if result[1] == 0 and result[2] == 0 and result[3] == 0:
+                print "Sync ok"
+                print "Ext adc ok"
+                print "Save barcode ok"
+                self.send_idle()
+                print "Send Idle ok."
+                result.append(self.test_bist())
+                print "Test BIST ok"
+                result.append(self.test_scan_chain())
+                print "Test Scan Chain ok"
+                result.append(iref_adjust(self))
+                print "Iref adjustment ok"
+                result.append(self.measure_power('SLEEP'))
+                result.append(adc_calibration(self))
+                result.append(scan_cal_dac_fc(self, "CAL_DAC scan, fC"))
+                self.save_calibration_values_to_file("s")
+                result.append(self.test_registers())
+                result.append(self.write_chip_id())
+                result.append(concecutive_triggers(self))
+                result.append(self.run_all_dac_scans())
+                result.append(self.run_scurve())
+                stop = time.time()
+                duration = (stop - start)/60
+                print "Errors:"
+                print result
+                print "Duration of the production test: %f min" % duration
+                for i, value in enumerate(result):
+                    if value == 'y':
+                        self.test_label[i].config(bg='yellow')
+                    elif value != 0:
+                        self.test_label[i].config(bg='red')
+                    else:
+                        self.test_label[i].config(bg='green')
+            else:
+                text = "->Production test aborted.\n"
+                self.add_to_interactive_screen(text)
+        else:
+            text = "->Production test aborted.\n"
+            self.add_to_interactive_screen(text)
+        time.sleep(1)
+        self.unset_calibration_variables()
+        self.tti_if.set_outputs_off()
 
 # ################# SCAN/TEST -FUNCTIONS #############################
+
+    def write_chip_id(self):
+        self.increment_chip_id()
+        return 1
+
+    def save_barcode(self):
+        error = 0
+        try:
+            barcode_value = int(self.barcode_entry.get())
+        except Exception as e:
+            print(e)
+            text = "Invalid barcode.\n"
+            self.add_to_interactive_screen(text)
+            error = 1
+        if error == 0:
+            self.database.save_barcode(barcode_value)
+            text = "Read barcode: %s\n" % barcode_value
+            self.add_to_interactive_screen(text)
+        return error
 
     def test_registers(self):
         timestamp = time.strftime("%Y%m%d_%H%M")
@@ -1234,6 +1457,11 @@ class VFAT3_GUI:
                     error_counter += 1
         line = "Write/Read test done. %d bad registers found." % error_counter
         print line
+        if self.database:
+            if error_counter == 0:
+                self.database.save_register_ok()
+            else:
+                self.database.save_register_error()
         result.append(line)
         stop = time.time()
         run_time = (stop - start) / 60
@@ -1246,6 +1474,7 @@ class VFAT3_GUI:
         print "Writing back previous register values."
         self.load_register_values_from_file_execute(temp_file, multiwrite=1)
         print "Done"
+        return error_counter
 
     def write_register(self, register_nr):
         filler_16bits = [0]*16
@@ -1282,7 +1511,8 @@ class VFAT3_GUI:
                     print output
                     #raw_input("Press Enter to continue...")
                     print "Trying again."
-                    #self.send_sync()
+                    self.send_sync()
+                    time.sleep(1)
                     continue
             if flag == 1:
                 break
@@ -1394,6 +1624,7 @@ class VFAT3_GUI:
         stop = time.time()
         run_time = (stop - start) / 60
         print "Runtime: %f" % run_time
+        return 'y'
 
     def run_xray_tests(self):
         while True:

@@ -19,8 +19,12 @@ class TtiSerialInterface:
         # Instrument specific commands.
         self.ch1_voltage_req = "V1O?"
         self.ch2_voltage_req = "V2O?"
+        self.ch1_voltage_set = "V1"
+        self.ch2_voltage_set = "V2"
         self.ch1_current_req = "I1O?"
         self.ch2_current_req = "I2O?"
+        self.ch1_current_set = "I1"
+        self.ch2_current_set = "I2"
         self.turn_off_outputs = "OPALL 0"
         self.turn_on_outputs = "OPALL 1"
         self.req_ch1_state = "OP1?"
@@ -52,11 +56,27 @@ class TtiSerialInterface:
     def req_ch2_current(self):
         return self.read_float(self.ch2_current_req)
 
+    def set_ch1_current_limit(self, current):
+        command = self.ch1_current_set + " %f" % current
+        return self.execute(command)
+
+    def set_ch2_current_limit(self, current):
+        command = self.ch2_current_set + " %f" % current
+        return self.execute(command)
+
     def req_ch1_voltage(self):
         return self.read_float(self.ch1_voltage_req)
 
+    def set_ch1_voltage(self, voltage):
+        command = self.ch1_voltage_set + " %f" % voltage
+        return self.execute(command)
+
     def req_ch2_voltage(self):
         return self.read_float(self.ch2_voltage_req)
+
+    def set_ch2_voltage(self, voltage):
+        command = self.ch2_voltage_set + " %f" % voltage
+        return self.execute(command)
 
     def req_device_id(self):
         return self.execute(self.instrument_identification)

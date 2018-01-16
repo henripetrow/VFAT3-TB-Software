@@ -10,7 +10,7 @@
 1000 Read 131073
 
 
-200 Repeat 64
+200 Repeat 63
 
 200 Write PRE_I_BLCC 1
 1000 Read 131072

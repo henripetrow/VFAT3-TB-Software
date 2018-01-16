@@ -7,6 +7,7 @@ import serial
 import sys
 import os
 from output_decoder import *
+from scurve_decoder import *
 import time
 import shutil
 
@@ -18,6 +19,7 @@ class FW_interface:
     def __init__(self, mode):
         self.connection_mode = mode
         if self.connection_mode == 0:  # IPbus/pyChips mode
+            self.glib = GLIB()
             print "Entering normal mode"
         if self.connection_mode == 1:  # Simulation mode
             with open("./data/FPGA_statusfile.dat", "w") as myfile:
@@ -65,17 +67,14 @@ class FW_interface:
         }
 
     def reset_vfat3(self):
-        glib = GLIB()
         if self.connection_mode == 0:
-            glib.set("reset", 1)
+            self.glib.set("reset", 1)
 
     def reset_ipbus(self):
-        glib = GLIB()
         if self.connection_mode == 0:
-            glib.set("reset_ipbus", 1)
+            self.glib.set("reset_ipbus", 1)
 
     def ext_adc(self):
-        glib = GLIB()
         counter = 0
         self.start_ext_adc()
         time.sleep(0.1)
@@ -86,7 +85,7 @@ class FW_interface:
                 rvalue = "Error"
                 break
             if self.connection_mode == 0:
-                value = glib.get("ext_adc")
+                value = self.glib.get("ext_adc")
             if value != 0:
                 rvalue = value * 0.0625  # ext ADC LSB is 62.5 uV
                 break
@@ -97,130 +96,109 @@ class FW_interface:
         return rvalue
 
     def start_ext_adc(self):
-        glib = GLIB()
         if self.connection_mode == 0:
-            glib.set("ext_adc_on", 1)
-
-
-
+            self.glib.set("ext_adc_on", 1)
 
     def stop_ext_adc(self):
-        glib = GLIB()
         if self.connection_mode == 0:
-            glib.set("ext_adc_on", 0)
+            self.glib.set("ext_adc_on", 0)
 
     def write_control(self, input_value):
-        glib = GLIB()
-        glib.set("state_fw", input_value)
+        self.glib.set("state_fw", input_value)
 
     def read_control(self):
-        glib = GLIB()
-        value = glib.get("state_fw")
+        value = self.glib.get("state_fw")
         return value
 
     def write_fifo(self):
-        glib = GLIB()
-        with open("./data/FPGA_instruction_list.dat", 'r') as f:
-            for line in f:
-                line = line.rstrip('\n')
-                data_line = "0000000000000000" + line
-                glib.set("test_fifo", int(data_line, 2))
+        f = open("./data/FPGA_instruction_list.dat", 'r')
+        x = f.read().splitlines()
+        x = [int(i, 2) for i in x]
+
+        self.glib.fifoWrite("test_fifo", x)
 
     def empty_fifo(self):
-        glib = GLIB()
         while True:
-            line = glib.get("test_fifo")
+            line = self.glib.get("test_fifo")
             if line == 0 or line is None:
                 break
 
     def empty_full_fifo(self):
-        glib = GLIB()
-        glib.fifoRead("test_fifo", 131000)
+        self.glib.fifoRead("test_fifo", 131000)
 
     def read_fifo(self):
-        glib = GLIB()
         open("./data/FPGA_output.dat", 'w').close()
         data_list = []
         while True:
-            line = glib.get("test_fifo")
+            line = self.glib.get("test_fifo")
             if line == 0 or line is None:
                 break
             if len(data_list) > 132000:
                     break
             else:
-                line = dec_to_bin_with_stuffing(line, 32)
-                line1 = ''.join(str(e) for e in line[0:24])
-                line2 = ''.join(str(e) for e in line[-8:])
-                line = "%s,%s \n" % (int(line1, 2), line2)
                 data_list.append(line)
-        open("./data/FPGA_output_list.dat", 'w').close()
-        with open("./data/FPGA_output_list.dat", "a") as myfile:
-            for i in data_list:
-                myfile.write(i)
+        return data_list
 
     def read_routine_fifo(self):
-        glib = GLIB()
-        open("./data/FPGA_output.dat", 'w').close()
-        data_list = glib.fifoRead("test_fifo", 130074)
-        open("./data/FPGA_output_list.dat", 'w').close()
-        with open("./data/FPGA_output_list.dat", "a") as myfile:
-            if data_list is None:
-                pass
-            elif any(data_list):
-                for i in data_list:
-                    line = dec_to_bin_with_stuffing(i, 32)
-                    # print "routine: %s" % line
-                    line1 = ''.join(str(e) for e in line[0:24])
-                    line2 = ''.join(str(e) for e in line[-8:])
-                    line = "%s,%s \n" % (int(line1, 2), line2)
-                    myfile.write(line)
-            else:
-                print "!-> read_routine_fifo received a value: None."
+        data_list = self.glib.fifoRead("test_fifo", 130074)
+        return data_list
+
+    # def read_routine_fifo(self):
+    #     glib = GLIB()
+    #     open("./data/FPGA_output.dat", 'w').close()
+    #     data_list = glib.fifoRead("test_fifo", 150074)
+    #     open("./data/FPGA_output_list.dat", 'w').close()
+    #     with open("./data/FPGA_output_list.dat", "a") as myfile:
+    #         if data_list is None:
+    #             pass
+    #         elif any(data_list):
+    #             for i in data_list:
+    #                 line = dec_to_bin_with_stuffing(i, 32)
+    #                 # print "routine: %s" % line
+    #                 line1 = ''.join(str(e) for e in line[0:24])
+    #                 line2 = ''.join(str(e) for e in line[-8:])
+    #                 line = "%s,%s \n" % (int(line1, 2), line2)
+    #                 myfile.write(line)
+    #         else:
+    #             print "!-> read_routine_fifo received a value: None."
 
     def read_sync_fifo(self):
-        glib = GLIB()
-        open("./data/FPGA_output.dat", 'w').close()
-        data_list = glib.fifoRead("test_fifo", 130)
-        open("./data/FPGA_output_list.dat", 'w').close()
-        with open("./data/FPGA_output_list.dat", "a") as myfile:
-            if any(data_list):
-                for i in data_list:
-                    line = dec_to_bin_with_stuffing(i, 32)
-                    # print "routine: %s" % line
-                    line1 = ''.join(str(e) for e in line[0:24])
-                    line2 = ''.join(str(e) for e in line[-8:])
-                    line = "%s,%s \n" % (int(line1, 2), line2)
-                    myfile.write(line)
-            else:
-                print "!-> read_routine_fifo received a value: None."
+        data_list = self.glib.fifoRead("test_fifo", 130)
+        return data_list
 
-    def launch(self, register, file_name, serial_port, routine=0, save_data=0,obj=0):
+    def launch(self, register, file_name, serial_port, routine=0, save_data=0, obj=0, scurve_ch="j"):
 
         open("./data/FPGA_output_list.dat", 'w').close()
         if file_name != "./data/FPGA_instruction_list.dat":
             shutil.copy2(file_name, "./data/FPGA_instruction_list.dat")
         timeout = 0
-        transaction_start = time.time()
         # ########## NORMAL MODE ##########
         if self.connection_mode == 0 or self.connection_mode == 3:
             if routine == 2:
                 self.empty_full_fifo()
+            elif routine == 1:
+                pass
             else:
                 self.empty_fifo()
-            time.sleep(0.01)
+            #time.sleep(0.01)
             self.write_control(0)
-            time.sleep(0.01)
+            #time.sleep(0.01)
             self.write_fifo()
-            time.sleep(0.01)
+            #time.sleep(0.001)
             self.write_control(1)
-            time.sleep(0.01)
-            if routine == 1:
-                self.read_routine_fifo()
-            elif routine == 2:
-                self.read_sync_fifo()
+            if scurve_ch != "j":
+                time.sleep(0.035)
+                #time.sleep(0.2)
             else:
-                self.read_fifo()
-
+                #time.sleep(0.03)
+                pass
+            if routine == 1:
+                received_data = self.read_routine_fifo()
+            elif routine == 2:
+                received_data = self.read_sync_fifo()
+            else:
+                #received_data = self.read_fifo()
+                received_data = self.read_sync_fifo()
         # ############ SIMULATION MODE ##########
         if self.connection_mode == 1:
 
@@ -244,53 +222,6 @@ class FW_interface:
                         myfile.write("0")
                     break
 
-        # ############## Aamir mode #####################333
-        if self.connection_mode == 2:
-            ser = serial.Serial(serial_port, baudrate=115200, writeTimeout=0)
-            ser.bytesize = serial.EIGHTBITS  # number of bits per bytes
-            ser.parity = serial.PARITY_NONE  # set parity check: no parity
-            ser.stopbits = serial.STOPBITS_ONE  # number of stop bits
-            ser.timeout = 10  # timeout block read
-            ser.xonxoff = True  # disable software flow control
-            ser.rtscts = False  # disable hardware (RTS/CTS) flow control
-            ser.dsrdtr = False  # disable hardware (DSR/DTR) flow control
-            data = "\xca"
-            ser.write(data)
-            output_byte_list = []
-            with open(file_name, 'r') as f0:
-                for i, l in enumerate(f0):
-                    pass
-            f0.close()
-            size = i + 1
-            c, f = divmod(size, 1 << 8)        # split the size to 8 bit lsb and msb
-            output_byte_list.append(c)
-            output_byte_list.append(f)
-
-            with open(file_name, 'r') as f:
-                for line in f:
-                    line = line.rstrip('\n')
-                    data_line = line[-4:]
-                    data_line = self.FCC_LUT_L[data_line]
-                    data_line = int(data_line, 2)
-                    print data_line
-                    output_byte_list.append(data_line)
-
-            ser.write(bytearray(output_byte_list))
-            data_list = []
-            for i in range(0, 700):
-                data = ser.read()
-                data = ord(data)
-                data = dec_to_bin_with_stuffing(data, 8)
-                data = ''.join(str(e) for e in data)
-                data = "000000000001,%s\n" % data
-                data_list.append(data)
-
-            open("./data/FPGA_output_list.dat", 'w').close()
-            with open("./data/FPGA_output_list.dat", "a") as myfile:
-                for i in data_list:
-                    myfile.write(i)
-
-            timeout = 0
         if save_data != 0:
             timestamp = time.strftime("%Y%m%d_%H%M%s")
             FPGA_output = "./data/FPGA_output_list.dat"
@@ -305,12 +236,11 @@ class FW_interface:
         if not timeout:
             transaction_stop = time.time()
             analysis_start = time.time()
-            output_data = decode_output_data('./data/FPGA_output_list.dat', register)
-            analysis_stop = time.time()
-            analysis_time = analysis_stop - analysis_start
-            transaction_time = transaction_stop - transaction_start
+            if scurve_ch == "j":
+                output_data = decode_output_data(received_data, register)
+            else:
+                output_data = decode_scurve_data(received_data, scurve_ch)
 
-            #print "Transactions: %f s, Analysis: %f s" % (transaction_time, analysis_time)
         else:
             print "not Decoding output data."
             output_data = ['Error', 'Timeout, no response from the firmware.']

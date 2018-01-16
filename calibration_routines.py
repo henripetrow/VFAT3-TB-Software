@@ -19,25 +19,25 @@ def cal_dac_steps(obj):
     step_values = []
     dac_values = []
     charge_values = []
-
+    obj.register[138].CAL_MODE[0] = 1
     obj.register[138].CAL_SEL_POL[0] = 1
     obj.write_register(138)
     time.sleep(0.1)
 
-    baseADC = obj.read_adc1()
-    base = obj.adc1M * baseADC + obj.adc1B
+    baseADC = obj.read_adc()
+    base = obj.adcM * baseADC + obj.adcB
 
     obj.register[138].CAL_SEL_POL[0] = 0
     obj.write_register(138)
     time.sleep(0.1)
 
-    for i in range(0, 255, 1):
-        #newVal = raw_input("ready?")
+    for i in range(0, 255, 5):
+
         obj.register[138].CAL_DAC[0] = i
         obj.write_register(138)
 
-        stepADC = obj.read_adc1()
-        step = obj.adc1M*stepADC + obj.adc1B
+        stepADC = obj.read_adc()
+        step = obj.adcM * stepADC + obj.adcB
 
         difference = step-base
         charge = (difference/1000.0) * 100.0  # 100 fF capacitor.
@@ -57,9 +57,11 @@ def cal_dac_steps(obj):
 
 
 def scan_cal_dac_fc(obj, scan_name):
-    if obj.adc0M == 0 or obj.adc0B == 0 or obj.adc1M == 0 or obj.adc1B == 0:
+    error = 0
+    if obj.adcM == 0:
         text = "\nADCs are not calibrated. Run ADC calibration first.\n"
         obj.add_to_interactive_screen(text)
+        error = 1
     else:
         start = time.time()
         modified = scan_name.replace(" ", "_")
@@ -88,6 +90,9 @@ def scan_cal_dac_fc(obj, scan_name):
         run_time = (stop - start) / 60
         text = "\nScan duration: %f min\n" % run_time
         obj.add_to_interactive_screen(text)
+    if obj.cal_dac_fcM < 0.1 or obj.cal_dac_fcM > 0.3:
+        error = 1
+    return error
 
 
 def calc_cal_dac_conversion_factor(obj, dac_values, charge_values):
@@ -102,7 +107,7 @@ def calc_cal_dac_conversion_factor(obj, dac_values, charge_values):
     cal_dac_fc_g.SetTitle('CAL_DAC Calibration;255-CAL_DAC;Charge [fC]')
     cal_dac_fc_g.SetMarkerStyle(3)
 
-    cal_dac_fc_fitR = cal_dac_fc_g.Fit('pol1','S')
+    cal_dac_fc_fitR = cal_dac_fc_g.Fit('pol1', 'S')
 
     obj.cal_dac_fcM = cal_dac_fc_fitR.GetParams()[1]
     obj.cal_dac_fcB = cal_dac_fc_fitR.GetParams()[0]
@@ -128,7 +133,7 @@ def calc_cal_dac_conversion_factor(obj, dac_values, charge_values):
 
 
 def iref_adjust(obj):
-
+    error = 0
     # Read the current Iref dac value.
     obj.read_register(134)
     obj.register[134].Iref[0] = 10
@@ -153,11 +158,15 @@ def iref_adjust(obj):
         time.sleep(0.1)
         output = obj.interfaceFW.ext_adc()
         if output == "Error":
+            error = 1
             print "No response from ADC, aborting Iref adjustment."
             break
         print "Iref: %f, target: 100 mV. DAC: %d" % (output, obj.register[134].Iref[0])
         new_diff = abs(100 - output)
-
+        if obj.register[134].Iref[0] == 0 or obj.register[134].Iref[0] == 63:
+            print "Iref could not be adjusted."
+            error = 1
+            break
         if previous_diff < new_diff:
             print "->Difference increasing. Choose previous value: %d." % previous_value
             obj.register[134].Iref[0] = previous_value
@@ -181,10 +190,11 @@ def iref_adjust(obj):
     obj.Iref_cal = 1
     print text
     obj.add_to_interactive_screen(text)
+    return error
 
 
 def adc_calibration(obj):
-
+    error = 0
     if obj.Iref_cal == 0:
         text = "\nIref is not calibrated. Run Iref calibration first.\n"
         obj.add_to_interactive_screen(text)
@@ -206,7 +216,7 @@ def adc_calibration(obj):
             print "->Measuring DAC value %d" % value
             obj.register[141].PRE_I_BIT[0] = value
             obj.write_register(141)
-            time.sleep(0.1)
+            time.sleep(0.05)
             int_adc0_value = float(obj.read_adc0())
             int_adc0_values.append(int_adc0_value)
 
@@ -242,6 +252,29 @@ def adc_calibration(obj):
         text += "ADC0: %f + %f\n" % (obj.adc0M, obj.adc0B)
         text += "ADC1: %f + %f\n" % (obj.adc1M, obj.adc1B)
         obj.add_to_interactive_screen(text)
+        obj.adcM = obj.adc0M
+        obj.adcB = obj.adc0B
+        if obj.adc0M <= 1 or obj.adc0M > 2.5:
+            error += 1
+            print "ADC0 broken"
+            obj.adc0M = 0
+            obj.adc0B = 0
+            obj.adcM = obj.adc1M
+            obj.adcB = obj.adc1B
+        if obj.adc1M <= 1 or obj.adc1M > 2.5:
+            error += 1
+            print "ADC1 broken"
+            obj.adc1M = 0
+            obj.adc1B = 0
+            if obj.adc0M == 0:
+                obj.adcM = 0
+                obj.adcB = 0
+
+    if error == 1:
+        error = 'y'
+    print obj.adcM
+    print obj.adcB
+    return error
 
 
 def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1):
@@ -294,138 +327,6 @@ def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1):
     canv.SaveAs(output_file)
 
 
-def adjust_local_thresholds(obj):
-    start = time.time()
-    # Measure the mean threshold of the channels, that will be used as a target.
-    mean_threshold = scurve_all_ch_execute(obj, "S-curve all ch")
-    print "Found the mean threshold for the 128 channels: %f" % mean_threshold
-    for k in range(0, 128):
-        obj.send_reset()
-        obj.send_sync()
-        thresholds = []
-        diff_values = []
-
-        # Read the current dac values
-        #obj.read_register(k)
-        print "Adjusting the channel %d local arm_dac." % k
-        output = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=[k, k], configuration="no")
-        threshold = output[0]
-        print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac[0])
-        previous_diff = abs(mean_threshold - threshold)
-        previous_value = 0
-        thresholds.append(threshold)
-        diff_values.append(previous_diff)
-        if threshold < mean_threshold:
-            print "->Value too low, increase arm_dac register."
-            obj.register[k].arm_dac[0] = 0
-            obj.write_register(k)
-            max_value = 63
-            direction = "up"
-        if threshold > mean_threshold:
-            print "->Value too high, decrease arm_dac register."
-            obj.register[k].arm_dac[0] = 64
-            obj.write_register(k)
-            max_value = 128
-            direction = "down"
-
-        while True:
-            obj.register[k].arm_dac[0] += 1
-            obj.write_register(k)
-
-            output = scurve_all_ch_execute(obj, "S-curve all ch", arm_dac=100, ch=[k, k], configuration="no")
-            threshold = output[0]
-            print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac[0])
-            thresholds.append(threshold)
-            new_diff = abs(mean_threshold - threshold)
-            diff_values.append(new_diff)
-            print thresholds
-            print diff_values
-            if direction == "up" and threshold > mean_threshold:
-                if previous_diff < new_diff:
-                    print "->Difference increasing. Choose previous value: %d." % previous_value
-                    obj.register[k].arm_dac[0] = previous_value
-                print "-> Channel calibrated."
-                break
-            if direction == "down" and threshold < mean_threshold:
-                if previous_diff < new_diff:
-                    print "->Difference increasing. Choose previous value: %d." % previous_value
-                    obj.register[k].arm_dac[0] = previous_value
-                print "-> Channel calibrated."
-                break
-
-            previous_value = obj.register[k].arm_dac[0]
-            previous_diff = new_diff
-
-    # Save the channel calibration settings to a file.
-    open("./data/channel_registers.dat", 'w').close()
-    for register_nr in range(0, 128):
-        data = []
-        for x in register[register_nr].reg_array:
-            data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
-        data = ''.join(str(e) for e in data)
-        with open("./data/channel_registers.dat", "a") as mfile:
-            mfile.write("%s\n" % data)
-
-    stop = time.time()
-    run_time = (stop - start) / 60
-    print "Run time (minutes): %f\n" % run_time
 
 
-def gain_measurement(obj):
 
-    start = time.time()
-
-    obj.register[65535].RUN[0] = 1
-    obj.write_register(65535)
-    time.sleep(1)
-
-    obj.register[133].Monitor_Sel[0] = 14
-    obj.write_register(133)
-
-    arm_dac_values = []
-    extADC = []
-    ADC0 = []
-    ADC1 = []
-    threshold_fc = []
-
-    for arm_dac in range(100, 151, 10):
-        arm_dac_values.append(arm_dac)
-        obj.register[135].ARM_DAC[0] = arm_dac
-        obj.write_register(135)
-        time.sleep(1)
-        extADC.append(obj.interfaceFW.ext_adc())
-        # if not isinstance(extADC,(int, long)):
-        # extADC.append(0)
-        ADC0.append(obj.read_adc0())
-        ADC1.append(obj.read_adc1())
-        output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, ch=[41, 46], configuration="yes",
-                                              dac_range=[200, 240], delay=50, bc_between_calpulses=2000, pulsestretch=7,
-                                             latency=45, cal_phi=0, folder="gain_meas")
-        threshold_fc.append(output[0])
-    timestamp = time.strftime("%Y%m%d_%H%M")
-    filename = "%s/%s/%sgain_measurement.dat" % (obj.data_folder, "gain_meas", timestamp)
-    if not os.path.exists(os.path.dirname(filename)):
-        try:
-            os.makedirs(os.path.dirname(filename))
-        except OSError as exc:  # Guard against race condition
-            print "Unable to create directory"
-    text = "Results were saved to the folder:\n %s \n" % filename
-
-    outF = open(filename, "w")
-    outF.write("arm_dac/I:ADC0/I:ADC1/I:extADC/I:thr_scurve/D\n")
-    for i, armdac in enumerate(arm_dac_values):
-        outF.write('%i\t%i\t%i\t%i\t%f\n' % (armdac, ADC0[i], ADC1[i], extADC[i], threshold_fc[i]))
-        pass
-    outF.close()
-
-    stop = time.time()
-    run_time = (stop - start) / 60
-    print "Runtime: %f" % run_time
-    # # Calculate the gain.
-    # if adc == "ext":
-    #     print "Thresholds in mV TH0: %f and TH1: %f" % (threshold_mv0, threshold_mv1)
-    # else:
-    #     print "Thresholds in dac counts TH0: %f and TH1: %f" % (threshold_mv0, threshold_mv1)
-    # print "Thresholds in fC TH0: %f and TH1: %f" % (threshold_fc0, threshold_fc1)
-    # gain = (threshold_mv1 - threshold_mv0)/(threshold_fc1 - threshold_fc0)
-    # print gain

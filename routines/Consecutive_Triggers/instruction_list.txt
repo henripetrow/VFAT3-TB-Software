@@ -1,5 +1,5 @@
 1 Send RunMode
 10 Send EC0
 10 Send BC0
-100 Send_Repeat LV1A 4000 100
+300 Send_Repeat LV1A 5000 300
 1000 Send ReSync

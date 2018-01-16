@@ -1,3 +1,5 @@
+import time
+
 def continuous_trigger(obj):
     obj.set_fe_nominal_values()
     print "Set FE nominal values."
@@ -39,7 +41,7 @@ def continuous_trigger(obj):
     obj.send_fcc("RunMode")
     while True:
         obj.send_fcc("CalPulse")
-        time.sleep(0.000000025)
+        time.sleep(0.001)
 
 
 def set_up_trigger_pattern(obj, option):

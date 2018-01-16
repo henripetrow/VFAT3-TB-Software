@@ -3,7 +3,9 @@ from generator import *
 import time
 
 
-def concecutive_triggers(obj, nr_loops=25):
+def concecutive_triggers(obj, nr_loops=10):
+    nr_of_triggers = 5000
+    nr_of_bc_between_triggers = 300
     timestamp = time.strftime("%Y%m%d_%H%M")
     scan_name = "Consecutive_Triggers"
     file_name = "./routines/%s/FPGA_instruction_list.txt" % scan_name
@@ -19,7 +21,7 @@ def concecutive_triggers(obj, nr_loops=25):
     instruction_text.append("1 Send RunMode")
     instruction_text.append("10 Send EC0")
     instruction_text.append("10 Send BC0")
-    instruction_text.append("100 Send_Repeat LV1A 4000 100")
+    instruction_text.append("%i Send_Repeat LV1A %i %i" % (nr_of_bc_between_triggers, nr_of_triggers, nr_of_bc_between_triggers))
     instruction_text.append("1000 Send ReSync")
 
     # Write the instructions to the file.
@@ -35,8 +37,33 @@ def concecutive_triggers(obj, nr_loops=25):
     obj.write_register(65535)
     time.sleep(1)
 
-    obj.register[130].ECb[0] = 1
-    obj.register[130].BCb[0] = 1
+    ecb = 0
+    bcb = 0
+    if ecb == 0:
+        ecb_size = 1
+    elif ecb == 1:
+        ecb_size = 2
+    elif ecb == 2:
+        ecb_size = 3
+    elif ecb == 3:
+        ecb_size = 1
+    else:
+        print "-> Invalid ECb value. Using 0."
+        ecb = 0
+
+    if bcb == 0:
+        bcb_size = 2
+    elif bcb == 1:
+        bcb_size = 3
+    else:
+        print "-> Invalid BCb value. Using 0."
+        bcb = 0
+
+    ecb_max = 2**(ecb_size*8)-1
+    bcb_max = 2**(bcb_size*8)-1
+
+    obj.register[130].ECb[0] = ecb
+    obj.register[130].BCb[0] = bcb
     obj.write_register(130)
     time.sleep(1)
 
@@ -52,7 +79,7 @@ def concecutive_triggers(obj, nr_loops=25):
 
 
     for k in range(0, nr_loops):
-        trigger_counter += 4000
+        trigger_counter += nr_of_triggers
         previous_EC = 0
         previous_BC = 0
         output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1, save_data=1, obj=obj)
@@ -70,17 +97,25 @@ def concecutive_triggers(obj, nr_loops=25):
                         crc_error_counter += 1
                     ec_diff = i.EC - previous_EC
                     if ec_diff != 1:
-                        print "->EC error"
-                        print "Previous EC: %d" % previous_BC
-                        print "Current EC: %d" % i.BC
-                        ec_error_counter += 1
+                        if previous_EC == ecb_max and i.EC == 0:
+                            pass
+                        else:
+                            print ""
+                            print "->EC error"
+                            print "Previous EC: %d" % previous_EC
+                            print "Current EC: %d" % i.EC
+                            ec_error_counter += 1
                     previous_EC = i.EC
                     bc_diff = i.BC - previous_BC
-                    if bc_diff != 100:
-                        print "->BC error"
-                        print "Previous BC: %d" % previous_BC
-                        print "Current BC: %d" % i.BC
-                        bc_error_counter += 1
+                    if bc_diff != nr_of_bc_between_triggers:
+                        if i.BC+(bcb_max-previous_BC) == nr_of_bc_between_triggers-1:  # -1 since counter starts from zero.
+                            pass
+                        else:
+                            print ""
+                            print "->BC error"
+                            print "Previous BC: %d" % previous_BC
+                            print "Current BC: %d" % i.BC
+                            bc_error_counter += 1
                     previous_BC = i.BC
 
         stop = time.time()
@@ -99,6 +134,10 @@ def concecutive_triggers(obj, nr_loops=25):
             for line in result:
                 print line
                 myfile.write("%s\n" % line)
+    error_list = [crc_error_counter, bc_error_counter, ec_error_counter, hit_counter]
+    error_sum = error_list[0] + error_list[1] + error_list[2] + error_list[3]
+    if obj.database:
+        obj.database.save_data_test(error_list)
 
     obj.register[65535].RUN[0] = 0
     obj.write_register(65535)
@@ -108,6 +147,7 @@ def concecutive_triggers(obj, nr_loops=25):
     obj.register[130].BCb[0] = 0
     obj.write_register(130)
     time.sleep(1)
+    return error_sum
 
 
 def check_data_packet(data_packet, ec_size=1, bc_size=2, data="", szp=0):

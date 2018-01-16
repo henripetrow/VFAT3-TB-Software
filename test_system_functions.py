@@ -57,14 +57,14 @@ def write_register_default_values(value):
 def dec_to_bin_with_stuffing(inn, size):
     out = [int(x) for x in bin(inn)[2:]]
     for x in range(len(out), size):
-        out.insert(0,0)
+        out.insert(0, 0)
     return out
 
 
 def data_packet_bit_stuffing(data):
     out = []
     SC1_counter = 0
-    for x in range(0,len(data)):
+    for x in range(0, len(data)):
         if data[x] == 1:
             SC1_counter += 1
             out.extend([1])
@@ -84,22 +84,22 @@ def crc_remainder(input_package):
     input_package_len = len(input_package)/8
 
     for j in range(0, input_package_len):
+
         input_bitstring = input_package[(j*8):((j+1)*8)]
         input_bitstring.reverse()
         input_bitstring = ''.join(str(e) for e in input_bitstring)
 
-        for i in range(7, -1, -1):
 
+        for i in range(7, -1, -1):
             crc_bin = bin(crc)				# Convert CRC dec to bin.
             crc_bin = crc_bin[2:]			#
             crc_len = len(crc_bin)			#
-            crc_bin = (16-crc_len)*'0' + crc_bin	#
-
-            if int(input_bitstring[i], 2)^int(crc_bin[0],2) == 1:
+            crc_bin = (16-crc_len)*'0' + crc_bin
+            if int(input_bitstring[i], 2) ^ int(crc_bin[0], 2) == 1:
 
                 crc_bin = crc_bin[1:]+'0'
                 crc = int(crc_bin, 2)
-                crc =crc^polynomial_bitstring
+                crc = crc ^ polynomial_bitstring
             else:
                 crc_bin = crc_bin[1:]+'0'
                 crc = int(crc_bin, 2)

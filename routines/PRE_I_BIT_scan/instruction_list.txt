@@ -9,7 +9,7 @@
 1000 Read 131073
 
 
-200 Repeat 64
+200 Repeat 255
 
 1000 Write PRE_I_BIT 1
 2000 Read 131072
