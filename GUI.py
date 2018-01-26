@@ -46,17 +46,8 @@ class VFAT3_GUI:
 
             if sys.argv[1] == '-db':
                 self.read_chip_id()
-                print "Using Hybrid: %s" % self.chip_id
 
-            if sys.argv[1] != '-no_psu':
-                self.tti_if = TtiSerialInterface()
-                print "Device ID:"
-                print self.tti_if.req_device_id()
-                self.tti_if.set_outputs_on()
-                self.tti_if.set_ch1_current_limit(0.2)
-                self.tti_if.set_ch2_current_limit(0.2)
-                self.tti_if.set_ch1_voltage(1.2)
-                self.tti_if.set_ch2_voltage(1.2)
+                print "Using Hybrid: %s" % self.chip_id
 
             else:
                 self.database = 0
@@ -67,7 +58,14 @@ class VFAT3_GUI:
             self.database = 0
             self.chip_id = 0
 
-
+        self.tti_if = TtiSerialInterface()
+        print "Device ID:"
+        print self.tti_if.req_device_id()
+        self.tti_if.set_outputs_on()
+        self.tti_if.set_ch1_current_limit(0.2)
+        self.tti_if.set_ch2_current_limit(0.2)
+        self.tti_if.set_ch1_voltage(1.2)
+        self.tti_if.set_ch2_voltage(1.2)
 
         # Local variables.
         self.barcode_id = ""
