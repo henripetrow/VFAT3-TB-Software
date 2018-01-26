@@ -5,7 +5,7 @@ import time
 
 def concecutive_triggers(obj, nr_loops=10):
     nr_of_triggers = 5000
-    nr_of_bc_between_triggers = 300
+    nr_of_bc_between_triggers = 16
     timestamp = time.strftime("%Y%m%d_%H%M")
     scan_name = "Consecutive_Triggers"
     file_name = "./routines/%s/FPGA_instruction_list.txt" % scan_name
@@ -19,9 +19,14 @@ def concecutive_triggers(obj, nr_loops=10):
 
     instruction_text = []
     instruction_text.append("1 Send RunMode")
+    instruction_text.append("4000 Send ReSync")
+    instruction_text.append("4000 Send ReSync")
+    instruction_text.append("4000 Send ReSync")
+    instruction_text.append("4000 Send ReSync")
+    instruction_text.append("4000 Send ReSync")
     instruction_text.append("10 Send EC0")
     instruction_text.append("10 Send BC0")
-    instruction_text.append("%i Send_Repeat LV1A %i %i" % (nr_of_bc_between_triggers, nr_of_triggers, nr_of_bc_between_triggers))
+    instruction_text.append("3000 Send_Repeat LV1A %i %i" % (nr_of_triggers, nr_of_bc_between_triggers))
     instruction_text.append("1000 Send ReSync")
 
     # Write the instructions to the file.
@@ -100,8 +105,9 @@ def concecutive_triggers(obj, nr_loops=10):
                         if previous_EC == ecb_max and i.EC == 0:
                             pass
                         else:
-                            print ""
+                            #print ""
                             print "->EC error"
+                            print "Packet: %d" % data_packet_counter
                             print "Previous EC: %d" % previous_EC
                             print "Current EC: %d" % i.EC
                             ec_error_counter += 1
@@ -111,10 +117,11 @@ def concecutive_triggers(obj, nr_loops=10):
                         if i.BC+(bcb_max-previous_BC) == nr_of_bc_between_triggers-1:  # -1 since counter starts from zero.
                             pass
                         else:
-                            print ""
-                            print "->BC error"
-                            print "Previous BC: %d" % previous_BC
-                            print "Current BC: %d" % i.BC
+                            # print ""
+                            # print "->BC error"
+                            # print "Packet: %d" % data_packet_counter
+                            # print "Previous BC: %d" % previous_BC
+                            # print "Current BC: %d" % i.BC
                             bc_error_counter += 1
                     previous_BC = i.BC
 

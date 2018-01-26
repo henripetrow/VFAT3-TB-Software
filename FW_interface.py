@@ -140,13 +140,11 @@ class FW_interface:
         return data_list
 
     def read_routine_fifo(self):
-        data_list = self.glib.fifoRead("test_fifo", 130074)
+        data_list = self.glib.fifoRead("test_fifo", 250074)
         return data_list
 
     # def read_routine_fifo(self):
-    #     glib = GLIB()
-    #     open("./data/FPGA_output.dat", 'w').close()
-    #     data_list = glib.fifoRead("test_fifo", 150074)
+    #     data_list = self.glib.fifoRead("test_fifo", 300074)
     #     open("./data/FPGA_output_list.dat", 'w').close()
     #     with open("./data/FPGA_output_list.dat", "a") as myfile:
     #         if data_list is None:
@@ -161,6 +159,7 @@ class FW_interface:
     #                 myfile.write(line)
     #         else:
     #             print "!-> read_routine_fifo received a value: None."
+    #     return data_list
 
     def read_sync_fifo(self):
         data_list = self.glib.fifoRead("test_fifo", 130)
@@ -189,9 +188,9 @@ class FW_interface:
             if scurve_ch != "j":
                 time.sleep(0.035)
                 #time.sleep(0.2)
-            else:
-                #time.sleep(0.03)
-                pass
+            #else:
+            #    #time.sleep(0.03)
+            #    pass
             if routine == 1:
                 received_data = self.read_routine_fifo()
             elif routine == 2:

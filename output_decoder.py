@@ -149,11 +149,12 @@ class datapacket:
 
     def ready(self, dataformat_register):
         # print "****************"
-        # print "DATA PACKET RECEIVED"
+        #print "DATA PACKET RECEIVED"
         # print "Header: %s" % self.header
         # print "FIFO warning: %d" % self.FIFO_warning
         # print "System BC: %d" % self.systemBC
-        # print self.data
+        #print self.data
+        #print self.crc
         if self.szp == 0:
             if self.EC:
                 self.ec_size = len(self.EC)/8
@@ -193,7 +194,7 @@ class datapacket:
 
             if received_crc_int != self.calculated_crc:
                 self.crc_error = 1
-                print("!-> data packet CRC error.")
+                #print("!-> data packet CRC error.")
             else:
                 pass
                 #print("CRC ok.")
@@ -302,6 +303,7 @@ def decode_output_data(data_list, register):
                     data_packet.crc_calc += input_value
                     # print input_value
                     if input_value == HDR_1W:                     # Check if FIFO warning was given.
+                        print "FIFO warning"
                         data_packet.FIFO_warning = 1              # Set the FIFO warning to the object.
                     data_packet.header = input_value              # Set the binary header to the new object.
                     data_packet.systemBC = BCcounter              # Set the system BC counter to the object. Tells the time of arrival of the packet.
@@ -383,6 +385,22 @@ def decode_output_data(data_list, register):
                     data_size = 16
                     # print "Collecting data: %s" % input_value
                     data_packet.data += input_value                # Input value is added to the data.
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"         To be used with the trigger FW
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # data_packet.data += "00000000"
+                    # datapacket_status = "CRC"
                     datapacket_byte_counter += 1                   # Byte counter is incremented by one to count the amount of data bytes.
                     if datapacket_byte_counter >= data_size:       # If byte counter is >= than data_size we have all data bytes and we can move to next state.
                         datapacket_status = "CRC"                  # Set state to IDLE.

@@ -48,20 +48,26 @@ class VFAT3_GUI:
                 self.read_chip_id()
                 print "Using Hybrid: %s" % self.chip_id
 
+            if sys.argv[1] != '-no_psu':
+                self.tti_if = TtiSerialInterface()
+                print "Device ID:"
+                print self.tti_if.req_device_id()
+                self.tti_if.set_outputs_on()
+                self.tti_if.set_ch1_current_limit(0.2)
+                self.tti_if.set_ch2_current_limit(0.2)
+                self.tti_if.set_ch1_voltage(1.2)
+                self.tti_if.set_ch2_voltage(1.2)
+
             else:
                 self.database = 0
+                self.chip_id = 0
         else:
             self.interfaceFW = FW_interface(0)          # 0 - IPbus mode
             self.mode = 0
+            self.database = 0
+            self.chip_id = 0
 
-        self.tti_if = TtiSerialInterface()
-        print "Device ID:"
-        print self.tti_if.req_device_id()
-        self.tti_if.set_outputs_on()
-        self.tti_if.set_ch1_current_limit(0.2)
-        self.tti_if.set_ch2_current_limit(0.2)
-        self.tti_if.set_ch1_voltage(1.2)
-        self.tti_if.set_ch2_voltage(1.2)
+
 
         # Local variables.
         self.barcode_id = ""
@@ -400,7 +406,10 @@ class VFAT3_GUI:
         self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth)
         self.cal_button.grid(column=2, row=5, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="Gain measurement", command=lambda: gain_measurement(self), width=bwidth)
+#        self.cal_button = Button(self.calibration_frame, text="Gain measurement", command=lambda: gain_measurement(self), width=bwidth)
+#        self.cal_button.grid(column=1, row=6, sticky='e')
+
+        self.cal_button = Button(self.calibration_frame, text="Gain per channel", command=lambda: gain_histogram(self), width=bwidth)
         self.cal_button.grid(column=1, row=6, sticky='e')
 
         self.cal_button = Button(self.calibration_frame, text="Save registers", command=lambda: self.save_register_values_to_file(), width=bwidth)

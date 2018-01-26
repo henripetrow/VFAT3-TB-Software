@@ -233,7 +233,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         text = "Run time (minutes): %f\n" % run_time
         obj.add_to_interactive_screen(text)
         threshold = mean_th_fc
-    return [threshold, all_ch_data, noisy_channels]
+    return [threshold, all_ch_data, noisy_channels, thr_list]
 
 
 def scurve_analyze(obj, scurve_data, folder, save="yes"):
@@ -466,7 +466,7 @@ def scurve_analyze_one_ch(scurve_data):
 def adjust_local_thresholds(obj):
     start = time.time()
     # Measure the mean threshold of the channels, that will be used as a target.
-    mean_threshold, all_ch_data = scurve_all_ch_execute(obj, "S-curve")
+    mean_threshold, all_ch_data, noisy_channels, thr_list = scurve_all_ch_execute(obj, "S-curve")
     correction = []
     print "Found the mean threshold for the 128 channels: %f" % mean_threshold
     for k in range(0, 128):
@@ -609,7 +609,61 @@ def gain_measurement(obj):
     # print gain
 
 
+def gain_histogram(obj):
 
+    start = time.time()
 
+    obj.register[65535].RUN[0] = 1
+    obj.write_register(65535)
+    time.sleep(1)
 
+    obj.register[133].Monitor_Sel[0] = 14
+    obj.write_register(133)
+
+    arm_dac0 = 100
+    arm_dac1 = 150
+
+    obj.register[135].ARM_DAC[0] = arm_dac0
+    obj.write_register(135)
+    time.sleep(1)
+    thr_v = obj.read_adc()
+    threshold_mv0 = obj.adcM * thr_v + obj.adcB
+    output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac0, configuration="yes",
+                                          dac_range=[200, 240], delay=50, bc_between_calpulses=2000, pulsestretch=7,
+                                         latency=45, cal_phi=0, folder="gain_meas")
+    threshold_fc0 = output[3]
+
+    obj.register[135].ARM_DAC[0] = arm_dac1
+    obj.write_register(135)
+    time.sleep(1)
+    thr_v = obj.read_adc()
+    threshold_mv1 = obj.adcM * thr_v + obj.adcB
+    output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac1, configuration="yes",
+                                          dac_range=[200, 240], delay=50, bc_between_calpulses=2000, pulsestretch=7,
+                                         latency=45, cal_phi=0, folder="gain_meas")
+    threshold_fc1 = output[3]
+
+    print threshold_fc0
+    print threshold_fc1
+    print threshold_mv0
+    print threshold_mv1
+    # Calculate the gain.
+    gain = []
+    for i in range(0, len(threshold_fc0)):
+        if threshold_fc1[i] != threshold_fc0[i]:
+            print i
+            print threshold_mv1
+            print threshold_mv0
+            print threshold_fc1[i]
+            print threshold_fc0[i]
+            gain_value = (threshold_mv1 - threshold_mv0)/(threshold_fc1[i] - threshold_fc0[i])
+            gain.append(gain_value)
+            print gain_value
+        else:
+            gain.append(0)
+    print gain
+
+    stop = time.time()
+    run_time = (stop - start) / 60
+    print "Runtime: %f" % run_time
 
