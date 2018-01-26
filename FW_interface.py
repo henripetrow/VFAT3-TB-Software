@@ -20,7 +20,7 @@ class FW_interface:
         self.connection_mode = mode
         if self.connection_mode == 0:  # IPbus/pyChips mode
             self.glib = GLIB()
-            print "Entering normal mode"
+            #print "Entering normal mode"
         if self.connection_mode == 1:  # Simulation mode
             with open("./data/FPGA_statusfile.dat", "w") as myfile:
                 print "Entering Simulation mode."

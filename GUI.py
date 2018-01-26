@@ -25,48 +25,43 @@ from tti_serial_interface import *
 class VFAT3_GUI:
     def __init__(self, master):
 
+        psu_mode = 1
+        conn_mode = 1
+        db_mode = 1
+
         # Communication mode selection.
-        if len(sys.argv) >= 2:
-            if sys.argv[1] == '-s':
-                self.interfaceFW = FW_interface(1)      # 1 - Simulation mode
-                self.mode = 1
-            elif sys.argv[1] == '-a':
-                self.interfaceFW = FW_interface(2)      # 1 - Serial mode
-                self.mode = 2
-            elif sys.argv[1] == '-j':
-                self.interfaceFW = FW_interface(0)      # 0 - IPbus mode
-                self.mode = 0
-            elif sys.argv[1] == '-u':
-                self.interfaceFW = FW_interface(3)      # 0 - IPbus/uHal mode
-                self.mode = 3
-            else:
-                print "Unrecognised option."
-                self.interfaceFW = FW_interface(0)      # 0 - IPbus mode
-                self.mode = 0
+        for arg in sys.argv:
+            print "sys.argv value: %s" % arg
+            if arg == '-s':
+                conn_mode = 0
+            if arg == '-no_db':
+                print "Entering no database-mode."
+                self.chip_id = 'n/a'
+                db_mode = 0
+            if arg == '-no_psu':
+                print "Entering no Power Supply-mode."
+                psu_mode = 0
 
-            if sys.argv[1] == '-db':
-                self.read_chip_id()
-
-                print "Using Hybrid: %s" % self.chip_id
-
-            else:
-                self.database = 0
-                self.chip_id = 0
-        else:
-            self.interfaceFW = FW_interface(0)          # 0 - IPbus mode
+        if psu_mode == 1:
+            self.tti_if = TtiSerialInterface()
+            if self.tti_if.psu_found:
+                print "Found Power Supply"
+                print "Device ID:"
+                print self.tti_if.req_device_id()
+                self.tti_if.set_outputs_on()
+                self.tti_if.set_ch1_current_limit(0.2)
+                self.tti_if.set_ch2_current_limit(0.2)
+                self.tti_if.set_ch1_voltage(1.2)
+                self.tti_if.set_ch2_voltage(1.2)
+        if conn_mode == 0:
+            self.interfaceFW = FW_interface(1)  # 1 - Simulation mode
+            self.mode = 1
+        if conn_mode == 1:
+            self.interfaceFW = FW_interface(0)  # 0 - IPbus mode
             self.mode = 0
-            self.database = 0
-            self.chip_id = 0
-
-        self.tti_if = TtiSerialInterface()
-        print "Device ID:"
-        print self.tti_if.req_device_id()
-        self.tti_if.set_outputs_on()
-        self.tti_if.set_ch1_current_limit(0.2)
-        self.tti_if.set_ch2_current_limit(0.2)
-        self.tti_if.set_ch1_voltage(1.2)
-        self.tti_if.set_ch2_voltage(1.2)
-
+        if db_mode == 1:
+            self.read_chip_id()
+            print "Using Hybrid: %s" % self.chip_id
         # Local variables.
         self.barcode_id = ""
         self.channel_register = 0

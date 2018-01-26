@@ -6,32 +6,34 @@ class TtiSerialInterface:
 
     def __init__(self, baudrate=9600):
         # test which port is the right one by requesting ID.
-        self.serial_port = "/dev/ttyACM0"
-        # ports = list(serial.tools.list_ports.comports())
-        # for p in ports:
-        #     if "PSU" in p.description:
-        #         self.serial_port = p.device
-        #         print self.serial_port
+        self.serial_port = ""
+        ports = list(serial.tools.list_ports.comports())
+        for p in ports:
+            if "PSU" in p.description:
+                self.serial_port = p.device
+                print self.serial_port
+        if self.serial_port != "":
+            self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
 
-        self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
+            # Instrument specific commands.
+            self.ch1_voltage_req = "V1O?"
+            self.ch2_voltage_req = "V2O?"
+            self.ch1_voltage_set = "V1"
+            self.ch2_voltage_set = "V2"
+            self.ch1_current_req = "I1O?"
+            self.ch2_current_req = "I2O?"
+            self.ch1_current_set = "I1"
+            self.ch2_current_set = "I2"
+            self.turn_off_outputs = "OPALL 0"
+            self.turn_on_outputs = "OPALL 1"
+            self.req_ch1_state = "OP1?"
+            self.req_ch2_state = "OP2?"
+            self.instrument_identification = "*IDN?"
 
-
-        # Instrument specific commands.
-        self.ch1_voltage_req = "V1O?"
-        self.ch2_voltage_req = "V2O?"
-        self.ch1_voltage_set = "V1"
-        self.ch2_voltage_set = "V2"
-        self.ch1_current_req = "I1O?"
-        self.ch2_current_req = "I2O?"
-        self.ch1_current_set = "I1"
-        self.ch2_current_set = "I2"
-        self.turn_off_outputs = "OPALL 0"
-        self.turn_on_outputs = "OPALL 1"
-        self.req_ch1_state = "OP1?"
-        self.req_ch2_state = "OP2?"
-        self.instrument_identification = "*IDN?"
-
-        self.device_ID = self.req_device_id()
+            self.device_ID = self.req_device_id()
+            self.psu_found = 1
+        else:
+            self.psu_found = 0
 
     # Functions
 
