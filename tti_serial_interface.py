@@ -9,6 +9,7 @@ class TtiSerialInterface:
         self.serial_port = ""
         ports = list(serial.tools.list_ports.comports())
         for p in ports:
+            print p
             if "PSU" in p.description:
                 self.serial_port = p.device
                 print self.serial_port
