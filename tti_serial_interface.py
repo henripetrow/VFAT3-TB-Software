@@ -7,11 +7,11 @@ class TtiSerialInterface:
     def __init__(self, baudrate=9600):
         # test which port is the right one by requesting ID.
         self.serial_port = "/dev/ttyACM0"
-        ports = list(serial.tools.list_ports.comports())
-        for p in ports:
-            if "PSU" in p.description:
-                self.serial_port = p.device
-                print self.serial_port
+        # ports = list(serial.tools.list_ports.comports())
+        # for p in ports:
+        #     if "PSU" in p.description:
+        #         self.serial_port = p.device
+        #         print self.serial_port
 
         self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
 
