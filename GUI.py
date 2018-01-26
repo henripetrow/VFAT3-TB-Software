@@ -53,6 +53,8 @@ class VFAT3_GUI:
                 self.tti_if.set_ch2_current_limit(0.2)
                 self.tti_if.set_ch1_voltage(1.2)
                 self.tti_if.set_ch2_voltage(1.2)
+            else:
+                print "No Power Supply found"
         if conn_mode == 0:
             self.interfaceFW = FW_interface(1)  # 1 - Simulation mode
             self.mode = 1
