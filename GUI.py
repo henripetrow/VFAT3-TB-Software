@@ -31,7 +31,7 @@ class VFAT3_GUI:
 
         # Communication mode selection.
         for arg in sys.argv:
-            print "sys.argv value: %s" % arg
+            # print "sys.argv value: %s" % arg
             if arg == '-s':
                 conn_mode = 0
             if arg == '-no_db':
