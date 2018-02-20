@@ -187,6 +187,7 @@ def iref_adjust(obj):
     obj.write_register(65535)
     time.sleep(1)
     text = "- Iref adjusted.\n"
+    text += "Register value: %i .\n" % obj.register[134].Iref[0]
     obj.Iref_cal = 1
     print text
     obj.add_to_interactive_screen(text)

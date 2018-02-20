@@ -1143,7 +1143,7 @@ class VFAT3_GUI:
         counter = 0
         while True:
             counter += 1
-            output = self.execute(verbose="yes")
+            output = self.execute(verbose="no")
             if counter == 10:
                 print "No reply from ADC."
                 break
@@ -1167,7 +1167,7 @@ class VFAT3_GUI:
         counter = 0
         while True:
             counter += 1
-            output = self.execute(verbose="yes")
+            output = self.execute(verbose="no")
             if counter == 10:
                 print "No reply from ADC."
                 break
@@ -1349,6 +1349,7 @@ class VFAT3_GUI:
 
     def run_production_tests(self):
         start = time.time()
+        self.clear_interactive_screen()
         # self.database = DatabaseInterface(self.chip_id)
         self.unset_calibration_variables()
         # self.tti_if.set_outputs_on()
@@ -1365,7 +1366,7 @@ class VFAT3_GUI:
             if result[1] == 0 and result[2] == 0 and result[3] == 1:
                 print "Sync ok"
                 print "Ext adc ok"
-                print "Save barcode ok"
+                #print "Save barcode ok"
                 self.send_idle()
                 print "Send Idle ok."
                 result.append(self.test_bist())

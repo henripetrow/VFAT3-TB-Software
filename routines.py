@@ -315,6 +315,12 @@ def scurve_analyze(obj, scurve_data, folder, save="yes"):
         print "Mean enc: %f" % mean_enc
         print "Noisy Channels:"
         print noisy_channels
+
+        text = "S-curve results:\n"
+        text += "Mean Threshold: %f\n" % mean_th
+        text += "Mean enc: %f\n" % mean_enc
+        text += "Noisy Channels: %i\n" % len(noisy_channels)
+        obj.add_to_interactive_screen(text)
         drawHisto(thr_h, cc, '%s/%s/threshHiso%s.png' % (obj.data_folder, folder, timestamp))
         thr_h.Write()
         drawHisto(enc_h, cc, '%s/%s/encHisto%s.png' % (obj.data_folder, folder, timestamp))
