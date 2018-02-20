@@ -6,5 +6,5 @@
 4000 Send ReSync
 10 Send EC0
 10 Send BC0
-3000 Send_Repeat LV1A 5000 300
+3000 Send_Repeat LV1A 4000 300
 1000 Send ReSync

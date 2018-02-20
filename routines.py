@@ -141,7 +141,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         obj.register[65535].RUN[0] = 1
         obj.write_register(65535)
         time.sleep(1)
-        obj.measure_power('RUN')
+        # obj.measure_power('RUN')
         obj.register[129].ST[0] = 0
         obj.register[129].PS[0] = pulsestretch
         obj.write_register(129)
