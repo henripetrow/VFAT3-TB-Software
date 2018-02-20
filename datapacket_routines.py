@@ -26,7 +26,7 @@ def concecutive_triggers(obj, nr_loops=10):
     instruction_text.append("4000 Send ReSync")
     instruction_text.append("10 Send EC0")
     instruction_text.append("10 Send BC0")
-    instruction_text.append("3000 Send_Repeat LV1A %i %i" % (nr_of_triggers, nr_of_bc_between_triggers))
+    instruction_text.append("%i Send_Repeat LV1A %i %i" % (nr_of_bc_between_triggers, nr_of_triggers, nr_of_bc_between_triggers))
     instruction_text.append("1000 Send ReSync")
 
     # Write the instructions to the file.
@@ -117,11 +117,11 @@ def concecutive_triggers(obj, nr_loops=10):
                         if i.BC+(bcb_max-previous_BC) == nr_of_bc_between_triggers-1:  # -1 since counter starts from zero.
                             pass
                         else:
-                            # print ""
-                            # print "->BC error"
-                            # print "Packet: %d" % data_packet_counter
-                            # print "Previous BC: %d" % previous_BC
-                            # print "Current BC: %d" % i.BC
+                            print ""
+                            print "->BC error"
+                            print "Packet: %d" % data_packet_counter
+                            print "Previous BC: %d" % previous_BC
+                            print "Current BC: %d" % i.BC
                             bc_error_counter += 1
                     previous_BC = i.BC
 
