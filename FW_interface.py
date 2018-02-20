@@ -3,7 +3,7 @@
 # Lappeenranta University of Technology
 ###########################################
 
-import serial
+# import serial
 import sys
 import os
 from output_decoder import *

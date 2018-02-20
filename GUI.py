@@ -16,10 +16,10 @@ from VFAT3_registers import *
 from generator import *
 from test_system_functions import *
 from FW_interface import *
-from DatabaseInterface import *
+# from DatabaseInterface import *
 from routines import *
 from calibration_routines import *
-from tti_serial_interface import *
+# from tti_serial_interface import *
 
 
 class VFAT3_GUI:
@@ -43,18 +43,19 @@ class VFAT3_GUI:
                 psu_mode = 0
 
         if psu_mode == 1:
-            self.tti_if = TtiSerialInterface()
-            if self.tti_if.psu_found:
-                print "Found Power Supply"
-                print "Device ID:"
-                print self.tti_if.req_device_id()
-                self.tti_if.set_outputs_off()
-                self.tti_if.set_ch1_current_limit(0.2)
-                self.tti_if.set_ch2_current_limit(0.2)
-                self.tti_if.set_ch1_voltage(1.2)
-                self.tti_if.set_ch2_voltage(1.2)
-            else:
-                print "No Power Supply found"
+            pass
+            # self.tti_if = TtiSerialInterface()
+            # if self.tti_if.psu_found:
+            #     print "Found Power Supply"
+            #     print "Device ID:"
+            #     print self.tti_if.req_device_id()
+            #     self.tti_if.set_outputs_off()
+            #     self.tti_if.set_ch1_current_limit(0.2)
+            #     self.tti_if.set_ch2_current_limit(0.2)
+            #     self.tti_if.set_ch1_voltage(1.2)
+            #     self.tti_if.set_ch2_voltage(1.2)
+            # else:
+            #     print "No Power Supply found"
         if conn_mode == 0:
             self.interfaceFW = FW_interface(1)  # 1 - Simulation mode
             self.mode = 1
