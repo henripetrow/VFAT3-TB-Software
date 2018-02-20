@@ -48,7 +48,7 @@ class VFAT3_GUI:
                 print "Found Power Supply"
                 print "Device ID:"
                 print self.tti_if.req_device_id()
-                self.tti_if.set_outputs_on()
+                self.tti_if.set_outputs_off()
                 self.tti_if.set_ch1_current_limit(0.2)
                 self.tti_if.set_ch2_current_limit(0.2)
                 self.tti_if.set_ch1_voltage(1.2)
@@ -1353,11 +1353,15 @@ class VFAT3_GUI:
         result = []
         time.sleep(2)
         result.append(self.check_short_circuit())
-        print "Short Circuit test ok"
         if result[0] == 0:
+            print "Short Circuit test ok"
             result.append(self.send_reset())
             result.append(self.test_ext_adc())
             result.append(self.save_barcode())
+            print "Test BIST ok"
+            result.append(self.test_scan_chain())
+            print "Test Scan Chain ok"
+            result.append(iref_adjust(self))
             if result[1] == 0 and result[2] == 0 and result[3] == 0:
                 print "Sync ok"
                 print "Ext adc ok"
@@ -1365,10 +1369,6 @@ class VFAT3_GUI:
                 self.send_idle()
                 print "Send Idle ok."
                 result.append(self.test_bist())
-                print "Test BIST ok"
-                result.append(self.test_scan_chain())
-                print "Test Scan Chain ok"
-                result.append(iref_adjust(self))
                 print "Iref adjustment ok"
                 result.append(self.measure_power('SLEEP'))
                 result.append(adc_calibration(self))

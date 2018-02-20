@@ -5,7 +5,7 @@ import time
 
 def concecutive_triggers(obj, nr_loops=10):
     nr_of_triggers = 5000
-    nr_of_bc_between_triggers = 16
+    nr_of_bc_between_triggers = 300
     timestamp = time.strftime("%Y%m%d_%H%M")
     scan_name = "Consecutive_Triggers"
     file_name = "./routines/%s/FPGA_instruction_list.txt" % scan_name

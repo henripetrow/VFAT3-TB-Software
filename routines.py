@@ -141,7 +141,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         obj.register[65535].RUN[0] = 1
         obj.write_register(65535)
         time.sleep(1)
-
+        obj.measure_power('RUN')
         obj.register[129].ST[0] = 0
         obj.register[129].PS[0] = pulsestretch
         obj.write_register(129)
@@ -420,6 +420,11 @@ def scan_execute(obj, scan_name, plot=1,):
     # outF.close()
 
     filename = "%s/dac_scans/%s_%s_scan.png" % (obj.data_folder, timestamp, modified)
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
     if plot == 1:
         nr_points = len(scan_values0)
         x = range(0, nr_points)
