@@ -37,7 +37,6 @@ def concecutive_triggers(obj, nr_loops=10):
     # Generate the instruction list for the FPGA.
     generator("Consecutive Triggers", obj.write_BCd_as_fillers, obj.register)
 
-
     obj.register[65535].RUN[0] = 1
     obj.write_register(65535)
     time.sleep(1)
@@ -72,7 +71,6 @@ def concecutive_triggers(obj, nr_loops=10):
     obj.write_register(130)
     time.sleep(1)
 
-
     trigger_counter = 0
     data_packet_counter = 0
     hit_counter = 0
@@ -80,8 +78,6 @@ def concecutive_triggers(obj, nr_loops=10):
     ec_error_counter = 0
     bc_error_counter = 0
     start = time.time()
-
-
 
     for k in range(0, nr_loops):
         trigger_counter += nr_of_triggers
@@ -383,3 +379,103 @@ def test_data_packet(obj):
     print "Writing back previous register values."
     obj.load_register_values_from_file_execute(temp_file, multiwrite=1)
     print "Done."
+
+
+def charge_distribution_on_neighbouring_ch(obj, nr_loops=10):
+    target_channel = 64
+    nr_of_triggers = 4000
+    nr_of_bc_between_triggers = 300
+    timestamp = time.strftime("%Y%m%d_%H%M")
+    scan_name = "charge_distribution"
+    file_name = "./routines/%s/FPGA_instruction_list.txt" % scan_name
+    output_file = "%s/concecutive_tiggers/%s_concecutive_triggers.dat" % (obj.data_folder, timestamp)
+
+    instruction_text = []
+    instruction_text.append("1 Send RunMode")
+    instruction_text.append("1000 Send_Repeat CalPulse_LV1A 10 3000 5")
+    instruction_text.append("1000 Send SCOnly")
+
+    # Write the instructions to the file.
+    output_file_name = "./routines/%s/instruction_list.txt" % scan_name
+    with open(output_file_name, "w") as mfile:
+        for item in instruction_text:
+            mfile.write("%s\n" % item)
+    # Generate the instruction list for the FPGA.
+    generator("charge distribution", obj.write_BCd_as_fillers, obj.register)
+
+
+    print "1"
+    obj.set_fe_nominal_values()
+
+    register[138].CAL_MODE[0] = 1
+    register[138].CAL_DAC[0] = 200
+    obj.write_register(138)
+    print "2"
+    obj.register[132].PT[0] = 15
+    obj.register[132].SEL_COMP_MODE[0] = 1
+    obj.write_register(132)
+    print "3"
+    obj.register[135].ZCC_DAC[0] = 10
+    obj.register[135].ARM_DAC[0] = 40
+    obj.write_register(135)
+    print "4"
+    obj.register[139].CAL_DUR[0] = 200
+    obj.write_register(139)
+    print "5"
+    obj.register[129].ST[0] = 0
+    obj.register[129].PS[0] = 7
+    obj.write_register(129)
+    print "6"
+    obj.register[target_channel].cal[0] = 1
+    print "7"
+    time.sleep(1)
+    obj.write_register(target_channel)
+    print "8"
+    obj.register[65535].RUN[0] = 1
+    obj.write_register(65535)
+    time.sleep(1)
+    start = time.time()
+    print "Start"
+    for k in range(0, 150, 20):
+        cal_dac_value = 250-k
+        print cal_dac_value
+        register[138].CAL_DAC[0] = cal_dac_value
+        obj.write_register(138)
+        print "Enter loop"
+        channel_before_hit_counter = 0
+        channel_hit_counter = 0
+        channel_after_hit_counter = 0
+        output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1, save_data=1, obj=obj)
+        print "Got output."
+        if output[0] == "Error":
+            text = "%s: %s\n" % (output[0], output[1])
+            obj.add_to_interactive_screen(text)
+        else:
+            for i in output[3]:
+                print i.data
+                #print i.data.index("1")
+                #print 127-target_channel
+                if i.type == "data_packet":
+                    if i.data[127-target_channel] == "1":
+                        channel_hit_counter += 1
+                        #print "Found hit."
+                    if i.data[127-target_channel+1] == "1":
+                        channel_before_hit_counter += 1
+                        print "Found neighbouring hit."
+                    if i.data[127-target_channel-1] == "1":
+                        channel_after_hit_counter += 1
+                        print "Found neighbouring hit."
+
+        stop = time.time()
+        run_time = (stop - start) / 60
+        print run_time
+    print "set off channel"
+    time.sleep(1)
+    obj.register[target_channel].cal[0] = 0
+    obj.write_register(target_channel)
+    print "channel set off"
+    obj.register[65535].RUN[0] = 0
+    obj.write_register(65535)
+    time.sleep(1)
+
+

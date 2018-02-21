@@ -486,5 +486,5 @@ def decode_output_data(data_list, register):
     else:
         #print "System returned: None"
         pass
-    output_data = [IPbus_transaction_list, datapacket_list, sync_response_list, transaction_list,FPGA_output]
+    output_data = [IPbus_transaction_list, datapacket_list, sync_response_list, transaction_list, FPGA_output]
     return output_data

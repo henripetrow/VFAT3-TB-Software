@@ -16,10 +16,10 @@ from VFAT3_registers import *
 from generator import *
 from test_system_functions import *
 from FW_interface import *
-# from DatabaseInterface import *
+from DatabaseInterface import *
 from routines import *
 from calibration_routines import *
-# from tti_serial_interface import *
+from tti_serial_interface import *
 
 
 class VFAT3_GUI:
@@ -44,19 +44,18 @@ class VFAT3_GUI:
                 psu_mode = 0
 
         if psu_mode == 1:
-            pass
-            # self.tti_if = TtiSerialInterface()
-            # if self.tti_if.psu_found:
-            #     print "Found Power Supply"
-            #     print "Device ID:"
-            #     print self.tti_if.req_device_id()
-            #     self.tti_if.set_outputs_off()
-            #     self.tti_if.set_ch1_current_limit(0.2)
-            #     self.tti_if.set_ch2_current_limit(0.2)
-            #     self.tti_if.set_ch1_voltage(1.2)
-            #     self.tti_if.set_ch2_voltage(1.2)
-            # else:
-            #     print "No Power Supply found"
+            self.tti_if = TtiSerialInterface()
+            if self.tti_if.psu_found:
+                print "Found Power Supply"
+                print "Device ID:"
+                print self.tti_if.req_device_id()
+                # self.tti_if.set_outputs_off()
+                self.tti_if.set_ch1_current_limit(0.2)
+                self.tti_if.set_ch2_current_limit(0.2)
+                self.tti_if.set_ch1_voltage(1.2)
+                self.tti_if.set_ch2_voltage(1.2)
+            else:
+                print "No Power Supply found"
         if conn_mode == 0:
             self.interfaceFW = FW_interface(1)  # 1 - Simulation mode
             self.mode = 1
@@ -303,6 +302,8 @@ class VFAT3_GUI:
         self.cont_trig_button = Button(self.misc_frame, text="Sync FPGA", command=lambda: self.send_reset(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=15, sticky='e')
 
+        self.cont_trig_button = Button(self.misc_frame, text="Charge distribution", command=lambda: charge_distribution_on_neighbouring_ch(self), width=bwidth)
+        self.cont_trig_button.grid(column=1, row=16, sticky='e')
 
         # ADD TABS
         self.nb.add(self.FCC_frame, text="FCC")
@@ -1350,20 +1351,17 @@ class VFAT3_GUI:
     def run_production_tests(self):
         start = time.time()
         self.clear_interactive_screen()
-        # self.database = DatabaseInterface(self.chip_id)
+        self.database = DatabaseInterface(self.chip_id)
         self.unset_calibration_variables()
-        # self.tti_if.set_outputs_on()
+        self.tti_if.set_outputs_on()
         result = []
         time.sleep(2)
-        # result.append(self.check_short_circuit())
-        result.append(1)
-        # if result[0] == 0:
-        if True:
+        result.append(self.check_short_circuit())
+        if result[0] == 0:
             result.append(self.send_reset())
             result.append(self.test_ext_adc())
-            # result.append(self.save_barcode())
-            result.append(1)
-            if result[1] == 0 and result[2] == 0 and result[3] == 1:
+            result.append(self.save_barcode())
+            if result[1] == 0 and result[2] == 0 and result[3] == 0:
                 print "Sync ok"
                 print "Ext adc ok"
                 #print "Save barcode ok"
@@ -1375,14 +1373,12 @@ class VFAT3_GUI:
                 print "Test Scan Chain ok"
                 result.append(iref_adjust(self))
                 print "Iref adjustment ok"
-                # result.append(self.measure_power('SLEEP'))
-                result.append(1)
+                result.append(self.measure_power('SLEEP'))
                 result.append(adc_calibration(self))
                 result.append(scan_cal_dac_fc(self, "CAL_DAC scan, fC"))
                 self.save_calibration_values_to_file("s")
                 result.append(self.test_registers())
-                # result.append(self.write_chip_id())
-                result.append(1)
+                result.append(self.write_chip_id())
                 result.append(concecutive_triggers(self))
                 result.append(self.run_all_dac_scans())
                 result.append(self.run_scurve())
@@ -1406,7 +1402,7 @@ class VFAT3_GUI:
             self.add_to_interactive_screen(text)
         time.sleep(1)
         self.unset_calibration_variables()
-        # self.tti_if.set_outputs_off()
+        self.tti_if.set_outputs_off()
 
 # ################# SCAN/TEST -FUNCTIONS #############################
 
