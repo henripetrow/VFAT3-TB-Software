@@ -431,20 +431,19 @@ def charge_distribution_on_neighbouring_ch(obj, nr_loops=10):
     time.sleep(1)
     obj.write_register(target_channel)
     print "8"
+
+    register[138].CAL_DAC[0] = 0
+    obj.write_register(138)
+
     obj.register[65535].RUN[0] = 1
     obj.write_register(65535)
     time.sleep(1)
     start = time.time()
     print "Start"
-    for k in range(0, 150, 20):
-        cal_dac_value = 250-k
-        print cal_dac_value
-        register[138].CAL_DAC[0] = cal_dac_value
-        obj.write_register(138)
+    hits_on_channnels = [0]*128
+    hits_on_channnels_normalized = [0]*128
+    for k in range(0, 15):
         print "Enter loop"
-        channel_before_hit_counter = 0
-        channel_hit_counter = 0
-        channel_after_hit_counter = 0
         output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1, save_data=1, obj=obj)
         print "Got output."
         if output[0] == "Error":
@@ -453,22 +452,14 @@ def charge_distribution_on_neighbouring_ch(obj, nr_loops=10):
         else:
             for i in output[3]:
                 print i.data
-                #print i.data.index("1")
-                #print 127-target_channel
                 if i.type == "data_packet":
-                    if i.data[127-target_channel] == "1":
-                        channel_hit_counter += 1
-                        #print "Found hit."
-                    if i.data[127-target_channel+1] == "1":
-                        channel_before_hit_counter += 1
-                        print "Found neighbouring hit."
-                    if i.data[127-target_channel-1] == "1":
-                        channel_after_hit_counter += 1
-                        print "Found neighbouring hit."
+                    for j, hit in enumerate(i.data):
+                        if hit == "1":
+                            hits_on_channnels[j] += 1
+        for i, item in enumerate(hits_on_channnels):
+            hits_on_channnels_normalized[i] = item/k
 
-        stop = time.time()
-        run_time = (stop - start) / 60
-        print run_time
+    print hits_on_channnels_normalized
     print "set off channel"
     time.sleep(1)
     obj.register[target_channel].cal[0] = 0
@@ -477,5 +468,8 @@ def charge_distribution_on_neighbouring_ch(obj, nr_loops=10):
     obj.register[65535].RUN[0] = 0
     obj.write_register(65535)
     time.sleep(1)
+    stop = time.time()
+    run_time = (stop - start) / 60
+    print run_time
 
 
