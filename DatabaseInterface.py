@@ -4,15 +4,16 @@ import pymysql
 class DatabaseInterface:
     def __init__(self, name):
         self.name = name
-        self.table_name = "Production"
-        self.connection = pymysql.connect(host="localhost", user="root", passwd="root", database="Hybrids")
+        self.passwd = "root"
+        self.user = "root"
+        self.table_name = "Test"
+        self.database_name = "Hybrids_test"
+        self.connection = pymysql.connect(host="localhost", user=self.user, passwd=self.passwd, database=self.database_name)
         self.cursor = self.connection.cursor()
 
-        self.dacs_8bit = ["ZCC_DAC", "ARM_DAC", "PRE_I_BIT", "PRE_VREF", "SH_I_BFCAS", "SH_I_BDIFF", "SD_I_BDIFF", "SD_I_BFCAS", "CAL_DAC"]
-        self.dacs_6bit = ["HYST_DAC", "CFD_DAC_1", "CFD_DAC_2", "PRE_I_BSF", "PRE_I_BLCC", "SD_I_BSF"]
         # Search if the name exists already.
-        updateSql = "SELECT * FROM %s WHERE ChipID = '%s' ;" % (self.table_name, name)
-        self.cursor.execute(updateSql)
+        update_sql = "SELECT * FROM %s WHERE ChipID = '%s' ;" % (self.table_name, name)
+        self.cursor.execute(update_sql)
         self.connection.commit()
         if self.cursor.rowcount == 0:
             print "Database entry not found. Creating a new entry."
@@ -20,34 +21,12 @@ class DatabaseInterface:
             insert1 = "INSERT INTO %s(ChipID) VALUES('%s');" % (self.table_name, self.name)
             self.cursor.execute(insert1)
             self.connection.commit()
-
-            # Insert new table for Threshold data.
-            insert1 = "INSERT INTO Threshold(ChipID) VALUES('%s');" % self.name
-            self.cursor.execute(insert1)
-            self.connection.commit()
-
-            # Insert new table for Threshold data.
-            insert1 = "INSERT INTO enc(ChipID) VALUES('%s');" % self.name
-            self.cursor.execute(insert1)
-            self.connection.commit()
-
-            # Insert new tables for DACs.
-            adcs = ["ADC0", "ADC1"]
-            for adc in adcs:
-                for i in self.dacs_6bit:
-                    insert1 = "INSERT INTO %s_%s(ChipID) VALUES('%s');" % (i, adc, self.name)
-                    self.cursor.execute(insert1)
-                    self.connection.commit()
-                for i in self.dacs_8bit:
-                    insert1 = "INSERT INTO %s_%s(ChipID) VALUES('%s');" % (i, adc, self.name)
-                    self.cursor.execute(insert1)
-                    self.connection.commit()
         else:
             print "Database entry found."
         self.connection.close()
 
-    def open_connection(self, db_name="Hybrids"):
-        self.connection = pymysql.connect(host="localhost", user="root", passwd="root", database=db_name)
+    def open_connection(self, db_name="Hybrids_test"):
+        self.connection = pymysql.connect(host="localhost", user=self.user, passwd=self.passwd, database=db_name)
         self.cursor = self.connection.cursor()
 
     def close_connection(self):
@@ -69,25 +48,18 @@ class DatabaseInterface:
         self.cursor.execute("UPDATE  %s SET %s=%f  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
         self.close_connection()
 
-    def save_dac_data(self, table_name, adc, data):
-        self.open_connection()
-        table_sql = "UPDATE %s_%s SET " % (table_name, adc)
-        table_sql += "DAC%i = %f" % (0, data[0])
+    def save_dac_data(self, dac_name, adc, data):
+        name = "%s_%s" % (dac_name, adc)
+        data_sql = "%i" % data[0]
         for i in range(1, len(data)):
-            table_sql += ", DAC%i = %f" % (i, data[i])
-        table_sql += " WHERE ChipID = '%s';" % self.name
-        self.cursor.execute(table_sql)
-        self.close_connection()
+            data_sql += " %i" % data[i]
+        self.set_string(name, data_sql)
 
-    def save_ch_data(self, table_name, data):
-        self.open_connection()
-        table_sql = "UPDATE %s SET " % table_name
-        table_sql += "Ch%i = %f" % (0, data[0])
+    def save_ch_data(self, name, data):
+        data_sql = "%f" % data[0]
         for i in range(1, len(data)):
-            table_sql += ", Ch%i = %f" % (i, data[i])
-        table_sql += " WHERE ChipID = '%s';" % self.name
-        self.cursor.execute(table_sql)
-        self.close_connection()
+            data_sql += " %f" % data[i]
+        self.set_string(name, data_sql)
 
     def save_adc0(self, m_value, b_value):
         self.set_float("ADC0M", m_value)
@@ -105,13 +77,13 @@ class DatabaseInterface:
         self.set_int("Iref", value)
 
     def save_mean_threshold(self, value):
-        self.set_float("Threshold", value)
+        self.set_float("Mean_Threshold", value)
 
     def save_threshold_data(self, values):
         self.save_ch_data("Threshold", values)
 
     def save_mean_enc(self, value):
-        self.set_float("enc", value)
+        self.set_float("Mean_enc", value)
 
     def save_enc_data(self, values):
         self.save_ch_data("enc", values)

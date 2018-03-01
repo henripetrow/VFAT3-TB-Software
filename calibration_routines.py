@@ -56,7 +56,7 @@ def cal_dac_steps(obj):
     return dac_values, base, step_values, charge_values
 
 
-def scan_cal_dac_fc(obj, scan_name):
+def scan_cal_dac_fc(obj, scan_name, production="no"):
     error = 0
     if obj.adcM == 0:
         text = "\nADCs are not calibrated. Run ADC calibration first.\n"
@@ -69,7 +69,7 @@ def scan_cal_dac_fc(obj, scan_name):
 
         dac_values, base_value, step_values, charge_values = cal_dac_steps(obj)
 
-        calc_cal_dac_conversion_factor(obj, dac_values, charge_values)
+        calc_cal_dac_conversion_factor(obj, dac_values, charge_values, production=production)
 
         # data = [dac_values, charge_values]
         # timestamp = time.strftime("%Y%m%d%H%M")
@@ -95,7 +95,7 @@ def scan_cal_dac_fc(obj, scan_name):
     return error
 
 
-def calc_cal_dac_conversion_factor(obj, dac_values, charge_values):
+def calc_cal_dac_conversion_factor(obj, dac_values, charge_values, production="no"):
 
     r.gStyle.SetStatX(0.5)
     r.gStyle.SetStatY(0.8)
@@ -112,19 +112,20 @@ def calc_cal_dac_conversion_factor(obj, dac_values, charge_values):
     obj.cal_dac_fcM = cal_dac_fc_fitR.GetParams()[1]
     obj.cal_dac_fcB = cal_dac_fc_fitR.GetParams()[0]
 
-    canv = r.TCanvas('canv', 'canv', 1000, 1000)
-    canv.cd()
+    if production == "no":
+        canv = r.TCanvas('canv', 'canv', 1000, 1000)
+        canv.cd()
 
-    timestamp = time.strftime("%Y%m%d_%H%M")
-    output_file = '%s/calibration/%scal_dac_fc.png' % (obj.data_folder, timestamp)
-    if not os.path.exists(os.path.dirname(output_file)):
-        try:
-            os.makedirs(os.path.dirname(output_file))
-        except OSError as exc:  # Guard against race condition
-            print "Unable to create directory"
-    open(output_file, 'w').close()
-    cal_dac_fc_g.Draw('ap')
-    canv.SaveAs(output_file)
+        timestamp = time.strftime("%Y%m%d_%H%M")
+        output_file = '%s/calibration/%scal_dac_fc.png' % (obj.data_folder, timestamp)
+        if not os.path.exists(os.path.dirname(output_file)):
+            try:
+                os.makedirs(os.path.dirname(output_file))
+            except OSError as exc:  # Guard against race condition
+                print "Unable to create directory"
+        open(output_file, 'w').close()
+        cal_dac_fc_g.Draw('ap')
+        canv.SaveAs(output_file)
 
 
     text = "\nCAL_DAC conversion completed.\n"
@@ -187,14 +188,14 @@ def iref_adjust(obj):
     obj.write_register(65535)
     time.sleep(1)
     text = "- Iref adjusted.\n"
-    text += "Register value: %i .\n" % obj.register[134].Iref[0]
+    text += "Register value: %i.\n" % obj.register[134].Iref[0]
     obj.Iref_cal = 1
     print text
     obj.add_to_interactive_screen(text)
     return error
 
 
-def adc_calibration(obj):
+def adc_calibration(obj, production="no"):
     error = 0
     if obj.Iref_cal == 0:
         text = "\nIref is not calibrated. Run Iref calibration first.\n"
@@ -239,7 +240,7 @@ def adc_calibration(obj):
         time.sleep(1)
         print int_adc0_values
         print dac_values
-        calc_adc_conversion_constants(obj, ext_adc_values, int_adc0_values, int_adc1_values)
+        calc_adc_conversion_constants(obj, ext_adc_values, int_adc0_values, int_adc1_values,production)
 
         adc0_values_conv = []
         for item in int_adc0_values:
@@ -278,7 +279,7 @@ def adc_calibration(obj):
     return error
 
 
-def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1):
+def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1, production="no"):
 
     r.gStyle.SetStatX(0.5)
     r.gStyle.SetStatY(0.8)
@@ -303,29 +304,30 @@ def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1):
     obj.adc1M = adc1fitR.GetParams()[1]
     obj.adc1B = adc1fitR.GetParams()[0]
 
-    canv = r.TCanvas('canv', 'canv', 1000, 1000)
-    canv.cd()
+    if production == "no":
+        canv = r.TCanvas('canv', 'canv', 1000, 1000)
+        canv.cd()
 
-    timestamp = time.strftime("%Y%m%d_%H%M")
-    output_file = '%s/calibration/%sadc0_cal.png' % (obj.data_folder, timestamp)
-    if not os.path.exists(os.path.dirname(output_file)):
-        try:
-            os.makedirs(os.path.dirname(output_file))
-        except OSError as exc:  # Guard against race condition
-            print "Unable to create directory"
-    open(output_file, 'w').close()
-    adc0_Conv_g.Draw('ap')
-    canv.SaveAs(output_file)
+        timestamp = time.strftime("%Y%m%d_%H%M")
+        output_file = '%s/calibration/%sadc0_cal.png' % (obj.data_folder, timestamp)
+        if not os.path.exists(os.path.dirname(output_file)):
+            try:
+                os.makedirs(os.path.dirname(output_file))
+            except OSError as exc:  # Guard against race condition
+                print "Unable to create directory"
+        open(output_file, 'w').close()
+        adc0_Conv_g.Draw('ap')
+        canv.SaveAs(output_file)
 
-    output_file = '%s/calibration/%sadc1_cal.png' % (obj.data_folder, timestamp)
-    if not os.path.exists(os.path.dirname(output_file)):
-        try:
-            os.makedirs(os.path.dirname(output_file))
-        except OSError as exc:  # Guard against race condition
-            print "Unable to create directory"
-    open(output_file, 'w').close()
-    adc1_Conv_g.Draw('ap')
-    canv.SaveAs(output_file)
+        output_file = '%s/calibration/%sadc1_cal.png' % (obj.data_folder, timestamp)
+        if not os.path.exists(os.path.dirname(output_file)):
+            try:
+                os.makedirs(os.path.dirname(output_file))
+            except OSError as exc:  # Guard against race condition
+                print "Unable to create directory"
+        open(output_file, 'w').close()
+        adc1_Conv_g.Draw('ap')
+        canv.SaveAs(output_file)
 
 
 

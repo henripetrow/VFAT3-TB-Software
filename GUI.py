@@ -37,7 +37,6 @@ class VFAT3_GUI:
             if arg == '-no_db':
                 print "Entering no database-mode."
                 self.chip_id = 'n/a'
-                self.database = 0
                 db_mode = 0
             if arg == '-no_psu':
                 print "Entering no Power Supply-mode."
@@ -66,6 +65,7 @@ class VFAT3_GUI:
             self.read_chip_id()
             print "Using Hybrid: %s" % self.chip_id
         # Local variables.
+        self.database = 0
         self.barcode_id = ""
         self.channel_register = 0
         self.value = ""
@@ -392,7 +392,7 @@ class VFAT3_GUI:
         self.cal_button = Button(self.calibration_frame, text="Save Calibration", command=lambda: self.save_calibration_values_to_file(), width=bwidth)
         self.cal_button.grid(column=1, row=3, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="Load Calibration", command=lambda: self.load_calibration_values_from_file(filename="/home/a0312687/cernbox/Hybrid_tests/hbrdnp026/calibration/20171114_1416calibration.dat"), width=bwidth)
+        self.cal_button = Button(self.calibration_frame, text="Load Calibration", command=lambda: self.load_calibration_values_from_file(), width=bwidth)
         self.cal_button.grid(column=2, row=3, sticky='e')
 
         self.FE_button = Button(self.calibration_frame, text="Set FE nominal values", command=lambda: self.set_fe_nominal_values(), width=bwidth)
@@ -689,17 +689,8 @@ class VFAT3_GUI:
 
     def save_calibration_values_to_file(self, filename=""):
         if filename == "":
-            filename = tkFileDialog.asksaveasfilename(filetypes=[('Register file', '*.reg')])
-        else:
-            timestamp = time.strftime("%Y%m%d_%H%M")
-            filename = '%s/calibration/%scalibration.dat' % (self.data_folder, timestamp)
-            if not os.path.exists(os.path.dirname(filename)):
-                try:
-                    os.makedirs(os.path.dirname(filename))
-                except OSError as exc:  # Guard against race condition
-                    print "Unable to create directory"
-            open(filename, 'w').close()
-
+            filename = tkFileDialog.asksaveasfilename(filetypes=[('Register file', '*.dat')])
+            print "Saving calibration values to file: %s" % filename
         self.save_calibration_values_to_file_execute(filename)
 
     def save_calibration_values_to_file_execute(self, filename):
@@ -709,6 +700,14 @@ class VFAT3_GUI:
             self.database.save_cal_dac(self.cal_dac_fcM, self.cal_dac_fcB)
             self.database.save_iref(self.register[134].Iref[0])
         else:
+            #timestamp = time.strftime("%Y%m%d_%H%M")
+            #filename = '%s/calibration/%scalibration.dat' % (self.data_folder, timestamp)
+            if not os.path.exists(os.path.dirname(filename)):
+                try:
+                    os.makedirs(os.path.dirname(filename))
+                except OSError as exc:  # Guard against race condition
+                    print "Unable to create directory"
+            open(filename, 'w').close()
             with open(filename, "w") as output_file:
                 output_file.write("adc0M/D:adc0B/D:adc1M/D:adc1B/D:cal_dac_fcM/D:cal_dac_fcB/D:Iref/I\n")
                 output_file.write('%f\t%f\t%f\t%f\t%f\t%f\t%d\n' % (self.adc0M, self.adc0B, self.adc1M, self.adc1B, self.cal_dac_fcM, self.cal_dac_fcB, self.register[134].Iref[0]))
@@ -1217,7 +1216,11 @@ class VFAT3_GUI:
         write_instruction(self.interactive_output_file,latency, LV1A_encoded, 0)
         self.execute(verbose="yes")
 
-    def run_scurve(self):
+    def run_scurve(self, production="no"):
+        if production == "no":
+            configuration = "yes"
+        else:
+            configuration = "no"
         prod_error = 0
         error = 0
         self.start_channel = int(self.start_ch_entry.get())
@@ -1254,7 +1257,7 @@ class VFAT3_GUI:
         if error == 0:
             text = "->Running S-curve"
             self.add_to_interactive_screen(text)
-            output = scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel, self.stop_channel], ch_step=self.channel_step, configuration="yes", dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
+            output = scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel, self.stop_channel], ch_step=self.channel_step, configuration=configuration, dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
             if output[2] != "":
                 prod_error = 'y'
             if output[2] == "n":
@@ -1374,18 +1377,18 @@ class VFAT3_GUI:
                 result.append(iref_adjust(self))
                 print "Iref adjustment ok"
                 result.append(self.measure_power('SLEEP'))
-                result.append(adc_calibration(self))
-                result.append(scan_cal_dac_fc(self, "CAL_DAC scan, fC"))
+                result.append(adc_calibration(self, production="yes"))
+                result.append(scan_cal_dac_fc(self, "CAL_DAC scan, fC", production="yes"))
                 self.save_calibration_values_to_file("s")
-                result.append(self.test_registers())
+                result.append(self.test_registers(production="yes"))
                 result.append(self.write_chip_id())
-                result.append(concecutive_triggers(self))
-                result.append(self.run_all_dac_scans())
-                result.append(self.run_scurve())
+                result.append(concecutive_triggers(self, save_result="no"))
+                result.append(self.run_all_dac_scans(production="yes"))
+                result.append(self.run_scurve(production="yes"))
                 stop = time.time()
                 duration = (stop - start)/60
-                print "Errors:"
-                print result
+                #print "Errors:"
+                #print result
                 print "Duration of the production test: %f min" % duration
                 for i, value in enumerate(result):
                     if value == 'y':
@@ -1425,15 +1428,16 @@ class VFAT3_GUI:
             self.add_to_interactive_screen(text)
         return error
 
-    def test_registers(self):
-        timestamp = time.strftime("%Y%m%d_%H%M")
-        output_file = "%s/register_test/%s_register_test.dat" % (self.data_folder, timestamp)
-        if not os.path.exists(os.path.dirname(output_file)):
-            try:
-                os.makedirs(os.path.dirname(output_file))
-            except OSError as exc:  # Guard against race condition
-                print "Unable to create directory"
-        open(output_file, 'w').close()
+    def test_registers(self, production="no"):
+        if production == "no":
+            timestamp = time.strftime("%Y%m%d_%H%M")
+            output_file = "%s/register_test/%s_register_test.dat" % (self.data_folder, timestamp)
+            if not os.path.exists(os.path.dirname(output_file)):
+                try:
+                    os.makedirs(os.path.dirname(output_file))
+                except OSError as exc:  # Guard against race condition
+                    print "Unable to create directory"
+            open(output_file, 'w').close()
         temp_file = "./data/temp_register_file.reg"
         self.save_register_values_to_file_execute(temp_file)
         # Write max values to registers and read them back.
@@ -1475,9 +1479,10 @@ class VFAT3_GUI:
         line = "Run time (minutes): %f\n" % run_time
         print line
         result.append(line)
-        with open(output_file, "a") as myfile:
-            for line in result:
-                myfile.write("%s\n" % line)
+        if production == "no":
+            with open(output_file, "a") as myfile:
+                for line in result:
+                    myfile.write("%s\n" % line)
         print "Writing back previous register values."
         self.load_register_values_from_file_execute(temp_file, multiwrite=1)
         print "Done"
@@ -1622,12 +1627,19 @@ class VFAT3_GUI:
 
         return output
 
-    def run_all_dac_scans(self):
+    def run_all_dac_scans(self, production="no"):
+        if production == "no":
+            plot = 1
+        else:
+            plot = 0
         start = time.time()
         for scan in self.scan_options:
             print "Running %s" % scan
-            scan_execute(self, scan, plot=1)
-            print "Scan done."
+            output = scan_execute(self, scan, plot=plot)
+            if output == "error":
+                break
+            else:
+                print "Scan done."
         stop = time.time()
         run_time = (stop - start) / 60
         print "Runtime: %f" % run_time

@@ -3,19 +3,24 @@ from generator import *
 import time
 
 
-def concecutive_triggers(obj, nr_loops=10):
+def concecutive_triggers(obj, nr_loops=10, save_result="yes"):
+    if save_result == "yes":
+        save_data = 1
+    else:
+        save_data = 0
     nr_of_triggers = 4000
     nr_of_bc_between_triggers = 300
     timestamp = time.strftime("%Y%m%d_%H%M")
     scan_name = "Consecutive_Triggers"
     file_name = "./routines/%s/FPGA_instruction_list.txt" % scan_name
-    output_file = "%s/concecutive_tiggers/%s_concecutive_triggers.dat" % (obj.data_folder, timestamp)
-    if not os.path.exists(os.path.dirname(output_file)):
-        try:
-            os.makedirs(os.path.dirname(output_file))
-        except OSError as exc:  # Guard against race condition
-            print "Unable to create directory"
-    open(output_file, 'w').close()
+    if save_result == "yes":
+        output_file = "%s/concecutive_tiggers/%s_concecutive_triggers.dat" % (obj.data_folder, timestamp)
+        if not os.path.exists(os.path.dirname(output_file)):
+            try:
+                os.makedirs(os.path.dirname(output_file))
+            except OSError as exc:  # Guard against race condition
+                print "Unable to create directory"
+        open(output_file, 'w').close()
 
     instruction_text = []
     instruction_text.append("1 Send RunMode")
@@ -83,7 +88,7 @@ def concecutive_triggers(obj, nr_loops=10):
         trigger_counter += nr_of_triggers
         previous_EC = 0
         previous_BC = 0
-        output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1, save_data=1, obj=obj)
+        output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1, save_data=save_data, obj=obj)
         if output[0] == "Error":
             text = "%s: %s\n" % (output[0], output[1])
             obj.add_to_interactive_screen(text)
@@ -132,11 +137,11 @@ def concecutive_triggers(obj, nr_loops=10):
         result.append("Hits found: %d" % hit_counter)
         result.append("Time elapsed: %f min" % run_time)
         result.append("***************")
-
-        with open(output_file, "a") as myfile:
-            for line in result:
-                print line
-                myfile.write("%s\n" % line)
+        if save_result == "yes":
+            with open(output_file, "a") as myfile:
+                for line in result:
+                    print line
+                    myfile.write("%s\n" % line)
     error_list = [crc_error_counter, bc_error_counter, ec_error_counter, hit_counter]
     error_sum = error_list[0] + error_list[1] + error_list[2] + error_list[3]
     if obj.database:

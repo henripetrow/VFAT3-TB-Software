@@ -68,6 +68,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     threshold = "n"
     all_ch_data = "n"
     noisy_channels = "n"
+    thr_list = "n"
 
     if obj.cal_dac_fcM == 0 or obj.cal_dac_fcB == 0:
         print "CAL_DAC not calibrated."
@@ -87,32 +88,31 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
 
         # Create the instructions for the specified scan values.
         steps = stop_dac_value - start_dac_value
-        if configuration == "yes":
-            instruction_text = []
-            instruction_text.append("1 Send SCOnly")
-            instruction_text.append("1 Write CAL_MODE 1")
-            instruction_text.append("400 Write CAL_DAC %d" % start_dac_value)
-            instruction_text.append("500 Send EC0")
-            instruction_text.append("1 Send RunMode")
-            instruction_text.append("1000 Repeat %d" % steps)
-            instruction_text.append("1000 Send_Repeat CalPulse_LV1A %d %d %d" % (samples_per_dac_value, bc_between_calpulses, delay))
-            instruction_text.append("1000 Send SCOnly")
-            instruction_text.append("1000 Write CAL_DAC 1")
-            instruction_text.append("200 Send RunMode")
-            instruction_text.append("1 End_Repeat")
-            instruction_text.append("1 Send SCOnly")
+        instruction_text = []
+        instruction_text.append("1 Send SCOnly")
+        instruction_text.append("1 Write CAL_MODE 1")
+        instruction_text.append("400 Write CAL_DAC %d" % start_dac_value)
+        instruction_text.append("500 Send EC0")
+        instruction_text.append("1 Send RunMode")
+        instruction_text.append("1000 Repeat %d" % steps)
+        instruction_text.append("1000 Send_Repeat CalPulse_LV1A %d %d %d" % (samples_per_dac_value, bc_between_calpulses, delay))
+        instruction_text.append("1000 Send SCOnly")
+        instruction_text.append("1000 Write CAL_DAC 1")
+        instruction_text.append("200 Send RunMode")
+        instruction_text.append("1 End_Repeat")
+        instruction_text.append("1 Send SCOnly")
 
-            # Write the instructions to the file.
-            output_file_name = "./routines/%s/instruction_list.txt" % modified
-            with open(output_file_name, "w") as mfile:
-                for item in instruction_text:
-                    mfile.write("%s\n" % item)
+        # Write the instructions to the file.
+        output_file_name = "./routines/%s/instruction_list.txt" % modified
+        with open(output_file_name, "w") as mfile:
+            for item in instruction_text:
+                mfile.write("%s\n" % item)
 
-            # Generate the instruction list for the FPGA.
-            generator(scan_name, obj.write_BCd_as_fillers, obj.register)
+        # Generate the instruction list for the FPGA.
+        generator(scan_name, obj.write_BCd_as_fillers, obj.register)
 
-            # Set the needed registers.
-            obj.set_fe_nominal_values()
+        # Set the needed registers.
+        obj.set_fe_nominal_values()
 
         obj.register[131].TP_FE[0] = 7
         obj.write_register(131)
@@ -141,7 +141,8 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         obj.register[65535].RUN[0] = 1
         obj.write_register(65535)
         time.sleep(1)
-        # obj.measure_power('RUN')
+        if configuration == "no":
+            obj.measure_power('RUN')
         obj.register[129].ST[0] = 0
         obj.register[129].PS[0] = pulsestretch
         obj.write_register(129)
@@ -221,13 +222,12 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         # Analyze data.
         mean_th_fc, mean_enc_fc, noisy_channels, enc_list, thr_list = scurve_analyze(obj, all_ch_data, folder, save=configuration)
         # Save data.
-        if configuration == "yes":
-            if obj.database:
-                obj.database.save_mean_threshold(mean_th_fc)
-                obj.database.save_mean_enc(mean_enc_fc)
-                obj.database.save_threshold_data(thr_list)
-                obj.database.save_enc_data(enc_list)
-                obj.database.save_noisy_channels(noisy_channels)
+        if obj.database:
+            obj.database.save_mean_threshold(mean_th_fc)
+            obj.database.save_mean_enc(mean_enc_fc)
+            obj.database.save_threshold_data(thr_list)
+            obj.database.save_enc_data(enc_list)
+            obj.database.save_noisy_channels(noisy_channels)
         stop = time.time()
         run_time = (stop - start) / 60
         text = "Run time (minutes): %f\n" % run_time
@@ -310,17 +310,17 @@ def scurve_analyze(obj, scurve_data, folder, save="yes"):
     mean_enc = enc_h.GetMean()
 
     # Plot.
-    if save == "yes":
-        print "Mean Threshold: %f" % mean_th
-        print "Mean enc: %f" % mean_enc
-        print "Noisy Channels:"
-        print noisy_channels
+    print "Mean Threshold: %f" % mean_th
+    print "Mean enc: %f" % mean_enc
+    print "Noisy Channels:"
+    print noisy_channels
 
-        text = "S-curve results:\n"
-        text += "Mean Threshold: %f\n" % mean_th
-        text += "Mean enc: %f\n" % mean_enc
-        text += "Noisy Channels: %i\n" % len(noisy_channels)
-        obj.add_to_interactive_screen(text)
+    text = "S-curve results:\n"
+    text += "Mean Threshold: %f\n" % mean_th
+    text += "Mean enc: %f\n" % mean_enc
+    text += "Noisy Channels: %i\n" % len(noisy_channels)
+    obj.add_to_interactive_screen(text)
+    if save == "yes":
         drawHisto(thr_h, cc, '%s/%s/threshHiso%s.png' % (obj.data_folder, folder, timestamp))
         thr_h.Write()
         drawHisto(enc_h, cc, '%s/%s/encHisto%s.png' % (obj.data_folder, folder, timestamp))
@@ -365,91 +365,96 @@ def fitScurve(scurve_g):
 
 def scan_execute(obj, scan_name, plot=1,):
 
-    start = time.time()
-
-    reg_values = []
-    scan_values0 = []
-    scan_values1 = []
-    scan_values0_adccount = []
-    scan_values1_adccount = []
-    modified = scan_name.replace(" ", "_")
-    file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
-
-    output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1)
-
-    if output[0] == "Error":
-        text = "%s: %s\n" % (output[0], output[1])
+    if obj.adcM == 0:
+        text = "\nADCs are not calibrated. Run ADC calibration first.\n"
         obj.add_to_interactive_screen(text)
+        output = "error"
     else:
-        adc_flag = 0
-        reg_value = 0
-        for i in output[0]:
-            if i.type_ID == 0:
-                if adc_flag == 0:
-                    first_adc_value = int(''.join(map(str, i.data)), 2)
-                    adc_flag = 1
-                else:
-                    second_adc_value = int(''.join(map(str, i.data)), 2)
-                    scan_values0_adccount.append(first_adc_value)
-                    scan_values1_adccount.append(second_adc_value)
-                    scan_values0.append(obj.adc0M * first_adc_value + obj.adc0B)
-                    scan_values1.append(obj.adc1M * second_adc_value + obj.adc1B)
-                    #scan_values0.append(first_adc_value)
-                    #scan_values1.append(second_adc_value)
-                    reg_values.append(reg_value)
-                    reg_value += 1
-                    adc_flag = 0
-        for i in output[4]:
-            print i
+        start = time.time()
 
-    # Save the results.
-    if obj.database:
-        obj.database.save_dac_data(modified[:-5], "ADC0", scan_values0_adccount)
-        obj.database.save_dac_data(modified[:-5], "ADC1", scan_values1_adccount)
+        reg_values = []
+        scan_values0 = []
+        scan_values1 = []
+        scan_values0_adccount = []
+        scan_values1_adccount = []
+        modified = scan_name.replace(" ", "_")
+        file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
 
-    data = [reg_values, scan_values0, scan_values1]
-    timestamp = time.strftime("%Y%m%d%H%M")
-    # filename = "%s/dac_scans/%s_%s_scan_data.dat" % (obj.data_folder, timestamp, modified)
-    # if not os.path.exists(os.path.dirname(filename)):
-    #     try:
-    #         os.makedirs(os.path.dirname(filename))
-    #     except OSError as exc:  # Guard against race condition
-    #         print "Unable to create directory"
-    # text = "Results were saved to the folder:\n %s \n" % filename
-    # obj.add_to_interactive_screen(text)
-    #
-    # outF = open(filename, "w")
-    # outF.write("regVal/I:ADC0/I:ADC1/I\n")
-    # for i, regVal in enumerate(reg_values):
-    #     outF.write('%i\t%i\t%i\n' % (regVal, scan_values0[i], scan_values1[i]))
-    #     pass
-    # outF.close()
+        output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1)
 
-    filename = "%s/dac_scans/%s_%s_scan.png" % (obj.data_folder, timestamp, modified)
-    if not os.path.exists(os.path.dirname(filename)):
-        try:
-            os.makedirs(os.path.dirname(filename))
-        except OSError as exc:  # Guard against race condition
-            print "Unable to create directory"
-    if plot == 1:
-        nr_points = len(scan_values0)
-        x = range(0, nr_points)
-        #fig = plt.figure(1)
-        plt.clf()
-        plt.plot(x, scan_values0, label="ADC0")
-        plt.plot(x, scan_values1, label="ADC1")
-        plt.ylabel('voltage [mV]')
-        plt.xlabel('DAC counts')
-        plt.legend()
-        plt.title(modified)
-        plt.grid(True)
-        plt.savefig(filename)
-        #plt.close(fig)
+        if output[0] == "Error":
+            text = "%s: %s\n" % (output[0], output[1])
+            obj.add_to_interactive_screen(text)
+        else:
+            adc_flag = 0
+            reg_value = 0
+            for i in output[0]:
+                if i.type_ID == 0:
+                    if adc_flag == 0:
+                        first_adc_value = int(''.join(map(str, i.data)), 2)
+                        adc_flag = 1
+                    else:
+                        second_adc_value = int(''.join(map(str, i.data)), 2)
+                        scan_values0_adccount.append(first_adc_value)
+                        scan_values1_adccount.append(second_adc_value)
+                        scan_values0.append(obj.adc0M * first_adc_value + obj.adc0B)
+                        scan_values1.append(obj.adc1M * second_adc_value + obj.adc1B)
+                        #scan_values0.append(first_adc_value)
+                        #scan_values1.append(second_adc_value)
+                        reg_values.append(reg_value)
+                        reg_value += 1
+                        adc_flag = 0
+            for i in output[4]:
+                print i
 
-    stop = time.time()
-    run_time = (stop - start) / 60
-    text = "Scan duration: %f min\n" % run_time
-    obj.add_to_interactive_screen(text)
+        # Save the results.
+        if obj.database:
+            obj.database.save_dac_data(modified[:-5], "ADC0", scan_values0_adccount)
+            obj.database.save_dac_data(modified[:-5], "ADC1", scan_values1_adccount)
+
+        data = [reg_values, scan_values0, scan_values1]
+        timestamp = time.strftime("%Y%m%d%H%M")
+        # filename = "%s/dac_scans/%s_%s_scan_data.dat" % (obj.data_folder, timestamp, modified)
+        # if not os.path.exists(os.path.dirname(filename)):
+        #     try:
+        #         os.makedirs(os.path.dirname(filename))
+        #     except OSError as exc:  # Guard against race condition
+        #         print "Unable to create directory"
+        # text = "Results were saved to the folder:\n %s \n" % filename
+        # obj.add_to_interactive_screen(text)
+        #
+        # outF = open(filename, "w")
+        # outF.write("regVal/I:ADC0/I:ADC1/I\n")
+        # for i, regVal in enumerate(reg_values):
+        #     outF.write('%i\t%i\t%i\n' % (regVal, scan_values0[i], scan_values1[i]))
+        #     pass
+        # outF.close()
+
+        filename = "%s/dac_scans/%s_%s_scan.png" % (obj.data_folder, timestamp, modified)
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError as exc:  # Guard against race condition
+                print "Unable to create directory"
+        if plot == 1:
+            nr_points = len(scan_values0)
+            x = range(0, nr_points)
+            #fig = plt.figure(1)
+            plt.clf()
+            plt.plot(x, scan_values0, label="ADC0")
+            plt.plot(x, scan_values1, label="ADC1")
+            plt.ylabel('voltage [mV]')
+            plt.xlabel('DAC counts')
+            plt.legend()
+            plt.title(modified)
+            plt.grid(True)
+            plt.savefig(filename)
+            #plt.close(fig)
+
+        stop = time.time()
+        run_time = (stop - start) / 60
+        text = "Scan duration: %f min\n" % run_time
+        obj.add_to_interactive_screen(text)
 
     return output
 
