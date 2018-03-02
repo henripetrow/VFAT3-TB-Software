@@ -1,5 +1,5 @@
 import pymysql
-
+import os
 
 class DatabaseInterface:
     def __init__(self, name):
@@ -120,22 +120,16 @@ class DatabaseInterface:
     def save_scanchain(self):
         self.set_int("ScanChain", 0)
 
-    def save_barcode(self,value):
+    def save_barcode(self, value):
         self.set_int("Barcode", value)
 
     def save_power(self, ch1_power, ch2_power, mode):
         self.set_float("%s_Power_digital" % mode, ch1_power)
         self.set_float("%s_Power_analog" % mode, ch2_power)
 
-
-
-
-
-
-
-
-
-
+    def create_xml_file(self):
+        command = "mysql -uroot -proot --xml -e 'SELECT * FROM %s.%s WHERE ChipID = %s' > ./results/hybrid_%s.xml" % (self.database_name, self.table_name, self.name, self.name)
+        os.system(command)
 
 
 

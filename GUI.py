@@ -1389,6 +1389,7 @@ class VFAT3_GUI:
                 duration = (stop - start)/60
                 #print "Errors:"
                 #print result
+                self.database.create_xml_file()
                 print "Duration of the production test: %f min" % duration
                 for i, value in enumerate(result):
                     if value == 'y':
