@@ -1,10 +1,10 @@
-from routines import *
-from generator import *
 import ROOT as r
 import numpy as np
+import os
+import time
 
 
-def calc_cal_dac_conversion_factor(dac_values, charge_values, production="no"):
+def calc_cal_dac_conversion_factor(obj, dac_values, charge_values, production="no"):
 
     r.gStyle.SetStatX(0.5)
     r.gStyle.SetStatY(0.8)
