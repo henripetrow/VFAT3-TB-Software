@@ -48,7 +48,7 @@ class VFAT3_GUI:
                 print "Found Power Supply"
                 print "Device ID:"
                 print self.tti_if.req_device_id()
-                # self.tti_if.set_outputs_off()
+                self.tti_if.set_outputs_on()
                 self.tti_if.set_ch1_current_limit(0.2)
                 self.tti_if.set_ch2_current_limit(0.2)
                 self.tti_if.set_ch1_voltage(1.2)
@@ -710,7 +710,9 @@ class VFAT3_GUI:
             open(filename, 'w').close()
             with open(filename, "w") as output_file:
                 output_file.write("adc0M/D:adc0B/D:adc1M/D:adc1B/D:cal_dac_fcM/D:cal_dac_fcB/D:Iref/I\n")
-                output_file.write('%f\t%f\t%f\t%f\t%f\t%f\t%d\n' % (self.adc0M, self.adc0B, self.adc1M, self.adc1B, self.cal_dac_fcM, self.cal_dac_fcB, self.register[134].Iref[0]))
+                output_file.write('%f\t%f\t%f\t%f\t%f\t%f\t%d\n' % (self.adc0M, self.adc0B, self.adc1M, self.adc1B,
+                                                                    self.cal_dac_fcM, self.cal_dac_fcB,
+                                                                    self.register[134].Iref[0]))
 
     def load_calibration_values_from_file(self, filename=""):
         if filename == "":
