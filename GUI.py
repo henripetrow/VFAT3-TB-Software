@@ -380,13 +380,13 @@ class VFAT3_GUI:
 
         # ###############CALIBRATION TAB #######################################
 
-        self.cal_button = Button(self.calibration_frame, text="Adjust Iref", command=lambda: iref_adjust(self), width=bwidth)
+        self.cal_button = Button(self.calibration_frame, text="Adjust Iref", command=lambda: self.adjust_iref(), width=bwidth)
         self.cal_button.grid(column=1, row=0, sticky='e')
 
-        self.adc_calibration_button = Button(self.calibration_frame, text="ADC calibration", command=lambda: adc_calibration(self), width=bwidth)
+        self.adc_calibration_button = Button(self.calibration_frame, text="ADC calibration", command=lambda: self.adc_calibration(), width=bwidth)
         self.adc_calibration_button.grid(column=1, row=1, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="CAL_DAC to fC", command=lambda: scan_cal_dac_fc(self, "CAL_DAC scan, fC"), width=bwidth)
+        self.cal_button = Button(self.calibration_frame, text="CAL_DAC to fC", command=lambda: self.scan_cal_dac_fc(), width=bwidth)
         self.cal_button.grid(column=1, row=2, sticky='e')
 
         self.cal_button = Button(self.calibration_frame, text="Save Calibration", command=lambda: self.save_calibration_values_to_file(), width=bwidth)
@@ -1097,29 +1097,102 @@ class VFAT3_GUI:
         if verbose == 'yes':
             text = "->Sending sync request.\n"
             self.add_to_interactive_screen(text)
-        command_encoded = FCC_LUT["CC-A"]
-        write_instruction(self.interactive_output_file, 1, command_encoded, 1)
-        write_instruction(self.interactive_output_file, 1, command_encoded, 0)
-        write_instruction(self.interactive_output_file, 1, command_encoded, 0)
-        output = self.interfaceFW.launch(register, self.interactive_output_file, self.COM_port, 2)
+        output = self.interfaceFW.send_sync()
         if output[0] == "Error":
             if verbose == 'yes':
-                text = "%s: %s\n" % (output[0], output[1])
+                text = "Error in sync\n"
                 self.add_to_interactive_screen(text)
-        elif output[2]:
+        elif output[0] == '3a':
             result = 1
             if verbose == 'yes':
                 text = "Sync ok.\n"
                 self.add_to_interactive_screen(text)
-            for i in output[2]:
-                if verbose == 'yes':
-                    text = "BC:%d, %s\n" % (i[0], i[1])
-                    self.add_to_interactive_screen(text)
         else:
             if verbose == 'yes':
                 text = "Sync fail.\n"
                 self.add_to_interactive_screen(text)
         return result
+
+    def adjust_iref(self, verbose='yes'):
+        result = 0
+        if verbose == 'yes':
+            text = "->Adjusting Iref.\n"
+            self.add_to_interactive_screen(text)
+        output = self.interfaceFW.adjust_iref()
+        if output[0] != '00':
+            result = 1
+            if verbose == 'yes':
+                text = "Iref adjusted to value %s.\n" % output[0]
+                self.add_to_interactive_screen(text)
+        return result
+
+    def adc_calibration(self, production="no"):
+        error = 0
+        if self.Iref_cal == 0:
+            text = "\nIref is not calibrated. Run Iref calibration first.\n"
+            self.add_to_interactive_screen(text)
+        else:
+            output = self.interfaceFW.int_adc_calibration()
+            ext_adc_values = output[0]
+            int_adc0_values = output[1]
+            int_adc1_values = output[2]
+            adc_values = calc_adc_conversion_constants(self, ext_adc_values, int_adc0_values, int_adc1_values,
+                                                       production)
+            self.adc0M = adc_values[0]
+            self.adc0B = adc_values[1]
+            self.adc1M = adc_values[2]
+            self.adc1B = adc_values[3]
+
+            text = "\nInternal ADCs calibrated. Values:\n"
+            text += "ADC0: %f + %f\n" % (self.adc0M, self.adc0B)
+            text += "ADC1: %f + %f\n" % (self.adc1M, self.adc1B)
+            self.add_to_interactive_screen(text)
+            self.adcM =self.adc0M
+            self.adcB = self.adc0B
+            if self.adc0M <= 1 or self.adc0M > 2.5:
+                error += 1
+                print "ADC0 broken"
+                self.adc0M = 0
+                self.adc0B = 0
+                self.adcM = self.adc1M
+                self.adcB = self.adc1B
+            if self.adc1M <= 1 or self.adc1M > 2.5:
+                error += 1
+                print "ADC1 broken"
+                self.adc1M = 0
+                self.adc1B = 0
+                if self.adc0M == 0:
+                    self.adcM = 0
+                    self.adcB = 0
+
+        if error == 1:
+            error = 'y'
+        print self.adcM
+        print self.adcB
+        return error
+
+    def scan_cal_dac_fc(self, production="no"):
+        error = 0
+        if self.adcM == 0:
+            text = "\nADCs are not calibrated. Run ADC calibration first.\n"
+            self.add_to_interactive_screen(text)
+            error = 1
+        else:
+            start = time.time()
+            output = self.interfaceFW.cal_dac_calibration()
+            output = calc_cal_dac_conversion_factor(self, output[0], output[1], production=production)
+            self.cal_dac_fcM = output[0]
+            self.cal_dac_fcB = output[1]
+            stop = time.time()
+            run_time = (stop - start) / 60
+            text = "\nCAL_DAC conversion completed.\n"
+            text += "CAL_DAC to fC: %f + %f\n" % (self.cal_dac_fcM, self.cal_dac_fcB)
+            self.add_to_interactive_screen(text)
+            text = "\nScan duration: %f min\n" % run_time
+            self.add_to_interactive_screen(text)
+        if self.cal_dac_fcM < 0.1 or self.cal_dac_fcM > 0.3:
+            error = 1
+        return error
 
     def send_idle(self):
         text = "->Sending IDLE transaction.\n"
