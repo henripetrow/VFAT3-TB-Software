@@ -402,6 +402,9 @@ register[65540] = HW_PROG()
 class ADC_READ_0:
     def __init__(self):
         self.ADC_0 = 0
+    def change_values(self, new_values):
+        new_values = new_values[15:]
+        self.ADC0_0 = int(new_values,2)
 
 
 class ADC_READ_1:
@@ -1140,22 +1143,22 @@ LUT = {
 }
 
 FCC_LUT = {
-"CC-A":"0000",
-"CC-B":"1111",
-"EC0":"0001",
-"BC0":"0010",
-"CalPulse":"0011",
-"ReSync":"0100",
-"SCOnly":"0101",
-"RunMode":"0110",
-"LV1A":"0111",
-"SC0":"1000",
-"SC1":"1001",
-"ReSC":"1010",
-"LV1A+EC0":"1011",
-"LV1A+BC0":"1100",
-"LV1A+EC0+BC0":"1101",
-"EC0+BC0":"1110"
+"CC-A":"00010111",
+"CC-B":"11101000",
+"EC0":"00001111",
+"BC0":"00110011",
+"CalPulse":"00111100",
+"ReSync":"01010101",
+"SCOnly":"01011010",
+"RunMode":"01100110",
+"LV1A":"01101001",
+"SC0":"10010110",
+"SC1":"10011001",
+"ReSC":"10100101",
+"LV1A+EC0":"10101010",
+"LV1A+BC0":"11000011",
+"LV1A+EC0+BC0":"11001100",
+"EC0+BC0":"11110000"
 }
 
 

@@ -274,7 +274,7 @@ class VFAT3_GUI:
         self.sync_button = Button(self.misc_frame, text="Sync", command=lambda: self.send_sync(), width=bwidth)
         self.sync_button.grid(column=1, row=1, sticky='e')
 
-        self.sync_check_button = Button(self.misc_frame, text="Sync check", command=lambda: self.send_fcc("CC-B"), width=bwidth)
+        self.sync_check_button = Button(self.misc_frame, text="Sync check", command=lambda: self.send_sync_verif(), width=bwidth)
         self.sync_check_button.grid(column=1, row=2, sticky='e')
 
         self.idle_button = Button(self.misc_frame, text="SC Idle character", command=lambda: self.send_idle(), width=bwidth)
@@ -782,6 +782,7 @@ class VFAT3_GUI:
         if multiwrite == 0:
             with open(filename, 'r') as f:
                 for line in f:
+                    time.sleep(0.01)
                     line = line.split(",")
                     reg_nr = int(line[0])
                     write_data = line[1]
@@ -847,28 +848,10 @@ class VFAT3_GUI:
             self.read_register(i)
         self.clear_interactive_screen()
 
-    def read_register(self, reg):
-        new_data = self.read_reg_execute(reg)
-        self.register[reg].change_values(new_data)
-
-    def read_reg_execute(self, reg):
-        output = self.SC_encoder.create_SC_packet(reg, 0, "READ", 0)
-        paketti = output[0]
-        write_instruction(self.interactive_output_file, 150, FCC_LUT[paketti[0]], 1)
-        for x in range(1, len(paketti)):
-            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-        while True:
-            output = self.execute()
-            if output[0] == "Error":
-                text = "%s: %s\n" % (output[0], output[1])
-                text += "Register values might be incorrect.\n"
-                self.add_to_interactive_screen(text)
-            if not output[0]:
-                print "Error trying again"
-            else:
-                new_data = output[0][0].data
-                new_data = ''.join(str(e) for e in new_data)
-                break
+    def read_register(self, reg, save_value='yes'):
+        new_data = self.interfaceFW.read_register(reg)
+        if save_value == 'yes':
+            self.register[reg].change_values(''.join(str(e) for e in new_data[16:]))
         return new_data
 
     def add_to_interactive_screen(self, text):
@@ -1055,10 +1038,9 @@ class VFAT3_GUI:
         counter = 0
         error = 0
         while True:
-            self.interfaceFW.reset_vfat3()
+            result = self.interfaceFW.send_sync()
             time.sleep(0.1)
-            result = self.send_sync(verbose='no')
-            if result == 1:
+            if result[0] == '0x3a':
                 text = "->Sync success.\n"
                 self.add_to_interactive_screen(text)
                 break
@@ -1097,12 +1079,12 @@ class VFAT3_GUI:
         if verbose == 'yes':
             text = "->Sending sync request.\n"
             self.add_to_interactive_screen(text)
-        output = self.interfaceFW.send_sync()
+            output = self.interfaceFW.send_fcc(["00010111", "00010111", "00010111"])
         if output[0] == "Error":
             if verbose == 'yes':
                 text = "Error in sync\n"
                 self.add_to_interactive_screen(text)
-        elif output[0] == '3a':
+        elif output[0] == '0x3a':
             result = 1
             if verbose == 'yes':
                 text = "Sync ok.\n"
@@ -1110,6 +1092,27 @@ class VFAT3_GUI:
         else:
             if verbose == 'yes':
                 text = "Sync fail.\n"
+                self.add_to_interactive_screen(text)
+        return result
+
+    def send_sync_verif(self, verbose='yes'):
+        result = 0
+        if verbose == 'yes':
+            text = "->Sending sync verification request.\n"
+            self.add_to_interactive_screen(text)
+        output = self.interfaceFW.send_fcc("11101000")
+        if output[0] == "Error":
+            if verbose == 'yes':
+                text = "Error in sync\n"
+                self.add_to_interactive_screen(text)
+        elif output[0] == '0xfe':
+            result = 1
+            if verbose == 'yes':
+                text = "Sync verification ok.\n"
+                self.add_to_interactive_screen(text)
+        else:
+            if verbose == 'yes':
+                text = "Sync verification fail.\n"
                 self.add_to_interactive_screen(text)
         return result
 
@@ -1205,51 +1208,15 @@ class VFAT3_GUI:
         self.execute(verbose="yes")
 
     def read_adc0(self):
-
         addr = 131072  # ADC0 address
-
-        output = self.SC_encoder.create_SC_packet(addr, 0, "READ", 0)
-        paketti = output[0]
-        write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-        for x in range(1, len(paketti)):
-            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-        counter = 0
-        while True:
-            counter += 1
-            output = self.execute(verbose="no")
-            if counter == 10:
-                print "No reply from ADC."
-                break
-            if output[0] == "Error":
-                print "Error."
-            else:
-                if output[0]:
-                    int_adc_value = int(''.join(map(str, output[0][0].data)), 2)
-                    break
+        output = self.read_register(addr, save_value='no')
+        int_adc_value = int(''.join(map(str, output)), 2)
         return int_adc_value
 
     def read_adc1(self):
-
-        addr = 131073  # ADC0 address
-
-        output = self.SC_encoder.create_SC_packet(addr, 0, "READ", 0)
-        paketti = output[0]
-        write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-        for x in range(1, len(paketti)):
-            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-        counter = 0
-        while True:
-            counter += 1
-            output = self.execute(verbose="no")
-            if counter == 10:
-                print "No reply from ADC."
-                break
-            if output[0] == "Error":
-                print "Error."
-            else:
-                if output[0]:
-                    int_adc_value = int(''.join(map(str, output[0][0].data)), 2)
-                    break
+        addr = 131073  # ADC1 address
+        output = self.read_register(addr, save_value='no')
+        int_adc_value = int(''.join(map(str, output)), 2)
         return int_adc_value
 
     def read_adc(self):
@@ -1447,11 +1414,11 @@ class VFAT3_GUI:
                 print "Test BIST ok"
                 result.append(self.test_scan_chain())
                 print "Test Scan Chain ok"
-                result.append(iref_adjust(self))
+                result.append(self.iref_adjust(self))
                 print "Iref adjustment ok"
                 result.append(self.measure_power('SLEEP'))
-                result.append(adc_calibration(self, production="yes"))
-                result.append(scan_cal_dac_fc(self, "CAL_DAC scan, fC", production="yes"))
+                result.append(self.adc_calibration(self, production="yes"))
+                result.append(self.scan_cal_dac_fc(self, "CAL_DAC scan, fC", production="yes"))
                 self.save_calibration_values_to_file("s")
                 result.append(self.test_registers(production="yes"))
                 result.append(self.write_chip_id())
@@ -1520,14 +1487,15 @@ class VFAT3_GUI:
         result = []
         with open(filename, 'r') as f:
             for line in f:
+                time.sleep(0.01)
                 line = line.rstrip('\n')
                 line = line.split(",")
                 reg_nr = int(line[0])
                 write_data = line[1]
                 self.register[reg_nr].change_values(write_data)
                 self.write_register(reg_nr)
-                read_data = self.read_reg_execute(reg_nr)
-                read_data = read_data[16:]
+                read_data = self.read_register(reg_nr)
+                read_data = ''.join(str(e) for e in read_data[16:])
                 if read_data == write_data:
                     line = "Register: %d. Write/Read ok." % reg_nr
                     print line
@@ -1557,50 +1525,17 @@ class VFAT3_GUI:
                 for line in result:
                     myfile.write("%s\n" % line)
         print "Writing back previous register values."
-        self.load_register_values_from_file_execute(temp_file, multiwrite=1)
+        self.load_register_values_from_file_execute(temp_file, multiwrite=0)
         print "Done"
         return error_counter
 
     def write_register(self, register_nr):
-        filler_16bits = [0]*16
         data = []
         for x in register[register_nr].reg_array:
             data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
-        data.reverse()
-        data.extend(filler_16bits)
-        self.write_register_execute(register_nr, data)
-
-    def write_register_execute(self, register_nr, data):
-        flag = 0
-        while True:
-            output = self.SC_encoder.create_SC_packet(register_nr, data, "WRITE", 0)
-            paketti = output[0]
-            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-            for x in range(1, len(paketti)):
-                write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-            output = self.interfaceFW.launch(register, self.interactive_output_file, self.COM_port)
-            if output[0] == "Error":
-                text = "%s: %s\n" % (output[0], output[1])
-                self.add_to_interactive_screen(text)
-            else:
-                if output[0]:
-                    for i in output[0]:
-                        if i.info_code == 0:
-                            # print "Transaction ok."
-                            flag = 1
-                        else:
-                            print "Transaction error. Error code."
-
-                else:
-                    print "Transaction error. No reply."
-                    print output
-                    #raw_input("Press Enter to continue...")
-                    print "Trying again."
-                    self.send_sync()
-                    time.sleep(1)
-                    continue
-            if flag == 1:
-                break
+        #data.reverse()
+        #data_str = ''.join(str(e) for e in data)
+        self.interfaceFW.write_register(register_nr, data)
 
     def generate_routine(self):
             text =  "->Generating the scan instruction file: %s\n" % self.chosen_scan
@@ -1692,11 +1627,10 @@ class VFAT3_GUI:
 # ####################### FCC-TAB FUNCTIONS ##########################
 
     def send_fcc(self, command, verbose="yes"):
-        # text = "->Sending %s.\n" % command
-        # self.add_to_interactive_screen(text)
+        text = "->Sending %s.\n" % command
+        self.add_to_interactive_screen(text)
         command_encoded = FCC_LUT[command]
-        write_instruction(self.interactive_output_file, 1, command_encoded, 1)
-        output = self.execute(verbose=verbose)
+        output = self.interfaceFW.send_fcc(command_encoded)
 
         return output
 
@@ -1779,9 +1713,6 @@ class VFAT3_GUI:
                 write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
             self.execute(verbose="yes")
 
-
-
-
             filler_16bits = [0]*16
             full_data = []
             data = []
@@ -1834,13 +1765,11 @@ class VFAT3_GUI:
             print data
             full_data.extend(data)
 
-
-
             output = self.SC_encoder.create_SC_packet(141,full_data,"MULTI_WRITE",0)
             paketti = output[0]
-            write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
+            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
             for x in range(1, len(paketti)):
-                write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
+                write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
             self.execute(verbose="yes")
             
         else:
@@ -1852,7 +1781,7 @@ class VFAT3_GUI:
                 try:
                     key = LUT[i]
                 except ValueError:
-                    text =  "-IGNORED: Invalid value for Register: %s" % i
+                    text = "-IGNORED: Invalid value for Register: %s" % i
                     self.add_to_interactive_screen(text)
                     continue
                 addr = key[0]
@@ -1866,18 +1795,7 @@ class VFAT3_GUI:
                     text = "Register: %s Value: %s \n" % (i,new_value)
                     self.add_to_interactive_screen(text)
                 j += 1
-            data = []
-            data_intermediate = []
-            for x in register[addr].reg_array:
-                data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-                data.extend(data_intermediate)
-            data.reverse()
-            output = self.SC_encoder.create_SC_packet(addr,data,"WRITE",0)
-            paketti = output[0]
-            write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[0]], 1)
-            for x in range(1,len(paketti)):
-                write_instruction(self.interactive_output_file,1, FCC_LUT[paketti[x]], 0)
-            self.execute(verbose="yes")
+            self.write_register(addr)
 
     def change_channel(self):
         chosen_register = int(self.channel_entry.get())
@@ -2127,28 +2045,7 @@ class VFAT3_GUI:
             text = "Reading the register: %d\n" % register_nr
             self.add_to_interactive_screen(text)
 
-            output = self.SC_encoder.create_SC_packet(register_nr, 0, "READ", 0)
-            paketti = output[0]
-            write_instruction(self.interactive_output_file, 150, FCC_LUT[paketti[0]], 1)
-            for x in range(1, len(paketti)):
-                write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-            output = self.execute(verbose="yes")
-            if not output[0]:
-                text = "No read data found. Register values might be incorrect.\n"
-                self.add_to_interactive_screen(text)
-            elif output[0] == "Error":
-                text = "%s: %s\n" %(output[0], output[1])
-                text += "Register values might be incorrect.\n"
-                self.add_to_interactive_screen(text)
-            else:
-                print "Read data:"
-                new_data = output[0][0].data
-                print new_data
-                if register_nr in [65536, 65537, 65538, 65539]:
-                    new_data = ''.join(str(e) for e in new_data)
-                else:
-                    new_data = ''.join(str(e) for e in new_data[-16:])
-                register[register_nr].change_values(new_data)
+            self.read_register(register_nr)
 
         j = 0
         for i in self.register_names:
