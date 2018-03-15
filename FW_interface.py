@@ -16,7 +16,7 @@ class FW_interface:
         # Connect the socket to the port where the server is listening
         self.server_address = ('192.168.1.10', 7)
 
-    def execute_req(self, message):
+    def execute_req(self, message, no_packets=1, timeout=15, scurve="no"):
         # Create a TCP/IP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect(self.server_address)
@@ -24,28 +24,31 @@ class FW_interface:
         print message
         self.sock.sendall(bytearray(message))
         try:
-            self.sock.settimeout(5.0)
-            data = self.sock.recv(2000)
-            # MSGLEN = 5
-            # chunks = []
-            # bytes_recd = 0
-            # while bytes_recd < MSGLEN:
-            #     chunk = self.sock.recv(min(MSGLEN - bytes_recd, 2048))
-            #     print chunk
-            #     if chunk == b'':
-            #         raise RuntimeError("socket connection broken")
-            #     chunks.append(chunk)
-            #     bytes_recd = bytes_recd + len(chunk)
-            # data = b''.join(chunks)
+            self.sock.settimeout(timeout)
             hex_data = []
-            for i in data:
-                hex_text = hex(ord(i))
-                hex_data.append(hex_text)
+            multi_line_data = []
+            for k in range(0, no_packets):
+                output = self.sock.recv(2000)
+                if scurve == "yes":
+                    for i in output:
+                        hex_text = int(ord(i))
+                        hex_data.append(hex_text)
+                    hex_data.reverse()
+                    print hex_data
+                    multi_line_data.append(hex_data)
+                    output = multi_line_data
+                    hex_data = []
+                else:
+                    for i in output:
+                        hex_text = hex(ord(i))
+                        hex_data.append(hex_text)
+                    output = hex_data
+
             print "Reply:"
-            print hex_data
+            print output
         finally:
             self.sock.close()
-        return hex_data
+        return output
 
     def send_fcc(self, fcc_bin):   # fcc_hex can be given as a list also.
         message = [0xca, 0x00, 0x00]
@@ -124,16 +127,19 @@ class FW_interface:
     def int_adc_calibration(self):
         message = [0xca, 0x00, 0x06]
         output = self.execute_req(message)
-        print output
+        output = [int(i, 16) for i in output]
+        #print output
+        return output
 
-    def cal_dac_calibration(self):
-        message = [0xca, 0x00, 0x07]
-        output = self.execute_req(message)
-        print output
+    def cal_dac_calibration(self, start, stop, step):
+        message = [0xca, 0x00, 0x07, start, step, stop]
+        output = self.execute_req(message, no_packets=2)
+        return output
 
-    def run_scurve(self):
-        message = [0xca, 0x00, 0x08]
-        output = self.execute_req(message)
-        print output
+    def run_scurve(self, start_ch, stop_ch, cal_dac_start, cal_dac_stop):
+        message = [0xca, 0x00, 0x08, start_ch, stop_ch, 1, cal_dac_start, cal_dac_stop, 1, 0x01, 0xf4, 0, 0x64]
+        nr_channels = stop_ch - start_ch + 1
+        output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
+        return output
 
 

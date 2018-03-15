@@ -475,8 +475,8 @@ class VFAT3_GUI:
         self.latency = 45
         self.calphi = 0
         self.arm_dac = 100
-        self.start_cal_dac = 215
-        self.stop_cal_dac = 235
+        self.start_cal_dac = 233
+        self.stop_cal_dac = 248
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
         self.start_ch_label.grid(column=1, row=1, sticky='w')
@@ -726,6 +726,21 @@ class VFAT3_GUI:
                         self.adc0B = float(line[1])
                         self.adc1M = float(line[2])
                         self.adc1B = float(line[3])
+                        self.adcM = self.adc0M
+                        self.adcB = self.adc0B
+                        if self.adc0M <= 1 or self.adc0M > 2.5:
+                            print "ADC0 broken"
+                            self.adc0M = 0
+                            self.adc0B = 0
+                            self.adcM = self.adc1M
+                            self.adcB = self.adc1B
+                        if self.adc1M <= 1 or self.adc1M > 2.5:
+                            print "ADC1 broken"
+                            self.adc1M = 0
+                            self.adc1B = 0
+                            if self.adc0M == 0:
+                                self.adcM = 0
+                                self.adcB = 0
                         self.cal_dac_fcM = float(line[4])
                         self.cal_dac_fcB = float(line[5])
                         self.register[134].Iref[0] = int(line[6])
@@ -1118,6 +1133,7 @@ class VFAT3_GUI:
 
     def adjust_iref(self, verbose='yes'):
         result = 0
+        start = time.time()
         if verbose == 'yes':
             text = "->Adjusting Iref.\n"
             self.add_to_interactive_screen(text)
@@ -1127,6 +1143,10 @@ class VFAT3_GUI:
             if verbose == 'yes':
                 text = "Iref adjusted to value %s.\n" % output[0]
                 self.add_to_interactive_screen(text)
+        stop = time.time()
+        run_time = (stop - start)
+        print "iref routine time: %f sec\n" % run_time
+
         return result
 
     def adc_calibration(self, production="no"):
@@ -1135,7 +1155,13 @@ class VFAT3_GUI:
             text = "\nIref is not calibrated. Run Iref calibration first.\n"
             self.add_to_interactive_screen(text)
         else:
+            start = time.time()
+            print "Starting ADC calibration."
             output = self.interfaceFW.int_adc_calibration()
+            stop = time.time()
+            run_time = (stop - start)
+            text = "\nScan duration: %f sec\n" % run_time
+            self.add_to_interactive_screen(text)
             ext_adc_values = output[0]
             int_adc0_values = output[1]
             int_adc1_values = output[2]
@@ -1167,7 +1193,10 @@ class VFAT3_GUI:
                 if self.adc0M == 0:
                     self.adcM = 0
                     self.adcB = 0
-
+            stop = time.time()
+            run_time = (stop - start)
+            text = "\nScan duration: %f sec\n" % run_time
+            self.add_to_interactive_screen(text)
         if error == 1:
             error = 'y'
         print self.adcM
@@ -1176,22 +1205,60 @@ class VFAT3_GUI:
 
     def scan_cal_dac_fc(self, production="no"):
         error = 0
+        dac_start = 0
+        dac_stop = 255
+        step = 1
+        cal_dac_values = range(dac_start, dac_stop+1, step)
         if self.adcM == 0:
             text = "\nADCs are not calibrated. Run ADC calibration first.\n"
             self.add_to_interactive_screen(text)
             error = 1
         else:
             start = time.time()
-            output = self.interfaceFW.cal_dac_calibration()
-            output = calc_cal_dac_conversion_factor(self, output[0], output[1], production=production)
+            cal_dac_values = range(dac_start, dac_stop + 1, step)
+            cal_dac_values.reverse()
+            output = self.interfaceFW.cal_dac_calibration(start=dac_start, stop=dac_stop, step=step)
+            stop = time.time()
+            run_time = (stop - start)
+            text = "\nReading values: %f sec\n" % run_time
+            self.add_to_interactive_screen(text)
+            base_value_hex = "%s%s" % (output[1], output[0][2:])
+            print base_value_hex
+            base_value_int = int(base_value_hex, 16)
+            base_value_mv = base_value_int * 0.0625
+            ext_adc_values = []
+            ext_adc_values_hex = output[2:]
+            ivalue = ""
+            flag = 0
+            for value in ext_adc_values_hex:
+                if flag == 0:
+                    value_lsb = value[2:]
+                    if len(value_lsb) == 1:
+                        value_lsb = "0"+value_lsb
+                    flag = 1
+                else:
+                    ivalue = value+value_lsb
+                    ivalue_dec = int(ivalue, 16)
+                    print ""
+                    print ivalue
+                    print ivalue_dec
+                    ivalue_mv = ivalue_dec * 0.0625
+                    print ivalue_mv
+                    ext_adc_values.append(ivalue_mv)
+                    ivalue = ""
+                    flag = 0
+            #print ext_adc_values
+
+            output = calc_cal_dac_conversion_factor(self, cal_dac_values, base_value_mv, ext_adc_values, production=production)
             self.cal_dac_fcM = output[0]
             self.cal_dac_fcB = output[1]
-            stop = time.time()
-            run_time = (stop - start) / 60
+
             text = "\nCAL_DAC conversion completed.\n"
             text += "CAL_DAC to fC: %f + %f\n" % (self.cal_dac_fcM, self.cal_dac_fcB)
             self.add_to_interactive_screen(text)
-            text = "\nScan duration: %f min\n" % run_time
+            stop = time.time()
+            run_time = (stop - start)
+            text = "\nScan duration: %f sec\n" % run_time
             self.add_to_interactive_screen(text)
         if self.cal_dac_fcM < 0.1 or self.cal_dac_fcM > 0.3:
             error = 1
@@ -1494,6 +1561,7 @@ class VFAT3_GUI:
                 write_data = line[1]
                 self.register[reg_nr].change_values(write_data)
                 self.write_register(reg_nr)
+                time.sleep(0.01)
                 read_data = self.read_register(reg_nr)
                 read_data = ''.join(str(e) for e in read_data[16:])
                 if read_data == write_data:
@@ -1631,7 +1699,15 @@ class VFAT3_GUI:
         self.add_to_interactive_screen(text)
         command_encoded = FCC_LUT[command]
         output = self.interfaceFW.send_fcc(command_encoded)
-
+        print output[0]
+        if output[0] == '0x1e':
+            i = 0
+            for byte in output:
+                if i == 4:
+                    data_bit = dec_to_bin_with_stuffing(int(byte, 16), 8)
+                    print ''.join(str(e) for e in data_bit)
+                    i = 0
+                i += 1
         return output
 
     def run_all_dac_scans(self, production="no"):

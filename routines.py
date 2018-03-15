@@ -86,111 +86,16 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         stop_dac_value = dac_range[1]
         samples_per_dac_value = 100
 
-        # Create the instructions for the specified scan values.
-        steps = stop_dac_value - start_dac_value
-        instruction_text = []
-        instruction_text.append("1 Send SCOnly")
-        instruction_text.append("1 Write CAL_MODE 1")
-        instruction_text.append("400 Write CAL_DAC %d" % start_dac_value)
-        instruction_text.append("500 Send EC0")
-        instruction_text.append("1 Send RunMode")
-        instruction_text.append("1000 Repeat %d" % steps)
-        instruction_text.append("1000 Send_Repeat CalPulse_LV1A %d %d %d" % (samples_per_dac_value, bc_between_calpulses, delay))
-        instruction_text.append("1000 Send SCOnly")
-        instruction_text.append("1000 Write CAL_DAC 1")
-        instruction_text.append("200 Send RunMode")
-        instruction_text.append("1 End_Repeat")
-        instruction_text.append("1 Send SCOnly")
-
-        # Write the instructions to the file.
-        output_file_name = "./routines/%s/instruction_list.txt" % modified
-        with open(output_file_name, "w") as mfile:
-            for item in instruction_text:
-                mfile.write("%s\n" % item)
-
-        # Generate the instruction list for the FPGA.
-        generator(scan_name, obj.write_BCd_as_fillers, obj.register)
-
-        # Set the needed registers.
-        obj.set_fe_nominal_values()
-
-        obj.register[131].TP_FE[0] = 7
-        obj.write_register(131)
-
-        register[137].LAT[0] = latency
-        obj.write_register(137)
-
-        obj.register[130].DT[0] = 0
-        obj.write_register(130)
-
-        register[138].CAL_PHI[0] = cal_phi
-        register[138].CAL_MODE[0] = 1
-        obj.write_register(138)
-
-        obj.register[132].PT[0] = 15
-        obj.register[132].SEL_COMP_MODE[0] = 1
-        obj.write_register(132)
-
-        obj.register[135].ZCC_DAC[0] = 10
-        obj.register[135].ARM_DAC[0] = arm_dac
-        obj.write_register(135)
-
-        obj.register[139].CAL_DUR[0] = 200
-        obj.write_register(139)
-
-        obj.register[65535].RUN[0] = 1
-        obj.write_register(65535)
-        time.sleep(1)
-        if configuration == "no":
-            obj.measure_power('RUN')
-        obj.register[129].ST[0] = 0
-        obj.register[129].PS[0] = pulsestretch
-        obj.write_register(129)
-
-        charge_values = obj.cal_dac_fc_values[start_dac_value:stop_dac_value]
-        charge_values.reverse()
-
         cal_dac_values = range(start_dac_value, stop_dac_value)
         cal_dac_values.reverse()
         cal_dac_values[:] = [255 - x for x in cal_dac_values]
         cal_dac_values[:] = [obj.cal_dac_fcM * x + obj.cal_dac_fcB for x in cal_dac_values]
-        all_ch_data = []
-        all_ch_data.append(["", "255-CAL_DAC"])
-        data_line = []
-        data_line.append("Channel")
-        data_line.extend(cal_dac_values)
-        all_ch_data.append(data_line)
-        for k in range(start_ch, stop_ch+1, ch_step):
-            print "Channel: %d" % k
-            while True:
-                start_time = time.time()
-                obj.register[k].cal[0] = 1
-                obj.write_register(k)
 
-                scurve_data = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, routine=1, scurve_ch=k)
-                scurve_data.reverse()
-                print scurve_data
-                # Check that there is enough data and it is not all zeroes.
-                if len(scurve_data) != steps:
-                    print "Not enough values, trying again."
-                    continue
-                if len(scurve_data) == steps:
-                    break
+        channels = range(start_ch, stop_ch+1)
 
-            # Unset the calibration to the channel.
-            obj.register[k].cal[0] = 0
-            obj.write_register(k)
-
-            # Modify the decoded data.
-            saved_data = []
-            saved_data.append(k)
-
-            saved_data.extend(scurve_data)
-            all_ch_data.append(saved_data)
-            stop_time = time.time()
-            duration = stop_time - start_time
-            #print "Channel duration: %f" % duration
-
+        scurve_data = obj.interfaceFW.run_scurve(start_ch, stop_ch, start_dac_value, stop_dac_value)
+        print "return data."
+        print scurve_data
         # Save the results.
         if configuration == "yes":
             timestamp = time.strftime("%Y%m%d_%H%M")
@@ -220,7 +125,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
 
 
         # Analyze data.
-        mean_th_fc, mean_enc_fc, noisy_channels, enc_list, thr_list = scurve_analyze(obj, all_ch_data, folder, save=configuration)
+        mean_th_fc, mean_enc_fc, noisy_channels, enc_list, thr_list = scurve_analyze(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
         # Save data.
         if obj.database:
             obj.database.save_mean_threshold(mean_th_fc)
@@ -236,18 +141,21 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     return [threshold, all_ch_data, noisy_channels, thr_list]
 
 
-def scurve_analyze(obj, scurve_data, folder, save="yes"):
+def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
 
     r.gROOT.SetBatch(True)
 
-    dac_values = scurve_data[1][1:]
-    # print dac_values
+    print dac_values
+    print channels
+    print scurve_data
     Nhits_h = {}
     Nev_h = {}
 
-    for i in range(2, len(scurve_data)):
-        data = scurve_data[i][1:]
-        channel = scurve_data[i][0]
+    for i in range(0, len(scurve_data)):
+        data = scurve_data[i][:]
+        channel = channels[i]
+        print channel
+        print data
 
         Nhits_h[channel] = r.TH1D('Nhits%i_h' % channel, 'Nhits%i_h'% channel, len(dac_values)-1, dac_values[0], dac_values[-1])
         Nev_h[channel] = r.TH1D('Nev%i_h' % channel, 'Nev%i_h' % channel, len(dac_values)-1, dac_values[0], dac_values[-1])
