@@ -1208,7 +1208,7 @@ class VFAT3_GUI:
         dac_start = 0
         dac_stop = 255
         step = 1
-        cal_dac_values = range(dac_start, dac_stop+1, step)
+
         if self.adcM == 0:
             text = "\nADCs are not calibrated. Run ADC calibration first.\n"
             self.add_to_interactive_screen(text)
@@ -1218,17 +1218,12 @@ class VFAT3_GUI:
             cal_dac_values = range(dac_start, dac_stop + 1, step)
             cal_dac_values.reverse()
             output = self.interfaceFW.cal_dac_calibration(start=dac_start, stop=dac_stop, step=step)
-            stop = time.time()
-            run_time = (stop - start)
-            text = "\nReading values: %f sec\n" % run_time
-            self.add_to_interactive_screen(text)
             base_value_hex = "%s%s" % (output[1], output[0][2:])
             print base_value_hex
             base_value_int = int(base_value_hex, 16)
             base_value_mv = base_value_int * 0.0625
             ext_adc_values = []
             ext_adc_values_hex = output[2:]
-            ivalue = ""
             flag = 0
             for value in ext_adc_values_hex:
                 if flag == 0:
@@ -1247,8 +1242,6 @@ class VFAT3_GUI:
                     ext_adc_values.append(ivalue_mv)
                     ivalue = ""
                     flag = 0
-            #print ext_adc_values
-
             output = calc_cal_dac_conversion_factor(self, cal_dac_values, base_value_mv, ext_adc_values, production=production)
             self.cal_dac_fcM = output[0]
             self.cal_dac_fcB = output[1]

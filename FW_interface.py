@@ -20,7 +20,6 @@ class FW_interface:
         # Create a TCP/IP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect(self.server_address)
-        print "Send:"
         print message
         self.sock.sendall(bytearray(message))
         try:
@@ -43,11 +42,10 @@ class FW_interface:
                         hex_text = hex(ord(i))
                         hex_data.append(hex_text)
                     output = hex_data
-
-            print "Reply:"
-            print output
         finally:
             self.sock.close()
+        print output
+        print len(output)
         return output
 
     def send_fcc(self, fcc_bin):   # fcc_hex can be given as a list also.
@@ -67,28 +65,20 @@ class FW_interface:
     def write_register(self, address, value):
         # Dec address to hex bytes
         address_hex = '0x%0*x' % (8, address)
-        #print "Register address: %s" % address_hex
         address_3 = address_hex[2:4]
         address_2 = address_hex[4:6]
         address_1 = address_hex[6:8]
         address_0 = address_hex[8:10]
 
         # Data from bit-string to hex bytes
-        #print "writing register value:"
-        #print value
         data_0 = value[8:16]
         data_1 = value[0:8]
-        #data_0.reverse()
-        #data_1.reverse()
         data_0 = ''.join(str(e) for e in data_0)
         data_1 = ''.join(str(e) for e in data_1)
-        #print "data0, bin: %s, hex: %x, dec:%i" % (data_0, int(data_0, 2), int(data_0, 2))
-        #print "data1, bin: %s, hex: %x, dec:%i" % (data_1, int(data_1, 2), int(data_1, 2))
         message = [0xca, 0x00, 0x01]
         message.append(0x01)  # R/W-byte
         message.extend([int(address_3, 16), int(address_2, 16), int(address_1, 16), int(address_0, 16)])
-        message.extend([0,0, int(data_1, 2), int(data_0, 2)])
-        #print message
+        message.extend([0, 0, int(data_1, 2), int(data_0, 2)])
         output = self.execute_req(message)
         return output
 
@@ -115,20 +105,17 @@ class FW_interface:
     def send_sync(self):
         message = [0xca, 0x00, 0x02]
         output = self.execute_req(message)
-        print output
         return output
 
     def adjust_iref(self):
         message = [0xca, 0x00, 0x05]
         output = self.execute_req(message)
-        print output
         return output
 
     def int_adc_calibration(self):
         message = [0xca, 0x00, 0x06]
         output = self.execute_req(message)
         output = [int(i, 16) for i in output]
-        #print output
         return output
 
     def cal_dac_calibration(self, start, stop, step):
@@ -137,9 +124,12 @@ class FW_interface:
         return output
 
     def run_scurve(self, start_ch, stop_ch, cal_dac_start, cal_dac_stop):
-        message = [0xca, 0x00, 0x08, start_ch, stop_ch, 1, cal_dac_start, cal_dac_stop, 1, 0x01, 0xf4, 0, 0x64]
+        message = [0xca, 0x00, 0x08, start_ch, stop_ch, 1, cal_dac_start, cal_dac_stop, 1, 0x01, 0x2c, 0, 0x64]
         nr_channels = stop_ch - start_ch + 1
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
         return output
 
-
+    def run_dac_scan(self, start, step, stop, mon_sel):
+        message = [0xca, 0x00, 0x09, start, step, stop, 0, 0, 1, mon_sel]
+        output = self.execute_req(message,  timeout=30)
+        return output

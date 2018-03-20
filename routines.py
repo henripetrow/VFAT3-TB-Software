@@ -65,7 +65,7 @@ def find_threshold(obj):
 
 
 def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes", dac_range=[215, 235], delay=50, bc_between_calpulses=2000, pulsestretch=3, latency=45, cal_phi=0, folder="scurve"):
-    threshold = "n"
+    mean_th_fc = "n"
     all_ch_data = "n"
     noisy_channels = "n"
     thr_list = "n"
@@ -75,87 +75,77 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     else:
         start = time.time()
 
-        modified = scan_name.replace(" ", "_")
-        file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
-
-        # scan either all of the channels or just the one defined by ch.
+        # Set channels and Cal dac range.
         start_ch = ch[0]
         stop_ch = ch[1]
-
         start_dac_value = dac_range[0]
         stop_dac_value = dac_range[1]
+        print "Running S-curves for channels: %i-%i, for CAL_DAC range: %i-%i:" % (start_ch, stop_ch, start_dac_value, stop_dac_value)
         samples_per_dac_value = 100
 
+        # Create list of cal dac values.
         cal_dac_values = range(start_dac_value, stop_dac_value)
         cal_dac_values.reverse()
         cal_dac_values[:] = [255 - x for x in cal_dac_values]
         cal_dac_values[:] = [obj.cal_dac_fcM * x + obj.cal_dac_fcB for x in cal_dac_values]
 
+        # Create a list of channels the s-curve is run on.
         channels = range(start_ch, stop_ch+1)
 
+        # Launch S-curve routine in firmware.
         scurve_data = obj.interfaceFW.run_scurve(start_ch, stop_ch, start_dac_value, stop_dac_value)
-        print "return data."
-        print scurve_data
-        # Save the results.
+
+        # Plot the s-curve data.
         if configuration == "yes":
             timestamp = time.strftime("%Y%m%d_%H%M")
+            modified = scan_name.replace(" ", "_")
             text = "Results were saved to the folder:\n %s \n" % folder
-            filename = "%s/%s/%sS-curve_data.csv" % (obj.data_folder, folder, timestamp)
+            filename = "%s/%s/%sscurves.png" % (obj.data_folder, folder, timestamp)
             if not os.path.exists(os.path.dirname(filename)):
                 try:
                     os.makedirs(os.path.dirname(filename))
                 except OSError as exc:  # Guard against race condition
                     print "Unable to create directory"
-            with open(filename, "wb") as f:
-                writer = csv.writer(f)
-                writer.writerows(all_ch_data)
             obj.add_to_interactive_screen(text)
-
             fig = plt.figure()
             for i in range(2, len(all_ch_data)):
-                #print all_ch_data[i][1:]
                 plt.plot(cal_dac_values, all_ch_data[i][1:])
             plt.grid(True)
             plt.ylabel('[%]')
             plt.xlabel('Charge [fC]')
             plt.xlim(0, 10)
             plt.title(modified)
-            fig.savefig("%s/%s/%sscurves.png" % (obj.data_folder, folder, timestamp))
-
-
+            fig.savefig(filename)
 
         # Analyze data.
         mean_th_fc, mean_enc_fc, noisy_channels, enc_list, thr_list = scurve_analyze(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
-        # Save data.
+
+        # Save data to database.
         if obj.database:
             obj.database.save_mean_threshold(mean_th_fc)
             obj.database.save_mean_enc(mean_enc_fc)
             obj.database.save_threshold_data(thr_list)
             obj.database.save_enc_data(enc_list)
             obj.database.save_noisy_channels(noisy_channels)
+
+        # Print routine duration.
         stop = time.time()
         run_time = (stop - start) / 60
         text = "Run time (minutes): %f\n" % run_time
         obj.add_to_interactive_screen(text)
-        threshold = mean_th_fc
-    return [threshold, all_ch_data, noisy_channels, thr_list]
+    return [mean_th_fc, all_ch_data, noisy_channels, thr_list]
 
 
 def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
 
     r.gROOT.SetBatch(True)
 
-    print dac_values
-    print channels
-    print scurve_data
     Nhits_h = {}
     Nev_h = {}
 
     for i in range(0, len(scurve_data)):
         data = scurve_data[i][:]
         channel = channels[i]
-        print channel
-        print data
 
         Nhits_h[channel] = r.TH1D('Nhits%i_h' % channel, 'Nhits%i_h'% channel, len(dac_values)-1, dac_values[0], dac_values[-1])
         Nev_h[channel] = r.TH1D('Nev%i_h' % channel, 'Nev%i_h' % channel, len(dac_values)-1, dac_values[0], dac_values[-1])
@@ -198,7 +188,7 @@ def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
             scurves_ag[ch].Write()
         thr_fc = fit_f.GetParameter(0)
         enc_fc = fit_f.GetParameter(1)
-        if enc_fc >= 0.18:      # Limit for noisy channel.
+        if enc_fc >= 1:      # Limit for noisy channel.
             noisy_channels.append(ch)
         else:
             # Fill the histograms.
@@ -288,32 +278,43 @@ def scan_execute(obj, scan_name, plot=1,):
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
 
-        output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1)
+        output = obj.interfaceFW.run_dac_scan(0, 1, 64, 130)
 
         if output[0] == "Error":
             text = "%s: %s\n" % (output[0], output[1])
             obj.add_to_interactive_screen(text)
         else:
             adc_flag = 0
-            reg_value = 0
-            for i in output[0]:
-                if i.type_ID == 0:
-                    if adc_flag == 0:
-                        first_adc_value = int(''.join(map(str, i.data)), 2)
-                        adc_flag = 1
-                    else:
-                        second_adc_value = int(''.join(map(str, i.data)), 2)
-                        scan_values0_adccount.append(first_adc_value)
-                        scan_values1_adccount.append(second_adc_value)
-                        scan_values0.append(obj.adc0M * first_adc_value + obj.adc0B)
-                        scan_values1.append(obj.adc1M * second_adc_value + obj.adc1B)
-                        #scan_values0.append(first_adc_value)
-                        #scan_values1.append(second_adc_value)
-                        reg_values.append(reg_value)
-                        reg_value += 1
-                        adc_flag = 0
-            for i in output[4]:
-                print i
+            int_adc0_values = []
+            int_adc1_values = []
+            for value in output:
+                print value
+                if adc_flag == 0:
+                    value_lsb = value[2:]
+                    if len(value_lsb) == 1:
+                        value_lsb = "0" + value_lsb
+                    adc_flag = 1
+                elif adc_flag == 1:
+                    ivalue = value + value_lsb
+                    ivalue_dec = int(ivalue, 16)
+                    print ivalue
+                    print "ADC0: %i" % ivalue_dec
+                    int_adc0_values.append(ivalue_dec)
+                    ivalue = ""
+                    adc_flag = 2
+                elif adc_flag == 2:
+                    value_lsb = value[2:]
+                    if len(value_lsb) == 1:
+                        value_lsb = "0"+value_lsb
+                    adc_flag = 3
+                elif adc_flag == 3:
+                    ivalue = value + value_lsb
+                    ivalue_dec = int(ivalue, 16)
+                    print ivalue
+                    print "ADC1: %i" % ivalue_dec
+                    int_adc1_values.append(ivalue_dec)
+                    ivalue = ""
+                    adc_flag = 0
 
         # Save the results.
         if obj.database:
