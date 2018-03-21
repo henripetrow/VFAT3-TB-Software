@@ -277,16 +277,16 @@ class VFAT3_GUI:
         self.sync_check_button = Button(self.misc_frame, text="Sync check", command=lambda: self.send_sync_verif(), width=bwidth)
         self.sync_check_button.grid(column=1, row=2, sticky='e')
 
-        self.idle_button = Button(self.misc_frame, text="SC Idle character", command=lambda: self.send_idle(), width=bwidth)
+        self.idle_button = Button(self.misc_frame, text="SC Idle character", command=lambda: self.send_idle(), width=bwidth, state=DISABLED)
         self.idle_button.grid(column=1, row=3, sticky='e')
 
         self.close_button = Button(self.misc_frame, text="Read int. ADCs", command=lambda: self.read_adcs(), width=bwidth)
         self.close_button.grid(column=1, row=4, sticky='e')
 
-        self.cal_button = Button(self.misc_frame, text="Read ext. ADC", command=lambda: self.ext_adc(), width=bwidth)
+        self.cal_button = Button(self.misc_frame, text="Read ext. ADC", command=lambda: self.ext_adc(), width=bwidth, state=DISABLED)
         self.cal_button.grid(column=1, row=5, sticky='e')
 
-        self.CalPulse_LV1A_button = Button(self.misc_frame, text="CalPulse+LV1A", command=self.send_cal_trigger, width=bwidth)
+        self.CalPulse_LV1A_button = Button(self.misc_frame, text="CalPulse+LV1A", command=self.send_cal_trigger, width=bwidth, state=DISABLED)
         self.CalPulse_LV1A_button.grid(column=1, row=6, sticky='e')
 
         self.CalPulse_LV1A_label0 = Label(self.misc_frame, text="Latency")
@@ -302,7 +302,7 @@ class VFAT3_GUI:
         self.cont_trig_button = Button(self.misc_frame, text="Sync FPGA", command=lambda: self.send_reset(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=15, sticky='e')
 
-        self.cont_trig_button = Button(self.misc_frame, text="Charge distribution", command=lambda: charge_distribution_on_neighbouring_ch(self), width=bwidth)
+        self.cont_trig_button = Button(self.misc_frame, text="Charge distribution", command=lambda: charge_distribution_on_neighbouring_ch(self), width=bwidth, state=DISABLED)
         self.cont_trig_button.grid(column=1, row=16, sticky='e')
 
         # ADD TABS
@@ -346,12 +346,15 @@ class VFAT3_GUI:
                 "SD_I_BSF scan",
                 "SD_I_BFCAS scan",
                 "CAL_DAC scan",
-                #"CAL_DAC scan, fC",
-                # "Counter Resets"
-                # "S-curve",
-                # "S-curve all ch",
-                # "S-curve all ch cont."
                 ]
+
+        self.scan_options_value = [164, 163, 140, 138, 139, 132, 130, 131, 162, 133, 134, 135, 137, 136, 161]
+        self.dac_sizes = [8, 8, 6, 6, 6, 6, 8, 6, 8, 8, 8, 8, 6, 8, 8]
+
+        dac6bits = ["CFD_DAC_1", "CFD_DAC_2", "HYST_DAC", "PRE_I_BLCC", "PRE_I_BSF", "SD_I_BSF"]
+        dac8bits = ["ARM_DAC", "CAL_DAC", "PRE_VREF", "PRE_I_BIT", "SD_I_BDIFF", "SH_I_BDIFF", "SD_I_BFCAS",
+                    "SH_I_BFCAS", "ZCC_DAC"]
+
         self.chosen_scan = self.scan_options[0]
         self.scan_variable = StringVar(master)
         self.scan_variable.set(self.scan_options[0])  # default value
@@ -371,9 +374,9 @@ class VFAT3_GUI:
         self.scan_button_frame.grid()  
         self.scan_button_frame.grid_propagate(False)
 
-        self.modify_button = Button(self.scan_button_frame, text="Modify", command=self.modify_scan)
+        self.modify_button = Button(self.scan_button_frame, text="Modify", command=self.modify_scan, state=DISABLED)
         self.modify_button.grid(column=0, row=0)
-        self.generate_button = Button(self.scan_button_frame, text="Generate", command=self.generate_routine)
+        self.generate_button = Button(self.scan_button_frame, text="Generate", command=self.generate_routine, state=DISABLED)
         self.generate_button.grid(column=1, row=0)
         self.run_button = Button(self.scan_button_frame, text="RUN", command=self.run_routine)
         self.run_button.grid(column=2, row=0)
@@ -395,19 +398,19 @@ class VFAT3_GUI:
         self.cal_button = Button(self.calibration_frame, text="Load Calibration", command=lambda: self.load_calibration_values_from_file(), width=bwidth)
         self.cal_button.grid(column=2, row=3, sticky='e')
 
-        self.FE_button = Button(self.calibration_frame, text="Set FE nominal values", command=lambda: self.set_fe_nominal_values(), width=bwidth)
+        self.FE_button = Button(self.calibration_frame, text="Set FE nominal values", command=lambda: self.set_fe_nominal_values(), width=bwidth, state=DISABLED)
         self.FE_button.grid(column=1, row=4, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="Channel Calibration", command=lambda: adjust_local_thresholds(self), width=bwidth)
+        self.cal_button = Button(self.calibration_frame, text="Channel Calibration", command=lambda: adjust_local_thresholds(self), width=bwidth, state=DISABLED)
         self.cal_button.grid(column=1, row=5, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth)
+        self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth, state=DISABLED)
         self.cal_button.grid(column=2, row=5, sticky='e')
 
 #        self.cal_button = Button(self.calibration_frame, text="Gain measurement", command=lambda: gain_measurement(self), width=bwidth)
 #        self.cal_button.grid(column=1, row=6, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="Gain per channel", command=lambda: gain_histogram(self), width=bwidth)
+        self.cal_button = Button(self.calibration_frame, text="Gain per channel", command=lambda: gain_histogram(self), width=bwidth, state=DISABLED)
         self.cal_button.grid(column=1, row=6, sticky='e')
 
         self.cal_button = Button(self.calibration_frame, text="Save registers", command=lambda: self.save_register_values_to_file(), width=bwidth)
@@ -420,20 +423,20 @@ class VFAT3_GUI:
 
         # ###############Routines-TAB #######################################
 
-        self.Trig1_set_button = Button(self.routines_frame, text="Set s-bit pattern", command=lambda: set_up_trigger_pattern(self, 0), width=bwidth)
+        self.Trig1_set_button = Button(self.routines_frame, text="Set s-bit pattern", command=lambda: set_up_trigger_pattern(self, 0), width=bwidth, state=DISABLED)
         self.Trig1_set_button.grid(column=1, row=7, sticky='e')
 
-        self.Trig_clear_button = Button(self.routines_frame, text="Clear s-bit pattern", command=lambda: set_up_trigger_pattern(self, 2), width=bwidth)
+        self.Trig_clear_button = Button(self.routines_frame, text="Clear s-bit pattern", command=lambda: set_up_trigger_pattern(self, 2), width=bwidth, state=DISABLED)
         self.Trig_clear_button.grid(column=1, row=8, sticky='e')
 
-        self.cont_trig_button = Button(self.routines_frame, text="Continuous CalPulses", command=lambda: continuous_trigger(self), width=bwidth)
+        self.cont_trig_button = Button(self.routines_frame, text="Continuous CalPulses", command=lambda: continuous_trigger(self), width=bwidth, state=DISABLED)
         self.cont_trig_button.grid(column=1, row=9, sticky='e')
 
         self.cal_button = Button(self.routines_frame, text="Production test",
                                  command=lambda: self.run_production_tests(), width=bwidth)
         self.cal_button.grid(column=1, row=10, sticky='e')
 
-        self.cont_trig_button = Button(self.routines_frame, text="Test data packets", command=lambda: self.run_concecutive_triggers(), width=bwidth)
+        self.cont_trig_button = Button(self.routines_frame, text="Test data packets", command=lambda: self.run_concecutive_triggers(), width=bwidth, state=DISABLED)
         self.cont_trig_button.grid(column=1, row=11, sticky='e')
 
         self.nr_trigger_loops = 25
@@ -451,7 +454,7 @@ class VFAT3_GUI:
         self.cal_button = Button(self.routines_frame, text="W/R all registers", command=lambda: self.test_registers(), width=bwidth)
         self.cal_button.grid(column=1, row=13, sticky='e')
 
-        self.cal_button = Button(self.routines_frame, text="X-ray routine cont", command=lambda: self.run_xray_tests(), width=bwidth)
+        self.cal_button = Button(self.routines_frame, text="X-ray routine cont", command=lambda: self.run_xray_tests(), width=bwidth, state=DISABLED)
         self.cal_button.grid(column=1, row=14, sticky='e')
 
         self.data_dir_label0 = Label(self.routines_frame, text="Data directory:")
