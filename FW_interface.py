@@ -20,7 +20,6 @@ class FW_interface:
         # Create a TCP/IP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect(self.server_address)
-        print message
         self.sock.sendall(bytearray(message))
         try:
             self.sock.settimeout(timeout)
@@ -33,7 +32,6 @@ class FW_interface:
                         hex_text = int(ord(i))
                         hex_data.append(hex_text)
                     hex_data.reverse()
-                    print hex_data
                     multi_line_data.append(hex_data)
                     output = multi_line_data
                     hex_data = []
@@ -44,8 +42,6 @@ class FW_interface:
                     output = hex_data
         finally:
             self.sock.close()
-        print output
-        print len(output)
         return output
 
     def send_fcc(self, fcc_bin):   # fcc_hex can be given as a list also.

@@ -351,9 +351,6 @@ class VFAT3_GUI:
         self.scan_options_value = [164, 163, 140, 138, 139, 132, 130, 131, 162, 133, 134, 135, 137, 136, 161]
         self.dac_sizes = [8, 8, 6, 6, 6, 6, 8, 6, 8, 8, 8, 8, 6, 8, 8]
 
-        dac6bits = ["CFD_DAC_1", "CFD_DAC_2", "HYST_DAC", "PRE_I_BLCC", "PRE_I_BSF", "SD_I_BSF"]
-        dac8bits = ["ARM_DAC", "CAL_DAC", "PRE_VREF", "PRE_I_BIT", "SD_I_BDIFF", "SH_I_BDIFF", "SD_I_BFCAS",
-                    "SH_I_BFCAS", "ZCC_DAC"]
 
         self.chosen_scan = self.scan_options[0]
         self.scan_variable = StringVar(master)
@@ -1621,38 +1618,12 @@ class VFAT3_GUI:
         text = "->Running the scan: %s\n" % self.chosen_scan
         self.add_to_interactive_screen(text)
         scan_name = self.chosen_scan
-        modified = scan_name.replace(" ", "_")
-        if self.chosen_scan == "Counter Resets":
-            self.counter_resets_execute(scan_name)
-        elif self.chosen_scan == "CAL_DAC scan, fC":
-            scan_cal_dac_fc(self, "CAL_DAC scan, fC")
-        elif self.chosen_scan == "S-curve":
-            scurve_execute(self, scan_name)
-        elif self.chosen_scan == "S-curve all ch":
-            scurve_all_ch_execute(self, scan_name)
-        elif self.chosen_scan == "S-curve all ch cont.":
-            while True:
-                scurve_all_ch_execute(self, scan_name)
-                self.send_reset()
-                for i in range(0, 5):
-                    print "->Sending sync request."
-                    command_encoded = FCC_LUT["CC-A"]
-                    write_instruction(self.interactive_output_file, 1, command_encoded, 1)
-                    write_instruction(self.interactive_output_file, 1, command_encoded, 0)
-                    write_instruction(self.interactive_output_file, 1, command_encoded, 0)
-                    output = self.interfaceFW.launch(register, self.interactive_output_file, self.COM_port)
-                    if output[0] == "Error":
-                        text = "%s: %s\n" % (output[0], output[1])
-                        self.add_to_interactive_screen(text)
-                    elif output[2]:
-                        print "Synch ok."
-                        for i in output[2]:
-                            print "BC:%d, %s\n" % (i[0], i[1])
-                    else:
-                        print "Synch fail."
-                    time.sleep(60)
-        else:
-            scan_execute(self, scan_name)
+        scan_nr = self.scan_options_value[self.scan_options.index(scan_name)]
+        dac_size = self.dac_sizes[self.scan_options.index(scan_name)]
+        print scan_name
+        print scan_nr
+        print dac_size
+        scan_execute(self, scan_name, scan_nr, dac_size)
 
     def counter_resets_execute(self, scan_name):
         modified = scan_name.replace(" ", "_")
@@ -1714,14 +1685,16 @@ class VFAT3_GUI:
         start = time.time()
         for scan in self.scan_options:
             print "Running %s" % scan
-            output = scan_execute(self, scan, plot=plot)
+            scan_nr = self.scan_options_value[self.scan_options.index(scan)]
+            dac_size = self.dac_sizes[self.scan_options.index(scan)]
+            output = scan_execute(self, scan, scan_nr, dac_size)
             if output == "error":
                 break
             else:
                 print "Scan done."
         stop = time.time()
-        run_time = (stop - start) / 60
-        print "Runtime: %f" % run_time
+        run_time = (stop - start)
+        print "Runtime: %f s" % run_time
         return 'y'
 
     def run_xray_tests(self):

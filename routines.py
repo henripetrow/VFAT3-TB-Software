@@ -64,7 +64,9 @@ def find_threshold(obj):
     fig.savefig(filename)
 
 
-def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes", dac_range=[215, 235], delay=50, bc_between_calpulses=2000, pulsestretch=3, latency=45, cal_phi=0, folder="scurve"):
+def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes",
+                          dac_range=[215, 235], delay=50, bc_between_calpulses=2000, pulsestretch=3, latency=45,
+                          cal_phi=0, folder="scurve"):
     mean_th_fc = "n"
     all_ch_data = "n"
     noisy_channels = "n"
@@ -261,7 +263,7 @@ def fitScurve(scurve_g):
     return bestFit_f
 
 
-def scan_execute(obj, scan_name, plot=1,):
+def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
 
     if obj.adcM == 0:
         text = "\nADCs are not calibrated. Run ADC calibration first.\n"
@@ -278,7 +280,7 @@ def scan_execute(obj, scan_name, plot=1,):
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
 
-        output = obj.interfaceFW.run_dac_scan(0, 1, 64, 130)
+        output = obj.interfaceFW.run_dac_scan(0, 1, 2**dac_size-1, scan_nr)
 
         if output[0] == "Error":
             text = "%s: %s\n" % (output[0], output[1])
@@ -288,7 +290,6 @@ def scan_execute(obj, scan_name, plot=1,):
             int_adc0_values = []
             int_adc1_values = []
             for value in output:
-                print value
                 if adc_flag == 0:
                     value_lsb = value[2:]
                     if len(value_lsb) == 1:
@@ -297,8 +298,6 @@ def scan_execute(obj, scan_name, plot=1,):
                 elif adc_flag == 1:
                     ivalue = value + value_lsb
                     ivalue_dec = int(ivalue, 16)
-                    print ivalue
-                    print "ADC0: %i" % ivalue_dec
                     int_adc0_values.append(ivalue_dec)
                     ivalue = ""
                     adc_flag = 2
@@ -310,16 +309,14 @@ def scan_execute(obj, scan_name, plot=1,):
                 elif adc_flag == 3:
                     ivalue = value + value_lsb
                     ivalue_dec = int(ivalue, 16)
-                    print ivalue
-                    print "ADC1: %i" % ivalue_dec
                     int_adc1_values.append(ivalue_dec)
                     ivalue = ""
                     adc_flag = 0
 
         # Save the results.
         if obj.database:
-            obj.database.save_dac_data(modified[:-5], "ADC0", scan_values0_adccount)
-            obj.database.save_dac_data(modified[:-5], "ADC1", scan_values1_adccount)
+            obj.database.save_dac_data(modified[:-5], "ADC0", int_adc0_values)
+            obj.database.save_dac_data(modified[:-5], "ADC1", int_adc1_values)
 
         data = [reg_values, scan_values0, scan_values1]
         timestamp = time.strftime("%Y%m%d%H%M")
@@ -346,13 +343,14 @@ def scan_execute(obj, scan_name, plot=1,):
             except OSError as exc:  # Guard against race condition
                 print "Unable to create directory"
         if plot == 1:
-            nr_points = len(scan_values0)
+            nr_points = len(int_adc0_values)
             x = range(0, nr_points)
             #fig = plt.figure(1)
             plt.clf()
-            plt.plot(x, scan_values0, label="ADC0")
-            plt.plot(x, scan_values1, label="ADC1")
-            plt.ylabel('voltage [mV]')
+            plt.plot(x, int_adc0_values, label="ADC0")
+            plt.plot(x, int_adc1_values, label="ADC1")
+            #plt.ylabel('voltage [mV]')
+            plt.ylabel('ADC counts')
             plt.xlabel('DAC counts')
             plt.legend()
             plt.title(modified)
@@ -361,8 +359,8 @@ def scan_execute(obj, scan_name, plot=1,):
             #plt.close(fig)
 
         stop = time.time()
-        run_time = (stop - start) / 60
-        text = "Scan duration: %f min\n" % run_time
+        run_time = (stop - start)
+        text = "Scan duration: %f s\n" % run_time
         obj.add_to_interactive_screen(text)
 
     return output
