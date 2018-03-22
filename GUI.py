@@ -398,10 +398,10 @@ class VFAT3_GUI:
         self.FE_button = Button(self.calibration_frame, text="Set FE nominal values", command=lambda: self.set_fe_nominal_values(), width=bwidth, state=DISABLED)
         self.FE_button.grid(column=1, row=4, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="Channel Calibration", command=lambda: adjust_local_thresholds(self), width=bwidth, state=DISABLED)
+        self.cal_button = Button(self.calibration_frame, text="Channel Calibration", command=lambda: adjust_local_thresholds(self), width=bwidth)
         self.cal_button.grid(column=1, row=5, sticky='e')
 
-        self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth, state=DISABLED)
+        self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth)
         self.cal_button.grid(column=2, row=5, sticky='e')
 
 #        self.cal_button = Button(self.calibration_frame, text="Gain measurement", command=lambda: gain_measurement(self), width=bwidth)
@@ -511,7 +511,7 @@ class VFAT3_GUI:
         self.delay_label = Label(self.scurve_frame, text="Pulse Delay:")
         self.delay_label.grid(column=1, row=4, sticky='w')
 
-        self.delay_entry = Entry(self.scurve_frame, width=5)
+        self.delay_entry = Entry(self.scurve_frame, width=5, state=DISABLED)
         self.delay_entry.grid(column=2, row=4, sticky='e')
         self.delay_entry.insert(0, self.delay)
 
@@ -521,7 +521,7 @@ class VFAT3_GUI:
         self.interval_label = Label(self.scurve_frame, text="LV1A interval:")
         self.interval_label.grid(column=1, row=5, sticky='w')
 
-        self.interval_entry = Entry(self.scurve_frame, width=5)
+        self.interval_entry = Entry(self.scurve_frame, width=5, state=DISABLED)
         self.interval_entry.grid(column=2, row=5, sticky='e')
         self.interval_entry.insert(0, self.interval)
 
@@ -531,7 +531,7 @@ class VFAT3_GUI:
         self.pulsestretch_label = Label(self.scurve_frame, text="Pulse stretch:")
         self.pulsestretch_label.grid(column=1, row=6, sticky='w')
 
-        self.pulsestretch_entry = Entry(self.scurve_frame, width=5)
+        self.pulsestretch_entry = Entry(self.scurve_frame, width=5, state=DISABLED)
         self.pulsestretch_entry.grid(column=2, row=6, sticky='e')
         self.pulsestretch_entry.insert(0, self.pulsestretch)
 
@@ -541,7 +541,7 @@ class VFAT3_GUI:
         self.latency_label = Label(self.scurve_frame, text="Latency:")
         self.latency_label.grid(column=1, row=7, sticky='w')
 
-        self.latency_entry = Entry(self.scurve_frame, width=5)
+        self.latency_entry = Entry(self.scurve_frame, width=5, state=DISABLED)
         self.latency_entry.grid(column=2, row=7, sticky='e')
         self.latency_entry.insert(0, self.latency)
 
@@ -551,7 +551,7 @@ class VFAT3_GUI:
         self.calphi_label = Label(self.scurve_frame, text="Cal Phi:")
         self.calphi_label.grid(column=1, row=8, sticky='w')
 
-        self.calphi_entry = Entry(self.scurve_frame, width=5)
+        self.calphi_entry = Entry(self.scurve_frame, width=5, state=DISABLED)
         self.calphi_entry.grid(column=2, row=8, sticky='e')
         self.calphi_entry.insert(0, self.calphi)
 

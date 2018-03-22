@@ -77,6 +77,9 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     else:
         start = time.time()
 
+        obj.register[135].ARM_DAC[0] = arm_dac
+        obj.write_register(135)
+
         # Set channels and Cal dac range.
         start_ch = ch[0]
         stop_ch = ch[1]
