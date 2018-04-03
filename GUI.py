@@ -146,6 +146,9 @@ class VFAT3_GUI:
         self.misc_frame = ttk.Frame(self.nb)
         self.misc_frame.grid()
 
+        self.new_frame = ttk.Frame(self.nb)
+        self.new_frame.grid()
+        #self.new_frame.grid_propagate(False)
 
         # #########FCC TAB################################
         self.label = Label(self.FCC_frame, text="Send Fast Control Commands (FCC)")
@@ -283,7 +286,7 @@ class VFAT3_GUI:
         self.close_button = Button(self.misc_frame, text="Read int. ADCs", command=lambda: self.read_adcs(), width=bwidth)
         self.close_button.grid(column=1, row=4, sticky='e')
 
-        self.cal_button = Button(self.misc_frame, text="Read ext. ADC", command=lambda: self.ext_adc(), width=bwidth, state=DISABLED)
+        self.cal_button = Button(self.misc_frame, text="Read ext. ADC", command=lambda: self.ext_adc(), width=bwidth)
         self.cal_button.grid(column=1, row=5, sticky='e')
 
         self.CalPulse_LV1A_button = Button(self.misc_frame, text="CalPulse+LV1A", command=self.send_cal_trigger, width=bwidth, state=DISABLED)
@@ -305,10 +308,166 @@ class VFAT3_GUI:
         self.cont_trig_button = Button(self.misc_frame, text="Charge distribution", command=lambda: charge_distribution_on_neighbouring_ch(self), width=bwidth, state=DISABLED)
         self.cont_trig_button.grid(column=1, row=16, sticky='e')
 
+        # ###############NEW TAB #######################################
+
+        ########### INFO BORDER ###########
+        self.info_border_frame = LabelFrame(self.new_frame, text='Chip Information', width=250, height=100)
+        self.info_border_frame.grid(sticky='w')
+        self.info_border_frame.grid_propagate(False)
+
+        self.hw_id_id_label = Label(self.info_border_frame, text="HW_ID_ID:")
+        self.hw_id_id_label.grid(column=1, row=1, sticky='e')
+        self.hw_id_id_label0 = Label(self.info_border_frame, text="n/a", width=10)
+        self.hw_id_id_label0.grid(column=2, row=1, sticky='w')
+        self.hw_id_ver_label = Label(self.info_border_frame, text="HW_ID_VER:")
+        self.hw_id_ver_label.grid(column=1, row=2, sticky='e')
+        self.hw_id_ver_label0 = Label(self.info_border_frame, text="n/a", width=10)
+        self.hw_id_ver_label0.grid(column=2, row=2, sticky='w')
+        self.chip_id_label = Label(self.info_border_frame, text="CHIP ID:")
+        self.chip_id_label.grid(column=1, row=3, sticky='e')
+        self.chip_id_label0 = Label(self.info_border_frame, text="n/a", width=10)
+        self.chip_id_label0.grid(column=2, row=3, sticky='w')
+        self.fpga_sync_button = Button(self.info_border_frame, text="Sync FPGA", command=lambda: self.sync_fpga(), width=bwidth)
+        self.fpga_sync_button.grid(column=1, row=4, sticky='e')
+
+
+        ########### RUN MODE ###########
+        self.run_frame = LabelFrame(self.new_frame, text='RUN mode', width=250, height=50)
+        self.run_frame.grid(sticky='w')
+        self.run_frame.grid_propagate(False)
+
+        self.run_label = Label(self.run_frame, text="Status:")
+        self.run_label.grid(column=0, row=0, sticky='e')
+        self.run_status_label = Label(self.run_frame, width=6, bg="red")
+        self.run_status_label.grid(column=1, row=0, sticky='w')
+
+        self.run_button = Button(self.run_frame, text="Change", command=lambda: self.toggle_run_bit())
+        self.run_button.grid(row=0, column=6, sticky='e')
+
+
+        ########### CHANNELS ################
+
+        self.ch_border_frame = LabelFrame(self.new_frame, text='Channels', width=250, height=100)
+        self.ch_border_frame.grid(sticky='w')
+        self.ch_border_frame.grid_propagate(False)
+
+        self.channel_label = Label(self.ch_border_frame, text="Channel:")
+        self.channel_label.grid(column=0, row=0, sticky='e')
+
+        self.channel_entry = Entry(self.ch_border_frame, width=3)
+        self.channel_entry.grid(column=1, row=0, sticky='e')
+        self.channel_entry.insert(0, self.channel_register)
+
+        self.channel_button = Button(self.ch_border_frame, text="Change ch.", command=self.new_change_channel)
+        self.channel_button.grid(column=2, row=0, sticky='e')
+
+        self.apply_button = Button(self.ch_border_frame, text="Apply", command=self.new_change_channel)
+        self.apply_button.grid(column=3, row=0, sticky='e')
+
+        cal_button = Checkbutton(self.ch_border_frame, text="cal")
+        cal_button.grid(column=0, row=1, sticky='w')
+
+        mask_button = Checkbutton(self.ch_border_frame, text="mask")
+        mask_button.grid(column=0, row=2, sticky='w')
+
+        self.zcc_label = Label(self.ch_border_frame, text="zcc_dac:")
+        self.zcc_label.grid(column=2, row=1, sticky='e')
+
+        self.zcc_entry = Entry(self.ch_border_frame, width=3)
+        self.zcc_entry.grid(column=3, row=1, sticky='w')
+        #self.data_dir_entry.insert(0, self.data_folder)
+
+        self.arm_label = Label(self.ch_border_frame, text="arm_dac:")
+        self.arm_label.grid(column=2, row=2, sticky='e')
+
+        self.arm_entry = Entry(self.ch_border_frame, width=3)
+        self.arm_entry.grid(column=3, row=2, sticky='w')
+        #self.data_dir_entry.insert(0, self.data_folder)
+
+        ########### SYNC BORDER ###########
+        self.sync_border_frame = LabelFrame(self.new_frame, text='Synchronization', width=250, height= 100)
+        self.sync_border_frame.grid(sticky='w')
+        self.sync_border_frame.grid_propagate(False)
+
+        self.sync_button = Button(self.sync_border_frame, text="Sync", command=lambda: self.send_sync(), width=bwidth)
+        self.sync_button.grid(column=1, row=1, sticky='e')
+        self.sync_label = Label(self.sync_border_frame, text="n/a", width=11)
+        self.sync_label.grid(column=2, row=1, sticky='e')
+
+        self.sync_check_button = Button(self.sync_border_frame, text="Sync check", command=lambda: self.send_sync_verif(), width=bwidth)
+        self.sync_check_button.grid(column=1, row=2, sticky='e')
+        self.sync_check_label = Label(self.sync_border_frame, text="n/a", width=11)
+        self.sync_check_label.grid(column=2, row=2, sticky='e')
+
+        ########### ADC BORDER ###########
+        self.adc_border_frame = LabelFrame(self.new_frame, text='ADCs', width=250, height=100)
+        self.adc_border_frame.grid(sticky='w')
+        self.adc_border_frame.grid_propagate(False)
+
+        self.sync_button = Button(self.adc_border_frame, text="Read ADCs", command=lambda: self.read_adcs(), width=bwidth)
+        self.sync_button.grid(column=1, row=0, sticky='w', columnspan=6)
+
+        self.ext_adc_label = Label(self.adc_border_frame, text="ext ADC:")
+        self.ext_adc_label.grid(column=1, row=1, sticky='e')
+        self.ext_adc_label0 = Label(self.adc_border_frame, text="n/a", width=10)
+        self.ext_adc_label0.grid(column=2, row=1, sticky='w')
+
+        self.adc0_label = Label(self.adc_border_frame, text="ADC0:")
+        self.adc0_label.grid(column=1, row=2, sticky='e')
+        self.adc0_label0 = Label(self.adc_border_frame, text="n/a", width=10)
+        self.adc0_label0.grid(column=2, row=2, sticky='w')
+
+        self.adc1_label = Label(self.adc_border_frame, text="ADC1:")
+        self.adc1_label.grid(column=1, row=3, sticky='e')
+        self.adc1_label0 = Label(self.adc_border_frame, text="n/a", width=10)
+        self.adc1_label0.grid(column=2, row=3, sticky='w')
+
+        ########### FRONT END BORDER ###########
+        self.fe_border_frame = LabelFrame(self.new_frame, text='Front End Biasing', width=250, height=75)
+        self.fe_border_frame.grid(sticky='w')
+        self.fe_border_frame.grid_propagate(False)
+
+        self.vfat3a_button = Button(self.fe_border_frame, text="VFAT3a nominal values", command=lambda: self.send_sync(), width=bwidth)
+        self.vfat3a_button.grid(column=1, row=1, sticky='e')
+
+        self.vfat3b_button = Button(self.fe_border_frame, text="VFAT3b nominal values", command=lambda: self.send_sync_verif(), width=bwidth)
+        self.vfat3b_button.grid(column=1, row=2, sticky='e')
+
+        ########### CALIBRATION BORDER ###########
+        self.calibration_border_frame = LabelFrame(self.new_frame, text='Calibration', width=250, height=120)
+        self.calibration_border_frame.grid(sticky='w')
+        self.calibration_border_frame.grid_propagate(False)
+
+        self.run_calib_button = Button(self.calibration_border_frame, text="Run", command=lambda: self.run_full_calibration())
+        self.run_calib_button.grid(column=1, row=0, sticky='e')
+        self.load_calib_button = Button(self.calibration_border_frame, text="Load", command=lambda: self.send_sync())
+        self.load_calib_button.grid(column=2, row=0, sticky='e')
+        self.save_calib_button = Button(self.calibration_border_frame, text="Save", command=lambda: self.send_sync())
+        self.save_calib_button.grid(column=3, row=0, sticky='e')
+
+        self.irefc_label = Label(self.calibration_border_frame, text="Iref:")
+        self.irefc_label.grid(column=1, row=1, sticky='e')
+        self.irefc_label0 = Label(self.calibration_border_frame, text="n/a", width=4)
+        self.irefc_label0.grid(column=2, row=1, sticky='w')
+        self.adc0c_label = Label(self.calibration_border_frame, text="ADC0:")
+        self.adc0c_label.grid(column=1, row=2, sticky='e')
+        self.adc0c_label0 = Label(self.calibration_border_frame, text="n/a", width=12)
+        self.adc0c_label0.grid(column=2, row=2, sticky='w')
+        self.adc1c_label = Label(self.calibration_border_frame, text="ADC1:")
+        self.adc1c_label.grid(column=1, row=3, sticky='e')
+        self.adc1c_label0 = Label(self.calibration_border_frame, text="n/a", width=12)
+        self.adc1c_label0.grid(column=2, row=3, sticky='w')
+        self.cal_dacc_label = Label(self.calibration_border_frame, text="CAL_DAC:")
+        self.cal_dacc_label.grid(column=1, row=4, sticky='e')
+        self.cal_dacc_label0 = Label(self.calibration_border_frame, text="n/a", width=12)
+        self.cal_dacc_label0.grid(column=2, row=4, sticky='w')
+
+
         # ADD TABS
         self.nb.add(self.FCC_frame, text="FCC")
         self.nb.add(self.register_frame, text="Registers")
         self.nb.add(self.misc_frame, text="misc.")
+        self.nb.add(self.new_frame, text="new")
 
         self.nb.grid_forget()
 
@@ -348,7 +507,7 @@ class VFAT3_GUI:
                 "CAL_DAC scan",
                 ]
 
-        self.scan_options_value = [164, 163, 140, 138, 139, 132, 130, 131, 162, 133, 134, 135, 137, 136, 161]
+        self.scan_options_value = [36, 35, 12, 10, 11, 4, 2, 3, 34, 5, 6, 7, 9, 8, 33]
         self.dac_sizes = [8, 8, 6, 6, 6, 6, 8, 6, 8, 8, 8, 8, 6, 8, 8]
 
 
@@ -419,6 +578,9 @@ class VFAT3_GUI:
 
 
         # ###############Routines-TAB #######################################
+
+        self.hist_button = Button(self.routines_frame, text="Channel histogram", command=lambda: channel_histogram(self), width=bwidth)
+        self.hist_button.grid(column=1, row=6, sticky='e')
 
         self.Trig1_set_button = Button(self.routines_frame, text="Set s-bit pattern", command=lambda: set_up_trigger_pattern(self, 0), width=bwidth, state=DISABLED)
         self.Trig1_set_button.grid(column=1, row=7, sticky='e')
@@ -870,8 +1032,9 @@ class VFAT3_GUI:
 
     def read_register(self, reg, save_value='yes'):
         new_data = self.interfaceFW.read_register(reg)
-        if save_value == 'yes':
-            self.register[reg].change_values(''.join(str(e) for e in new_data[16:]))
+        if new_data != 'Error':
+            if save_value == 'yes':
+                self.register[reg].change_values(''.join(str(e) for e in new_data[16:]))
         return new_data
 
     def add_to_interactive_screen(self, text):
@@ -1072,16 +1235,19 @@ class VFAT3_GUI:
             counter += 1
         return error
 
-    def ext_adc(self, verbose='yes'):
+    def read_ext_adc(self, verbose='yes'):
         if verbose == 'yes':
             text = "->Reading the verification board external ADC.\n"
             self.add_to_interactive_screen(text)
-        value = self.interfaceFW.ext_adc()
+        value = self.interfaceFW.read_ext_adc()
+        value_hex = "%s%s" % (value[1], value[0][2:])
+        value_int = int(value_hex, 16)
+        print value_int
+        value_mv = value_int * 0.0625
         if verbose == 'yes':
-            s_value = str(value)
-            text = "Value: %s mV\n" % s_value
+            text = "EXT ADC: %d\t %f mV\n" % (value_int, value_mv)
             self.add_to_interactive_screen(text)
-        return value
+        return [value_int, value_mv]
 
     def test_ext_adc(self):
         error = 0
@@ -1104,15 +1270,21 @@ class VFAT3_GUI:
             if verbose == 'yes':
                 text = "Error in sync\n"
                 self.add_to_interactive_screen(text)
+                self.sync_label.config(text="Error")
+                self.sync_label.config(bg="red")
         elif output[0] == '0x3a':
             result = 1
             if verbose == 'yes':
                 text = "Sync ok.\n"
                 self.add_to_interactive_screen(text)
+                self.sync_label.config(text="ok")
+                self.sync_label.config(bg="green")
         else:
             if verbose == 'yes':
                 text = "Sync fail.\n"
                 self.add_to_interactive_screen(text)
+                self.sync_label.config(text="Fail")
+                self.sync_label.config(bg="red")
         return result
 
     def send_sync_verif(self, verbose='yes'):
@@ -1125,15 +1297,21 @@ class VFAT3_GUI:
             if verbose == 'yes':
                 text = "Error in sync\n"
                 self.add_to_interactive_screen(text)
+                self.sync_check_label.config(text="Error")
+                self.sync_check_label.config(bg="red")
         elif output[0] == '0xfe':
             result = 1
             if verbose == 'yes':
                 text = "Sync verification ok.\n"
                 self.add_to_interactive_screen(text)
+                self.sync_check_label.config(text="ok")
+                self.sync_check_label.config(bg="green")
         else:
             if verbose == 'yes':
                 text = "Sync verification fail.\n"
                 self.add_to_interactive_screen(text)
+                self.sync_check_label.config(text="Fail")
+                self.sync_check_label.config(bg="red")
         return result
 
     def adjust_iref(self, verbose='yes'):
@@ -1146,8 +1324,9 @@ class VFAT3_GUI:
         if output[0] != '00':
             result = 1
             if verbose == 'yes':
-                text = "Iref adjusted to value %s.\n" % output[0]
+                text = "Iref adjusted to value %s.\n" % int(output[0], 16)
                 self.add_to_interactive_screen(text)
+        self.register[134].Iref[0] = int(output[0], 16)
         stop = time.time()
         run_time = (stop - start)
         print "iref routine time: %f sec\n" % run_time
@@ -1162,15 +1341,69 @@ class VFAT3_GUI:
         else:
             start = time.time()
             print "Starting ADC calibration."
-            output = self.interfaceFW.int_adc_calibration()
+            output = self.interfaceFW.int_adc_calibration(0, 1, 255)
+            ext_adc_values = []
+            adc0_values = []
+            adc1_values = []
+            cal_dac_values = []
+            adc_flag = 0
+            for value in output:
+                print value
+                if adc_flag == 0:
+                    value_lsb = value[2:]
+                    if len(value_lsb) == 1:
+                        value_lsb = "0" + value_lsb
+                    adc_flag = 1
+                elif adc_flag == 1:
+                    ivalue = value + value_lsb
+                    ivalue_dec = int(ivalue, 16)
+                    print "DAC: %f" % ivalue_dec
+                    cal_dac_values.append(ivalue_dec)
+                    ivalue = ""
+                    adc_flag = 2
+                elif adc_flag == 2:
+                    value_lsb = value[2:]
+                    if len(value_lsb) == 1:
+                        value_lsb = "0"+value_lsb
+                    adc_flag = 3
+                elif adc_flag == 3:
+                    ivalue = value + value_lsb
+                    ivalue_dec = float(int(ivalue, 16))
+                    ivalue_mv = ivalue_dec * 0.0625
+                    print "ext ADC: %f" % ivalue_mv
+                    ext_adc_values.append(ivalue_mv)
+                    ivalue = ""
+                    adc_flag = 4
+                elif adc_flag == 4:
+                    value_lsb = value[2:]
+                    if len(value_lsb) == 1:
+                        value_lsb = "0"+value_lsb
+                    adc_flag = 5
+                elif adc_flag == 5:
+                    ivalue = value + value_lsb
+                    ivalue_dec = float(int(ivalue, 16))
+                    print "ADC0: %f" % ivalue_dec
+                    adc0_values.append(ivalue_dec)
+                    ivalue = ""
+                    adc_flag = 6
+                elif adc_flag == 6:
+                    value_lsb = value[2:]
+                    if len(value_lsb) == 1:
+                        value_lsb = "0"+value_lsb
+                    adc_flag = 7
+                elif adc_flag == 7:
+                    ivalue = value + value_lsb
+                    ivalue_dec = float(int(ivalue, 16))
+                    print "ADC1: %f" % ivalue_dec
+                    adc1_values.append(ivalue_dec)
+                    ivalue = ""
+                    adc_flag = 0
+
             stop = time.time()
             run_time = (stop - start)
             text = "\nScan duration: %f sec\n" % run_time
             self.add_to_interactive_screen(text)
-            ext_adc_values = output[0]
-            int_adc0_values = output[1]
-            int_adc1_values = output[2]
-            adc_values = calc_adc_conversion_constants(self, ext_adc_values, int_adc0_values, int_adc1_values,
+            adc_values = calc_adc_conversion_constants(self, ext_adc_values, adc0_values, adc1_values, cal_dac_values,
                                                        production)
             self.adc0M = adc_values[0]
             self.adc0B = adc_values[1]
@@ -1220,11 +1453,9 @@ class VFAT3_GUI:
             error = 1
         else:
             start = time.time()
-            cal_dac_values = range(dac_start, dac_stop + 1, step)
-            cal_dac_values.reverse()
+            cal_dac_values = []
             output = self.interfaceFW.cal_dac_calibration(start=dac_start, stop=dac_stop, step=step)
             base_value_hex = "%s%s" % (output[1], output[0][2:])
-            print base_value_hex
             base_value_int = int(base_value_hex, 16)
             base_value_mv = base_value_int * 0.0625
             ext_adc_values = []
@@ -1236,17 +1467,25 @@ class VFAT3_GUI:
                     if len(value_lsb) == 1:
                         value_lsb = "0"+value_lsb
                     flag = 1
-                else:
+                elif flag == 1:
                     ivalue = value+value_lsb
                     ivalue_dec = int(ivalue, 16)
-                    print ""
-                    print ivalue
-                    print ivalue_dec
+                    cal_dac_values.append(ivalue_dec)
+                    ivalue = ""
+                    flag = 2
+                elif flag == 2:
+                    value_lsb = value[2:]
+                    if len(value_lsb) == 1:
+                        value_lsb = "0"+value_lsb
+                    flag = 3
+                elif flag == 3:
+                    ivalue = value+value_lsb
+                    ivalue_dec = int(ivalue, 16)
                     ivalue_mv = ivalue_dec * 0.0625
-                    print ivalue_mv
                     ext_adc_values.append(ivalue_mv)
                     ivalue = ""
                     flag = 0
+            cal_dac_values.reverse()
             output = calc_cal_dac_conversion_factor(self, cal_dac_values, base_value_mv, ext_adc_values, production=production)
             self.cal_dac_fcM = output[0]
             self.cal_dac_fcB = output[1]
@@ -1275,14 +1514,18 @@ class VFAT3_GUI:
     def read_adc0(self):
         addr = 131072  # ADC0 address
         output = self.read_register(addr, save_value='no')
-        int_adc_value = int(''.join(map(str, output)), 2)
-        return int_adc_value
+        #output.reverse()
+        int_adc_value = int(''.join(map(str, output[-16:])), 2)
+        mv_adc_value = self.adc0M * int_adc_value + self.adc0B
+        return [int_adc_value, mv_adc_value]
 
     def read_adc1(self):
         addr = 131073  # ADC1 address
         output = self.read_register(addr, save_value='no')
-        int_adc_value = int(''.join(map(str, output)), 2)
-        return int_adc_value
+        #output.reverse()
+        int_adc_value = int(''.join(map(str, output[-16:])), 2)
+        mv_adc_value = self.adc1M * int_adc_value + self.adc1B
+        return [int_adc_value, mv_adc_value]
 
     def read_adc(self):
         if self.adc0M != 0:
@@ -1300,12 +1543,32 @@ class VFAT3_GUI:
         self.add_to_interactive_screen(text)
 
         adc0_value = self.read_adc0()
-        text = "ADC0: %d\t %f mV\n" % (adc0_value, self.adc0M * adc0_value + self.adc0B)
+        text = "ADC0: %d\t %f mV\n" % (adc0_value[0], adc0_value[1])
         self.add_to_interactive_screen(text)
+        self.adc0_label0.config(text="%.4f mV" % adc0_value[1])
 
         adc1_value = self.read_adc1()
-        text = "ADC1: %d\t %f mV\n" % (adc1_value, self.adc1M * adc1_value + self.adc1B)
+        text = "ADC1: %d\t %f mV\n" % (adc1_value[0], adc1_value[1])
         self.add_to_interactive_screen(text)
+        self.adc1_label0.config(text="%.4f mV" % adc1_value[1])
+
+        ext_adc_value = self.read_ext_adc(verbose='no')
+        text = "EXT ADC: %d\t %f mV\n" % (ext_adc_value[0], ext_adc_value[1])
+        self.add_to_interactive_screen(text)
+        self.ext_adc_label0.config(text="%.4f mV" % ext_adc_value[1])
+
+    def sync_fpga(self):
+        self.send_reset()
+        output = self.read_register(0x10000, save_value='no')
+        value = int(''.join(map(str, output)), 2)
+        self.hw_id_id_label0.config(text="%x" % value)
+        output = self.read_register(0x10001, save_value='no')
+        value = int(''.join(map(str, output)), 2)
+        self.hw_id_ver_label0.config(text="%x" % value)
+        output = self.read_register(0x10003, save_value='no')
+        value = int(''.join(map(str, output)), 2)
+        self.chip_id_label0.config(text="%x" % value)
+        self.toggle_run_bit(change_value="no")
 
     def send_cal_trigger(self):
         latency = int(self.scurve_entry.get())
@@ -1317,9 +1580,36 @@ class VFAT3_GUI:
         CalPulse_encoded = FCC_LUT["CalPulse"]
         LV1A_encoded = FCC_LUT["LV1A"]
 
-        write_instruction(self.interactive_output_file,1, CalPulse_encoded, 1)
-        write_instruction(self.interactive_output_file,latency, LV1A_encoded, 0)
+        write_instruction(self.interactive_output_file, 1, CalPulse_encoded, 1)
+        write_instruction(self.interactive_output_file, latency, LV1A_encoded, 0)
         self.execute(verbose="yes")
+
+    def toggle_run_bit(self, change_value="yes"):
+        output = self.read_register(0xffff)
+        if output[0] == "Error":
+            self.run_status_label.config(text="ERROR")
+            self.run_status_label.config(bg="red")
+        else:
+            if self.register[0xffff].RUN[0] == 0:
+                if change_value == "yes":
+                    self.register[0xffff].RUN[0] = 1
+                    self.write_register(0xffff)
+                    self.run_status_label.config(text="RUN")
+                    self.run_status_label.config(bg="green")
+                else:
+                    self.run_status_label.config(text="SLEEP")
+                    self.run_status_label.config(bg="blue")
+            elif self.register[0xffff].RUN[0] == 1:
+                if change_value == "yes":
+                    self.register[0xffff].RUN[0] = 0
+                    self.write_register(0xffff)
+                    self.run_status_label.config(text="SLEEP")
+                    self.run_status_label.config(bg="blue")
+                else:
+                    self.run_status_label.config(text="RUN")
+                    self.run_status_label.config(bg="green")
+            else:
+                print "Error"
 
     def run_scurve(self, production="no"):
         if production == "no":
@@ -1514,6 +1804,24 @@ class VFAT3_GUI:
 
 # ################# SCAN/TEST -FUNCTIONS #############################
 
+
+    def run_full_calibration(self):
+        start = time.time()
+
+        self.adjust_iref()
+        self.adc_calibration(production="no")
+        self.scan_cal_dac_fc(production="no")
+
+        stop = time.time()
+        duration = (stop - start)
+
+        self.irefc_label0.config(text="%i" % self.register[134].Iref[0])
+        self.adc0c_label0.config(text="%0.2f %0.1f" % (self.adc0M, self.adc0B))
+        self.adc1c_label0.config(text="%0.2f %0.1f" % (self.adc1M, self.adc1B))
+        self.cal_dacc_label0.config(text="%0.2f %0.3f" % (self.cal_dac_fcM, self.cal_dac_fcB))
+
+        print "Duration of the full calibration: %f sec" % duration
+
     def write_chip_id(self):
         self.increment_chip_id()
         return 1
@@ -1681,6 +1989,9 @@ class VFAT3_GUI:
                     i = 0
                 i += 1
         return output
+
+
+
 
     def run_all_dac_scans(self, production="no"):
         if production == "no":
@@ -1855,6 +2166,16 @@ class VFAT3_GUI:
             text = "Channel value: %d is out of limits. Channels are 0-128 \n" % chosen_register
             self.add_to_interactive_screen(text)
         self.update_registers("Channels")
+
+    def new_change_channel(self):
+        chosen_register = int(self.channel_entry.get())
+        if chosen_register >= 0 and chosen_register <= 128:
+            self.channel_register = chosen_register
+        else:
+            text = "Channel value: %d is out of limits. Channels are 0-128 \n" % chosen_register
+            self.add_to_interactive_screen(text)
+        self.channel_entry.delete(0, END)
+        self.channel_entry.insert(0, self.channel_register)
 
     def update_registers(self, value):
         self.value = value

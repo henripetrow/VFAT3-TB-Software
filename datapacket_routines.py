@@ -1,7 +1,7 @@
 from routines import *
 from generator import *
 import time
-
+import numpy as np
 
 def concecutive_triggers(obj, nr_loops=10, save_result="yes"):
     if save_result == "yes":
@@ -478,3 +478,70 @@ def charge_distribution_on_neighbouring_ch(obj, nr_loops=10):
     print run_time
 
 
+def channel_histogram(obj):
+
+    trigger_pattern = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
+
+    for k in range(0, 128):
+        obj.register[k].cal[0] = trigger_pattern[k]
+        obj.write_register(k)
+        time.sleep(0.05)
+
+
+    obj.register[138].CAL_DAC[0] = 100
+    obj.register[138].CAL_MODE[0] = 1
+    obj.write_register(138)
+
+    obj.register[132].SEL_COMP_MODE[0] = 1
+    obj.write_register(132)
+
+    obj.register[135].ZCC_DAC[0] = 10
+    obj.register[135].ARM_DAC[0] = 150
+    obj.write_register(135)
+
+    obj.register[139].CAL_FS[0] = 1
+    obj.register[139].CAL_DUR[0] = 100
+    obj.write_register(139)
+
+    obj.register[65535].RUN[0] = 1
+    obj.write_register(65535)
+
+    obj.register[129].ST[0] = 1
+    obj.register[129].PS[0] = 0
+    obj.write_register(129)
+
+    obj.send_fcc("RunMode")
+    lv1a = FCC_LUT["LV1A"]
+    calpulse = FCC_LUT["CalPulse"]
+
+    command_encoded = [calpulse]
+    output = obj.interfaceFW.send_fcc(command_encoded)
+    data_packet = []
+    hit_map = [0]*128
+    for k in range(0, 100):
+        if output[0] == '0x1e':
+            i = 0
+            for byte in output:
+                if i == 4:
+                    data_bit = dec_to_bin_with_stuffing(int(byte, 16), 8)
+                    data_packet.extend(data_bit)
+                    #print ''.join(str(e) for e in data_bit)
+                    i = 0
+                i += 1
+            data = data_packet[24:152]
+            hit_map = np.add(hit_map, data)
+        else:
+            print "No data received."
+            break
+
+    print hit_map
+
+    return output
+    self.send_fcc("SCOnly")

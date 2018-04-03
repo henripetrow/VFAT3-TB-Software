@@ -65,8 +65,8 @@ def find_threshold(obj):
 
 
 def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes",
-                          dac_range=[215, 235], delay=50, bc_between_calpulses=2000, pulsestretch=3, latency=45,
-                          cal_phi=0, folder="scurve"):
+                          dac_range=[220, 240], delay=50, bc_between_calpulses=2000, pulsestretch=3, latency=45,
+                          cal_phi=0, folder="scurve", triggers=100):
     mean_th_fc = "n"
     all_ch_data = "n"
     noisy_channels = "n"
@@ -77,9 +77,6 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     else:
         start = time.time()
 
-        obj.register[135].ARM_DAC[0] = arm_dac
-        obj.write_register(135)
-
         # Set channels and Cal dac range.
         start_ch = ch[0]
         stop_ch = ch[1]
@@ -89,7 +86,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         samples_per_dac_value = 100
 
         # Create list of cal dac values.
-        cal_dac_values = range(start_dac_value, stop_dac_value)
+        cal_dac_values = range(start_dac_value, stop_dac_value+1)
         cal_dac_values.reverse()
         cal_dac_values[:] = [255 - x for x in cal_dac_values]
         cal_dac_values[:] = [obj.cal_dac_fcM * x + obj.cal_dac_fcB for x in cal_dac_values]
@@ -98,7 +95,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         channels = range(start_ch, stop_ch+1)
 
         # Launch S-curve routine in firmware.
-        scurve_data = obj.interfaceFW.run_scurve(start_ch, stop_ch, start_dac_value, stop_dac_value)
+        scurve_data = obj.interfaceFW.run_scurve(start_ch, stop_ch, start_dac_value, stop_dac_value, triggers=200, arm_dac=arm_dac)
 
         # Plot the s-curve data.
         if configuration == "yes":
@@ -113,8 +110,10 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
                     print "Unable to create directory"
             obj.add_to_interactive_screen(text)
             fig = plt.figure()
-            for i in range(2, len(all_ch_data)):
-                plt.plot(cal_dac_values, all_ch_data[i][1:])
+            print scurve_data
+            print cal_dac_values
+            for i in range(2, len(scurve_data)):
+                plt.plot(cal_dac_values, scurve_data[i])
             plt.grid(True)
             plt.ylabel('[%]')
             plt.xlabel('Charge [fC]')
@@ -182,7 +181,6 @@ def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
         txtOutF = open('%s/%s/scurveFits%s.dat' % (obj.data_folder, folder, timestamp), 'w')
         txtOutF.write('CH/I:thr/D:enc/D\n')
     noisy_channels = []
-    # print 'Fitting Scurves'
     for ch in Nhits_h:
         scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch], Nev_h[ch])
         scurves_ag[ch].SetName('scurve%i_ag' % ch)
@@ -278,6 +276,7 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
         reg_values = []
         scan_values0 = []
         scan_values1 = []
+        dac_values = []
         scan_values0_adccount = []
         scan_values1_adccount = []
         modified = scan_name.replace(" ", "_")
@@ -301,7 +300,7 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
                 elif adc_flag == 1:
                     ivalue = value + value_lsb
                     ivalue_dec = int(ivalue, 16)
-                    int_adc0_values.append(ivalue_dec)
+                    dac_values.append(ivalue_dec)
                     ivalue = ""
                     adc_flag = 2
                 elif adc_flag == 2:
@@ -312,10 +311,20 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
                 elif adc_flag == 3:
                     ivalue = value + value_lsb
                     ivalue_dec = int(ivalue, 16)
-                    int_adc1_values.append(ivalue_dec)
+                    int_adc0_values.append(obj.adc0M * ivalue_dec + obj.adc0B)
+                    ivalue = ""
+                    adc_flag = 4
+                elif adc_flag == 4:
+                    value_lsb = value[2:]
+                    if len(value_lsb) == 1:
+                        value_lsb = "0"+value_lsb
+                    adc_flag = 5
+                elif adc_flag == 5:
+                    ivalue = value + value_lsb
+                    ivalue_dec = int(ivalue, 16)
+                    int_adc1_values.append(obj.adc1M * ivalue_dec + obj.adc1B)
                     ivalue = ""
                     adc_flag = 0
-
         # Save the results.
         if obj.database:
             obj.database.save_dac_data(modified[:-5], "ADC0", int_adc0_values)
@@ -323,21 +332,21 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
 
         data = [reg_values, scan_values0, scan_values1]
         timestamp = time.strftime("%Y%m%d%H%M")
-        # filename = "%s/dac_scans/%s_%s_scan_data.dat" % (obj.data_folder, timestamp, modified)
-        # if not os.path.exists(os.path.dirname(filename)):
-        #     try:
-        #         os.makedirs(os.path.dirname(filename))
-        #     except OSError as exc:  # Guard against race condition
-        #         print "Unable to create directory"
-        # text = "Results were saved to the folder:\n %s \n" % filename
-        # obj.add_to_interactive_screen(text)
-        #
-        # outF = open(filename, "w")
-        # outF.write("regVal/I:ADC0/I:ADC1/I\n")
-        # for i, regVal in enumerate(reg_values):
-        #     outF.write('%i\t%i\t%i\n' % (regVal, scan_values0[i], scan_values1[i]))
-        #     pass
-        # outF.close()
+        filename = "%s/dac_scans/%s_%s_scan_data.dat" % (obj.data_folder, timestamp, modified)
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError as exc:  # Guard against race condition
+                print "Unable to create directory"
+        text = "Results were saved to the folder:\n %s \n" % filename
+        obj.add_to_interactive_screen(text)
+
+        outF = open(filename, "w")
+        outF.write("regVal/I:ADC0/I:ADC1/I\n")
+        for i, regVal in enumerate(reg_values):
+            outF.write('%i\t%i\t%i\n' % (regVal, scan_values0[i], scan_values1[i]))
+            pass
+        outF.close()
 
         filename = "%s/dac_scans/%s_%s_scan.png" % (obj.data_folder, timestamp, modified)
         if not os.path.exists(os.path.dirname(filename)):
@@ -346,12 +355,10 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
             except OSError as exc:  # Guard against race condition
                 print "Unable to create directory"
         if plot == 1:
-            nr_points = len(int_adc0_values)
-            x = range(0, nr_points)
             #fig = plt.figure(1)
             plt.clf()
-            plt.plot(x, int_adc0_values, label="ADC0")
-            plt.plot(x, int_adc1_values, label="ADC1")
+            plt.plot(dac_values, int_adc0_values, label="ADC0")
+            plt.plot(dac_values, int_adc1_values, label="ADC1")
             #plt.ylabel('voltage [mV]')
             plt.ylabel('ADC counts')
             plt.xlabel('DAC counts')
@@ -404,7 +411,7 @@ def adjust_local_thresholds(obj):
         # Read the current dac values
         #obj.read_register(k)
         print "Adjusting the channel %d local arm_dac." % k
-        output = scurve_all_ch_execute(obj, "S-curve", arm_dac=100, ch=[k, k], configuration="no")
+        output = scurve_all_ch_execute(obj, "S-curve", arm_dac=100, ch=[k, k], configuration="no", triggers=250)
         threshold = output[0]
         print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac[0])
         previous_diff = abs(mean_threshold - threshold)
@@ -428,7 +435,7 @@ def adjust_local_thresholds(obj):
             obj.register[k].arm_dac[0] += 1
             obj.write_register(k)
 
-            output = scurve_all_ch_execute(obj, "S-curve", arm_dac=100, ch=[k, k], configuration="no")
+            output = scurve_all_ch_execute(obj, "S-curve", arm_dac=100, ch=[k, k], configuration="no", triggers=250)
             threshold = output[0]
             if abs(mean_threshold - threshold) > 5:
                 print "Broken channel."
