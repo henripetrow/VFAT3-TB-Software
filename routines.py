@@ -290,7 +290,7 @@ def scurve_analyze(obj, scurve_data, folder, save="yes"):
             scurves_ag[ch].Write()
         thr_fc = fit_f.GetParameter(0)
         enc_fc = fit_f.GetParameter(1)
-        if enc_fc >= 0.18:      # Limit for noisy channel.
+        if enc_fc >= 0.2:      # Limit for noisy channel.
             noisy_channels.append(ch)
         else:
             # Fill the histograms.
