@@ -123,7 +123,7 @@ class FW_interface:
 
     def cal_dac_calibration(self, start, stop, step):
         message = [0xca, 0x00, 0x07, start, step, stop]
-        output = self.execute_req(message, no_packets=2)
+        output = self.execute_req(message, no_packets=2, timeout=30)
         return output
 
     def run_scurve(self, start_ch, stop_ch, cal_dac_start, cal_dac_stop, arm_dac, triggers=200):

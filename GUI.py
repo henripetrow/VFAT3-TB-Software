@@ -427,10 +427,10 @@ class VFAT3_GUI:
         self.fe_border_frame.grid(sticky='w')
         self.fe_border_frame.grid_propagate(False)
 
-        self.vfat3a_button = Button(self.fe_border_frame, text="VFAT3a nominal values", command=lambda: self.send_sync(), width=bwidth)
+        self.vfat3a_button = Button(self.fe_border_frame, text="VFAT3a nominal values", command=lambda: self.set_fe_nominal_values(chip="VFAT3a"), width=bwidth)
         self.vfat3a_button.grid(column=1, row=1, sticky='e')
 
-        self.vfat3b_button = Button(self.fe_border_frame, text="VFAT3b nominal values", command=lambda: self.send_sync_verif(), width=bwidth)
+        self.vfat3b_button = Button(self.fe_border_frame, text="VFAT3b nominal values", command=lambda: self.set_fe_nominal_values(chip="VFAT3b"), width=bwidth)
         self.vfat3b_button.grid(column=1, row=2, sticky='e')
 
         ########### CALIBRATION BORDER ###########
@@ -637,8 +637,8 @@ class VFAT3_GUI:
         self.latency = 45
         self.calphi = 0
         self.arm_dac = 100
-        self.start_cal_dac = 220
-        self.stop_cal_dac = 240
+        self.start_cal_dac = 215
+        self.stop_cal_dac = 235
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
         self.start_ch_label.grid(column=1, row=1, sticky='w')
@@ -964,7 +964,7 @@ class VFAT3_GUI:
         if multiwrite == 0:
             with open(filename, 'r') as f:
                 for line in f:
-                    time.sleep(0.01)
+                    time.sleep(0.03)
                     line = line.split(",")
                     reg_nr = int(line[0])
                     write_data = line[1]
@@ -1457,7 +1457,8 @@ class VFAT3_GUI:
             output = self.interfaceFW.cal_dac_calibration(start=dac_start, stop=dac_stop, step=step)
             base_value_hex = "%s%s" % (output[1], output[0][2:])
             base_value_int = int(base_value_hex, 16)
-            base_value_mv = base_value_int * 0.0625
+            #base_value_mv = base_value_int * 0.0625
+            base_value_mv = base_value_int * self.adc1M + self.adc1B
             ext_adc_values = []
             ext_adc_values_hex = output[2:]
             flag = 0
@@ -1481,7 +1482,8 @@ class VFAT3_GUI:
                 elif flag == 3:
                     ivalue = value+value_lsb
                     ivalue_dec = int(ivalue, 16)
-                    ivalue_mv = ivalue_dec * 0.0625
+                    #ivalue_mv = ivalue_dec * 0.0625
+                    ivalue_mv = ivalue_dec * self.adc1M + self.adc1B
                     ext_adc_values.append(ivalue_mv)
                     ivalue = ""
                     flag = 0
@@ -1652,7 +1654,11 @@ class VFAT3_GUI:
         if error == 0:
             text = "->Running S-curve\n"
             self.add_to_interactive_screen(text)
-            output = scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel, self.stop_channel], ch_step=self.channel_step, configuration=configuration, dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay, bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch, latency=self.latency, cal_phi=self.calphi)
+            output = scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel,
+                                           self.stop_channel], ch_step=self.channel_step, configuration=configuration,
+                                           dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay,
+                                           bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch,
+                                           latency=self.latency, cal_phi=self.calphi)
             if output[2] != "":
                 prod_error = 'y'
             if output[2] == "n":
@@ -1661,76 +1667,35 @@ class VFAT3_GUI:
             print "Aborting s-curve run."
         return prod_error
 
-    def set_fe_nominal_values(self):
-        register[141].PRE_I_BSF[0] = 13
-        register[141].PRE_I_BIT[0] = 150
-        register[142].PRE_I_BLCC[0] = 25
-        register[142].PRE_VREF[0] = 86
-        register[143].SH_I_BFCAS[0] = 250
-        register[143].SH_I_BDIFF[0] = 150
-        register[144].SD_I_BDIFF[0] = 255
-        register[145].SD_I_BSF[0] = 15
-        register[145].SD_I_BFCAS[0] = 255
+    def set_fe_nominal_values(self, chip="VFAT3b"):
+        if chip == "VFAT3a":
+            print "Setting FE biasing for VFAT3a"
+            register[141].PRE_I_BSF[0] = 13
+            register[141].PRE_I_BIT[0] = 150
+            register[142].PRE_I_BLCC[0] = 25
+            register[142].PRE_VREF[0] = 86
+            register[143].SH_I_BFCAS[0] = 250
+            register[143].SH_I_BDIFF[0] = 150
+            register[144].SD_I_BDIFF[0] = 255
+            register[145].SD_I_BSF[0] = 15
+            register[145].SD_I_BFCAS[0] = 255
+        elif chip == "VFAT3b":
+            print "Setting FE biasing for VFAT3b"
+            register[141].PRE_I_BSF[0] = 13
+            register[141].PRE_I_BIT[0] = 150
+            register[142].PRE_I_BLCC[0] = 25
+            register[142].PRE_VREF[0] = 86
+            register[143].SH_I_BFCAS[0] = 130
+            register[143].SH_I_BDIFF[0] = 80
+            register[144].SD_I_BDIFF[0] = 140
+            register[145].SD_I_BSF[0] = 15
+            register[145].SD_I_BFCAS[0] = 135
 
         self.write_register(141)
         self.write_register(142)
         self.write_register(143)
         self.write_register(144)
         self.write_register(145)
-        # filler_16bits = [0]*16
-        # full_data = []
-        # data = []
-        #
-        # for x in register[141].reg_array:
-        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-        #     data.extend(data_intermediate)
-        # data.reverse()
-        # data.extend(filler_16bits)
-        # print data
-        # full_data.extend(data)
-        #
-        # data = []
-        # for x in register[142].reg_array:
-        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-        #     data.extend(data_intermediate)
-        # data.reverse()
-        # data.extend(filler_16bits)
-        # print data
-        # full_data.extend(data)
-        #
-        # data = []
-        # for x in register[143].reg_array:
-        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-        #     data.extend(data_intermediate)
-        # data.reverse()
-        # data.extend(filler_16bits)
-        # print data
-        # full_data.extend(data)
-        #
-        # data = []
-        # for x in register[144].reg_array:
-        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-        #     data.extend(data_intermediate)
-        # data.reverse()
-        # data.extend(filler_16bits)
-        # print data
-        # full_data.extend(data)
-        #
-        # data = []
-        # for x in register[145].reg_array:
-        #     data_intermediate = dec_to_bin_with_stuffing(x[0], x[1])
-        #     data.extend(data_intermediate)
-        # data.reverse()
-        # data.extend(filler_16bits)
-        # print data
-        # full_data.extend(data)
-        #
-        # output = self.SC_encoder.create_SC_packet(141, full_data, "MULTI_WRITE", 0)
-        # paketti = output[0]
-        # write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
-        # for x in range(1, len(paketti)):
-        #     write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-        # self.execute()
 
     def run_concecutive_triggers(self):
         self.nr_trigger_loops = int(self.cont_trig_entry.get())
@@ -1757,28 +1722,29 @@ class VFAT3_GUI:
         result.append(self.check_short_circuit())
         if result[0] == 0:
             result.append(self.send_reset())
-            result.append(self.test_ext_adc())
-            result.append(self.save_barcode())
-            if result[1] == 0 and result[2] == 0 and result[3] == 0:
+            #result.append(self.test_ext_adc())
+            #result.append(self.save_barcode())
+            if result[1] == 0:
                 print "Sync ok"
                 print "Ext adc ok"
                 #print "Save barcode ok"
-                self.send_idle()
-                print "Send Idle ok."
+                #self.send_idle()
+                #print "Send Idle ok."
                 result.append(self.test_bist())
                 print "Test BIST ok"
                 result.append(self.test_scan_chain())
                 print "Test Scan Chain ok"
-                result.append(self.iref_adjust(self))
+                result.append(self.adjust_iref(self))
                 print "Iref adjustment ok"
                 result.append(self.measure_power('SLEEP'))
-                result.append(self.adc_calibration(self, production="yes"))
-                result.append(self.scan_cal_dac_fc(self, "CAL_DAC scan, fC", production="yes"))
+                result.append(self.adc_calibration(production="yes"))
+                result.append(self.scan_cal_dac_fc(production="yes"))
                 self.save_calibration_values_to_file("s")
                 result.append(self.test_registers(production="yes"))
                 result.append(self.write_chip_id())
-                result.append(concecutive_triggers(self, save_result="no"))
+                #result.append(concecutive_triggers(self, save_result="no"))
                 result.append(self.run_all_dac_scans(production="yes"))
+                self.set_fe_nominal_values(chip="VFAT3a")
                 result.append(self.run_scurve(production="yes"))
                 stop = time.time()
                 duration = (stop - start)/60
@@ -1867,7 +1833,7 @@ class VFAT3_GUI:
                 write_data = line[1]
                 self.register[reg_nr].change_values(write_data)
                 self.write_register(reg_nr)
-                time.sleep(0.01)
+                time.sleep(0.03)
                 read_data = self.read_register(reg_nr)
                 read_data = ''.join(str(e) for e in read_data[16:])
                 if read_data == write_data:
@@ -1989,9 +1955,6 @@ class VFAT3_GUI:
                     i = 0
                 i += 1
         return output
-
-
-
 
     def run_all_dac_scans(self, production="no"):
         if production == "no":
