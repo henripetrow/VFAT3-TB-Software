@@ -1727,6 +1727,7 @@ class VFAT3_GUI:
             if result[1] == 0:
                 print "Sync ok"
                 print "Ext adc ok"
+
                 #print "Save barcode ok"
                 #self.send_idle()
                 #print "Send Idle ok."
