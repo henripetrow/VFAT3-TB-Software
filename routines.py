@@ -87,6 +87,11 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
 
         # Create list of cal dac values.
         cal_dac_values = range(start_dac_value, stop_dac_value+1)
+
+
+        obj.register[131].TP_FE[0] = 7
+        obj.write_register(131)
+
         cal_dac_values.reverse()
         cal_dac_values[:] = [255 - x for x in cal_dac_values]
         cal_dac_values[:] = [obj.cal_dac_fcM * x + obj.cal_dac_fcB for x in cal_dac_values]
