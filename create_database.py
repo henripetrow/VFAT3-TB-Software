@@ -1,17 +1,17 @@
 import pymysql
 
-connection = pymysql.connect(host="localhost", user="root", passwd="root", database="Hybrids_test")
+connection = pymysql.connect(host="localhost", user="VFAT3", passwd="1234", database="Hybrids_test0")
 cursor = connection.cursor()
 
 
 # Create Production -table.
 
-production_table = ["ChipID INT(10)", "Barcode INT(10)", "ADC0M FLOAT(8)", "ADC0B FLOAT(8)", "ADC1M FLOAT(8)",
+production_table = ["ChipID INT(10)", "HW_ID_VER INT", "BUFFER_OFFSET FLOAT", "VREF_ADC INT", "V_BGR FLOAT", "ADC0M FLOAT(8)", "ADC0B FLOAT(8)", "ADC1M FLOAT(8)",
                     "ADC1B FLOAT(8)", "CAL_DACM FLOAT", "CAL_DACB FLOAT", "Iref INT", "Mean_Threshold FLOAT", "Mean_enc FLOAT",
-                    "RegisterTest CHAR(10)", "EC_errors INT", "BC_errors INT", "CRC_errors INT", "Hit_errors INT",
-                    "NoisyChannels TEXT", "BIST BOOLEAN", "ScanChain BOOLEAN", "SLEEP_Power_analog FLOAT",
+                    "RegisterTest INT", "EC_errors INT", "BC_errors INT", "CRC_errors INT", "Hit_errors INT",
+                    "NoisyChannels TEXT", "DeadChannels TEXT", "BIST INT", "ScanChain BOOLEAN", "SLEEP_Power_analog FLOAT",
                     "SLEEP_Power_digital FLOAT", "RUN_Power_analog FLOAT",
-                    "RUN_Power_digital FLOAT", "Threshold TEXT", "enc TEXT"]
+                    "RUN_Power_digital FLOAT", "Threshold TEXT", "enc TEXT", "ADC0_CAL_LUT TEXT", "ADC1_CAL_LUT TEXT", "EXT_ADC_CAL_LUT TEXT", "CAL_DAC_FC TEXT"]
 
 adcs = ["ADC0", "ADC1"]
 dac6bits = ["CFD_DAC_1", "CFD_DAC_2", "HYST_DAC", "PRE_I_BLCC", "PRE_I_BSF", "SD_I_BSF"]
@@ -25,7 +25,7 @@ for adc in adcs:
 
 production_table.extend(dac_table)
 
-production_table_sql = 'CREATE TABLE Test(%s' % production_table[0]
+production_table_sql = 'CREATE TABLE Test0(%s' % production_table[0]
 for i, item in enumerate(production_table):
     if i == 0:
         pass

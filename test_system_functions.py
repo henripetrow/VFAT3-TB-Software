@@ -8,10 +8,10 @@
 def write_instruction(input_file, BCd, command, erase):
     if erase == 1:
         open(input_file, 'w').close() 
-    BCd = dec_to_bin_with_stuffing(BCd-1,12)
+    BCd = dec_to_bin_with_stuffing(BCd-1, 12)
     BCd = ''.join(str(e) for e in BCd)
     with open(input_file, "a") as myfile:
-        myfile.write("%s%s\n" % (BCd,command))
+        myfile.write("%s\n" % command)
 
 
 def write_instruction_list(input_file, instruction_list):
@@ -21,7 +21,7 @@ def write_instruction_list(input_file, instruction_list):
         for i in instruction_list:
             BCd = dec_to_bin_with_stuffing(i[0]-1,12)
             BCd = ''.join(str(e) for e in BCd)
-            myfile.write("%s%s\n" % (BCd,i[1]))
+            myfile.write("%s\n" % (i[1]))
 
 
 def write_register_default_values(value):

@@ -46,7 +46,7 @@ class instruction_object:
     def add_instruction(self, input_file, BCd, command, erase):
         self.instruction_write_list.append([BCd, command])
 
-    def write_register_defaults():
+    def write_register_defaults(self):
         write_register_default_values("SCAN")
 
     def write_to_file(self, write_BCd_as_fillers):
@@ -57,10 +57,10 @@ class instruction_object:
             if write_BCd_as_fillers:
                 for x in range(1, BCd):
                     if idle_flag == 0:     
-                        self.add_instruction(self.output_file, 1, "PPPP", 0)
+                        self.add_instruction(self.output_file, 1, "11111111", 0)
                         idle_flag = 1
                     else:
-                        self.add_instruction(self.output_file, 1, "AAAA", 0)
+                        self.add_instruction(self.output_file, 1, "00000000", 0)
                         idle_flag = 0
 
             # FCC

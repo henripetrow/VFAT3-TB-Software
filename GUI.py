@@ -6,6 +6,7 @@
 import Tkinter, tkFileDialog, Tkconstants
 from Tkinter import *
 import ttk
+import tkMessageBox
 import time
 import sys
 import os
@@ -65,11 +66,12 @@ class VFAT3_GUI:
             self.read_chip_id()
             print "Using Hybrid: %s" % self.chip_id
         # Local variables.
+        self.default_bg_color = master.cget("bg")
         self.database = 0
         self.barcode_id = ""
         self.channel_register = 0
         self.value = ""
-        self.write_BCd_as_fillers = 0
+        self.write_BCd_as_fillers = 1
         self.adc0M = 0.0
         self.adc0B = 0.0
         self.adc1M = 0.0
@@ -97,9 +99,9 @@ class VFAT3_GUI:
         s.configure('My.TFrame', background='white')
         self.master = master
         # self.master.wm_iconbitmap('/home/a0312687/VFAT3-TB-Software/data/LUT_logo.ico')
-        self.master.title("GUI for the VFAT3 test system.")
+        self.master.title("VFAT3 test platform")
         bwidth = 15
-        self.master.minsize(width=680, height=450)
+        self.master.minsize(width=300, height=450)
         self.master.configure(background='white')
 
 
@@ -595,10 +597,10 @@ class VFAT3_GUI:
                                  command=lambda: self.run_production_tests(), width=bwidth)
         self.cal_button.grid(column=1, row=10, sticky='e')
 
-        self.cont_trig_button = Button(self.routines_frame, text="Test data packets", command=lambda: self.run_concecutive_triggers(), width=bwidth, state=DISABLED)
+        self.cont_trig_button = Button(self.routines_frame, text="Test data packets", command=lambda: self.test_data_packets(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=11, sticky='e')
 
-        self.nr_trigger_loops = 25
+        self.nr_trigger_loops = 5
 
         self.cont_trig_entry = Entry(self.routines_frame, width=5)
         self.cont_trig_entry.grid(column=3, row=11, sticky='e')
@@ -626,19 +628,28 @@ class VFAT3_GUI:
         self.cont_trig_button = Button(self.routines_frame, text="Browse", command=lambda: self.ask_directory(), width=5)
         self.cont_trig_button.grid(column=3, row=15, sticky='e', columnspan=2)
 
+        self.cal_button = Button(self.routines_frame, text="Run BIST", command=lambda: self.test_bist(), width=bwidth)
+        self.cal_button.grid(column=1, row=16, sticky='e')
+
+        self.cal_button = Button(self.routines_frame, text="Write Chip ID", command=lambda: self.burn_chip_id(), width=bwidth)
+        self.cal_button.grid(column=1, row=17, sticky='e')
+
+        self.cal_button = Button(self.routines_frame, text="Read HW_ID_VER", command=lambda: self.read_hw_id(), width=bwidth)
+        self.cal_button.grid(column=1, row=18, sticky='e')
+
         # ############### S-curve tab #########################################
 
         self.start_channel = 0
         self.stop_channel = 127
         self.channel_step = 1
-        self.delay = 50
+        self.delay = 5
         self.interval = 2000
         self.pulsestretch = 3
         self.latency = 45
         self.calphi = 0
         self.arm_dac = 100
-        self.start_cal_dac = 215
-        self.stop_cal_dac = 235
+        self.start_cal_dac = 210
+        self.stop_cal_dac = 240
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
         self.start_ch_label.grid(column=1, row=1, sticky='w')
@@ -676,7 +687,7 @@ class VFAT3_GUI:
         self.delay_entry = Entry(self.scurve_frame, width=5)
         self.delay_entry.grid(column=2, row=4, sticky='e')
         self.delay_entry.insert(0, self.delay)
-        self.delay_entry.config(state='disabled')
+        #self.delay_entry.config(state='disabled')
 
         self.delay_label0 = Label(self.scurve_frame, text="0-4000")
         self.delay_label0.grid(column=3, row=4, sticky='w')
@@ -783,12 +794,12 @@ class VFAT3_GUI:
         self.production_button_frame.grid()
         self.production_button_frame.grid_propagate(False)
 
-        self.chip_id_label = Label(self.production_frame, text="Chip ID:")
-        self.chip_id_label.grid()
-        self.chip_id_entry = Entry(self.production_frame, width=20)
-        self.chip_id_entry.grid()
-        self.chip_id_entry.insert(0, self.chip_id)
-        self.chip_id_entry.config(state='disabled')
+        #self.chip_id_label = Label(self.production_frame, text="Chip ID:")
+        #self.chip_id_label.grid()
+        #self.chip_id_entry = Entry(self.production_frame, width=20)
+        #self.chip_id_entry.grid()
+        #self.chip_id_entry.insert(0, self.chip_id)
+        #self.chip_id_entry.config(state='disabled')
 
         self.barcode_label = Label(self.production_frame, text="Barcode ID:")
         self.barcode_label.grid()
@@ -802,11 +813,23 @@ class VFAT3_GUI:
         self.checks_label = Label(self.production_frame, text="\nTests:", width=25)
         self.checks_label.grid()
 
-        tests = ['Check Short Circuit', 'Sync', 'ext ADC check', 'Save Barcode', 'BIST', 'Scan Chain', 'Iref adjustment', 'SLEEP power measurement', 'Internal ADC calibration',
-                 'CAL_DAC conversion', 'Register Test', 'Chip ID write', 'Data packet test', 'Scan of all DACs',
+        self.tests = ['Short Circuit Check',
+                 'BIST',
+                 #'Scan Chain',
+                 'Sync',
+                 #'ext ADC check',
+                 #'Save Barcode',
+                 'Register Test',
+                 'Chip ID write',
+                 'Iref adjustment',
+                 'SLEEP power measurement',
+                 'Internal ADC calibration',
+                 'CAL_DAC conversion',
+                 'Data packet test',
+                 'Scan of all DACs',
                  'All Channel S-curves']
         self.test_label = []
-        for i, test in enumerate(tests):
+        for i, test in enumerate(self.tests):
             self.test_label.append(Label(self.production_frame, text=test, width=25))
             self.test_label[i].grid()
 
@@ -817,21 +840,21 @@ class VFAT3_GUI:
 
         # INTERACTIVE SCREEN
         self.interactive_screen = Text(master, bg="black", fg="white", height=30, width=60)
-        self.interactive_screen.grid(column=1, row=0)
-        self.add_to_interactive_screen("\n")
-        self.add_to_interactive_screen("############################################################\n")
-        self.add_to_interactive_screen(" Welcome to the VFAT3 test system Graphical User Interface. \n")
-        self.add_to_interactive_screen("############################################################\n")
-        self.add_to_interactive_screen("\n")
-        self.scrollbar = Scrollbar(master, command=self.interactive_screen.yview)
-        self.scrollbar.grid(column=2, row=0, sticky='nsew')
-        self.interactive_screen['yscrollcommand'] = self.scrollbar.set
+        #self.interactive_screen.grid(column=1, row=0)
+        #self.add_to_interactive_screen("\n")
+        #self.add_to_interactive_screen("############################################################\n")
+        #self.add_to_interactive_screen(" Welcome to the VFAT3 test system Graphical User Interface. \n")
+        #self.add_to_interactive_screen("############################################################\n")
+        #self.add_to_interactive_screen("\n")
+        #self.scrollbar = Scrollbar(master, command=self.interactive_screen.yview)
+        #self.scrollbar.grid(column=2, row=0, sticky='nsew')
+        #self.interactive_screen['yscrollcommand'] = self.scrollbar.set
 
         # CLOSE- AND CLEAR-BUTTONS
         self.ctrlButtons_frame = ttk.Frame(master)
-        self.ctrlButtons_frame.grid(column=1, sticky='e')
-        self.close_button = Button(self.ctrlButtons_frame, text="Clear", command=self.clear_interactive_screen)
-        self.close_button.grid(column=1, row=0)
+        self.ctrlButtons_frame.grid(column=0, sticky='e')
+        self.clear_button = Button(self.ctrlButtons_frame, text="Clear", command=self.clear_interactive_screen)
+        # self.clear_button.grid(column=1, row=0)
         self.close_button = Button(self.ctrlButtons_frame, text="Close", command=master.quit)
         self.close_button.grid(column=2, row=0)
 
@@ -961,10 +984,11 @@ class VFAT3_GUI:
                 print "Invalid file. Abort."
 
     def load_register_values_from_file_execute(self, filename, multiwrite=0):
+        start = time.time()
         if multiwrite == 0:
             with open(filename, 'r') as f:
                 for line in f:
-                    time.sleep(0.03)
+                    time.sleep(0.015)
                     line = line.split(",")
                     reg_nr = int(line[0])
                     write_data = line[1]
@@ -973,11 +997,13 @@ class VFAT3_GUI:
         else:
             filler_16bits = [0]*16
             full_data = []
-
+            nr_of_registers = 0
+            reg_nr = 0
             with open(filename, 'r') as f:
-                for line in f:
+                for h, line in enumerate(f):
                     line = line.split(",")
                     reg_nr = int(line[0])
+                    #print reg_nr
                     write_data = line[1]
                     self.register[reg_nr].change_values(write_data)
                     data = []
@@ -987,13 +1013,27 @@ class VFAT3_GUI:
                     data.reverse()
                     data.extend(filler_16bits)
                     full_data.extend(data)
+                    nr_of_registers += 1
+                    if nr_of_registers > 30:
+                        output = self.SC_encoder.create_SC_packet(reg_nr, full_data, "MULTI_WRITE", 0, nr_words=nr_of_registers)
+                        paketti = output[0]
+                        write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
+                        for x in range(1, len(paketti)):
+                            write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
+                        self.interfaceFW.send_fcc(0, self.interactive_output_file)
+                        nr_of_registers = 0
+                        full_data = []
+                        reg_nr = h + 1
 
-            output = self.SC_encoder.create_SC_packet(0, full_data, "MULTI_WRITE", 0, nr_words=146)
+            output = self.SC_encoder.create_SC_packet(reg_nr, full_data, "MULTI_WRITE", 0,
+                                                                  nr_words=nr_of_registers)
             paketti = output[0]
             write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[0]], 1)
             for x in range(1, len(paketti)):
                 write_instruction(self.interactive_output_file, 1, FCC_LUT[paketti[x]], 0)
-            self.execute()
+            self.interfaceFW.send_fcc(0, self.interactive_output_file)
+        stop = time.time()
+        print stop-start
 
     def apply_ch_local_adjustments(self):
         filename = "./data/channel_registers.dat"
@@ -1188,12 +1228,14 @@ class VFAT3_GUI:
 
     def check_short_circuit(self):
         error = 0
+        time.sleep(0.8)
         ch1_current = self.tti_if.req_ch1_current()
         ch2_current = self.tti_if.req_ch2_current()
         print ch1_current
         print ch2_current
-        if ch1_current > 0.1 or ch2_current > 0.1:
+        if ch1_current > 0.19 or ch2_current > 0.19:
             text = "Short circuit detected.\n"
+            self.database.save_power(ch1_current, ch2_current, "SLEEP")
             self.add_to_interactive_screen(text)
             error = 1
         return error
@@ -1265,7 +1307,7 @@ class VFAT3_GUI:
         if verbose == 'yes':
             text = "->Sending sync request.\n"
             self.add_to_interactive_screen(text)
-            output = self.interfaceFW.send_fcc(["00010111", "00010111", "00010111"])
+        output = self.interfaceFW.send_fcc(["00010111", "00010111", "00010111"])
         if output[0] == "Error":
             if verbose == 'yes':
                 text = "Error in sync\n"
@@ -1314,18 +1356,22 @@ class VFAT3_GUI:
                 self.sync_check_label.config(bg="red")
         return result
 
-    def adjust_iref(self, verbose='yes'):
-        result = 0
+    def adjust_iref(self, verbose='yes', production='no'):
+        result = 1
         start = time.time()
         if verbose == 'yes':
             text = "->Adjusting Iref.\n"
             self.add_to_interactive_screen(text)
+            print text[:-2]
         output = self.interfaceFW.adjust_iref()
         if output[0] != '00':
-            result = 1
+            result = 0
             if verbose == 'yes':
                 text = "Iref adjusted to value %s.\n" % int(output[0], 16)
                 self.add_to_interactive_screen(text)
+                print text[:-2]
+                if production == "yes":
+                    self.database.save_iref(int(output[0], 16))
         self.register[134].Iref[0] = int(output[0], 16)
         stop = time.time()
         run_time = (stop - start)
@@ -1342,13 +1388,14 @@ class VFAT3_GUI:
             start = time.time()
             print "Starting ADC calibration."
             output = self.interfaceFW.int_adc_calibration(0, 1, 255)
+            #print output
             ext_adc_values = []
             adc0_values = []
             adc1_values = []
             cal_dac_values = []
             adc_flag = 0
             for value in output:
-                print value
+                #print value
                 if adc_flag == 0:
                     value_lsb = value[2:]
                     if len(value_lsb) == 1:
@@ -1357,7 +1404,7 @@ class VFAT3_GUI:
                 elif adc_flag == 1:
                     ivalue = value + value_lsb
                     ivalue_dec = int(ivalue, 16)
-                    print "DAC: %f" % ivalue_dec
+                    #print "DAC: %f" % ivalue_dec
                     cal_dac_values.append(ivalue_dec)
                     ivalue = ""
                     adc_flag = 2
@@ -1370,7 +1417,7 @@ class VFAT3_GUI:
                     ivalue = value + value_lsb
                     ivalue_dec = float(int(ivalue, 16))
                     ivalue_mv = ivalue_dec * 0.0625
-                    print "ext ADC: %f" % ivalue_mv
+                    #print "ext ADC: %f" % ivalue_mv
                     ext_adc_values.append(ivalue_mv)
                     ivalue = ""
                     adc_flag = 4
@@ -1382,7 +1429,7 @@ class VFAT3_GUI:
                 elif adc_flag == 5:
                     ivalue = value + value_lsb
                     ivalue_dec = float(int(ivalue, 16))
-                    print "ADC0: %f" % ivalue_dec
+                    #print "ADC0: %f" % ivalue_dec
                     adc0_values.append(ivalue_dec)
                     ivalue = ""
                     adc_flag = 6
@@ -1394,7 +1441,7 @@ class VFAT3_GUI:
                 elif adc_flag == 7:
                     ivalue = value + value_lsb
                     ivalue_dec = float(int(ivalue, 16))
-                    print "ADC1: %f" % ivalue_dec
+                    #print "ADC1: %f" % ivalue_dec
                     adc1_values.append(ivalue_dec)
                     ivalue = ""
                     adc_flag = 0
@@ -1442,10 +1489,11 @@ class VFAT3_GUI:
         return error
 
     def scan_cal_dac_fc(self, production="no"):
+        start_time = time.time()
         error = 0
         dac_start = 0
         dac_stop = 255
-        step = 1
+        step = 10
 
         if self.adcM == 0:
             text = "\nADCs are not calibrated. Run ADC calibration first.\n"
@@ -1487,7 +1535,7 @@ class VFAT3_GUI:
                     ext_adc_values.append(ivalue_mv)
                     ivalue = ""
                     flag = 0
-            cal_dac_values.reverse()
+            #cal_dac_values.reverse()
             output = calc_cal_dac_conversion_factor(self, cal_dac_values, base_value_mv, ext_adc_values, production=production)
             self.cal_dac_fcM = output[0]
             self.cal_dac_fcB = output[1]
@@ -1501,6 +1549,9 @@ class VFAT3_GUI:
             self.add_to_interactive_screen(text)
         if self.cal_dac_fcM < 0.1 or self.cal_dac_fcM > 0.3:
             error = 1
+        stop_time = time.time()
+        run_time = stop_time - start_time
+        print "CAL_DAC calibration time: %f s\n" % run_time
         return error
 
     def send_idle(self):
@@ -1692,9 +1743,13 @@ class VFAT3_GUI:
             register[145].SD_I_BFCAS[0] = 135
 
         self.write_register(141)
+        time.sleep(0.02)
         self.write_register(142)
+        time.sleep(0.02)
         self.write_register(143)
+        time.sleep(0.02)
         self.write_register(144)
+        time.sleep(0.02)
         self.write_register(145)
 
     def run_concecutive_triggers(self):
@@ -1702,8 +1757,35 @@ class VFAT3_GUI:
         concecutive_triggers(self, self.nr_trigger_loops)
 
     def test_bist(self):
-        if self.database:
-            self.database.save_bist()
+        output = self.interfaceFW.run_bist()
+        flag = 0
+        # for value in output:
+        #     # print value
+        #     if flag == 0:
+        #         ivalue = value[2:]
+        #         if len(value) == 1:
+        #             ivalue = "0" + ivalue
+        #         flag = 1
+        #     elif flag == 1:
+        #         value = value[2:]
+        #         if len(value) == 1:
+        #             value = "0" + value
+        #         ivalue = value + ivalue
+        #         flag = 2
+        #     elif flag == 2:
+        #         value = value[2:]
+        #         if len(value) == 1:
+        #             value = "0" + value
+        #         ivalue = value + ivalue
+        #         flag = 3
+        #     elif flag == 3:
+        #         ivalue = value + ivalue
+        #         ivalue_dec = int(ivalue, 16)
+        #         print "BIST: %i  %s" % (ivalue_dec, ivalue)
+        #         flag = 0
+        # print output
+        # if self.database:
+        #     self.database.save_bist(ivalue_dec)
         return 1
 
     def test_scan_chain(self):
@@ -1713,64 +1795,75 @@ class VFAT3_GUI:
 
     def run_production_tests(self):
         start = time.time()
+        result = ['g'] * len(self.tests)
         self.clear_interactive_screen()
-        self.database = DatabaseInterface(self.chip_id)
-        self.unset_calibration_variables()
-        self.tti_if.set_outputs_on()
-        result = []
-        time.sleep(2)
-        result.append(self.check_short_circuit())
-        if result[0] == 0:
-            result.append(self.send_reset())
-            #result.append(self.test_ext_adc())
-            #result.append(self.save_barcode())
-            if result[1] == 0:
-                print "Sync ok"
-                print "Ext adc ok"
-
-                #print "Save barcode ok"
-                #self.send_idle()
-                #print "Send Idle ok."
-                result.append(self.test_bist())
+        if not self.save_barcode():
+            self.unset_calibration_variables()
+            self.tti_if.set_outputs_on()
+            result[0] = self.check_short_circuit()
+            if result[0] == 0:
+                result[1] = self.test_bist()
                 print "Test BIST ok"
-                result.append(self.test_scan_chain())
+                #result.append(self.test_scan_chain())
                 print "Test Scan Chain ok"
-                result.append(self.adjust_iref(self))
-                print "Iref adjustment ok"
-                result.append(self.measure_power('SLEEP'))
-                result.append(self.adc_calibration(production="yes"))
-                result.append(self.scan_cal_dac_fc(production="yes"))
-                self.save_calibration_values_to_file("s")
-                result.append(self.test_registers(production="yes"))
-                result.append(self.write_chip_id())
-                #result.append(concecutive_triggers(self, save_result="no"))
-                result.append(self.run_all_dac_scans(production="yes"))
-                self.set_fe_nominal_values(chip="VFAT3a")
-                result.append(self.run_scurve(production="yes"))
-                stop = time.time()
-                duration = (stop - start)/60
-                #print "Errors:"
-                #print result
-                print "Duration of the production test: %f min" % duration
-                for i, value in enumerate(result):
-                    if value == 'y':
-                        self.test_label[i].config(bg='yellow')
-                    elif value != 0:
-                        self.test_label[i].config(bg='red')
+                result[2] = self.send_reset()
+                if result[2] == 0:
+                    print "Sync ok"
+                    self.read_hw_id()
+                    result[3] = self.test_registers(production="yes")
+                    result[4] = self.write_chip_id()
+                    result[5] = self.adjust_iref(production="yes")
+                    result[6] = self.measure_power('SLEEP')
+                    result[7] = self.adc_calibration(production="yes")
+                    if result[7] == 0 or result[7] == 'y':
+                        result[8] = self.scan_cal_dac_fc(production="yes")
+                        #self.save_calibration_values_to_file("s")
+                        result[9] = test_data_packets(self, save_result="no")
+                        result[10] = self.run_all_dac_scans(production="yes")
+                        self.set_fe_nominal_values(chip="VFAT3a")
+                        result[11] = self.run_scurve(production="yes")
                     else:
-                        self.test_label[i].config(bg='green')
+                        print "Internal ADCs broken. Abort production test."
+
+                else:
+                    text = "->Production test aborted.\n"
+                    self.add_to_interactive_screen(text)
             else:
-                text = "->Production test aborted.\n"
+                text = "Short Circuit detected.\n"
+                text += "->Production test aborted.\n"
                 self.add_to_interactive_screen(text)
+                print text
+            time.sleep(0.1)
         else:
-            text = "->Production test aborted.\n"
-            self.add_to_interactive_screen(text)
-        time.sleep(1)
+            print "Production test aborted."
+        stop = time.time()
+        duration = (stop - start) / 60
+
+        print "Errors:"
+        print result
+        print "Duration of the production test: %f min" % duration
+        for i, value in enumerate(result):
+            if value == 'y':
+                self.test_label[i].config(bg='yellow')
+            elif value == 'g':
+                self.test_label[i].config(bg=self.default_bg_color)
+            elif value != 0:
+                self.test_label[i].config(bg='red')
+            else:
+                self.test_label[i].config(bg='green')
+        self.barcode_entry.delete(0, END)
+        if self.database:
+            self.database.create_xml_file()
         self.unset_calibration_variables()
         self.tti_if.set_outputs_off()
 
-# ################# SCAN/TEST -FUNCTIONS #############################
+    def read_hw_id(self):
+        value = self.read_register(0x10001, save_value='no')
+        value = ''.join(str(e) for e in value)
+        if self.database:
+            self.database.save_hw_id_ver(int(value,2))
 
+# ################# SCAN/TEST -FUNCTIONS #############################
 
     def run_full_calibration(self):
         start = time.time()
@@ -1790,22 +1883,51 @@ class VFAT3_GUI:
         print "Duration of the full calibration: %f sec" % duration
 
     def write_chip_id(self):
-        self.increment_chip_id()
+        #self.increment_chip_id()
         return 1
+
+    def burn_chip_id(self, chip_id=2147483648):
+        print "Register value before:"
+        print self.read_register(0x10003)
+        self.register[0x10004].PRG_TIME[0] = 800
+
+        chip_id_bin = dec_to_bin_with_stuffing(chip_id, 32)
+        chip_id_bin.reverse()
+        for i, bit in enumerate(chip_id_bin):
+            if bit == 1:
+                print ""
+                print i
+                self.register[0x10004].PRG_BIT_ADD[0] = i
+                data = []
+                for x in register[0x10004].reg_array:
+                    data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
+                print data
+        print "Register value after:"
+        print self.read_register(0x10003)
 
     def save_barcode(self):
         error = 0
-        try:
-            barcode_value = int(self.barcode_entry.get())
-        except Exception as e:
-            print(e)
-            text = "Invalid barcode.\n"
-            self.add_to_interactive_screen(text)
+        if self.barcode_entry.get() != "":
+            try:
+                barcode_value = int(self.barcode_entry.get())
+            except Exception as e:
+                print(e)
+                text = "Invalid barcode.\n"
+                self.add_to_interactive_screen(text)
+                error = 1
+            if error == 0:
+                #self.database.save_barcode(barcode_value)
+                self.database = DatabaseInterface(barcode_value)
+                if self.database.id_exists:
+                    result = tkMessageBox.askyesno("Barcode/Chip_ID found", "Would you like to re-run production tests for hybrid nr. %i" % barcode_value)
+                    time.sleep(3)
+                    if not result:
+                        error = 1
+                text = "Read barcode: %s\n" % barcode_value
+                self.add_to_interactive_screen(text)
+        else:
+            print "No barcode scanned."
             error = 1
-        if error == 0:
-            self.database.save_barcode(barcode_value)
-            text = "Read barcode: %s\n" % barcode_value
-            self.add_to_interactive_screen(text)
         return error
 
     def test_registers(self, production="no"):
@@ -1827,14 +1949,13 @@ class VFAT3_GUI:
         result = []
         with open(filename, 'r') as f:
             for line in f:
-                time.sleep(0.01)
                 line = line.rstrip('\n')
                 line = line.split(",")
                 reg_nr = int(line[0])
                 write_data = line[1]
                 self.register[reg_nr].change_values(write_data)
                 self.write_register(reg_nr)
-                time.sleep(0.03)
+                time.sleep(0.015)
                 read_data = self.read_register(reg_nr)
                 read_data = ''.join(str(e) for e in read_data[16:])
                 if read_data == write_data:
@@ -1851,15 +1972,11 @@ class VFAT3_GUI:
         line = "Write/Read test done. %d bad registers found." % error_counter
         print line
         if self.database:
-            if error_counter == 0:
-                self.database.save_register_ok()
-            else:
-                self.database.save_register_error()
+            self.database.save_register_test(error_counter)
+
         result.append(line)
-        stop = time.time()
-        run_time = (stop - start) / 60
-        line = "Run time (minutes): %f\n" % run_time
-        print line
+
+
         result.append(line)
         if production == "no":
             with open(output_file, "a") as myfile:
@@ -1868,6 +1985,10 @@ class VFAT3_GUI:
         print "Writing back previous register values."
         self.load_register_values_from_file_execute(temp_file, multiwrite=0)
         print "Done"
+        stop = time.time()
+        run_time = (stop - start)
+        line = "Run time (sec): %f\n" % run_time
+        print line
         return error_counter
 
     def write_register(self, register_nr):
@@ -1959,15 +2080,15 @@ class VFAT3_GUI:
 
     def run_all_dac_scans(self, production="no"):
         if production == "no":
-            plot = 1
+            save_data = 1
         else:
-            plot = 0
+            save_data = 0
         start = time.time()
         for scan in self.scan_options:
             print "Running %s" % scan
             scan_nr = self.scan_options_value[self.scan_options.index(scan)]
             dac_size = self.dac_sizes[self.scan_options.index(scan)]
-            output = scan_execute(self, scan, scan_nr, dac_size)
+            output = scan_execute(self, scan, scan_nr, dac_size, save_data)
             if output == "error":
                 break
             else:

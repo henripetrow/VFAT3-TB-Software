@@ -297,29 +297,29 @@ register[144] = GBL_CFG_BIAS_4()
 
 class GBL_CFG_BIAS_5:
     def __init__(self):
-        self.empty1 = [0,2]
-        self.SD_I_BSF = [1,6]
-        self.SD_I_BFCAS = [1,8]
+        self.empty1 = [0, 2]
+        self.SD_I_BSF = [1, 6]
+        self.SD_I_BFCAS = [1, 8]
 
-        self.reg_array = [self.empty1,self.SD_I_BSF,self.SD_I_BFCAS]
+        self.reg_array = [self.empty1, self.SD_I_BSF, self.SD_I_BFCAS]
 
     def change_values(self, new_values):
-        self.SD_I_BSF[0] = int(new_values[2:8],2)
-        self.SD_I_BFCAS[0] = int(new_values[8:],2)
+        self.SD_I_BSF[0] = int(new_values[2:8], 2)
+        self.SD_I_BFCAS[0] = int(new_values[8:], 2)
 
 register[145] = GBL_CFG_BIAS_5()
 
 class GBL_CFG_BIAS_6:
     def __init__(self):
-        self.empty1 = [0,4]
-        self.SLVS_IBIAS = [40,6]
-        self.SLVS_VREF = [40,6]
+        self.empty1 = [0, 4]
+        self.SLVS_IBIAS = [40, 6]
+        self.SLVS_VREF = [40, 6]
 
-        self.reg_array = [self.empty1,self.SLVS_IBIAS,self.SLVS_VREF]
+        self.reg_array = [self.empty1, self.SLVS_IBIAS, self.SLVS_VREF]
 
     def change_values(self, new_values):
-        self.SLVS_IBIAS[0] = int(new_values[4:10],2)
-        self.SLVS_VREF[0] = int(new_values[10:],2)
+        self.SLVS_IBIAS[0] = int(new_values[4:10], 2)
+        self.SLVS_VREF[0] = int(new_values[10:], 2)
 
 register[146] = GBL_CFG_BIAS_6()
 
@@ -351,48 +351,53 @@ register[65536] = HW_ID_ID()
 
 class HW_ID_VER:
     def __init__(self):
-        self.VER = [196608,32]
+        self.VER = [196608, 32]
 
         self.reg_array = [self.VER]
 
     def change_values(self, new_values):
-        self.VER[0] = int(new_values,2)
+        #print new_values
+        self.VER[0] = int(new_values, 2)
 
-register[65537] = HW_ID_VER()
+register[0x10001] = HW_ID_VER()
 
 
 class HW_RW_REG:
     def __init__(self):
-        self.RW_REG = [0,32]
+        self.RW_REG = [0, 32]
 
         self.reg_array = [self.RW_REG]
 
     def change_values(self, new_values):
-        self.RW_REG[0] = int(new_values,2)
+        self.RW_REG[0] = int(new_values, 2)
 
 register[65538] = HW_RW_REG()
 
 
 class HW_CHIP_ID:
     def __init__(self):
-        self.CHIP_ID = [0,32]
+        self.CHIP_ID = [0, 32]
 
         self.reg_array = [self.CHIP_ID]
 
     def change_values(self, new_values):
-        self.CHIP_ID[0] = int(new_values,2)
+        self.CHIP_ID[0] = int(new_values, 2)
 
 register[65539] = HW_CHIP_ID()
 
 
 class HW_PROG:
     def __init__(self):
-        self.PRG_TIME = [0,11]
-        self.PRG_BIT_ADD = [0,5]
+        self.empty1 = [0, 13]
+        self.PRG_TIME = [0, 11]
+        self.empty2 = [0, 3]
+        self.PRG_BIT_ADD = [0, 5]
+
+        self.reg_array = [self.empty1, self.PRG_TIME, self.empty2, self.PRG_BIT_ADD]
 
     def change_values(self, new_values):
-        self.PRG_TIME[0] = int(new_values,2)
-        self.PRG_BIT_ADD[0] = int(new_values,2)
+        self.PRG_TIME[0] = int(new_values, 2)
+        self.PRG_BIT_ADD[0] = int(new_values, 2)
 
 register[65540] = HW_PROG()
 
@@ -402,9 +407,10 @@ register[65540] = HW_PROG()
 class ADC_READ_0:
     def __init__(self):
         self.ADC_0 = 0
+
     def change_values(self, new_values):
         new_values = new_values[15:]
-        self.ADC0_0 = int(new_values,2)
+        self.ADC_0 = int(new_values, 2)
 
 
 class ADC_READ_1:

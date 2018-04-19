@@ -194,7 +194,7 @@ class datapacket:
 
             if received_crc_int != self.calculated_crc:
                 self.crc_error = 1
-                #print("!-> data packet CRC error.")
+                print("!-> data packet CRC error.")
             else:
                 pass
                 #print("CRC ok.")
@@ -244,11 +244,12 @@ def decode_output_data(data_list, register):
         pass
     elif any(data_list):
         for i in data_list:
-            if i == 0:
+            if i == "not":
                 pass
             else:
-                line = bin(i)
-                line.replace('b', '0')
+                #line = bin(i)
+                #line.replace('b', '0')
+                #print line
                 # Calculate the datapacket size
                 if dataformat_register.ECb[0] == 0 or dataformat_register.ECb[0] == 3:
                     EC_size = 1
@@ -265,19 +266,21 @@ def decode_output_data(data_list, register):
                 if dataformat_register.TT[0] == 2:
                     EC_size = 0
 
-                try:
-                    BCd = 0
-                except Exception as e:
-                    print(e)
-                    print "-IGNORE: Invalid value: %s" % split_line[0]
-                    continue
+                #try:
+                #    BCd = 0
+                #except Exception as e:
+                #    print(e)
+                #    print "-IGNORE: Invalid value: %s" % split_line[0]
+                #    continue
                 # print [i[1] for i in SC_shift_register]
                 # print hdlc_state
-                input_value = line[-8:]
+                input_value = dec_to_bin_with_stuffing(i, 8)
+                input_value = ''.join(str(e) for e in input_value)
+                #print input_value
                 # FPGA_output.append(input_value)
                 # print input_value
                 # print hdlc_flag_bit
-                BCcounter = BCcounter + BCd
+                #BCcounter = BCcounter + BCd
                 # print datapacket_status
                 # Sync responses.
                 if input_value == "00111010":

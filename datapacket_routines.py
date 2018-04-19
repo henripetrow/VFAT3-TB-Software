@@ -1,15 +1,19 @@
 from routines import *
 from generator import *
+from output_decoder import *
 import time
 import numpy as np
 
-def concecutive_triggers(obj, nr_loops=10, save_result="yes"):
+
+def test_data_packets(obj, nr_loops=10, save_result="yes"):
+    print "Running data packet test."
+    start = time.time()
     if save_result == "yes":
         save_data = 1
     else:
         save_data = 0
-    nr_of_triggers = 4000
-    nr_of_bc_between_triggers = 300
+    nr_of_triggers = 10
+    nr_of_bc_between_triggers = 30
     timestamp = time.strftime("%Y%m%d_%H%M")
     scan_name = "Consecutive_Triggers"
     file_name = "./routines/%s/FPGA_instruction_list.txt" % scan_name
@@ -24,15 +28,10 @@ def concecutive_triggers(obj, nr_loops=10, save_result="yes"):
 
     instruction_text = []
     instruction_text.append("1 Send RunMode")
-    instruction_text.append("4000 Send ReSync")
-    instruction_text.append("4000 Send ReSync")
-    instruction_text.append("4000 Send ReSync")
-    instruction_text.append("4000 Send ReSync")
-    instruction_text.append("4000 Send ReSync")
     instruction_text.append("10 Send EC0")
     instruction_text.append("10 Send BC0")
     instruction_text.append("%i Send_Repeat LV1A %i %i" % (nr_of_bc_between_triggers, nr_of_triggers, nr_of_bc_between_triggers))
-    instruction_text.append("1000 Send ReSync")
+    instruction_text.append("100 Send ReSync")
 
     # Write the instructions to the file.
     output_file_name = "./routines/%s/instruction_list.txt" % scan_name
@@ -74,8 +73,8 @@ def concecutive_triggers(obj, nr_loops=10, save_result="yes"):
     obj.register[130].ECb[0] = ecb
     obj.register[130].BCb[0] = bcb
     obj.write_register(130)
-    time.sleep(1)
-
+    obj.register[135].ARM_DAC[0] = 100
+    obj.write_register(135)
     trigger_counter = 0
     data_packet_counter = 0
     hit_counter = 0
@@ -85,15 +84,24 @@ def concecutive_triggers(obj, nr_loops=10, save_result="yes"):
     start = time.time()
 
     for k in range(0, nr_loops):
+        time.sleep(0.02)
         trigger_counter += nr_of_triggers
         previous_EC = 0
         previous_BC = 0
-        output = obj.interfaceFW.launch(obj.register, file_name, obj.COM_port, 1, save_data=save_data, obj=obj)
+        output = obj.interfaceFW.send_fcc("", file_name)
+        flag = 0
+        reply_list = []
+        for i in output:
+            if flag == 0:
+                reply_list.append(int(i,16))
+                flag = 3
+            else:
+                flag -= 1
+        output = decode_output_data(reply_list, obj.register)
         if output[0] == "Error":
             text = "%s: %s\n" % (output[0], output[1])
             obj.add_to_interactive_screen(text)
         else:
-
             for i in output[3]:
                 if i.type == "data_packet":
                     data_packet_counter += 1
@@ -127,7 +135,7 @@ def concecutive_triggers(obj, nr_loops=10, save_result="yes"):
                     previous_BC = i.BC
 
         stop = time.time()
-        run_time = (stop - start) / 60
+        run_time = (stop - start)
         result = []
         result.append("-> %d Triggers sent." % trigger_counter)
         result.append("%d Data packets received." % data_packet_counter)
@@ -135,7 +143,7 @@ def concecutive_triggers(obj, nr_loops=10, save_result="yes"):
         result.append("EC errors: %d" % ec_error_counter)
         result.append("BC errors: %d" % bc_error_counter)
         result.append("Hits found: %d" % hit_counter)
-        result.append("Time elapsed: %f min" % run_time)
+        result.append("Time elapsed: %f s" % run_time)
         result.append("***************")
         if save_result == "yes":
             with open(output_file, "a") as myfile:
@@ -149,12 +157,19 @@ def concecutive_triggers(obj, nr_loops=10, save_result="yes"):
 
     obj.register[65535].RUN[0] = 0
     obj.write_register(65535)
-    time.sleep(1)
-
+    print "-> %d Triggers sent." % trigger_counter
+    print "%d Data packets received." % data_packet_counter
+    print "CRC errors: %d" % crc_error_counter
+    print "EC errors: %d" % ec_error_counter
+    print "BC errors: %d" % bc_error_counter
+    print "Hits found: %d" % hit_counter
+    print "Time elapsed: %f s" % run_time
     obj.register[130].ECb[0] = 0
     obj.register[130].BCb[0] = 0
     obj.write_register(130)
-    time.sleep(1)
+    stop = time.time()
+    duration = stop - start
+    print "\nData Packet test duration: %f s\n" % duration
     return error_sum
 
 
@@ -192,7 +207,7 @@ def check_data_packet(data_packet, ec_size=1, bc_size=2, data="", szp=0):
     return error
 
 
-def test_data_packet(obj):
+def test_data_packet_formatting(obj):
     temp_file = "./data/temp_register_file.reg"
     obj.save_register_values_to_file_execute(temp_file)
 

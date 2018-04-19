@@ -4,10 +4,10 @@
 ###########################################
 
 
-import ROOT as r
 import math
 import time
 import matplotlib.pyplot as plt
+import matplotlib.mlab as mlab
 import numpy
 import csv
 from test_system_functions import *
@@ -66,7 +66,7 @@ def find_threshold(obj):
 
 def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes",
                           dac_range=[220, 240], delay=50, bc_between_calpulses=2000, pulsestretch=3, latency=45,
-                          cal_phi=0, folder="scurve", triggers=100):
+                          cal_phi=0, folder="scurve", triggers=30):
     mean_th_fc = "n"
     all_ch_data = "n"
     noisy_channels = "n"
@@ -88,19 +88,31 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         # Create list of cal dac values.
         cal_dac_values = range(start_dac_value, stop_dac_value+1)
 
+        if configuration == "no":
+            print "Setting s-curve for production."
+            obj.register[129].ST[0] = 0
+            obj.register[129].PS[0] = 7
+            obj.write_register(129)
 
-        obj.register[131].TP_FE[0] = 7
-        obj.write_register(131)
-
+            obj.register[131].TP_FE[0] = 7
+            obj.write_register(131)
+            obj.register[139].CAL_DUR[0] = 200
+            obj.write_register(139)
+            obj.register[132].PT[0] = 15
+            obj.register[132].SEL_COMP_MODE[0] = 1
+            obj.write_register(132)
+            obj.register[0xffff].RUN[0] = 1
+            obj.write_register(0xffff)
+            obj.measure_power("RUN")
         cal_dac_values.reverse()
-        cal_dac_values[:] = [255 - x for x in cal_dac_values]
+        #cal_dac_values[:] = [255 - x for x in cal_dac_values]
         cal_dac_values[:] = [obj.cal_dac_fcM * x + obj.cal_dac_fcB for x in cal_dac_values]
 
         # Create a list of channels the s-curve is run on.
-        channels = range(start_ch, stop_ch+1)
+        channels = range(start_ch, stop_ch+1, ch_step)
 
         # Launch S-curve routine in firmware.
-        scurve_data = obj.interfaceFW.run_scurve(start_ch, stop_ch, start_dac_value, stop_dac_value, triggers=triggers, arm_dac=arm_dac)
+        scurve_data = obj.interfaceFW.run_scurve(start_ch, stop_ch, ch_step, start_dac_value, stop_dac_value, delay, triggers=triggers, arm_dac=arm_dac)
 
         # Plot the s-curve data.
         if configuration == "yes":
@@ -115,8 +127,8 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
                     print "Unable to create directory"
             obj.add_to_interactive_screen(text)
             fig = plt.figure()
-            print scurve_data
-            print cal_dac_values
+            #print scurve_data
+            #print cal_dac_values
             for i in range(2, len(scurve_data)):
                 plt.plot(cal_dac_values, scurve_data[i])
             plt.grid(True)
@@ -127,8 +139,8 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             fig.savefig(filename)
 
         # Analyze data.
-        mean_th_fc, mean_enc_fc, noisy_channels, enc_list, thr_list = scurve_analyze(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
-
+        # mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list = scurve_analyze(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
+        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data)
         # Save data to database.
         if obj.database:
             obj.database.save_mean_threshold(mean_th_fc)
@@ -136,6 +148,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.database.save_threshold_data(thr_list)
             obj.database.save_enc_data(enc_list)
             obj.database.save_noisy_channels(noisy_channels)
+            obj.database.save_dead_channels(dead_channels)
 
         # Print routine duration.
         stop = time.time()
@@ -151,13 +164,16 @@ def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
 
     Nhits_h = {}
     Nev_h = {}
-
+    dead_channels = []
     for i in range(0, len(scurve_data)):
         data = scurve_data[i][:]
         channel = channels[i]
 
         Nhits_h[channel] = r.TH1D('Nhits%i_h' % channel, 'Nhits%i_h'% channel, len(dac_values)-1, dac_values[0], dac_values[-1])
         Nev_h[channel] = r.TH1D('Nev%i_h' % channel, 'Nev%i_h' % channel, len(dac_values)-1, dac_values[0], dac_values[-1])
+
+        if all(v == 0 for v in data):
+            dead_channels.append(channel)
 
         for j, Nhits in enumerate(data):
             Nhits_h[channel].AddBinContent(j, Nhits)
@@ -186,6 +202,7 @@ def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
         txtOutF = open('%s/%s/scurveFits%s.dat' % (obj.data_folder, folder, timestamp), 'w')
         txtOutF.write('CH/I:thr/D:enc/D\n')
     noisy_channels = []
+
     for ch in Nhits_h:
         scurves_ag[ch] = r.TGraphAsymmErrors(Nhits_h[ch], Nev_h[ch])
         scurves_ag[ch].SetName('scurve%i_ag' % ch)
@@ -196,10 +213,12 @@ def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
             scurves_ag[ch].Write()
         thr_fc = fit_f.GetParameter(0)
         enc_fc = fit_f.GetParameter(1)
-        if enc_fc >= 1:      # Limit for noisy channel.
-            noisy_channels.append(ch)
+        if enc_fc >= 0.7:      # Limit for noisy channel.
+            if ch not in dead_channels:
+                noisy_channels.append(ch)
+                thr_h.Fill(fit_f.GetParameter(0))
+                enc_h.Fill(fit_f.GetParameter(1))
         else:
-            # Fill the histograms.
             thr_h.Fill(fit_f.GetParameter(0))
             enc_h.Fill(fit_f.GetParameter(1))
 
@@ -220,11 +239,14 @@ def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
     print "Mean enc: %f" % mean_enc
     print "Noisy Channels:"
     print noisy_channels
+    print "Dead Channels:"
+    print dead_channels
 
     text = "S-curve results:\n"
     text += "Mean Threshold: %f\n" % mean_th
     text += "Mean enc: %f\n" % mean_enc
     text += "Noisy Channels: %i\n" % len(noisy_channels)
+    text += "Dead Channels: %i\n" % len(dead_channels)
     obj.add_to_interactive_screen(text)
     if save == "yes":
         drawHisto(thr_h, cc, '%s/%s/threshHiso%s.png' % (obj.data_folder, folder, timestamp))
@@ -235,7 +257,7 @@ def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
         chi2_h.Write()
         outF.Close()
 
-    return mean_th, mean_enc, noisy_channels, enc_list, thr_list
+    return mean_th, mean_enc, noisy_channels, dead_channels, enc_list, thr_list
 
 
 def drawHisto(hist, canv, filename):
@@ -269,7 +291,7 @@ def fitScurve(scurve_g):
     return bestFit_f
 
 
-def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
+def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
 
     if obj.adcM == 0:
         text = "\nADCs are not calibrated. Run ADC calibration first.\n"
@@ -287,7 +309,7 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
         modified = scan_name.replace(" ", "_")
         file_name = "./routines/%s/FPGA_instruction_list.txt" % modified
 
-        output = obj.interfaceFW.run_dac_scan(0, 1, 2**dac_size-1, scan_nr)
+        output = obj.interfaceFW.run_dac_scan(0, 5, 2**dac_size-1, scan_nr)
 
         if output[0] == "Error":
             text = "%s: %s\n" % (output[0], output[1])
@@ -296,6 +318,8 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
             adc_flag = 0
             int_adc0_values = []
             int_adc1_values = []
+            mv_adc0_values = []
+            mv_adc1_values = []
             for value in output:
                 if adc_flag == 0:
                     value_lsb = value[2:]
@@ -316,7 +340,8 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
                 elif adc_flag == 3:
                     ivalue = value + value_lsb
                     ivalue_dec = int(ivalue, 16)
-                    int_adc0_values.append(obj.adc0M * ivalue_dec + obj.adc0B)
+                    mv_adc0_values.append(obj.adc0M * ivalue_dec + obj.adc0B)
+                    int_adc0_values.append(ivalue_dec)
                     ivalue = ""
                     adc_flag = 4
                 elif adc_flag == 4:
@@ -327,7 +352,8 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
                 elif adc_flag == 5:
                     ivalue = value + value_lsb
                     ivalue_dec = int(ivalue, 16)
-                    int_adc1_values.append(obj.adc1M * ivalue_dec + obj.adc1B)
+                    int_adc1_values.append(ivalue_dec)
+                    mv_adc1_values.append(obj.adc1M * ivalue_dec + obj.adc1B)
                     ivalue = ""
                     adc_flag = 0
         # Save the results.
@@ -336,36 +362,36 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
             obj.database.save_dac_data(modified[:-5], "ADC1", int_adc1_values)
 
         data = [reg_values, scan_values0, scan_values1]
-        timestamp = time.strftime("%Y%m%d%H%M")
-        filename = "%s/dac_scans/%s_%s_scan_data.dat" % (obj.data_folder, timestamp, modified)
-        if not os.path.exists(os.path.dirname(filename)):
-            try:
-                os.makedirs(os.path.dirname(filename))
-            except OSError as exc:  # Guard against race condition
-                print "Unable to create directory"
-        text = "Results were saved to the folder:\n %s \n" % filename
-        obj.add_to_interactive_screen(text)
+        if save_data == 1:
+            timestamp = time.strftime("%Y%m%d%H%M")
+            filename = "%s/dac_scans/%s_%s_scan_data.dat" % (obj.data_folder, timestamp, modified)
+            if not os.path.exists(os.path.dirname(filename)):
+                try:
+                    os.makedirs(os.path.dirname(filename))
+                except OSError as exc:  # Guard against race condition
+                    print "Unable to create directory"
+            text = "Results were saved to the folder:\n %s \n" % filename
+            obj.add_to_interactive_screen(text)
 
-        outF = open(filename, "w")
-        outF.write("regVal/I:ADC0/I:ADC1/I\n")
-        for i, regVal in enumerate(reg_values):
-            outF.write('%i\t%i\t%i\n' % (regVal, scan_values0[i], scan_values1[i]))
-            pass
-        outF.close()
+            outF = open(filename, "w")
+            outF.write("regVal/I:ADC0/I:ADC1/I\n")
+            for i, regVal in enumerate(reg_values):
+                outF.write('%i\t%i\t%i\n' % (regVal, scan_values0[i], scan_values1[i]))
+                pass
+            outF.close()
 
-        filename = "%s/dac_scans/%s_%s_scan.png" % (obj.data_folder, timestamp, modified)
-        if not os.path.exists(os.path.dirname(filename)):
-            try:
-                os.makedirs(os.path.dirname(filename))
-            except OSError as exc:  # Guard against race condition
-                print "Unable to create directory"
-        if plot == 1:
+            filename = "%s/dac_scans/%s_%s_scan.png" % (obj.data_folder, timestamp, modified)
+            if not os.path.exists(os.path.dirname(filename)):
+                try:
+                    os.makedirs(os.path.dirname(filename))
+                except OSError as exc:  # Guard against race condition
+                    print "Unable to create directory"
             #fig = plt.figure(1)
             plt.clf()
-            plt.plot(dac_values, int_adc0_values, label="ADC0")
-            plt.plot(dac_values, int_adc1_values, label="ADC1")
+            plt.plot(dac_values, mv_adc0_values, label="ADC0")
+            plt.plot(dac_values, mv_adc1_values, label="ADC1")
             #plt.ylabel('voltage [mV]')
-            plt.ylabel('ADC counts')
+            plt.ylabel('Voltage [mV]')
             plt.xlabel('DAC counts')
             plt.legend()
             plt.title(modified)
@@ -375,8 +401,8 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, plot=1,):
 
         stop = time.time()
         run_time = (stop - start)
-        text = "Scan duration: %f s\n" % run_time
-        obj.add_to_interactive_screen(text)
+        #text = "Scan duration: %f s\n" % run_time
+        #obj.add_to_interactive_screen(text)
 
     return output
 
@@ -605,3 +631,118 @@ def gain_histogram(obj):
     run_time = (stop - start) / 60
     print "Runtime: %f" % run_time
 
+
+def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
+    timestamp = time.strftime("%d.%m.%Y %H:%M")
+    full_data = []
+    mean_list = []
+    rms_list = []
+    dead_channels = []
+    noisy_channels = []
+
+
+    fig = plt.figure(figsize=(10, 20))
+    sub1 = plt.subplot(511)
+
+    for i, channel in enumerate(channels):
+        diff = []
+
+        mean_calc = 0
+        summ = 0
+        data = scurve_data[i]
+        if all(v == 0 for v in data):
+            dead_channels.append(channel)
+            mean_list.append(0)
+            rms_list.append(0)
+        else:
+            l = 0
+            diff.append(channel)
+            diff.append("")
+            for j in data:
+                if l != 0:
+                    diff_value = j - previous_value
+                    diff.append(diff_value)
+                    mean_calc += dac_values[l] * diff_value
+                    summ += diff_value
+                previous_value = j
+                l += 1
+            if summ != 0:
+                mean = mean_calc / float(summ)
+            else:
+                mean = 0
+            mean_list.append(mean)
+            l = 1
+            rms = 0
+            for r in diff[2:]:
+                rms += r * (mean - dac_values[l]) ** 2
+                l += 1
+            if 0 < (rms / summ):
+                rms = math.sqrt(rms / summ)
+            else:
+                rms == 0
+            if rms > 0.7:
+                noisy_channels.append(channel)
+            rms_list.append(rms)
+            diff.append(mean)
+            diff.append(rms)
+            full_data.append(diff)
+            plt.plot(dac_values, data)
+
+    rms_mean = numpy.mean(rms_list)
+    rms_rms = numpy.std(rms_list)
+
+    mean_mean = numpy.mean(mean_list)
+    mean_rms = numpy.std(mean_list)
+    print "Old Method:"
+    print "Mean Threshold: %f" % mean_mean
+    print "Mean enc: %f" % rms_mean
+    print "Noisy Channels:"
+    print noisy_channels
+    print "Dead Channels:"
+    print dead_channels
+
+    if folder:
+        sub1.set_xlabel('255-CAL_DAC')
+        sub1.set_ylabel('%')
+        sub1.set_title('S-curves of all channels')
+        sub1.grid(True)
+        text = "%s \n S-curves, 128 channels, HG, 25 ns." % timestamp
+        sub1.text(25, 140, text, horizontalalignment='center', verticalalignment='center')
+
+        sub2 = plt.subplot(512)
+        sub2.plot(range(0, 128), rms_list)
+        sub2.set_xlabel('Channel')
+        sub2.set_ylabel('RMS')
+        sub2.set_title('RMS of all channels')
+        sub2.grid(True)
+        text = "mean: %.2f RMS: %.2f" % (rms_mean, rms_rms)
+        sub2.text(10, rms_mean, text, horizontalalignment='center', verticalalignment='center', bbox=dict(alpha=0.5))
+
+        sub3 = plt.subplot(513)
+        sub3.plot(range(0, 128), mean_list)
+        sub3.set_xlabel('Channel')
+        sub3.set_ylabel('255-CAL_DAC')
+        sub3.set_title('mean of all channels')
+        sub3.grid(True)
+        text = "Mean: %.2f RMS: %.2f" % (mean_mean, mean_rms)
+        sub3.text(10, mean_mean, text, horizontalalignment='center', verticalalignment='center', bbox=dict(alpha=0.5))
+
+        sub4 = plt.subplot(514)
+        n, bins, patches = sub4.hist(mean_list, bins='auto')
+        y = mlab.normpdf(bins, mean_mean, mean_rms)
+        sub4.plot(bins, y, 'r--', linewidth=1)
+
+        sub5 = plt.subplot(515)
+        n, bins, patches = sub5.hist(rms_list, bins='auto')
+        y = mlab.normpdf(bins, rms_mean, rms_rms)
+        sub5.plot(bins, y, 'r--', linewidth=1)
+
+        fig.subplots_adjust(hspace=.5)
+
+        timestamp = time.strftime("%Y%m%d_%H%M")
+
+        fig.savefig("%s%sS-curve_plot.pdf" % (folder, timestamp))
+
+        text = "Results were saved to the folder:\n %s \n" % folder
+        obj.add_to_interactive_screen(text)
+    return mean_mean, mean_rms, noisy_channels, dead_channels, rms_list, mean_list
