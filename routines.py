@@ -358,8 +358,8 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
                     adc_flag = 0
         # Save the results.
         if obj.database:
-            obj.database.save_dac_data(modified[:-5], "ADC0", int_adc0_values)
-            obj.database.save_dac_data(modified[:-5], "ADC1", int_adc1_values)
+            obj.database.save_dac_data(modified[:-5], "ADC0", int_adc0_values, dac_values)
+            obj.database.save_dac_data(modified[:-5], "ADC1", int_adc1_values, dac_values)
 
         data = [reg_values, scan_values0, scan_values1]
         if save_data == 1:
@@ -701,7 +701,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print "Dead Channels:"
     print dead_channels
 
-    if folder:
+    if folder != "":
         sub1.set_xlabel('255-CAL_DAC')
         sub1.set_ylabel('%')
         sub1.set_title('S-curves of all channels')

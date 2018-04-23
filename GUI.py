@@ -12,7 +12,6 @@ import sys
 import os
 import subprocess  # For opening scans for edit in the system default editor.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
-from ipbus import *
 from VFAT3_registers import *
 from generator import *
 from test_system_functions import *
@@ -2085,6 +2084,7 @@ class VFAT3_GUI:
             save_data = 0
         start = time.time()
         for scan in self.scan_options:
+            time.sleep(0.05)
             print "Running %s" % scan
             scan_nr = self.scan_options_value[self.scan_options.index(scan)]
             dac_size = self.dac_sizes[self.scan_options.index(scan)]

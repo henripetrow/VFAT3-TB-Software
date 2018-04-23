@@ -7,9 +7,11 @@ class DatabaseInterface:
         self.name = name
         self.user = "VFAT3"
         self.passwd = "1234"
-
-        self.table_name = "Test"
-        self.database_name = "Hybrids_test0"
+        self.dacs_8bit = ["ZCC_DAC", "ARM_DAC", "PRE_I_BIT", "PRE_VREF", "SH_I_BFCAS", "SH_I_BDIFF", "SD_I_BDIFF",
+                          "SD_I_BFCAS", "CAL_DAC"]
+        self.dacs_6bit = ["HYST_DAC", "CFD_DAC_1", "CFD_DAC_2", "PRE_I_BSF", "PRE_I_BLCC", "SD_I_BSF"]
+        self.table_name = "Production"
+        self.database_name = "Hybrids_test1"
         self.connection = pymysql.connect(host="localhost", user=self.user, passwd=self.passwd, database=self.database_name)
         self.cursor = self.connection.cursor()
 
@@ -23,11 +25,53 @@ class DatabaseInterface:
             insert1 = "INSERT INTO %s(ChipID) VALUES('%s');" % (self.table_name, self.name)
             self.cursor.execute(insert1)
             self.connection.commit()
+
+            # Insert new table for Threshold data.
+            insert1 = "INSERT INTO Threshold(ChipID) VALUES('%s');" % self.name
+            self.cursor.execute(insert1)
+            self.connection.commit()
+
+            # Insert new table for Threshold data.
+            insert1 = "INSERT INTO enc(ChipID) VALUES('%s');" % self.name
+            self.cursor.execute(insert1)
+            self.connection.commit()
+
+            # Insert new table for Threshold data.
+            insert1 = "INSERT INTO ADC0_CAL_LUT(ChipID) VALUES('%s');" % self.name
+            self.cursor.execute(insert1)
+            self.connection.commit()
+
+            # Insert new table for Threshold data.
+            insert1 = "INSERT INTO ADC1_CAL_LUT(ChipID) VALUES('%s');" % self.name
+            self.cursor.execute(insert1)
+            self.connection.commit()
+
+            # Insert new table for Threshold data.
+            insert1 = "INSERT INTO EXT_ADC_CAL_LUT(ChipID) VALUES('%s');" % self.name
+            self.cursor.execute(insert1)
+            self.connection.commit()
+
+            # Insert new table for Threshold data.
+            insert1 = "INSERT INTO CAL_DAC_FC(ChipID) VALUES('%s');" % self.name
+            self.cursor.execute(insert1)
+            self.connection.commit()
+
+            # Insert new tables for DACs.
+            adcs = ["ADC0", "ADC1"]
+            for adc in adcs:
+                for i in self.dacs_6bit:
+                    insert1 = "INSERT INTO %s_%s(ChipID) VALUES('%s');" % (i, adc, self.name)
+                    self.cursor.execute(insert1)
+                    self.connection.commit()
+                for i in self.dacs_8bit:
+                    insert1 = "INSERT INTO %s_%s(ChipID) VALUES('%s');" % (i, adc, self.name)
+                    self.cursor.execute(insert1)
+            self.connection.commit()
+
         else:
             print "Database entry found."
             self.id_exists = 1
         self.connection.close()
-
 
     def open_connection(self):
         self.connection = pymysql.connect(host="localhost", user=self.user, passwd=self.passwd, database=self.database_name)
@@ -52,32 +96,45 @@ class DatabaseInterface:
         self.cursor.execute("UPDATE  %s SET %s=%f  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
         self.close_connection()
 
-    def save_dac_data(self, dac_name, adc, data):
-        name = "%s_%s" % (dac_name, adc)
-        data_sql = "%i" % data[0]
-        for i in range(1, len(data)):
-            data_sql += " %i" % data[i]
-        self.set_string(name, data_sql)
+    def save_dac_data(self, table_name, adc, adc_values, dac_values):
+        self.open_connection()
+        table_sql = "UPDATE %s_%s SET " % (table_name, adc)
+        table_sql += "DAC%i = %f" % (dac_values[0], adc_values[0])
+        for i in range(1, len(dac_values)):
+            table_sql += ", DAC%i = %f" % (dac_values[i], adc_values[i])
+        table_sql += " WHERE ChipID = '%s';" % self.name
+        self.cursor.execute(table_sql)
+        self.close_connection()
 
-    def save_lut_data(self, lut_name, data):
-        name = "%s" % lut_name
-        data_sql = "%i" % data[0]
+    def save_lut_data(self, table_name, data, dac_values):
+        self.open_connection()
+        table_sql = "UPDATE %s SET " % table_name
+        table_sql += "DAC%i = %i" % (dac_values[0], data[0])
         for i in range(1, len(data)):
-            data_sql += " %i" % data[i]
-        self.set_string(name, data_sql)
+            table_sql += ", DAC%i = %i" % (dac_values[i], data[i])
+        table_sql += " WHERE ChipID = '%s';" % self.name
+        self.cursor.execute(table_sql)
+        self.close_connection()
 
-    def save_lut_data_float(self, lut_name, data):
-        name = "%s" % lut_name
-        data_sql = "%f" % data[0]
+    def save_lut_data_float(self, table_name, data, dac_values):
+        self.open_connection()
+        table_sql = "UPDATE %s SET " % table_name
+        table_sql += "DAC%i = %f" % (dac_values[0], data[0])
         for i in range(1, len(data)):
-            data_sql += " %f" % data[i]
-        self.set_string(name, data_sql)
+            table_sql += ", DAC%i = %f" % (dac_values[i], data[i])
+        table_sql += " WHERE ChipID = '%s';" % self.name
+        self.cursor.execute(table_sql)
+        self.close_connection()
 
-    def save_ch_data(self, name, data):
-        data_sql = "%f" % data[0]
+    def save_ch_data(self, table_name, data):
+        self.open_connection()
+        table_sql = "UPDATE %s SET " % table_name
+        table_sql += "Ch%i = %f" % (0, data[0])
         for i in range(1, len(data)):
-            data_sql += " %f" % data[i]
-        self.set_string(name, data_sql)
+            table_sql += ", Ch%i = %f" % (i, data[i])
+        table_sql += " WHERE ChipID = '%s';" % self.name
+        self.cursor.execute(table_sql)
+        self.close_connection()
 
     def save_adc0(self, m_value, b_value):
         self.set_float("ADC0M", m_value)
@@ -116,26 +173,10 @@ class DatabaseInterface:
         self.set_int("Hit_errors", error_list[3])
 
     def save_noisy_channels(self, value):
-        if len(value) == 0:
-            self.set_string("NoisyChannels", "None")
-        else:
-            for i, ch in enumerate(value):
-                if i == 0:
-                    output = "%i" % ch
-                else:
-                    output += ", %i" % ch
-            self.set_string("NoisyChannels", output)
+        self.set_string("NoisyChannels", len(value))
 
     def save_dead_channels(self, value):
-        if len(value) == 0:
-            self.set_string("DeadChannels", "None")
-        else:
-            for i, ch in enumerate(value):
-                if i == 0:
-                    output = "%i" % ch
-                else:
-                    output += ", %i" % ch
-            self.set_string("DeadChannels", output)
+        self.set_int("DeadChannels", len(value))
 
     def save_bist(self, value):
         self.set_int("BIST", value)

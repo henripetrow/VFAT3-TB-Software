@@ -11,7 +11,7 @@ def calc_cal_dac_conversion_factor(obj, dac_values, base_value, ext_adc_values, 
         charge_values.append(charge)
 
     if production == "yes":
-        obj.database.save_lut_data_float("CAL_DAC_FC", charge_values)
+        obj.database.save_lut_data_float("CAL_DAC_FC", charge_values, dac_values)
 
     print dac_values
     #dac_values = [float(i) for i in dac_values]
@@ -41,9 +41,9 @@ def calc_cal_dac_conversion_factor(obj, dac_values, base_value, ext_adc_values, 
 
 def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1, dac_values, production="no"):
     if production == "yes":
-        obj.database.save_lut_data("ADC0_CAL_LUT", int_adc0)
-        obj.database.save_lut_data("ADC1_CAL_LUT", int_adc1)
-        obj.database.save_lut_data("EXT_ADC_CAL_LUT", ext_adc)
+        obj.database.save_lut_data("ADC0_CAL_LUT", int_adc0, dac_values)
+        obj.database.save_lut_data("ADC1_CAL_LUT", int_adc1, dac_values)
+        obj.database.save_lut_data("EXT_ADC_CAL_LUT", ext_adc, dac_values)
 
     adc0M, adc0B, r_value, p_value, std_err0 = stats.linregress(int_adc0, ext_adc)
     adc1M, adc1B, r_value, p_value, std_err1 = stats.linregress(int_adc1, ext_adc)
