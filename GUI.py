@@ -62,8 +62,9 @@ class VFAT3_GUI:
             self.interfaceFW = FW_interface(0)  # 0 - IPbus mode
             self.mode = 0
         if db_mode == 1:
-            self.read_chip_id()
-            print "Using Hybrid: %s" % self.chip_id
+            #self.read_chip_id()
+            #print "Using Hybrid: %s" % self.chip_id
+            pass
         # Local variables.
         self.default_bg_color = master.cget("bg")
         self.database = 0
