@@ -67,7 +67,7 @@ class FW_interface:
         finally:
             self.sock.close()
         # print output
-        #print "output length: %i" % len(output)
+        # print "output length: %i" % len(output)
         return output
 
     def send_fcc(self, fcc_bin, file=""):   # fcc_hex can be given as a list also.
@@ -170,10 +170,20 @@ class FW_interface:
         output = self.execute_req(message,  timeout=30)
         return output
 
-    def read_ext_adc(self):
-        message = [0xca, 0x00, 0x03]
+    def read_ext_adc_imon(self):
+        message = [0xca, 0x00, 0x03, 0x01]
         output = self.execute_req(message,  timeout=30)
         return output
+
+    def read_ext_adc_vmon(self):
+        message = [0xca, 0x00, 0x03, 0x00]
+        output = self.execute_req(message,  timeout=30)
+        return output
+
+    def read_ext_adc_vbgr(self):
+        message = [0xca, 0x00, 0x03, 0x02]
+        #output = self.execute_req(message,  timeout=30)
+        return ['0x00', '0x00']
 
     def run_bist(self):
         message = [0xca, 0x00, 0x0a]

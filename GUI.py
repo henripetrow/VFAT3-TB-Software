@@ -66,6 +66,7 @@ class VFAT3_GUI:
             #print "Using Hybrid: %s" % self.chip_id
             pass
         # Local variables.
+        self.hybrid_model = "HV3b"
         self.default_bg_color = master.cget("bg")
         self.database = 0
         self.barcode_id = ""
@@ -637,6 +638,9 @@ class VFAT3_GUI:
         self.cal_button = Button(self.routines_frame, text="Read HW_ID_VER", command=lambda: self.read_hw_id(), width=bwidth)
         self.cal_button.grid(column=1, row=18, sticky='e')
 
+        self.cal_button = Button(self.routines_frame, text="Adjust ADC0 ref", command=lambda: self.adjust_adc0_ref(), width=bwidth)
+        self.cal_button.grid(column=1, row=18, sticky='e')
+
         # ############### S-curve tab #########################################
 
         self.start_channel = 0
@@ -1201,6 +1205,22 @@ class VFAT3_GUI:
 
 # ################ MISC-TAB FUNCTIONS ################################
 
+    def adjust_adc0_ref(self):
+        self.register[133].Monitor_sel = 39
+        self.write_register(133)
+        diff_values = []
+        for i in range(0, 4):
+            self.register[133].VREF_ADC = i
+            self.write_register(133)
+            time.sleep(0.1)
+            output = self.read_ext_adc()
+            diff_values.append(abs(1000-output[1]))
+        print diff_values
+        print diff_values.index(min(diff_values))
+        self.register[133].VREF_ADC = diff_values.index(min(diff_values))
+        self.write_register(133)
+
+
     def read_chip_id(self):
         with open('./data/chip_id.dat', 'r') as f:
             self.chip_id = int(f.readline())
@@ -1281,15 +1301,31 @@ class VFAT3_GUI:
         if verbose == 'yes':
             text = "->Reading the verification board external ADC.\n"
             self.add_to_interactive_screen(text)
-        value = self.interfaceFW.read_ext_adc()
-        value_hex = "%s%s" % (value[1], value[0][2:])
-        value_int = int(value_hex, 16)
-        print value_int
-        value_mv = value_int * 0.0625
+
+        # Vmon
+        value = self.interfaceFW.read_ext_adc_vmon()
+        vmon_value_hex = "%s%s" % (value[1], value[0][2:])
+        vmon_value_int = int(vmon_value_hex, 16)
+        vmon_value_mv = vmon_value_int * 0.0625
+
+        # Imon
+        value = self.interfaceFW.read_ext_adc_imon()
+        imon_value_hex = "%s%s" % (value[1], value[0][2:])
+        imon_value_int = int(imon_value_hex, 16)
+        imon_value_mv = imon_value_int * 0.0625
+
+        # VBGR
+        value = self.interfaceFW.read_ext_adc_vbgr()
+        vbgr_value_hex = "%s%s" % (value[1], value[0][2:])
+        vbgr_value_int = int(vbgr_value_hex, 16)
+        vbgr_value_mv = vbgr_value_int * 0.0625
         if verbose == 'yes':
-            text = "EXT ADC: %d\t %f mV\n" % (value_int, value_mv)
+            text = "EXT ADC Imon: %d\t %f mV\n" % (imon_value_int, imon_value_mv)
+            text += "EXT ADC Vmon: %d\t %f mV\n" % (vmon_value_int, vmon_value_mv)
+            text += "EXT ADC VBGR: %d\t %f mV\n" % (vbgr_value_int, vbgr_value_mv)
             self.add_to_interactive_screen(text)
-        return [value_int, value_mv]
+            print text
+        return [vmon_value_int, vmon_value_mv, imon_value_int, imon_value_mv]
 
     def test_ext_adc(self):
         error = 0
@@ -1505,8 +1541,12 @@ class VFAT3_GUI:
             output = self.interfaceFW.cal_dac_calibration(start=dac_start, stop=dac_stop, step=step)
             base_value_hex = "%s%s" % (output[1], output[0][2:])
             base_value_int = int(base_value_hex, 16)
-            #base_value_mv = base_value_int * 0.0625
-            base_value_mv = base_value_int * self.adc1M + self.adc1B
+            if self.hybrid_model == "HV3b":
+                base_value_mv = base_value_int * 0.0625
+            elif self.hybrid_model == "HV3a":
+                base_value_mv = base_value_int * self.adc1M + self.adc1B
+            else:
+                print "Error hybrid model: %s not found" % self.hybrid_model
             ext_adc_values = []
             ext_adc_values_hex = output[2:]
             flag = 0
@@ -1530,8 +1570,12 @@ class VFAT3_GUI:
                 elif flag == 3:
                     ivalue = value+value_lsb
                     ivalue_dec = int(ivalue, 16)
-                    #ivalue_mv = ivalue_dec * 0.0625
-                    ivalue_mv = ivalue_dec * self.adc1M + self.adc1B
+                    if self.hybrid_model == "HV3b":
+                        ivalue_mv = ivalue_dec * 0.0625
+                    elif self.hybrid_model == "HV3a":
+                        ivalue_mv = ivalue_dec * self.adc1M + self.adc1B
+                    else:
+                        print "Error hybrid model: %s not found" % self.hybrid_model
                     ext_adc_values.append(ivalue_mv)
                     ivalue = ""
                     flag = 0
@@ -1820,7 +1864,7 @@ class VFAT3_GUI:
                         #self.save_calibration_values_to_file("s")
                         result[9] = test_data_packets(self, save_result="no")
                         result[10] = self.run_all_dac_scans(production="yes")
-                        self.set_fe_nominal_values(chip="VFAT3a")
+                        self.set_fe_nominal_values(chip=self.hybrid_model)
                         result[11] = self.run_scurve(production="yes")
                     else:
                         print "Internal ADCs broken. Abort production test."
