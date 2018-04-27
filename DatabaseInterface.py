@@ -194,6 +194,15 @@ class DatabaseInterface:
     def save_hw_id_ver(self, hw_id_ver):
         self.set_int("HW_ID_VER", hw_id_ver)
 
+    def save_vref(self, value):
+        self.set_int("VREF_ADC", value)
+
+    def save_vbgr(self, value):
+        self.set_float("V_BGR", value)
+
+    def save_adc_offset(self, value):
+        self.set_float("BUFFER_OFFSET", value)
+
     def create_xml_file(self):
         command = "mysql -uroot -proot --xml -e 'SELECT * FROM %s.%s WHERE ChipID = %s' > ./results/hybrid_%s.xml" % (self.database_name, self.table_name, self.name, self.name)
         os.system(command)

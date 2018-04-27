@@ -1205,21 +1205,51 @@ class VFAT3_GUI:
 
 # ################ MISC-TAB FUNCTIONS ################################
 
-    def adjust_adc0_ref(self):
-        self.register[133].Monitor_sel = 39
+    def measure_adc_offset(self):
+        self.register[0xffff].RUN[0] = 1
+        self.write_register(0xffff)
+        time.sleep(0.1)
+        self.register[133].Monitor_Sel[0] = 32
         self.write_register(133)
+        time.sleep(0.1)
+        output = self.read_ext_adc()
+        vbgr = output[5]
+        vmon = output[1]
+        print vbgr
+        print vmon
+        adc_offset = vmon - vbgr
+        self.register[0xffff].RUN[0] = 0
+        self.write_register(0xffff)
+        if self.database:
+            self.database.save_vbgr(vbgr)
+            self.database.save_adc_offset(adc_offset)
+
+    def adjust_adc0_ref(self):
+        self.register[0xffff].RUN[0] = 0
+        self.write_register(0xffff)
+        time.sleep(1)
+        self.register[0xffff].RUN[0] = 1
+        self.write_register(0xffff)
+        time.sleep(1)
+        self.register[133].Monitor_Sel[0] = 39
+        self.write_register(133)
+        time.sleep(1)
         diff_values = []
         for i in range(0, 4):
-            self.register[133].VREF_ADC = i
+            self.register[133].VREF_ADC[0] = i
             self.write_register(133)
             time.sleep(0.1)
             output = self.read_ext_adc()
             diff_values.append(abs(1000-output[1]))
         print diff_values
-        print diff_values.index(min(diff_values))
-        self.register[133].VREF_ADC = diff_values.index(min(diff_values))
+        chosen_value = diff_values.index(min(diff_values))
+        print chosen_value
+        #self.register[0xffff].RUN[0] = 0
+        #self.write_register(0xffff)
+        self.register[133].VREF_ADC[0] = chosen_value
         self.write_register(133)
-
+        if self.database:
+            self.database.save_vref(chosen_value)
 
     def read_chip_id(self):
         with open('./data/chip_id.dat', 'r') as f:
@@ -1325,7 +1355,7 @@ class VFAT3_GUI:
             text += "EXT ADC VBGR: %d\t %f mV\n" % (vbgr_value_int, vbgr_value_mv)
             self.add_to_interactive_screen(text)
             print text
-        return [vmon_value_int, vmon_value_mv, imon_value_int, imon_value_mv]
+        return [vmon_value_int, vmon_value_mv, imon_value_int, imon_value_mv, vbgr_value_int, vbgr_value_mv]
 
     def test_ext_adc(self):
         error = 0
@@ -1417,10 +1447,13 @@ class VFAT3_GUI:
 
     def adc_calibration(self, production="no"):
         error = 0
+
         if self.Iref_cal == 0:
             text = "\nIref is not calibrated. Run Iref calibration first.\n"
             self.add_to_interactive_screen(text)
         else:
+            self.adjust_adc0_ref()
+            self.measure_adc_offset()
             start = time.time()
             print "Starting ADC calibration."
             output = self.interfaceFW.int_adc_calibration(0, 1, 255)
@@ -1642,17 +1675,17 @@ class VFAT3_GUI:
         adc0_value = self.read_adc0()
         text = "ADC0: %d\t %f mV\n" % (adc0_value[0], adc0_value[1])
         self.add_to_interactive_screen(text)
-        self.adc0_label0.config(text="%.4f mV" % adc0_value[1])
+        self.adc0_label0.config(text="%.2f mV" % adc0_value[1])
 
         adc1_value = self.read_adc1()
         text = "ADC1: %d\t %f mV\n" % (adc1_value[0], adc1_value[1])
         self.add_to_interactive_screen(text)
-        self.adc1_label0.config(text="%.4f mV" % adc1_value[1])
+        self.adc1_label0.config(text="%.2f mV" % adc1_value[1])
 
-        ext_adc_value = self.read_ext_adc(verbose='no')
+        ext_adc_value = self.read_ext_adc(verbose='yes')
         text = "EXT ADC: %d\t %f mV\n" % (ext_adc_value[0], ext_adc_value[1])
         self.add_to_interactive_screen(text)
-        self.ext_adc_label0.config(text="%.4f mV" % ext_adc_value[1])
+        self.ext_adc_label0.config(text="%.2f mV" % ext_adc_value[1])
 
     def sync_fpga(self):
         self.send_reset()
@@ -1847,14 +1880,14 @@ class VFAT3_GUI:
             result[0] = self.check_short_circuit()
             if result[0] == 0:
                 result[1] = self.test_bist()
-                print "Test BIST ok"
+                #print "Test BIST ok"
                 #result.append(self.test_scan_chain())
-                print "Test Scan Chain ok"
+                #print "Test Scan Chain ok"
                 result[2] = self.send_reset()
                 if result[2] == 0:
                     print "Sync ok"
-                    self.read_hw_id()
-                    result[3] = self.test_registers(production="yes")
+                    #self.read_hw_id()
+                    #result[3] = self.test_registers(production="yes")
                     result[4] = self.write_chip_id()
                     result[5] = self.adjust_iref(production="yes")
                     result[6] = self.measure_power('SLEEP')
@@ -1862,10 +1895,10 @@ class VFAT3_GUI:
                     if result[7] == 0 or result[7] == 'y':
                         result[8] = self.scan_cal_dac_fc(production="yes")
                         #self.save_calibration_values_to_file("s")
-                        result[9] = test_data_packets(self, save_result="no")
-                        result[10] = self.run_all_dac_scans(production="yes")
-                        self.set_fe_nominal_values(chip=self.hybrid_model)
-                        result[11] = self.run_scurve(production="yes")
+                        #result[9] = test_data_packets(self, save_result="no")
+                        #result[10] = self.run_all_dac_scans(production="yes")
+                        #self.set_fe_nominal_values(chip=self.hybrid_model)
+                        #result[11] = self.run_scurve(production="yes")
                     else:
                         print "Internal ADCs broken. Abort production test."
 

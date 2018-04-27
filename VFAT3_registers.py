@@ -113,27 +113,26 @@ class GBL_CFG_CTR_3:
         self.Force_TH[0] = int(new_values[13],2)
         self.SEL_COMP_MODE[0] = int(new_values[14:],2)
 
-
-
 register[132] = GBL_CFG_CTR_3()
+
 
 class GBL_CFG_CTR_4:
     def __init__(self):
         self.empty1 = [0, 6]
-        self.VREF_ADC = [1,2]
-        self.Mon_Gain = [0,1]
+        self.VREF_ADC = [1, 2]
+        self.Mon_Gain = [0, 1]
         self.empty2 = [0, 1]
-        self.Monitor_Sel = [0,6]
+        self.Monitor_Sel = [0, 6]
 
-        self.reg_array = [self.empty1,self.VREF_ADC,self.Mon_Gain,self.empty2,self.Monitor_Sel]
+        self.reg_array = [self.empty1, self.VREF_ADC, self.Mon_Gain, self.empty2, self.Monitor_Sel]
 
     def change_values(self, new_values):
-        self.VREF_ADC[0] = int(new_values[6:8],2)
-        self.Mon_Gain[0] = int(new_values[8],2)
-        self.Monitor_Sel[0] = int(new_values[10:],2)
-
+        self.VREF_ADC[0] = int(new_values[6:8], 2)
+        self.Mon_Gain[0] = int(new_values[8], 2)
+        self.Monitor_Sel[0] = int(new_values[10:], 2)
 
 register[133] = GBL_CFG_CTR_4()
+
 
 class GBL_CFG_CTR_5:
     def __init__(self):
@@ -145,8 +144,8 @@ class GBL_CFG_CTR_5:
     def change_values(self, new_values):
         self.Iref[0] = int(new_values[10:], 2)
 
-
 register[134] = GBL_CFG_CTR_5()
+
 
 class GBL_CFG_THR:
     def __init__(self):
@@ -160,6 +159,7 @@ class GBL_CFG_THR:
         self.ARM_DAC[0] = int(new_values[8:],2)
 
 register[135] = GBL_CFG_THR()
+
 
 class GBL_CFG_HYS:
     def __init__(self):

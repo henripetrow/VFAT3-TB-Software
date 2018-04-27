@@ -16,21 +16,21 @@ class FW_interface:
         # Connect the socket to the port where the server is listening
         self.server_address = ('192.168.1.10', 7)
 
-    def execute_req(self, message, no_packets=1, timeout=2, scurve="no"):
+    def execute_req(self, message, no_packets=1, timeout=2, scurve="no", receive=2000):
         # Create a TCP/IP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect(self.server_address)
         self.sock.sendall(bytearray(message))
         if scurve == "yes":
             channels = range(message[3], message[4]+1, message[5])
-        #print message
+        print message
         try:
             self.sock.settimeout(timeout)
             int_data = []
             hex_data = []
             multi_line_data = []
             for k in range(0, no_packets):
-                output = self.sock.recv(3000)
+                output = self.sock.recv(receive)
                 if scurve == "yes":
                     for i in output:
                         hex_value = hex(ord(i))
@@ -49,8 +49,10 @@ class FW_interface:
                             int_data.append(ivalue_dec)
                             value_flag = 0
                     int_data.reverse()
+                    print_data = [int(i) for i in int_data]
                     print "Channel %i:" % channels[k]
-                    print int_data
+                    print print_data
+                    #print int_data
                     multi_line_data.append(int_data)
                     output = multi_line_data
                     int_data = []
@@ -116,7 +118,7 @@ class FW_interface:
         message.append(0x01)  # R/W-byte
         message.extend([int(address_3, 16), int(address_2, 16), int(address_1, 16), int(address_0, 16)])
         message.extend([0, 0, int(data_1, 2), int(data_0, 2)])
-        output = self.execute_req(message)
+        output = self.execute_req(message, receive=10)
         return output
 
     def read_register(self, address): # Address in dec
@@ -130,7 +132,7 @@ class FW_interface:
         message = [0xca, 0x00, 0x01]
         message.append(0x00)  # R/W-byte
         message.extend([int(address_3, 16), int(address_2, 16), int(address_1, 16), int(address_0, 16)])
-        output = self.execute_req(message)
+        output = self.execute_req(message, receive=10)
         output_bin = []
         output_bin.extend(dec_to_bin_with_stuffing(int(output[3], 16), 8))
         output_bin.extend(dec_to_bin_with_stuffing(int(output[2], 16), 8))
@@ -160,7 +162,7 @@ class FW_interface:
         return output
 
     def run_scurve(self, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, delay, arm_dac, triggers=100):
-        message = [0xca, 0x00, 0x08, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, 1, 0x0, 0x0, 0, triggers, arm_dac, 8, 0, delay, 0x01, 0xf4]
+        message = [0xca, 0x00, 0x08, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, 1, 0x0, 0x0, 0, triggers, arm_dac, 19, 0, delay, 0x01, 0xf4]
         nr_channels = stop_ch - start_ch + 1
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
         return output
@@ -171,19 +173,19 @@ class FW_interface:
         return output
 
     def read_ext_adc_imon(self):
-        message = [0xca, 0x00, 0x03, 0x01]
-        output = self.execute_req(message,  timeout=30)
+        message = [0xca, 0x00, 0x03, 0x49, 0x01]
+        output = self.execute_req(message,  timeout=30, receive=20)
         return output
 
     def read_ext_adc_vmon(self):
-        message = [0xca, 0x00, 0x03, 0x00]
-        output = self.execute_req(message,  timeout=30)
+        message = [0xca, 0x00, 0x03, 0x49, 0x00]
+        output = self.execute_req(message,  timeout=30, receive=20)
         return output
 
     def read_ext_adc_vbgr(self):
-        message = [0xca, 0x00, 0x03, 0x02]
-        #output = self.execute_req(message,  timeout=30)
-        return ['0x00', '0x00']
+        message = [0xca, 0x00, 0x03, 0x49, 0x02]
+        output = self.execute_req(message,  timeout=30, receive=20)
+        return output
 
     def run_bist(self):
         message = [0xca, 0x00, 0x0a]

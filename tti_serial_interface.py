@@ -6,7 +6,7 @@ class TtiSerialInterface:
 
     def __init__(self, baudrate=9600):
         # test which port is the right one by requesting ID.
-        self.serial_port = "/dev/ttyACM1"
+        self.serial_port = "/dev/ttyACM0"
         # ports = list(serial.tools.list_ports.comports())
         # for p in ports:
         #     print p

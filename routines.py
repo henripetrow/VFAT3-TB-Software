@@ -66,7 +66,7 @@ def find_threshold(obj):
 
 def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes",
                           dac_range=[220, 240], delay=50, bc_between_calpulses=2000, pulsestretch=3, latency=45,
-                          cal_phi=0, folder="scurve", triggers=30):
+                          cal_phi=0, folder="scurve", triggers=100):
     mean_th_fc = "n"
     all_ch_data = "n"
     noisy_channels = "n"
@@ -98,7 +98,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.write_register(131)
             obj.register[139].CAL_DUR[0] = 200
             obj.write_register(139)
-            obj.register[132].PT[0] = 15
+            obj.register[132].PT[0] = 2
             obj.register[132].SEL_COMP_MODE[0] = 1
             obj.write_register(132)
             obj.register[0xffff].RUN[0] = 1
@@ -637,20 +637,26 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     full_data = []
     mean_list = []
     rms_list = []
+    rms_return_list = []
     dead_channels = []
     noisy_channels = []
 
 
-    fig = plt.figure(figsize=(10, 20))
-    sub1 = plt.subplot(511)
+    #fig = plt.figure(figsize=(10, 20))
+    #sub1 = plt.subplot(511)
 
     for i, channel in enumerate(channels):
+        print ""
+        print "Channel: %i" % channel
         diff = []
 
         mean_calc = 0
         summ = 0
         data = scurve_data[i]
+        print_data = [int(i) for i in data]
+        print print_data
         if all(v == 0 for v in data):
+            print "Dead channel."
             dead_channels.append(channel)
             mean_list.append(0)
             rms_list.append(0)
@@ -670,6 +676,9 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                 mean = mean_calc / float(summ)
             else:
                 mean = 0
+            if mean <= 0 or mean > 70:
+                print "Invalid threshold."
+                mean = 0
             mean_list.append(mean)
             l = 1
             rms = 0
@@ -680,17 +689,24 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                 rms = math.sqrt(rms / summ)
             else:
                 rms == 0
-            if rms > 0.7:
+            if 0 >= rms or rms > 0.7:
                 noisy_channels.append(channel)
-            rms_list.append(rms)
+                rms = 0
+            else:
+                rms_list.append(rms)
+
+            print "Threshold: %f" % mean
+            print "enc: %f" % rms
+
             diff.append(mean)
             diff.append(rms)
             full_data.append(diff)
-            plt.plot(dac_values, data)
+            rms_return_list.append(rms)
+
 
     rms_mean = numpy.mean(rms_list)
     rms_rms = numpy.std(rms_list)
-
+    print rms_list
     mean_mean = numpy.mean(mean_list)
     mean_rms = numpy.std(mean_list)
     print "Old Method:"
@@ -702,6 +718,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print dead_channels
 
     if folder != "":
+        fig = plt.figure(figsize=(10, 20))
+        sub1 = plt.subplot(511)
         sub1.set_xlabel('255-CAL_DAC')
         sub1.set_ylabel('%')
         sub1.set_title('S-curves of all channels')
@@ -745,4 +763,4 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
         text = "Results were saved to the folder:\n %s \n" % folder
         obj.add_to_interactive_screen(text)
-    return mean_mean, mean_rms, noisy_channels, dead_channels, rms_list, mean_list
+    return mean_mean, mean_rms, noisy_channels, dead_channels, rms_return_list, mean_list
