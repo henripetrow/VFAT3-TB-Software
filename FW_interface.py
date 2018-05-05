@@ -23,7 +23,7 @@ class FW_interface:
         self.sock.sendall(bytearray(message))
         if scurve == "yes":
             channels = range(message[3], message[4]+1, message[5])
-        print message
+        #print message
         try:
             self.sock.settimeout(timeout)
             int_data = []
@@ -191,3 +191,39 @@ class FW_interface:
         message = [0xca, 0x00, 0x0a]
         output = self.execute_req(message, timeout=30)
         return output
+
+    def read_avdd_power(self):
+        message = [0xca, 0x00, 0x03, 0x48, 0x00]
+        output = self.execute_req(message,  timeout=30, receive=20)
+        avdd_value_hex = "%s%s" % (output[1], output[0][2:])
+        avdd_value_int = int(avdd_value_hex, 16)
+        avdd_value_mv = avdd_value_int * 0.0625
+        #print "AVDD voltage: %f" % avdd_value_mv
+        avdd_value_current = avdd_value_mv * 0.2346 - 4.17
+        avdd_power = avdd_value_current * 1.2
+        print "Power AVDD: %f" % avdd_power
+        return avdd_power
+
+    def read_dvdd_power(self):
+        message = [0xca, 0x00, 0x03, 0x48, 0x01]
+        output = self.execute_req(message,  timeout=30, receive=20)
+        dvdd_value_hex = "%s%s" % (output[1], output[0][2:])
+        dvdd_value_int = int(dvdd_value_hex, 16)
+        dvdd_value_mv = dvdd_value_int * 0.0625
+        dvdd_value_current = dvdd_value_mv * 0.2346 - 4.17
+        dvdd_power = dvdd_value_current * 1.2
+        #print "DVDD voltage: %f" % dvdd_value_mv
+        print "Power DVDD: %f" % dvdd_power
+        return dvdd_power
+
+    def read_iovdd_power(self):
+        message = [0xca, 0x00, 0x03, 0x48, 0x02]
+        output = self.execute_req(message,  timeout=30, receive=20)
+        iovdd_value_hex = "%s%s" % (output[1], output[0][2:])
+        iovdd_value_int = int(iovdd_value_hex, 16)
+        iovdd_value_mv = iovdd_value_int * 0.0625
+        iovdd_value_current = iovdd_value_mv * 0.2346 - 4.17
+        iovdd_power = iovdd_value_current * 2.5
+        print "IOVDD voltage: %f" % iovdd_value_mv
+        print "Power IOVDD: %f" % iovdd_power
+        return iovdd_power

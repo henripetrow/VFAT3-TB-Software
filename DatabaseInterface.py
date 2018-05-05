@@ -11,7 +11,7 @@ class DatabaseInterface:
                           "SD_I_BFCAS", "CAL_DAC"]
         self.dacs_6bit = ["HYST_DAC", "CFD_DAC_1", "CFD_DAC_2", "PRE_I_BSF", "PRE_I_BLCC", "SD_I_BSF"]
         self.table_name = "Production"
-        self.database_name = "Hybrids_test1"
+        self.database_name = "VFAT3_Production"
         self.connection = pymysql.connect(host="localhost", user=self.user, passwd=self.passwd, database=self.database_name)
         self.cursor = self.connection.cursor()
 
@@ -198,13 +198,14 @@ class DatabaseInterface:
         self.set_int("VREF_ADC", value)
 
     def save_vbgr(self, value):
+        print "Saving VBGR value: %f######################3" %value
         self.set_float("V_BGR", value)
 
     def save_adc_offset(self, value):
         self.set_float("BUFFER_OFFSET", value)
 
     def create_xml_file(self):
-        command = "mysql -uroot -proot --xml -e 'SELECT * FROM %s.%s WHERE ChipID = %s' > ./results/hybrid_%s.xml" % (self.database_name, self.table_name, self.name, self.name)
+        command = "mysql -uVFAT3 -p1234 --xml -e 'SELECT * FROM %s.%s WHERE ChipID = %s' > ./results/hybrid_%s.xml" % (self.database_name, self.table_name, self.name, self.name)
         os.system(command)
 
 

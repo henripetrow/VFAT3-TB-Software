@@ -763,4 +763,4 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
         text = "Results were saved to the folder:\n %s \n" % folder
         obj.add_to_interactive_screen(text)
-    return mean_mean, mean_rms, noisy_channels, dead_channels, rms_return_list, mean_list
+    return mean_mean, rms_mean, noisy_channels, dead_channels, rms_return_list, mean_list

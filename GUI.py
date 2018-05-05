@@ -330,7 +330,7 @@ class VFAT3_GUI:
         self.chip_id_label.grid(column=1, row=3, sticky='e')
         self.chip_id_label0 = Label(self.info_border_frame, text="n/a", width=10)
         self.chip_id_label0.grid(column=2, row=3, sticky='w')
-        self.fpga_sync_button = Button(self.info_border_frame, text="Sync FPGA", command=lambda: self.sync_fpga(), width=bwidth)
+        self.fpga_sync_button = Button(self.info_border_frame, text="Connect (Hard Reset)", command=lambda: self.sync_fpga(), width=bwidth)
         self.fpga_sync_button.grid(column=1, row=4, sticky='e')
 
 
@@ -641,6 +641,9 @@ class VFAT3_GUI:
         self.cal_button = Button(self.routines_frame, text="Adjust ADC0 ref", command=lambda: self.adjust_adc0_ref(), width=bwidth)
         self.cal_button.grid(column=1, row=18, sticky='e')
 
+        self.cal_button = Button(self.routines_frame, text="Meas. power", command=lambda: self.measure_power(), width=bwidth)
+        self.cal_button.grid(column=1, row=19, sticky='e')
+
         # ############### S-curve tab #########################################
 
         self.start_channel = 0
@@ -652,7 +655,7 @@ class VFAT3_GUI:
         self.latency = 45
         self.calphi = 0
         self.arm_dac = 100
-        self.start_cal_dac = 210
+        self.start_cal_dac = 220
         self.stop_cal_dac = 240
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
@@ -1082,11 +1085,11 @@ class VFAT3_GUI:
         return new_data
 
     def add_to_interactive_screen(self, text):
-        self.interactive_screen.insert(END,text)
+        self.interactive_screen.insert(END, text)
         self.interactive_screen.see(END)
 
     def clear_interactive_screen(self):
-        self.interactive_screen.delete(1.0,END)
+        self.interactive_screen.delete(1.0, END)
 
     def execute(self, verbose="no"):
         output = self.interfaceFW.launch(register, self.interactive_output_file, self.COM_port)
@@ -1095,7 +1098,7 @@ class VFAT3_GUI:
             self.add_to_interactive_screen(text)
         else:
             if output[0]:
-                #text =  "Received SC replies:\n"
+                # text =  "Received SC replies:\n"
                 # self.add_to_interactive_screen(text)
                 for i in output[0]:
                     if i.info_code == 0:
@@ -1108,12 +1111,12 @@ class VFAT3_GUI:
                             text = "Transaction error.\n"
                             self.add_to_interactive_screen(text)
 
-                    #text = "Transaction ID:%d, %s\n" % (i.transaction_ID, data_ok)
-                    #self.add_to_interactive_screen(text)
+                    # text = "Transaction ID:%d, %s\n" % (i.transaction_ID, data_ok)
+                    # self.add_to_interactive_screen(text)
                     if i.type_ID == 0:
                         pass
-                        #text = "Data:\n %s\n" % i.data
-                        #self.add_to_interactive_screen(text)
+                        # text = "Data:\n %s\n" % i.data
+                        # self.add_to_interactive_screen(text)
 
             if output[1]:
                 if verbose == "yes":
@@ -1218,6 +1221,7 @@ class VFAT3_GUI:
         print vbgr
         print vmon
         adc_offset = vmon - vbgr
+        print adc_offset
         self.register[0xffff].RUN[0] = 0
         self.write_register(0xffff)
         if self.database:
@@ -1279,34 +1283,28 @@ class VFAT3_GUI:
     def check_short_circuit(self):
         error = 0
         time.sleep(0.8)
-        ch1_current = self.tti_if.req_ch1_current()
-        ch2_current = self.tti_if.req_ch2_current()
-        print ch1_current
-        print ch2_current
-        if ch1_current > 0.19 or ch2_current > 0.19:
+        avdd_power = self.interfaceFW.read_avdd_power()
+        dvdd_power = self.interfaceFW.read_dvdd_power()
+        if avdd_power > 100 or dvdd_power > 100:
             text = "Short circuit detected.\n"
-            self.database.save_power(ch1_current, ch2_current, "SLEEP")
+            self.database.save_power(dvdd_power, avdd_power, "SLEEP")
             self.add_to_interactive_screen(text)
             error = 1
         return error
 
-    def measure_power(self, mode):
+    def measure_power(self, mode=""):
         error = 0
-        ch1_current = self.tti_if.req_ch1_current()
-        ch2_current = self.tti_if.req_ch2_current()
-        ch1_voltage = self.tti_if.req_ch1_voltage()
-        ch2_voltage = self.tti_if.req_ch2_voltage()
-        ch1_power = ch1_voltage * ch1_current
-        ch2_power = ch2_voltage * ch2_current
-        print "Power Measurements:"
-        print ch1_power
-        print ch2_power
+        avdd_power = self.interfaceFW.read_avdd_power()
+        dvdd_power = self.interfaceFW.read_dvdd_power()
+        iovdd_power = self.interfaceFW.read_iovdd_power()
 
-        self.database.save_power(ch1_power, ch2_power, mode)
-        if ch1_power > 0.1:
-            error = 1
-        if ch2_power > 0.1:
-            error = 1
+        ch2_power = 0
+        if self.database:
+            self.database.save_power(dvdd_power, avdd_power, mode)
+        # if ch1_power > 0.1:
+        #     error = 1
+        # if ch2_power > 0.1:
+        #     error = 1
         return error
 
     def send_reset(self):
@@ -1332,17 +1330,19 @@ class VFAT3_GUI:
             text = "->Reading the verification board external ADC.\n"
             self.add_to_interactive_screen(text)
 
-        # Vmon
-        value = self.interfaceFW.read_ext_adc_vmon()
-        vmon_value_hex = "%s%s" % (value[1], value[0][2:])
-        vmon_value_int = int(vmon_value_hex, 16)
-        vmon_value_mv = vmon_value_int * 0.0625
 
         # Imon
         value = self.interfaceFW.read_ext_adc_imon()
         imon_value_hex = "%s%s" % (value[1], value[0][2:])
         imon_value_int = int(imon_value_hex, 16)
         imon_value_mv = imon_value_int * 0.0625
+        time.sleep(0.1)
+        # Vmon
+        value = self.interfaceFW.read_ext_adc_vmon()
+        vmon_value_hex = "%s%s" % (value[1], value[0][2:])
+        vmon_value_int = int(vmon_value_hex, 16)
+        vmon_value_mv = vmon_value_int * 0.0625
+        time.sleep(0.1)
 
         # VBGR
         value = self.interfaceFW.read_ext_adc_vbgr()
@@ -1624,7 +1624,7 @@ class VFAT3_GUI:
             run_time = (stop - start)
             text = "\nScan duration: %f sec\n" % run_time
             self.add_to_interactive_screen(text)
-        if self.cal_dac_fcM < 0.1 or self.cal_dac_fcM > 0.3:
+        if self.cal_dac_fcM > -0.1 or self.cal_dac_fcM < -0.3:
             error = 1
         stop_time = time.time()
         run_time = stop_time - start_time
@@ -1876,10 +1876,10 @@ class VFAT3_GUI:
         self.clear_interactive_screen()
         if not self.save_barcode():
             self.unset_calibration_variables()
-            self.tti_if.set_outputs_on()
+            # self.tti_if.set_outputs_on()
             result[0] = self.check_short_circuit()
             if result[0] == 0:
-                result[1] = self.test_bist()
+                #result[1] = self.test_bist()
                 #print "Test BIST ok"
                 #result.append(self.test_scan_chain())
                 #print "Test Scan Chain ok"
@@ -1887,18 +1887,18 @@ class VFAT3_GUI:
                 if result[2] == 0:
                     print "Sync ok"
                     #self.read_hw_id()
-                    #result[3] = self.test_registers(production="yes")
-                    result[4] = self.write_chip_id()
+                    result[3] = self.test_registers(production="yes")
+                    #result[4] = self.write_chip_id()
                     result[5] = self.adjust_iref(production="yes")
                     result[6] = self.measure_power('SLEEP')
                     result[7] = self.adc_calibration(production="yes")
                     if result[7] == 0 or result[7] == 'y':
                         result[8] = self.scan_cal_dac_fc(production="yes")
                         #self.save_calibration_values_to_file("s")
-                        #result[9] = test_data_packets(self, save_result="no")
-                        #result[10] = self.run_all_dac_scans(production="yes")
+                        result[9] = test_data_packets(self, save_result="no")
+                        result[10] = self.run_all_dac_scans(production="yes")
                         #self.set_fe_nominal_values(chip=self.hybrid_model)
-                        #result[11] = self.run_scurve(production="yes")
+                        result[11] = self.run_scurve(production="yes")
                     else:
                         print "Internal ADCs broken. Abort production test."
 
@@ -1932,13 +1932,13 @@ class VFAT3_GUI:
         if self.database:
             self.database.create_xml_file()
         self.unset_calibration_variables()
-        self.tti_if.set_outputs_off()
+        #self.tti_if.set_outputs_off()
 
     def read_hw_id(self):
         value = self.read_register(0x10001, save_value='no')
         value = ''.join(str(e) for e in value)
         if self.database:
-            self.database.save_hw_id_ver(int(value,2))
+            self.database.save_hw_id_ver(int(value, 2))
 
 # ################# SCAN/TEST -FUNCTIONS #############################
 
@@ -1963,15 +1963,16 @@ class VFAT3_GUI:
         #self.increment_chip_id()
         return 1
 
-    def burn_chip_id(self, chip_id=2147483648):
+    def burn_chip_id(self, chip_id=57):
         print "Register value before:"
         print self.read_register(0x10003)
-        self.register[0x10004].PRG_TIME[0] = 800
+        self.register[0x10004].PRG_TIME[0] = 900
 
         chip_id_bin = dec_to_bin_with_stuffing(chip_id, 32)
         chip_id_bin.reverse()
         for i, bit in enumerate(chip_id_bin):
             if bit == 1:
+                time.sleep(0.1)
                 print ""
                 print i
                 self.register[0x10004].PRG_BIT_ADD[0] = i
@@ -1979,6 +1980,7 @@ class VFAT3_GUI:
                 for x in register[0x10004].reg_array:
                     data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
                 print data
+                self.write_register(0x10004)
         print "Register value after:"
         print self.read_register(0x10003)
 
@@ -2068,12 +2070,13 @@ class VFAT3_GUI:
         print line
         return error_counter
 
-    def write_register(self, register_nr):
-        data = []
-        for x in register[register_nr].reg_array:
-            data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
-        #data.reverse()
-        #data_str = ''.join(str(e) for e in data)
+    def write_register(self, register_nr, data = ""):
+        if data == "":
+            data = []
+            for x in register[register_nr].reg_array:
+                data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
+            #data.reverse()
+            #data_str = ''.join(str(e) for e in data)
         self.interfaceFW.write_register(register_nr, data)
 
     def generate_routine(self):

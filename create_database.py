@@ -1,6 +1,6 @@
 import pymysql
 
-connection = pymysql.connect(host="localhost", user="VFAT3", passwd="1234", database="Hybrids_test1")
+connection = pymysql.connect(host="localhost", user="VFAT3", passwd="1234", database="VFAT3_Production")
 cursor = connection.cursor()
 
 
