@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=VFAT3 Test System
+Exec=python /home/hpetrow/VFAT3-TB-Software/GUI.py -no_psu
+Icon=/home/hpetrow/VFAT3-TB-Software/icon.png
+Type=Application
+Terminal=true
+Categories=Production;
