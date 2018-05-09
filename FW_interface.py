@@ -224,6 +224,6 @@ class FW_interface:
         iovdd_value_mv = iovdd_value_int * 0.0625
         iovdd_value_current = iovdd_value_mv * 0.2346 - 4.17
         iovdd_power = iovdd_value_current * 2.5
-        print "IOVDD voltage: %f" % iovdd_value_mv
+        # print "IOVDD voltage: %f" % iovdd_value_mv
         print "Power IOVDD: %f" % iovdd_power
         return iovdd_power

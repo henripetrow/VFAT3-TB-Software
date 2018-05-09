@@ -1294,6 +1294,7 @@ class VFAT3_GUI:
 
     def measure_power(self, mode=""):
         error = 0
+        time.sleep(0.1)
         avdd_power = self.interfaceFW.read_avdd_power()
         dvdd_power = self.interfaceFW.read_dvdd_power()
         iovdd_power = self.interfaceFW.read_iovdd_power()
@@ -1301,10 +1302,12 @@ class VFAT3_GUI:
         ch2_power = 0
         if self.database:
             self.database.save_power(dvdd_power, avdd_power, mode)
-        # if ch1_power > 0.1:
-        #     error = 1
-        # if ch2_power > 0.1:
-        #     error = 1
+            print  dvdd_power
+            print avdd_power
+            # if ch1_power > 0.1:
+            #     error = 1
+            # if ch2_power > 0.1:
+            #     error = 1
         return error
 
     def send_reset(self):
@@ -1889,8 +1892,8 @@ class VFAT3_GUI:
                     #self.read_hw_id()
                     result[3] = self.test_registers(production="yes")
                     #result[4] = self.write_chip_id()
-                    result[5] = self.adjust_iref(production="yes")
                     result[6] = self.measure_power('SLEEP')
+                    result[5] = self.adjust_iref(production="yes")
                     result[7] = self.adc_calibration(production="yes")
                     if result[7] == 0 or result[7] == 'y':
                         result[8] = self.scan_cal_dac_fc(production="yes")
@@ -1932,6 +1935,8 @@ class VFAT3_GUI:
         if self.database:
             self.database.create_xml_file()
         self.unset_calibration_variables()
+        self.register[0xffff].RUN[0] = 0
+        self.write_register(0xffff)
         #self.tti_if.set_outputs_off()
 
     def read_hw_id(self):
