@@ -89,26 +89,55 @@ outF.close()
 
 # 6-bit DACs
 if show_data[0]:
-    for adc in adcs:
-        for dac in dac6bits:
+    for dac in dac6bits:
+        filename = "./%s_%s.xml" % (hybrid, dac)
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError as exc:  # Guard against race condition
+                print "Unable to create directory"
+        data = "<ROOT>\n"
+        data += "<HEADER>\n"
+        data += "<TYPE>\n"
+        data += "<EXTENSION_TABLE_NAME>VFAT3_%s</EXTENSION_TABLE_NAME>\n" % dac
+        data += "<NAME>VFAT3 Production Summary Data</NAME>\n"
+        data += "</TYPE>\n"
+        data += "<RUN>\n"
+        data += "<RUN_TYPE>VFAT3 Production Data</RUN_TYPE>\n"
+        data += "<RUN_NUMBER>1</RUN_NUMBER>\n"
+        data += "<RUN_BEGIN_TIMESTAMP>2016-07-18 13:55:06</RUN_BEGIN_TIMESTAMP>\n"
+        data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
+        data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
+        data += "<LOCATION>TIF</LOCATION>\n"
+        data += "<INITIATED_BY_USER>YourName</INITIATED_BY_USER>\n"
+        data += "</RUN>\n"
+        data += "</HEADER>\n"
+        data += "<DATASET>\n"
+        data += "<COMMENT_DESCRIPTION>GEM VFAT3 Production Summary Data</COMMENT_DESCRIPTION>\n"
+        data += "<VERSION>1</VERSION>\n"
+        data += "<PART>\n"
+        data += "<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n"
+        data += "<SERIAL_NUMBER>%s</SERIAL_NUMBER>\n" % production_data[0]
+        data += "</PART>\n"
+        for adc in adcs:
+            data += "<DATA>\n"
             data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
-            x_data = []
-            y_data = []
             for i, dat in enumerate(data):
                 if dat:
-                    x_data.append(i)
-                    if adc == "ADC0":
-                        y_data.append(dat*adc0m+adc0b)
-                    if adc == "ADC1":
-                        y_data.append(dat*adc1m+adc1b)
-            plt.plot(x_data, y_data, label=dac)
-    plt.legend()
-    plt.title("%s 6-bit DACs" % hybrid)
-    plt.xlim([0, 100])
-    plt.ylabel("ADC value [mV]")
-    plt.xlabel("DAC count")
-    plt.grid(True)
-    plt.show()
+                    data += "< ADC_NAME > %s </ADC_NAME >" % adc
+                    data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
+                    data += "< ADC_VALUE > %s </ADC_VALUE >" % dat
+                else:
+                    data += "< ADC_NAME > %s </ADC_NAME >" % adc
+                    data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
+                    data += "< ADC_VALUE > NULL </ADC_VALUE >"
+            data += "</DATA>\n"
+        data += "</DATASET>\n"
+        data += "</ROOT>\n"
+        outF = open(filename, "w")
+        outF.write(data)
+        outF.close()
+        break
 
 # 8-bit DACs
 if show_data[1]:
