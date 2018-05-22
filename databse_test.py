@@ -1,5 +1,6 @@
 from DatabaseInterfaceBrowse import *
 import matplotlib.pyplot as plt
+import os
 
 database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids()
@@ -16,46 +17,16 @@ hybrid = hybrid_list[int(hybrid_nr)]
 show_data = [0, 0, 0, 0]
 
 production_data = database.get_production_results(hybrid)
-adc0m = production_data[5]
-adc0b = production_data[6]
-adc1m = production_data[7]
-adc1b = production_data[8]
-cal_dacm = production_data[9]
-cal_dacb = production_data[10]
-print ""
-print "------------------------"
-print hybrid
-print "------------------------"
-print "HV_ID_VER:\t %s" % production_data[1]
-print "BUFFER_OFFSET:\t %s" % production_data[2]
-print "VREF_ADC:\t %s" % production_data[3]
-print "V_BGR:\t\t %s" % production_data[4]
-print "Iref:\t\t %s" % production_data[11]
-print "ADC0:\t\t %s %s" % (adc0m, adc0b)
-print "ADC1:\t\t %s %s" % (adc1m, adc1b)
-print "CAL_DAC:\t %s + %s" % (cal_dacm, cal_dacb)
-print "Register Test:\t %s" % production_data[14]
-print "EC errors:\t %s" % production_data[15]
-print "BC errors:\t %s" % production_data[16]
-print "CRC errors:\t %s" % production_data[17]
-print "Hit errors:\t %s" % production_data[18]
-print "Noisy Channels:\t %s" % production_data[19]
-print "Dead Channels:\t %s" % production_data[20]
-print "BIST:\t\t %s" % production_data[21]
-print "Scan Chain:\t %s" % production_data[22]
-print "SLEEP POWER:\t A: %s D: %s" % (production_data[23], production_data[24])
-print "RUN POWER:\t A: %s D: %s" % (production_data[25], production_data[26])
-print "------------------------"
 
-# filename = "%s_Production_table.xml" % hybrid
-# if not os.path.exists(os.path.dirname(filename)):
-#     try:
-#         os.makedirs(os.path.dirname(filename))
-#     except OSError as exc:  # Guard against race condition
-#         print "Unable to create directory"
-# text = "Results were saved to the folder:\n %s \n" % filename
-#
-# outF = open(filename, "w")
+
+filename = "./%s_Production_table.xml" % hybrid
+if not os.path.exists(os.path.dirname(filename)):
+    try:
+        os.makedirs(os.path.dirname(filename))
+    except OSError as exc:  # Guard against race condition
+        print "Unable to create directory"
+
+
 data = "<ROOT>\n"
 data += "<HEADER>\n"
 data += "<TYPE>\n"
@@ -77,6 +48,7 @@ data += "</HEADER>\n"
 data += "<DATASET>\n"
 data += "<COMMENT_DESCRIPTION>GEM VFAT3 Production Summary Data</COMMENT_DESCRIPTION>\n"
 data += "<VERSION>1</VERSION>\n"
+data += "<PART>\n"
 data += "<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n"
 data += "<SERIAL_NUMBER>%s</SERIAL_NUMBER>\n" % production_data[0]
 data += "</PART><DATA>\n"
@@ -108,8 +80,11 @@ data += "<RUN_PWR_ANALOG>%s</RUN_PWR_ANALOG>\n" % production_data[25]
 data += "<RUN_PWR_DIGITAL>%s</RUN_PWR_DIGITAL>\n" % production_data[26]
 data += "</DATA>\n"
 data += "</DATASET>\n"
+data += "</ROOT>\n"
 
-print data
+outF = open(filename, "w")
+outF.write(data)
+outF.close()
 
 
 # 6-bit DACs
