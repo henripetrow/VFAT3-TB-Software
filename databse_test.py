@@ -1,6 +1,7 @@
 from DatabaseInterfaceBrowse import *
-import matplotlib.pyplot as plt
 import os
+
+user = "Henri Petrow"
 
 database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids()
@@ -14,12 +15,12 @@ dac6bits = ["CFD_DAC_1", "CFD_DAC_2", "HYST_DAC", "PRE_I_BLCC", "PRE_I_BSF", "SD
 dac8bits = ["ARM_DAC", "CAL_DAC", "PRE_VREF", "PRE_I_BIT", "SD_I_BDIFF", "SH_I_BDIFF", "SD_I_BFCAS", "SH_I_BFCAS", "ZCC_DAC"]
 dac_table = []
 hybrid = hybrid_list[int(hybrid_nr)]
-show_data = [0, 0, 0, 0]
+show_data = [1, 1, 1, 1, 1, 1]
 
 production_data = database.get_production_results(hybrid)
 
 
-filename = "./%s_Production_table.xml" % hybrid
+filename = "./results/%s_PRODUCTION_SUMMARY.xml" % hybrid
 if not os.path.exists(os.path.dirname(filename)):
     try:
         os.makedirs(os.path.dirname(filename))
@@ -40,7 +41,7 @@ data += "<RUN_BEGIN_TIMESTAMP>2016-07-18 13:55:06</RUN_BEGIN_TIMESTAMP>\n"
 data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
 data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
 data += "<LOCATION>TIF</LOCATION>\n"
-data += "<INITIATED_BY_USER>YourName</INITIATED_BY_USER>\n"
+data += "<INITIATED_BY_USER>%s</INITIATED_BY_USER>\n" % user
 data += "</RUN>\n"
 data += "</HEADER>\n"
 
@@ -87,10 +88,13 @@ outF.write(data)
 outF.close()
 
 
-# 6-bit DACs
+dac_list = dac6bits
+dac_list.extend(dac8bits)
+
+
 if show_data[0]:
-    for dac in dac6bits:
-        filename = "./%s_%s.xml" % (hybrid, dac)
+    for dac in dac_list:
+        filename = "./results/%s_%s.xml" % (hybrid, dac)
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
@@ -109,7 +113,7 @@ if show_data[0]:
         data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
         data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
         data += "<LOCATION>TIF</LOCATION>\n"
-        data += "<INITIATED_BY_USER>YourName</INITIATED_BY_USER>\n"
+        data += "<INITIATED_BY_USER>%s</INITIATED_BY_USER>\n" % user
         data += "</RUN>\n"
         data += "</HEADER>\n"
         data += "<DATASET>\n"
@@ -121,8 +125,8 @@ if show_data[0]:
         data += "</PART>\n"
         for adc in adcs:
             data += "<DATA>\n"
-            data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
-            for i, dat in enumerate(data):
+            db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
+            for i, dat in enumerate(db_data):
                 if dat:
                     data += "< ADC_NAME > %s </ADC_NAME >" % adc
                     data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
@@ -137,64 +141,292 @@ if show_data[0]:
         outF = open(filename, "w")
         outF.write(data)
         outF.close()
-        break
 
-# 8-bit DACs
-if show_data[1]:
-    for adc in adcs:
-        for dac in dac8bits:
-            data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
-            x_data = []
-            y_data = []
-            for i, dat in enumerate(data):
-                if dat:
-                    x_data.append(i)
-                    if adc == "ADC0":
-                        y_data.append(dat*adc0m+adc0b)
-                    if adc == "ADC1":
-                        y_data.append(dat*adc1m+adc1b)
-            plt.plot(x_data, y_data, label=dac)
-    plt.legend(prop={'size': 10})
-    plt.title("%s 8-bit DACs" % hybrid)
-    plt.xlim([0, 400])
-    plt.ylabel("ADC value [mV]")
-    plt.xlabel("DAC count")
-    plt.grid(True)
-    plt.show()
 
 # Thresholds
-if show_data[2]:
-    data = database.get_table_values(hybrid, "Threshold")
-    x_data = range(0, 128)
-    if production_data[12]:
-        mean_data = [production_data[12]]*128
-        plt.plot(x_data, mean_data)
-    plt.plot(x_data, data)
-    if production_data[12]:
-        plt.text(80, 8, "Mean Threshold:\n %f" % production_data[12], bbox=dict(alpha=0.5))
-    plt.plot(x_data, data)
-    plt.title("%s Threshold" % hybrid)
-    plt.ylim([0, 10])
-    plt.xlim([0, 128])
-    plt.xlabel("Channel")
-    plt.ylabel("Threshold [fC]")
-    plt.grid(True)
-    plt.show()
+if show_data[1]:
+    filename = "./results/%s_THRESHOLD.xml" % hybrid
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+    data = "<ROOT>\n"
+    data += "<HEADER>\n"
+    data += "<TYPE>\n"
+    data += "<EXTENSION_TABLE_NAME>VFAT3_THRESHOLD</EXTENSION_TABLE_NAME>\n"
+    data += "<NAME>VFAT3 Production Summary Data</NAME>\n"
+    data += "</TYPE>\n"
+    data += "<RUN>\n"
+    data += "<RUN_TYPE>VFAT3 Production Data</RUN_TYPE>\n"
+    data += "<RUN_NUMBER>1</RUN_NUMBER>\n"
+    data += "<RUN_BEGIN_TIMESTAMP>2016-07-18 13:55:06</RUN_BEGIN_TIMESTAMP>\n"
+    data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
+    data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
+    data += "<LOCATION>TIF</LOCATION>\n"
+    data += "<INITIATED_BY_USER>%s</INITIATED_BY_USER>\n" % user
+    data += "</RUN>\n"
+    data += "</HEADER>\n"
+    data += "<DATASET>\n"
+    data += "<COMMENT_DESCRIPTION>GEM VFAT3 Production Summary Data</COMMENT_DESCRIPTION>\n"
+    data += "<VERSION>1</VERSION>\n"
+    data += "<PART>\n"
+    data += "<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n"
+    data += "<SERIAL_NUMBER>%s</SERIAL_NUMBER>\n" % production_data[0]
+    data += "</PART>\n"
+    db_data = database.get_table_values(hybrid, "Threshold")
+    for i, dat in enumerate(db_data):
+        if dat:
+            data += "<CHANNEL> %s </CHANNEL>" % i
+            data += "<THR_VALUE> %s </THR_VALUE>" % dat
+        else:
+            data += "<CHANNEL> %s </CHANNEL>" % i
+            data += "<THR_VALUE> NULL </THR_VALUE>"
+    data += "</DATA>\n"
+    data += "</DATASET>\n"
+    data += "</ROOT>\n"
+    outF = open(filename, "w")
+    outF.write(data)
+    outF.close()
 
 # enc
+if show_data[2]:
+    filename = "./results/%s_ENC.xml" % hybrid
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+    data = "<ROOT>\n"
+    data += "<HEADER>\n"
+    data += "<TYPE>\n"
+    data += "<EXTENSION_TABLE_NAME>VFAT3_ENC</EXTENSION_TABLE_NAME>\n"
+    data += "<NAME>VFAT3 Production Summary Data</NAME>\n"
+    data += "</TYPE>\n"
+    data += "<RUN>\n"
+    data += "<RUN_TYPE>VFAT3 Production Data</RUN_TYPE>\n"
+    data += "<RUN_NUMBER>1</RUN_NUMBER>\n"
+    data += "<RUN_BEGIN_TIMESTAMP>2016-07-18 13:55:06</RUN_BEGIN_TIMESTAMP>\n"
+    data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
+    data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
+    data += "<LOCATION>TIF</LOCATION>\n"
+    data += "<INITIATED_BY_USER>%s</INITIATED_BY_USER>\n" % user
+    data += "</RUN>\n"
+    data += "</HEADER>\n"
+    data += "<DATASET>\n"
+    data += "<COMMENT_DESCRIPTION>GEM VFAT3 Production Summary Data</COMMENT_DESCRIPTION>\n"
+    data += "<VERSION>1</VERSION>\n"
+    data += "<PART>\n"
+    data += "<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n"
+    data += "<SERIAL_NUMBER>%s</SERIAL_NUMBER>\n" % production_data[0]
+    data += "</PART>\n"
+    db_data = database.get_table_values(hybrid, "enc")
+    for i, dat in enumerate(db_data):
+        if dat:
+            data += "<CHANNEL> %s </CHANNEL>" % i
+            data += "<ENC_VALUE> %s </THR_VALUE>" % dat
+        else:
+            data += "<CHANNEL> %s </CHANNEL>" % i
+            data += "<ENC_VALUE> NULL </THR_VALUE>"
+    data += "</DATA>\n"
+    data += "</DATASET>\n"
+    data += "</ROOT>\n"
+    outF = open(filename, "w")
+    outF.write(data)
+    outF.close()
+    if show_data[0]:
+        for dac in dac_list:
+            filename = "./results/%s_%s.xml" % (hybrid, dac)
+            if not os.path.exists(os.path.dirname(filename)):
+                try:
+                    os.makedirs(os.path.dirname(filename))
+                except OSError as exc:  # Guard against race condition
+                    print "Unable to create directory"
+            data = "<ROOT>\n"
+            data += "<HEADER>\n"
+            data += "<TYPE>\n"
+            data += "<EXTENSION_TABLE_NAME>VFAT3_%s</EXTENSION_TABLE_NAME>\n" % dac
+            data += "<NAME>VFAT3 Production Summary Data</NAME>\n"
+            data += "</TYPE>\n"
+            data += "<RUN>\n"
+            data += "<RUN_TYPE>VFAT3 Production Data</RUN_TYPE>\n"
+            data += "<RUN_NUMBER>1</RUN_NUMBER>\n"
+            data += "<RUN_BEGIN_TIMESTAMP>2016-07-18 13:55:06</RUN_BEGIN_TIMESTAMP>\n"
+            data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
+            data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
+            data += "<LOCATION>TIF</LOCATION>\n"
+            data += "<INITIATED_BY_USER>%s</INITIATED_BY_USER>\n" % user
+            data += "</RUN>\n"
+            data += "</HEADER>\n"
+            data += "<DATASET>\n"
+            data += "<COMMENT_DESCRIPTION>GEM VFAT3 Production Summary Data</COMMENT_DESCRIPTION>\n"
+            data += "<VERSION>1</VERSION>\n"
+            data += "<PART>\n"
+            data += "<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n"
+            data += "<SERIAL_NUMBER>%s</SERIAL_NUMBER>\n" % production_data[0]
+            data += "</PART>\n"
+            for adc in adcs:
+                data += "<DATA>\n"
+                db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
+                for i, dat in enumerate(db_data):
+                    if dat:
+                        data += "< ADC_NAME > %s </ADC_NAME >" % adc
+                        data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
+                        data += "< ADC_VALUE > %s </ADC_VALUE >" % dat
+                    else:
+                        data += "< ADC_NAME > %s </ADC_NAME >" % adc
+                        data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
+                        data += "< ADC_VALUE > NULL </ADC_VALUE >"
+                data += "</DATA>\n"
+            data += "</DATASET>\n"
+            data += "</ROOT>\n"
+            outF = open(filename, "w")
+            outF.write(data)
+            outF.close()
+
+
 if show_data[3]:
-    data = database.get_table_values(hybrid, "enc")
-    x_data = range(0, 128)
-    if production_data[13]:
-        mean_data = [production_data[13]]*128
-        plt.plot(x_data, mean_data)
-    plt.plot(x_data, data)
-    if production_data[13]:
-        plt.text(100, 0.8, "Mean enc:\n %f" % production_data[13], bbox=dict(alpha=0.5))
-    plt.title("%s enc" % hybrid)
-    plt.ylim([0, 1])
-    plt.xlim([0, 128])
-    plt.xlabel("Channel")
-    plt.ylabel("enc [fC]")
-    plt.grid(True)
-    plt.show()
+    dac = "CAL_LUT"
+    filename = "./results/%s_%s.xml" % (hybrid, dac)
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+    data = "<ROOT>\n"
+    data += "<HEADER>\n"
+    data += "<TYPE>\n"
+    data += "<EXTENSION_TABLE_NAME>VFAT3_%s</EXTENSION_TABLE_NAME>\n" % dac
+    data += "<NAME>VFAT3 Production Summary Data</NAME>\n"
+    data += "</TYPE>\n"
+    data += "<RUN>\n"
+    data += "<RUN_TYPE>VFAT3 Production Data</RUN_TYPE>\n"
+    data += "<RUN_NUMBER>1</RUN_NUMBER>\n"
+    data += "<RUN_BEGIN_TIMESTAMP>2016-07-18 13:55:06</RUN_BEGIN_TIMESTAMP>\n"
+    data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
+    data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
+    data += "<LOCATION>TIF</LOCATION>\n"
+    data += "<INITIATED_BY_USER>%s</INITIATED_BY_USER>\n" % user
+    data += "</RUN>\n"
+    data += "</HEADER>\n"
+    data += "<DATASET>\n"
+    data += "<COMMENT_DESCRIPTION>GEM VFAT3 Production Summary Data</COMMENT_DESCRIPTION>\n"
+    data += "<VERSION>1</VERSION>\n"
+    data += "<PART>\n"
+    data += "<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n"
+    data += "<SERIAL_NUMBER>%s</SERIAL_NUMBER>\n" % production_data[0]
+    data += "</PART>\n"
+    for adc in adcs:
+        data += "<DATA>\n"
+        db_data = database.get_table_values(hybrid, "%s_%s" % (adc, dac))
+        for i, dat in enumerate(db_data):
+            if dat:
+                data += "< ADC_NAME > %s </ADC_NAME >" % adc
+                data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
+                data += "< ADC_VALUE > %s </ADC_VALUE >" % dat
+            else:
+                data += "< ADC_NAME > %s </ADC_NAME >" % adc
+                data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
+                data += "< ADC_VALUE > NULL </ADC_VALUE >"
+        data += "</DATA>\n"
+    data += "</DATASET>\n"
+    data += "</ROOT>\n"
+    outF = open(filename, "w")
+    outF.write(data)
+    outF.close()
+
+
+if show_data[4]:
+    dac = "CAL_DAC_FC"
+    filename = "./results/%s_%s.xml" % (hybrid, dac)
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+    data = "<ROOT>\n"
+    data += "<HEADER>\n"
+    data += "<TYPE>\n"
+    data += "<EXTENSION_TABLE_NAME>VFAT3_%s</EXTENSION_TABLE_NAME>\n" % dac
+    data += "<NAME>VFAT3 Production Summary Data</NAME>\n"
+    data += "</TYPE>\n"
+    data += "<RUN>\n"
+    data += "<RUN_TYPE>VFAT3 Production Data</RUN_TYPE>\n"
+    data += "<RUN_NUMBER>1</RUN_NUMBER>\n"
+    data += "<RUN_BEGIN_TIMESTAMP>2016-07-18 13:55:06</RUN_BEGIN_TIMESTAMP>\n"
+    data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
+    data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
+    data += "<LOCATION>TIF</LOCATION>\n"
+    data += "<INITIATED_BY_USER>%s</INITIATED_BY_USER>\n" % user
+    data += "</RUN>\n"
+    data += "</HEADER>\n"
+    data += "<DATASET>\n"
+    data += "<COMMENT_DESCRIPTION>GEM VFAT3 Production Summary Data</COMMENT_DESCRIPTION>\n"
+    data += "<VERSION>1</VERSION>\n"
+    data += "<PART>\n"
+    data += "<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n"
+    data += "<SERIAL_NUMBER>%s</SERIAL_NUMBER>\n" % production_data[0]
+    data += "</PART>\n"
+    data += "<DATA>\n"
+    db_data = database.get_table_values(hybrid, "%s" % dac)
+    for i, dat in enumerate(db_data):
+        if dat:
+            data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
+            data += "< CHRG_VALUE > %s </CHRG_VALUE >" % dat
+        else:
+            data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
+            data += "< CHRG_VALUE > NULL </CHRG_VALUE >"
+    data += "</DATA>\n"
+    data += "</DATASET>\n"
+    data += "</ROOT>\n"
+    outF = open(filename, "w")
+    outF.write(data)
+    outF.close()
+
+
+if show_data[5]:
+    dac = "EXT_ADC_CAL_LUT"
+    filename = "./results/%s_%s.xml" % (hybrid, dac)
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+    data = "<ROOT>\n"
+    data += "<HEADER>\n"
+    data += "<TYPE>\n"
+    data += "<EXTENSION_TABLE_NAME>VFAT3_%s</EXTENSION_TABLE_NAME>\n" % dac
+    data += "<NAME>VFAT3 Production Summary Data</NAME>\n"
+    data += "</TYPE>\n"
+    data += "<RUN>\n"
+    data += "<RUN_TYPE>VFAT3 Production Data</RUN_TYPE>\n"
+    data += "<RUN_NUMBER>1</RUN_NUMBER>\n"
+    data += "<RUN_BEGIN_TIMESTAMP>2016-07-18 13:55:06</RUN_BEGIN_TIMESTAMP>\n"
+    data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
+    data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
+    data += "<LOCATION>TIF</LOCATION>\n"
+    data += "<INITIATED_BY_USER>%s</INITIATED_BY_USER>\n" % user
+    data += "</RUN>\n"
+    data += "</HEADER>\n"
+    data += "<DATASET>\n"
+    data += "<COMMENT_DESCRIPTION>GEM VFAT3 Production Summary Data</COMMENT_DESCRIPTION>\n"
+    data += "<VERSION>1</VERSION>\n"
+    data += "<PART>\n"
+    data += "<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n"
+    data += "<SERIAL_NUMBER>%s</SERIAL_NUMBER>\n" % production_data[0]
+    data += "</PART>\n"
+    data += "<DATA>\n"
+    db_data = database.get_table_values(hybrid, "%s" % dac)
+    for i, dat in enumerate(db_data):
+        if dat:
+            data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
+            data += "< ADC_VALUE > %s </ADC_VALUE >" % dat
+        else:
+            data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
+            data += "< ADC_VALUE > NULL </ADC_VALUE >"
+    data += "</DATA>\n"
+    data += "</DATASET>\n"
+    data += "</ROOT>\n"
+    outF = open(filename, "w")
+    outF.write(data)
+    outF.close()
