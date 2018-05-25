@@ -1971,13 +1971,13 @@ class VFAT3_GUI:
     def burn_chip_id(self, chip_id=57):
         print "Register value before:"
         print self.read_register(0x10003)
-        self.register[0x10004].PRG_TIME[0] = 900
+        self.register[0x10004].PRG_TIME[0] = 2000
 
         chip_id_bin = dec_to_bin_with_stuffing(chip_id, 32)
         chip_id_bin.reverse()
         for i, bit in enumerate(chip_id_bin):
             if bit == 1:
-                time.sleep(0.1)
+                time.sleep(1)
                 print ""
                 print i
                 self.register[0x10004].PRG_BIT_ADD[0] = i
@@ -2075,7 +2075,7 @@ class VFAT3_GUI:
         print line
         return error_counter
 
-    def write_register(self, register_nr, data = ""):
+    def write_register(self, register_nr, data=""):
         if data == "":
             data = []
             for x in register[register_nr].reg_array:

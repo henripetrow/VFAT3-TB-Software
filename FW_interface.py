@@ -23,7 +23,7 @@ class FW_interface:
         self.sock.sendall(bytearray(message))
         if scurve == "yes":
             channels = range(message[3], message[4]+1, message[5])
-        #print message
+        print message
         try:
             self.sock.settimeout(timeout)
             int_data = []
@@ -110,14 +110,27 @@ class FW_interface:
         address_0 = address_hex[8:10]
 
         # Data from bit-string to hex bytes
-        data_0 = value[8:16]
-        data_1 = value[0:8]
+        print value
+        if len(value) == 16:
+            data_0 = value[8:16]
+            data_1 = value[0:8]
+            data_2 = [0]
+            data_3 = [0]
+        elif len(value) == 32:
+            data_0 = value[24:32]
+            data_1 = value[16:24]
+            data_2 = value[8:16]
+            data_3 = value[0:8]
+        else:
+            print "Invalid write -data."
         data_0 = ''.join(str(e) for e in data_0)
         data_1 = ''.join(str(e) for e in data_1)
+        data_2 = ''.join(str(e) for e in data_2)
+        data_3 = ''.join(str(e) for e in data_3)
         message = [0xca, 0x00, 0x01]
         message.append(0x01)  # R/W-byte
         message.extend([int(address_3, 16), int(address_2, 16), int(address_1, 16), int(address_0, 16)])
-        message.extend([0, 0, int(data_1, 2), int(data_0, 2)])
+        message.extend([int(data_3, 2), int(data_2, 2), int(data_1, 2), int(data_0, 2)])
         output = self.execute_req(message, receive=10)
         return output
 
