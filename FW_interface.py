@@ -23,7 +23,7 @@ class FW_interface:
         self.sock.sendall(bytearray(message))
         if scurve == "yes":
             channels = range(message[3], message[4]+1, message[5])
-        print message
+        # print message
         try:
             self.sock.settimeout(timeout)
             int_data = []

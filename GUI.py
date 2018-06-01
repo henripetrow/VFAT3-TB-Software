@@ -1294,8 +1294,9 @@ class VFAT3_GUI:
 
     def measure_power(self, mode=""):
         error = 0
-        time.sleep(0.1)
+        time.sleep(0.2)
         avdd_power = self.interfaceFW.read_avdd_power()
+        time.sleep(0.2)
         dvdd_power = self.interfaceFW.read_dvdd_power()
         iovdd_power = self.interfaceFW.read_iovdd_power()
 
@@ -1700,7 +1701,7 @@ class VFAT3_GUI:
         self.hw_id_ver_label0.config(text="%x" % value)
         output = self.read_register(0x10003, save_value='no')
         value = int(''.join(map(str, output)), 2)
-        self.chip_id_label0.config(text="%x" % value)
+        self.chip_id_label0.config(text="%i" % value)
         self.toggle_run_bit(change_value="no")
 
     def send_cal_trigger(self):
@@ -1902,6 +1903,7 @@ class VFAT3_GUI:
                         result[10] = self.run_all_dac_scans(production="yes")
                         #self.set_fe_nominal_values(chip=self.hybrid_model)
                         result[11] = self.run_scurve(production="yes")
+                        # self.burn_chip_id(chip_id=self.database.name)
                     else:
                         print "Internal ADCs broken. Abort production test."
 
@@ -1937,6 +1939,9 @@ class VFAT3_GUI:
         self.unset_calibration_variables()
         self.register[0xffff].RUN[0] = 0
         self.write_register(0xffff)
+        print "hybrid number."
+        print self.database.name
+        hybrid_browser(self.database.name)
         #self.tti_if.set_outputs_off()
 
     def read_hw_id(self):

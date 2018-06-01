@@ -213,7 +213,7 @@ def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
             scurves_ag[ch].Write()
         thr_fc = fit_f.GetParameter(0)
         enc_fc = fit_f.GetParameter(1)
-        if enc_fc >= 0.7:      # Limit for noisy channel.
+        if enc_fc >= 0.2:      # Limit for noisy channel.
             if ch not in dead_channels:
                 noisy_channels.append(ch)
                 thr_h.Fill(fit_f.GetParameter(0))

@@ -48,7 +48,6 @@ print "RUN POWER:\t A: %s D: %s" % (production_data[25], production_data[26])
 print "------------------------"
 
 
-
 # 6-bit DACs
 if show_data[0]:
     for adc in adcs:
@@ -71,6 +70,7 @@ if show_data[0]:
     plt.xlabel("DAC count")
     plt.grid(True)
     plt.show()
+
 
 # 8-bit DACs
 if show_data[1]:
@@ -95,11 +95,12 @@ if show_data[1]:
     plt.grid(True)
     plt.show()
 
+
 # Thresholds
 if show_data[2]:
     data = database.get_table_values(hybrid, "Threshold")
     x_data = range(0, 128)
-    if production_data[12]:
+    if production_data[12]:  # Plot the mean value as horizontal line if the value exists.
         mean_data = [production_data[12]]*128
         plt.plot(x_data, mean_data)
     plt.plot(x_data, data)
@@ -114,11 +115,12 @@ if show_data[2]:
     plt.grid(True)
     plt.show()
 
+
 # enc
 if show_data[3]:
     data = database.get_table_values(hybrid, "enc")
     x_data = range(0, 128)
-    if production_data[13]:
+    if production_data[13]:  # Plot the mean value as horizontal line if the value exists.
         mean_data = [production_data[13]]*128
         plt.plot(x_data, mean_data)
     plt.plot(x_data, data)

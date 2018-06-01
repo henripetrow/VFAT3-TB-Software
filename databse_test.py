@@ -39,7 +39,7 @@ data += "<RUN_TYPE>VFAT3 Production Data</RUN_TYPE>\n"
 data += "<RUN_NUMBER>1</RUN_NUMBER>\n"
 data += "<RUN_BEGIN_TIMESTAMP>2016-07-18 13:55:06</RUN_BEGIN_TIMESTAMP>\n"
 data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
-data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
+data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERN</COMMENT_DESCRIPTION>\n"
 data += "<LOCATION>TIF</LOCATION>\n"
 data += "<INITIATED_BY_USER>%s</INITIATED_BY_USER>\n" % user
 data += "</RUN>\n"
@@ -208,7 +208,7 @@ if show_data[2]:
     data += "<RUN_NUMBER>1</RUN_NUMBER>\n"
     data += "<RUN_BEGIN_TIMESTAMP>2016-07-18 13:55:06</RUN_BEGIN_TIMESTAMP>\n"
     data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
-    data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
+    data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERN</COMMENT_DESCRIPTION>\n"
     data += "<LOCATION>TIF</LOCATION>\n"
     data += "<INITIATED_BY_USER>%s</INITIATED_BY_USER>\n" % user
     data += "</RUN>\n"
@@ -355,7 +355,7 @@ if show_data[4]:
     data += "<RUN_NUMBER>1</RUN_NUMBER>\n"
     data += "<RUN_BEGIN_TIMESTAMP>2016-07-18 13:55:06</RUN_BEGIN_TIMESTAMP>\n"
     data += "<RUN_END_TIMESTAMP>2016-07-18 14:55:03</RUN_END_TIMESTAMP>\n"
-    data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERNV</COMMENT_DESCRIPTION>\n"
+    data += "<COMMENT_DESCRIPTION>VFAT3 Production Data from Testing at CERN</COMMENT_DESCRIPTION>\n"
     data += "<LOCATION>TIF</LOCATION>\n"
     data += "<INITIATED_BY_USER>%s</INITIATED_BY_USER>\n" % user
     data += "</RUN>\n"
