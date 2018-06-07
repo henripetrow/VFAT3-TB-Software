@@ -28,6 +28,7 @@ class VFAT3_GUI:
         psu_mode = 1
         conn_mode = 1
         db_mode = 1
+        self.burn_mode = 1
 
         # Communication mode selection.
         for arg in sys.argv:
@@ -41,6 +42,9 @@ class VFAT3_GUI:
             if arg == '-no_psu':
                 print "Entering no Power Supply-mode."
                 psu_mode = 0
+            if arg == '-no_id_burn':
+                print "Entering to mode with no chip id burn."
+                self.burn_mode = 0
 
         if psu_mode == 1:
             self.tti_if = TtiSerialInterface()
@@ -1285,7 +1289,7 @@ class VFAT3_GUI:
         time.sleep(0.8)
         avdd_power = self.interfaceFW.read_avdd_power()
         dvdd_power = self.interfaceFW.read_dvdd_power()
-        if avdd_power > 100 or dvdd_power > 100:
+        if avdd_power > 400 or dvdd_power > 400:
             text = "Short circuit detected.\n"
             self.database.save_power(dvdd_power, avdd_power, "SLEEP")
             self.add_to_interactive_screen(text)
@@ -1892,7 +1896,7 @@ class VFAT3_GUI:
                     print "Sync ok"
                     #self.read_hw_id()
                     result[3] = self.test_registers(production="yes")
-                    result[4] = self.burn_chip_id()
+                    result[4] = self.burn_chip_id(chip_id=self.database.name)
                     result[6] = self.measure_power('SLEEP')
                     result[5] = self.adjust_iref(production="yes")
                     result[7] = self.adc_calibration(production="yes")
@@ -1903,7 +1907,6 @@ class VFAT3_GUI:
                         result[10] = self.run_all_dac_scans(production="yes")
                         #self.set_fe_nominal_values(chip=self.hybrid_model)
                         result[11] = self.run_scurve(production="yes")
-                        # self.burn_chip_id(chip_id=self.database.name)
                     else:
                         print "Internal ADCs broken. Abort production test."
 
@@ -1973,39 +1976,43 @@ class VFAT3_GUI:
         #self.increment_chip_id()
         return 1
 
-    def burn_chip_id(self, chip_id=57):
+    def burn_chip_id(self, chip_id=""):
         error = 0
-        print "Register value before:"
-        reg_value = self.read_register(0x10003)
-        print reg_value
-        if self.register[0x10003].CHIP_ID[0] == 0:
-
-            self.register[0x10004].PRG_TIME[0] = 2000
-
-            chip_id_bin = dec_to_bin_with_stuffing(chip_id, 32)
-            chip_id_bin.reverse()
-            for i, bit in enumerate(chip_id_bin):
-                if bit == 1:
-                    time.sleep(1)
-                    print ""
-                    print i
-                    self.register[0x10004].PRG_BIT_ADD[0] = i
-                    data = []
-                    for x in register[0x10004].reg_array:
-                        data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
-                    print data
-                    self.write_register(0x10004)
-            print "Register value after:"
-            print self.read_register(0x10003)
-            if self.register[0x10003].CHIP_ID[0] == chip_id:
-                print "Chip ID burn was success."
+        if self.burn_mode == 1:
+            print "Register value before:"
+            reg_value = self.read_register(0x10003)
+            print reg_value
+            if self.register[0x10003].CHIP_ID[0] != 0:
+                self.register[0x10004].PRG_TIME[0] = 2000
+                chip_id_bin = dec_to_bin_with_stuffing(chip_id, 32)
+                chip_id_bin.reverse()
+                print chip_id
+                print chip_id_bin
+                for i, bit in enumerate(chip_id_bin):
+                    if bit == 1:
+                        time.sleep(1)
+                        print ""
+                        print i
+                        self.register[0x10004].PRG_BIT_ADD[0] = i
+                        data = []
+                        for x in register[0x10004].reg_array:
+                            data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
+                        print data
+                        self.write_register(0x10004)
+                print "Register value after:"
+                print self.read_register(0x10003)
+                if self.register[0x10003].CHIP_ID[0] == chip_id:
+                    print "Chip ID burn was success."
+                else:
+                    print "Wrong Chip ID was burned."
+                    error = 1
             else:
-                print "Wrong Chip ID was burned."
+                print "Chip id has already been burned."
+                print "Register value:"
+                print self.read_register(0x10003)
                 error = 1
         else:
-            print "Chip id has already been burned."
-            print "Register value:"
-            print self.read_register(0x10003)
+            print "No Chip ID burn -mode has been selected. No Chip ID was burned."
             error = 1
         return error
 
