@@ -1994,7 +1994,7 @@ class VFAT3_GUI:
                     for x in register[0x10004].reg_array:
                         data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
                     print data
-                    #self.write_register(0x10004)
+                    self.write_register(0x10004)
             print "Register value after:"
             print self.read_register(0x10003)
             if self.register[0x10003].CHIP_ID[0] == chip_id:
