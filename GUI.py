@@ -1982,7 +1982,7 @@ class VFAT3_GUI:
             print "Register value before:"
             reg_value = self.read_register(0x10003)
             print reg_value
-            if self.register[0x10003].CHIP_ID[0] != 0:
+            if self.register[0x10003].CHIP_ID[0] == 0:
                 self.register[0x10004].PRG_TIME[0] = 2000
                 chip_id_bin = dec_to_bin_with_stuffing(chip_id, 32)
                 chip_id_bin.reverse()
