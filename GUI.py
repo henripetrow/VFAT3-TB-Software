@@ -1321,7 +1321,7 @@ class VFAT3_GUI:
                 text = "->Sync success.\n"
                 self.add_to_interactive_screen(text)
                 break
-            if counter > 16:
+            if counter > 1:
                 error = 1
                 text = "->Sync fail.\n"
                 self.add_to_interactive_screen(text)
@@ -1892,7 +1892,7 @@ class VFAT3_GUI:
                     print "Sync ok"
                     #self.read_hw_id()
                     result[3] = self.test_registers(production="yes")
-                    #result[4] = self.write_chip_id()
+                    result[4] = self.burn_chip_id()
                     result[6] = self.measure_power('SLEEP')
                     result[5] = self.adjust_iref(production="yes")
                     result[7] = self.adc_calibration(production="yes")
@@ -1974,25 +1974,40 @@ class VFAT3_GUI:
         return 1
 
     def burn_chip_id(self, chip_id=57):
+        error = 0
         print "Register value before:"
-        print self.read_register(0x10003)
-        self.register[0x10004].PRG_TIME[0] = 2000
+        reg_value = self.read_register(0x10003)
+        print reg_value
+        if self.register[0x10003].CHIP_ID[0] == 0:
 
-        chip_id_bin = dec_to_bin_with_stuffing(chip_id, 32)
-        chip_id_bin.reverse()
-        for i, bit in enumerate(chip_id_bin):
-            if bit == 1:
-                time.sleep(1)
-                print ""
-                print i
-                self.register[0x10004].PRG_BIT_ADD[0] = i
-                data = []
-                for x in register[0x10004].reg_array:
-                    data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
-                print data
-                self.write_register(0x10004)
-        print "Register value after:"
-        print self.read_register(0x10003)
+            self.register[0x10004].PRG_TIME[0] = 2000
+
+            chip_id_bin = dec_to_bin_with_stuffing(chip_id, 32)
+            chip_id_bin.reverse()
+            for i, bit in enumerate(chip_id_bin):
+                if bit == 1:
+                    time.sleep(1)
+                    print ""
+                    print i
+                    self.register[0x10004].PRG_BIT_ADD[0] = i
+                    data = []
+                    for x in register[0x10004].reg_array:
+                        data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
+                    print data
+                    #self.write_register(0x10004)
+            print "Register value after:"
+            print self.read_register(0x10003)
+            if self.register[0x10003].CHIP_ID[0] == chip_id:
+                print "Chip ID burn was success."
+            else:
+                print "Wrong Chip ID was burned."
+                error = 1
+        else:
+            print "Chip id has already been burned."
+            print "Register value:"
+            print self.read_register(0x10003)
+            error = 1
+        return error
 
     def save_barcode(self):
         error = 0

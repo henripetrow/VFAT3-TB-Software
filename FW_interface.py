@@ -110,7 +110,7 @@ class FW_interface:
         address_0 = address_hex[8:10]
 
         # Data from bit-string to hex bytes
-        print value
+        #print value
         if len(value) == 16:
             data_0 = value[8:16]
             data_1 = value[0:8]
