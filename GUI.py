@@ -1845,6 +1845,7 @@ class VFAT3_GUI:
     def test_bist(self):
         output = self.interfaceFW.run_bist()
         flag = 0
+        error = 0
         for value in output:
             # print value
             if flag == 0:
@@ -1872,7 +1873,9 @@ class VFAT3_GUI:
         print output
         if self.database:
             self.database.save_bist(ivalue_dec)
-        return 1
+        if ivalue_dec >= 1080306 or ivalue_dec <= 1080296:
+            error = 1
+        return error
 
     def test_scan_chain(self):
         if self.database:
