@@ -68,7 +68,7 @@ class FW_interface:
             print "No response"
         finally:
             self.sock.close()
-        print output
+        # print output
         # print "output length: %i" % len(output)
         return output
 

@@ -1342,21 +1342,24 @@ class VFAT3_GUI:
 
         # Imon
         value = self.interfaceFW.read_ext_adc_imon()
-        imon_value_hex = "%s%s" % (value[1], value[0][2:])
-        imon_value_int = int(imon_value_hex, 16)
+        msb = int(value[1], 16) << 8
+        lsb = int(value[0], 16)
+        imon_value_int = msb + lsb
         imon_value_mv = imon_value_int * 0.0625
         time.sleep(0.1)
         # Vmon
         value = self.interfaceFW.read_ext_adc_vmon()
-        vmon_value_hex = "%s%s" % (value[1], value[0][2:])
-        vmon_value_int = int(vmon_value_hex, 16)
+        msb = int(value[1], 16) << 8
+        lsb = int(value[0], 16)
+        vmon_value_int = msb + lsb
         vmon_value_mv = vmon_value_int * 0.0625
         time.sleep(0.1)
 
         # VBGR
         value = self.interfaceFW.read_ext_adc_vbgr()
-        vbgr_value_hex = "%s%s" % (value[1], value[0][2:])
-        vbgr_value_int = int(vbgr_value_hex, 16)
+        msb = int(value[1], 16) << 8
+        lsb = int(value[0], 16)
+        vbgr_value_int = msb + lsb
         vbgr_value_mv = vbgr_value_int * 0.0625
         if verbose == 'yes':
             text = "EXT ADC Imon: %d\t %f mV\n" % (imon_value_int, imon_value_mv)
