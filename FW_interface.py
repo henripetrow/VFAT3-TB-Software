@@ -68,7 +68,7 @@ class FW_interface:
             print "No response"
         finally:
             self.sock.close()
-        # print output
+        print output
         # print "output length: %i" % len(output)
         return output
 
@@ -208,8 +208,9 @@ class FW_interface:
     def read_avdd_power(self):
         message = [0xca, 0x00, 0x03, 0x48, 0x00]
         output = self.execute_req(message,  timeout=30, receive=20)
-        avdd_value_hex = "%s%s" % (output[1], output[0][2:])
-        avdd_value_int = int(avdd_value_hex, 16)
+        msb = int(output[1], 16) << 8
+        lsb = int(output[0], 16)
+        avdd_value_int = msb + lsb
         avdd_value_mv = avdd_value_int * 0.0625
         #print "AVDD voltage: %f" % avdd_value_mv
         avdd_value_current = avdd_value_mv * 0.2346 - 4.17
@@ -220,8 +221,9 @@ class FW_interface:
     def read_dvdd_power(self):
         message = [0xca, 0x00, 0x03, 0x48, 0x01]
         output = self.execute_req(message,  timeout=30, receive=20)
-        dvdd_value_hex = "%s%s" % (output[1], output[0][2:])
-        dvdd_value_int = int(dvdd_value_hex, 16)
+        msb = int(output[1], 16) << 8
+        lsb = int(output[0], 16)
+        dvdd_value_int = msb + lsb
         dvdd_value_mv = dvdd_value_int * 0.0625
         dvdd_value_current = dvdd_value_mv * 0.2346 - 4.17
         dvdd_power = dvdd_value_current * 1.2
@@ -232,8 +234,9 @@ class FW_interface:
     def read_iovdd_power(self):
         message = [0xca, 0x00, 0x03, 0x48, 0x02]
         output = self.execute_req(message,  timeout=30, receive=20)
-        iovdd_value_hex = "%s%s" % (output[1], output[0][2:])
-        iovdd_value_int = int(iovdd_value_hex, 16)
+        msb = int(output[1], 16) << 8
+        lsb = int(output[0], 16)
+        iovdd_value_int = msb + lsb
         iovdd_value_mv = iovdd_value_int * 0.0625
         iovdd_value_current = iovdd_value_mv * 0.2346 - 4.17
         iovdd_power = iovdd_value_current * 2.5

@@ -1994,7 +1994,7 @@ class VFAT3_GUI:
                 print chip_id_bin
                 for i, bit in enumerate(chip_id_bin):
                     if bit == 1:
-                        time.sleep(1)
+                        time.sleep(0.1)
                         print ""
                         print i
                         self.register[0x10004].PRG_BIT_ADD[0] = i
