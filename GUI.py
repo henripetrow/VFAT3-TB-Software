@@ -1283,6 +1283,7 @@ class VFAT3_GUI:
         self.adcB = 0.0
         self.cal_dac_fcM = 0.0
         self.cal_dac_fcB = 0.0
+        #self.database = 0
 
     def check_short_circuit(self):
         error = 0
@@ -1307,7 +1308,7 @@ class VFAT3_GUI:
         ch2_power = 0
         if self.database:
             self.database.save_power(dvdd_power, avdd_power, mode)
-            print  dvdd_power
+            print dvdd_power
             print avdd_power
             # if ch1_power > 0.1:
             #     error = 1
@@ -1844,33 +1845,33 @@ class VFAT3_GUI:
     def test_bist(self):
         output = self.interfaceFW.run_bist()
         flag = 0
-        # for value in output:
-        #     # print value
-        #     if flag == 0:
-        #         ivalue = value[2:]
-        #         if len(value) == 1:
-        #             ivalue = "0" + ivalue
-        #         flag = 1
-        #     elif flag == 1:
-        #         value = value[2:]
-        #         if len(value) == 1:
-        #             value = "0" + value
-        #         ivalue = value + ivalue
-        #         flag = 2
-        #     elif flag == 2:
-        #         value = value[2:]
-        #         if len(value) == 1:
-        #             value = "0" + value
-        #         ivalue = value + ivalue
-        #         flag = 3
-        #     elif flag == 3:
-        #         ivalue = value + ivalue
-        #         ivalue_dec = int(ivalue, 16)
-        #         print "BIST: %i  %s" % (ivalue_dec, ivalue)
-        #         flag = 0
-        # print output
-        # if self.database:
-        #     self.database.save_bist(ivalue_dec)
+        for value in output:
+            # print value
+            if flag == 0:
+                ivalue = value[2:]
+                if len(value) == 1:
+                    ivalue = "0" + ivalue
+                flag = 1
+            elif flag == 1:
+                value = value[2:]
+                if len(value) == 1:
+                    value = "0" + value
+                ivalue = value + ivalue
+                flag = 2
+            elif flag == 2:
+                value = value[2:]
+                if len(value) == 1:
+                    value = "0" + value
+                ivalue = value + ivalue
+                flag = 3
+            elif flag == 3:
+                ivalue = value + ivalue
+                ivalue_dec = int(ivalue, 16)
+                print "BIST: %i  %s" % (ivalue_dec, ivalue)
+                flag = 0
+        print output
+        if self.database:
+            self.database.save_bist(ivalue_dec)
         return 1
 
     def test_scan_chain(self):
@@ -1887,14 +1888,14 @@ class VFAT3_GUI:
             # self.tti_if.set_outputs_on()
             result[0] = self.check_short_circuit()
             if result[0] == 0:
-                #result[1] = self.test_bist()
+                result[1] = self.test_bist()
                 #print "Test BIST ok"
                 #result.append(self.test_scan_chain())
                 #print "Test Scan Chain ok"
                 result[2] = self.send_reset()
                 if result[2] == 0:
                     print "Sync ok"
-                    #self.read_hw_id()
+                    self.read_hw_id()
                     result[3] = self.test_registers(production="yes")
                     result[4] = self.burn_chip_id(chip_id=self.database.name)
                     result[6] = self.measure_power('SLEEP')
