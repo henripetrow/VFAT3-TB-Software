@@ -1339,7 +1339,6 @@ class VFAT3_GUI:
             text = "->Reading the verification board external ADC.\n"
             self.add_to_interactive_screen(text)
 
-
         # Imon
         value = self.interfaceFW.read_ext_adc_imon()
         msb = int(value[1], 16) << 8
@@ -1847,36 +1846,16 @@ class VFAT3_GUI:
 
     def test_bist(self):
         output = self.interfaceFW.run_bist()
-        flag = 0
         error = 0
-        for value in output:
-            # print value
-            if flag == 0:
-                ivalue = value[2:]
-                if len(value) == 1:
-                    ivalue = "0" + ivalue
-                flag = 1
-            elif flag == 1:
-                value = value[2:]
-                if len(value) == 1:
-                    value = "0" + value
-                ivalue = value + ivalue
-                flag = 2
-            elif flag == 2:
-                value = value[2:]
-                if len(value) == 1:
-                    value = "0" + value
-                ivalue = value + ivalue
-                flag = 3
-            elif flag == 3:
-                ivalue = value + ivalue
-                ivalue_dec = int(ivalue, 16)
-                print "BIST: %i  %s" % (ivalue_dec, ivalue)
-                flag = 0
-        print output
+        data3 = int(output[3], 16) << 24
+        data2 = int(output[2], 16) << 16
+        data1 = int(output[1], 16) << 8
+        data0 = int(output[0], 16)
+        bist_value_int = data3 + data2 + data1 + data0
+        print "BIST: %i" % bist_value_int
         if self.database:
-            self.database.save_bist(ivalue_dec)
-        if ivalue_dec >= 1080306 or ivalue_dec <= 1080296:
+            self.database.save_bist(bist_value_int)
+        if bist_value_int >= 1080306 or bist_value_int <= 1080296:
             error = 1
         return error
 
