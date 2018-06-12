@@ -307,15 +307,18 @@ for hybrid in hybrid_list:
         db_data = database.get_table_values(hybrid, "%s_%s" % (adc, dac))
         for i, dat in enumerate(db_data):
             if dat:
-                data += "< ADC_NAME > %s </ADC_NAME >" % adc
-                data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
-                data += "< ADC_VALUE > %s </ADC_VALUE >" % dat
+                data += "<ADC_NAME > %s </ADC_NAME>\n" % adc
+                data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
+                data += "<ADC_VALUE > %s </ADC_VALUE>\n" % dat
             else:
-                data += "< ADC_NAME > %s </ADC_NAME >" % adc
-                data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
-                data += "< ADC_VALUE > NULL </ADC_VALUE >"
+                data += "<ADC_NAME > %s </ADC_NAME>\n" % adc
+                data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
+                data += "<ADC_VALUE > NULL </ADC_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATASET>\n"
+    outF = open(filename, "a")
+    outF.write(data)
+    outF.close()
 generate_footer(filename)
 print "Generated xml-file for: %s" % dac
 
@@ -341,13 +344,16 @@ for hybrid in hybrid_list:
     for i, dat in enumerate(db_data):
         data += "<DATA>\n"
         if dat:
-            data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
-            data += "< CHRG_VALUE > %s </CHRG_VALUE >" % dat
+            data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
+            data += "<CHRG_VALUE > %s </CHRG_VALUE>\n" % dat
         else:
-            data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
-            data += "< CHRG_VALUE > NULL </CHRG_VALUE >"
+            data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
+            data += "<CHRG_VALUE > NULL </CHRG_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATASET>\n"
+    outF = open(filename, "a")
+    outF.write(data)
+    outF.close()
 generate_footer(filename)
 print "Generated xml-file for: %s" % dac
 
@@ -368,17 +374,20 @@ for hybrid in hybrid_list:
     data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
     data += "<SERIAL_NUMBER>%s</SERIAL_NUMBER>\n" % production_data[0]
     data += "</PART>\n"
-    db_data = database.get_table_values(hybrid, "%s" % dac)
+    db_data = database.get_table_values(hybrid, dac)
     for i, dat in enumerate(db_data):
         data += "<DATA>\n"
         if dat:
-            data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
-            data += "< ADC_VALUE > %s </ADC_VALUE >" % dat
+            data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
+            data += "<ADC_VALUE > %s </ADC_VALUE >" % dat
         else:
-            data += "< DAC_SETTING > DAC%s </DAC_SETTING >" % i
-            data += "< ADC_VALUE > NULL </ADC_VALUE >"
+            data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
+            data += "<ADC_VALUE > NULL </ADC_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATASET>\n"
+    outF = open(filename, "a")
+    outF.write(data)
+    outF.close()
 generate_footer(filename)
 print "Generated xml-file for: %s" % dac
 print ""

@@ -34,7 +34,6 @@ class DatabaseInterfaceBrowse:
         self.connection.close()
         return data_list
 
-
     def get_table_values(self, chip_id, table):
         data_list = []
         self.open_connection()
