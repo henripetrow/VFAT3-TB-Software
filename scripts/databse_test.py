@@ -1,4 +1,4 @@
-from DatabaseInterfaceBrowse import *
+from scripts.DatabaseInterfaceBrowse import *
 import os
 
 user = "Henri Petrow"

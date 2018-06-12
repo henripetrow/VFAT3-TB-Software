@@ -1,4 +1,4 @@
-from DatabaseInterfaceBrowse import *
+from scripts.DatabaseInterfaceBrowse import *
 import matplotlib.pyplot as plt
 
 database = DatabaseInterfaceBrowse()

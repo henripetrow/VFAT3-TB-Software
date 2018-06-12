@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.append('../')
-from DatabaseInterfaceBrowse import *
+from scripts.DatabaseInterfaceBrowse import *
 
 
 user = "Henri Petrow"

@@ -1,6 +1,6 @@
 import pymysql
 import os
-from DatabaseInterfaceBrowse import *
+from scripts.DatabaseInterfaceBrowse import *
 import matplotlib.pyplot as plt
 
 class DatabaseInterface:
