@@ -14,12 +14,18 @@ run_type = "VFAT3 Production Data"
 
 kind_of_part = "GEM VFAT3 Hybrid"
 
-#file_path = "../results/xml/"
-file_path = "/home/hpetrow/cernbox/Data/production_data_xml_test/"
+file_path = "../results/xml/"
+#file_path = "/home/hpetrow/cernbox/Data/production_data_xml_test/"
 
-test_hybrids = ['Hybrid333', 'Hybrid3333', 'Hybrid33333', 'Hybrid3333333', 'Hybrid333333', 'Hybrid324234', 'Hybrid354',
-                'Hybrid34543', 'Hybrid444444', 'Hybrid44444']
+if not os.path.exists(os.path.dirname(file_path)):
+    try:
+        os.makedirs(os.path.dirname(file_path))
+    except OSError as exc:  # Guard against race condition
+        print "Unable to create directory"
 
+# test_hybrids = ['Hybrid333', 'Hybrid3333', 'Hybrid33333', 'Hybrid3333333', 'Hybrid333333', 'Hybrid324234', 'Hybrid354',
+#                'Hybrid34543', 'Hybrid444444', 'Hybrid44444']
+test_hybrids = []
 
 def generate_header(file_name, table_name, name):
     if not os.path.exists(os.path.dirname(file_name)):
