@@ -1,4 +1,8 @@
-from routines import *
+############################################
+# Created by Henri Petrow 2017
+# Lappeenranta University of Technology
+###########################################
+
 from generator import *
 from output_decoder import *
 import time

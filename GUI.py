@@ -11,14 +11,15 @@ import time
 import sys
 import os
 import subprocess  # For opening scans for edit in the system default editor.
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/python_scripts_thomas/kernel")
+
 from VFAT3_registers import *
 from generator import *
 from test_system_functions import *
 from FW_interface import *
 from DatabaseInterface import *
-from routines import *
-from calibration_routines import *
+from routines.routines import *
+from routines.calibration_routines import *
+from routines.datapacket_routines import *
 from tti_serial_interface import *
 
 

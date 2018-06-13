@@ -1,3 +1,8 @@
+############################################
+# Created by Henri Petrow 2018
+# Lappeenranta University of Technology
+###########################################
+
 from scripts.DatabaseInterfaceBrowse import *
 import matplotlib.pyplot as plt
 

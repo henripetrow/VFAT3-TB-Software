@@ -1,5 +1,6 @@
 import time
 
+
 def continuous_trigger(obj):
     obj.set_fe_nominal_values()
     print "Set FE nominal values."
