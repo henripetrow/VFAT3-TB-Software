@@ -3,6 +3,7 @@ import os
 from scripts.DatabaseInterfaceBrowse import *
 import matplotlib.pyplot as plt
 
+
 class DatabaseInterface:
     def __init__(self, name):
         self.id_exists = 0
@@ -200,7 +201,7 @@ class DatabaseInterface:
         self.set_int("VREF_ADC", value)
 
     def save_vbgr(self, value):
-        print "Saving VBGR value: %f######################3" %value
+        print "Saving VBGR value: %f" % value
         self.set_float("V_BGR", value)
 
     def save_adc_offset(self, value):
@@ -213,9 +214,9 @@ class DatabaseInterface:
 
 def hybrid_browser(hybrid=""):
     database = DatabaseInterfaceBrowse()
-    #hybrid_list = database.list_hybrids()
-    #print "List of tested hybrids:"
-    #for i, hybrid in enumerate(hybrid_list):
+    # hybrid_list = database.list_hybrids()
+    # print "List of tested hybrids:"
+    # for i, hybrid in enumerate(hybrid_list):
     #    print "[%i] %s" % (i, hybrid)
 
     # hybrid_nr = raw_input("Choose hybrid:")

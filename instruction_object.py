@@ -4,12 +4,9 @@
 ###########################################
 
 import csv
-
 from SC_encode import *
 from VFAT3_registers import *
 from test_system_functions import *
-
-
 
 
 class instruction_object:

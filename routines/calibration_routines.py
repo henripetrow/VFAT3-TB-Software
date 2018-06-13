@@ -13,14 +13,12 @@ def calc_cal_dac_conversion_factor(obj, dac_values, base_value, ext_adc_values, 
     if production == "yes":
         obj.database.save_lut_data_float("CAL_DAC_FC", charge_values, dac_values)
 
-    print dac_values
-    #dac_values = [float(i) for i in dac_values]
-    print charge_values
+    # print dac_values
+    # print charge_values
     cal_dac_fcM, cal_dac_fcB, r_value, p_value, std_err = stats.linregress(dac_values, charge_values)
 
-    print "CAL_DAC std_err: %f" % std_err
-    print cal_dac_fcM
-    print cal_dac_fcB
+    # print "CAL_DAC std_err: %f" % std_err
+    print "CAL_DAC: %s %s" % (cal_dac_fcM, cal_dac_fcB)
 
     if production == "no":
         fit_values = []
@@ -48,11 +46,11 @@ def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1, dac_values, 
     adc0M, adc0B, r_value, p_value, std_err0 = stats.linregress(int_adc0, ext_adc)
     adc1M, adc1B, r_value, p_value, std_err1 = stats.linregress(int_adc1, ext_adc)
 
-    print std_err0
+    # print std_err0
     if std_err0 > 1:
         adc0M = 0
         adc0B = 0
-    print std_err1
+    # print std_err1
     if std_err1 > 1:
         adc1M = 0
         adc1B = 0
@@ -61,9 +59,6 @@ def calc_adc_conversion_constants(obj, ext_adc, int_adc0, int_adc1, dac_values, 
     if production == "yes":
         obj.database.save_adc0(adc0M, adc0B)
         obj.database.save_adc1(adc1M, adc1B)
-
-
-
 
     if production == 'no':
         int_adc0_calibrated = []

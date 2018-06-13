@@ -3,7 +3,6 @@
 # Lappeenranta University of Technology
 ###########################################
 
-#from crc16pure import *
 
 def write_instruction(input_file, BCd, command, erase):
     if erase == 1:

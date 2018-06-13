@@ -470,7 +470,6 @@ class VFAT3_GUI:
         self.cal_dacc_label0 = Label(self.calibration_border_frame, text="n/a", width=12)
         self.cal_dacc_label0.grid(column=2, row=4, sticky='w')
 
-
         # ADD TABS
         self.nb.add(self.FCC_frame, text="FCC")
         self.nb.add(self.register_frame, text="Registers")
@@ -570,9 +569,6 @@ class VFAT3_GUI:
 
         self.cal_button = Button(self.calibration_frame, text="Apply ch. Calibration", command=lambda: self.apply_ch_local_adjustments(), width=bwidth)
         self.cal_button.grid(column=2, row=5, sticky='e')
-
-#        self.cal_button = Button(self.calibration_frame, text="Gain measurement", command=lambda: gain_measurement(self), width=bwidth)
-#        self.cal_button.grid(column=1, row=6, sticky='e')
 
         self.cal_button = Button(self.calibration_frame, text="Gain per channel", command=lambda: gain_histogram(self), width=bwidth, state=DISABLED)
         self.cal_button.grid(column=1, row=6, sticky='e')
@@ -1214,6 +1210,7 @@ class VFAT3_GUI:
 # ################ MISC-TAB FUNCTIONS ################################
 
     def measure_adc_offset(self):
+        print "\nMeasuring ADC offset."
         self.register[0xffff].RUN[0] = 1
         self.write_register(0xffff)
         time.sleep(0.1)
@@ -1226,7 +1223,7 @@ class VFAT3_GUI:
         print vbgr
         print vmon
         adc_offset = vmon - vbgr
-        print adc_offset
+        print "ADC Offset: %s mV" % adc_offset
         self.register[0xffff].RUN[0] = 0
         self.write_register(0xffff)
         if self.database:
@@ -1234,6 +1231,7 @@ class VFAT3_GUI:
             self.database.save_adc_offset(adc_offset)
 
     def adjust_adc0_ref(self):
+        print "\nAdjusting ADC0 reference voltage."
         self.register[0xffff].RUN[0] = 0
         self.write_register(0xffff)
         time.sleep(1)
@@ -1252,7 +1250,7 @@ class VFAT3_GUI:
             diff_values.append(abs(1000-output[1]))
         print diff_values
         chosen_value = diff_values.index(min(diff_values))
-        print chosen_value
+        print "Chosen VREF_ADC value: %s" % chosen_value
         #self.register[0xffff].RUN[0] = 0
         #self.write_register(0xffff)
         self.register[133].VREF_ADC[0] = chosen_value
@@ -1299,6 +1297,7 @@ class VFAT3_GUI:
         return error
 
     def measure_power(self, mode=""):
+        print "\nMeasuring power."
         error = 0
         time.sleep(0.2)
         avdd_power = self.interfaceFW.read_avdd_power()
@@ -1309,12 +1308,11 @@ class VFAT3_GUI:
         ch2_power = 0
         if self.database:
             self.database.save_power(dvdd_power, avdd_power, mode)
-            print dvdd_power
-            print avdd_power
             # if ch1_power > 0.1:
             #     error = 1
             # if ch2_power > 0.1:
             #     error = 1
+        print ""
         return error
 
     def send_reset(self):
@@ -1467,7 +1465,7 @@ class VFAT3_GUI:
             self.adjust_adc0_ref()
             self.measure_adc_offset()
             start = time.time()
-            print "Starting ADC calibration."
+            print "\nStarting ADC calibration."
             output = self.interfaceFW.int_adc_calibration(0, 1, 255)
             #print output
             ext_adc_values = []
@@ -1565,11 +1563,11 @@ class VFAT3_GUI:
             self.add_to_interactive_screen(text)
         if error == 1:
             error = 'y'
-        print self.adcM
-        print self.adcB
+        print ""
         return error
 
     def scan_cal_dac_fc(self, production="no"):
+        print "\nStarting CAL_DAC calibration."
         start_time = time.time()
         error = 0
         dac_start = 0
@@ -1846,6 +1844,7 @@ class VFAT3_GUI:
         concecutive_triggers(self, self.nr_trigger_loops)
 
     def test_bist(self):
+        print "\nTesting BIST."
         output = self.interfaceFW.run_bist()
         error = 0
         data3 = int(output[3], 16) << 24
@@ -1858,6 +1857,7 @@ class VFAT3_GUI:
             self.database.save_bist(bist_value_int)
         if bist_value_int >= 1080306 or bist_value_int <= 1080296:
             error = 1
+        print ""
         return error
 
     def test_scan_chain(self):
@@ -1964,6 +1964,7 @@ class VFAT3_GUI:
         return 1
 
     def burn_chip_id(self, chip_id=""):
+        print "\nBurning Chip ID."
         error = 0
         if self.burn_mode == 1:
             print "Register value before:"
@@ -2178,6 +2179,7 @@ class VFAT3_GUI:
         return output
 
     def run_all_dac_scans(self, production="no"):
+        print "\nRunning all DAC scans."
         if production == "no":
             save_data = 1
         else:
@@ -2195,7 +2197,7 @@ class VFAT3_GUI:
                 print "Scan done."
         stop = time.time()
         run_time = (stop - start)
-        print "Runtime: %f s" % run_time
+        print "Runtime: %f s\n" % run_time
         return 'y'
 
     def run_xray_tests(self):

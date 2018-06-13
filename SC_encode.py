@@ -24,7 +24,7 @@ class SC_encode:
         package = [self.SC0 if x == 0 else x for x in package]
         return package
 
-    def create_SC_packet(self, address, data, action, BCcounter, nr_words = 5):
+    def create_SC_packet(self, address, data, action, BCcounter, nr_words=5):
         if action == "IDLE":
             action_value = "f"
             words = 1
@@ -76,7 +76,6 @@ class SC_encode:
         data.extend(crc)
         data = data_packet_bit_stuffing(data)
 
-
         hdlc_pack.extend(flag)
         hdlc_pack.extend(data)
         hdlc_pack.extend(flag)
@@ -111,9 +110,8 @@ class SC_encode:
 
         # Data. 32 bits.
         # data = dec_to_bin_with_stuffing(data, 32)
-     
 
-        if typ == "f": # Idle
+        if typ == "f":  # Idle
             type_ID = [1, 1, 1, 1]
             ipbus_pack.extend(type_ID)
             ipbus_pack.extend(transaction_ID)
@@ -121,7 +119,7 @@ class SC_encode:
             ipbus_pack.extend(words)
             ipbus_pack.extend(protocol_version)
   
-        if typ == 0: # Read
+        if typ == 0:  # Read
             type_ID = [0, 0, 0, 0]
             ipbus_pack.extend(type_ID)
             ipbus_pack.extend(transaction_ID)
@@ -129,7 +127,7 @@ class SC_encode:
             ipbus_pack.extend(protocol_version)
             ipbus_pack.extend(address)
 
-        if typ == 1: # Write
+        if typ == 1:  # Write
             type_ID = [1, 0, 0, 0]
             ipbus_pack.extend(type_ID)
             ipbus_pack.extend(transaction_ID)
@@ -142,18 +140,18 @@ class SC_encode:
             else:
                 ipbus_pack.extend(data)                
             
-        if typ == 2: # Non-incrementing Read
+        if typ == 2:  # Non-incrementing Read
             type_ID = [0, 1, 0, 0]
             ipbus_pack.extend(type_ID)
             ipbus_pack.extend(transaction_ID)
             ipbus_pack.extend(address)
             
-        if typ == 3: # Non-incrementing Write 
-            type_ID = [1,1,0,0]
-        if typ == 4: # Read-Modify-Write bits
-            type_ID = [0,0,1,0]
-        if typ == 5: # Read-Modify-Write sum
-            type_ID = [1,0,1,0]
+        if typ == 3:  # Non-incrementing Write
+            type_ID = [1, 1, 0, 0]
+        if typ == 4:  # Read-Modify-Write bits
+            type_ID = [0, 0, 1, 0]
+        if typ == 5:  # Read-Modify-Write sum
+            type_ID = [1, 0, 1, 0]
             
         return ipbus_pack
 

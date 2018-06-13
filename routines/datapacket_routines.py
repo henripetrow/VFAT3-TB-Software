@@ -238,9 +238,8 @@ def test_data_packet_formatting(obj):
     cal_channels.reverse()
     cal_channels = ''.join(str(e) for e in cal_channels)
 
-
     obj.set_fe_nominal_values()
-    line =  "Set FE nominal values."
+    line = "Set FE nominal values."
     print line
     result.append(line)
 
@@ -388,7 +387,6 @@ def test_data_packet_formatting(obj):
         comp_data = cal_channels[:8*(i+1)] + '0' * 8*(15-i)
         error += check_data_packet(output, data=comp_data)
 
-
     line = "########END TEST########"
     print line
     result.append(line)
@@ -426,7 +424,6 @@ def charge_distribution_on_neighbouring_ch(obj, nr_loops=10):
             mfile.write("%s\n" % item)
     # Generate the instruction list for the FPGA.
     generator("charge distribution", obj.write_BCd_as_fillers, obj.register)
-
 
     print "1"
     obj.set_fe_nominal_values()
@@ -513,7 +510,6 @@ def channel_histogram(obj):
         obj.write_register(k)
         time.sleep(0.05)
 
-
     obj.register[138].CAL_DAC[0] = 100
     obj.register[138].CAL_MODE[0] = 1
     obj.write_register(138)
@@ -551,7 +547,7 @@ def channel_histogram(obj):
                 if i == 4:
                     data_bit = dec_to_bin_with_stuffing(int(byte, 16), 8)
                     data_packet.extend(data_bit)
-                    #print ''.join(str(e) for e in data_bit)
+                    # print ''.join(str(e) for e in data_bit)
                     i = 0
                 i += 1
             data = data_packet[24:152]

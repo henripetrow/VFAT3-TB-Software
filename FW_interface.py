@@ -8,6 +8,7 @@ import sys
 import time
 from test_system_functions import *
 
+
 class FW_interface:
     def __init__(self, mode):
         # Create a TCP/IP socket
@@ -52,7 +53,7 @@ class FW_interface:
                     print_data = [int(i) for i in int_data]
                     print "Channel %i:" % channels[k]
                     print print_data
-                    #print int_data
+                    # print int_data
                     multi_line_data.append(int_data)
                     output = multi_line_data
                     int_data = []
@@ -62,7 +63,7 @@ class FW_interface:
                         hex_text = hex(ord(i))
                         hex_data.append(hex_text)
                     output = hex_data
-                    #print output
+                    # print output
         except socket.timeout:
             output = ['Error']
             print "No response"
@@ -86,7 +87,7 @@ class FW_interface:
             address_hex = '0x%0*x' % (4, length)
             message.extend([int(address_hex[2:4], 16), int(address_hex[4:6], 16)])
             message.extend(fcc_data)
-            #print message
+            # print message
             output = self.execute_req(message)
         else:
             if isinstance(fcc_bin, list):
@@ -110,7 +111,7 @@ class FW_interface:
         address_0 = address_hex[8:10]
 
         # Data from bit-string to hex bytes
-        #print value
+        # print value
         if len(value) == 16:
             data_0 = value[8:16]
             data_1 = value[0:8]
@@ -136,8 +137,8 @@ class FW_interface:
 
     def read_register(self, address): # Address in dec
         address_hex = '0x%0*x' % (8, address)
-        #print "Register address: %s" % address_hex
-        #print "Reading register."
+        # print "Register address: %s" % address_hex
+        # print "Reading register."
         address_3 = address_hex[2:4]
         address_2 = address_hex[4:6]
         address_1 = address_hex[6:8]
@@ -151,7 +152,7 @@ class FW_interface:
         output_bin.extend(dec_to_bin_with_stuffing(int(output[2], 16), 8))
         output_bin.extend(dec_to_bin_with_stuffing(int(output[1], 16), 8))
         output_bin.extend(dec_to_bin_with_stuffing(int(output[0], 16), 8))
-        #print output_bin
+        # print output_bin
         return output_bin
 
     def send_sync(self):
@@ -212,7 +213,7 @@ class FW_interface:
         lsb = int(output[0], 16)
         avdd_value_int = msb + lsb
         avdd_value_mv = avdd_value_int * 0.0625
-        #print "AVDD voltage: %f" % avdd_value_mv
+        # print "AVDD voltage: %f" % avdd_value_mv
         avdd_value_current = avdd_value_mv * 0.2346 - 4.17
         avdd_power = avdd_value_current * 1.2
         print "Power AVDD: %f" % avdd_power
@@ -227,7 +228,7 @@ class FW_interface:
         dvdd_value_mv = dvdd_value_int * 0.0625
         dvdd_value_current = dvdd_value_mv * 0.2346 - 4.17
         dvdd_power = dvdd_value_current * 1.2
-        #print "DVDD voltage: %f" % dvdd_value_mv
+        # print "DVDD voltage: %f" % dvdd_value_mv
         print "Power DVDD: %f" % dvdd_power
         return dvdd_power
 

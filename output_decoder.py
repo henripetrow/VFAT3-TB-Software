@@ -6,6 +6,7 @@
 from SC_encode import *
 import time
 
+
 class IPbus_response:
     def __init__(self, BCd, data):
         self.type = "IPbus"
@@ -123,6 +124,7 @@ class IPbus_response:
         calculated_crc = crc_remainder(crc_data) # Calculate the CRC for the message.
         if received_crc != calculated_crc:
             print "!-> HDLC CRC error."
+
 
 class datapacket:
     def __init__(self):
