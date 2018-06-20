@@ -109,9 +109,9 @@ for hybrid in hybrid_list:
     data += "</PART>\n"
     data += "<DATA>\n"
     data += "<HW_ID_VERSION>%s</HW_ID_VERSION>\n" % production_data[1]
-    data += "<BUFFER_OFFSET>%s</BUFFER_OFFSET>\n" % production_data[1]
-    data += "<VREF_ADC>%s</VREF_ADC>\n" % production_data[1]
-    data += "<V_BGR>%s</V_BGR>\n" % production_data[1]
+    data += "<BUFFER_OFFSET>%s</BUFFER_OFFSET>\n" % production_data[2]
+    data += "<VREF_ADC>%s</VREF_ADC>\n" % production_data[3]
+    data += "<V_BGR>%s</V_BGR>\n" % production_data[4]
     data += "<ADC0M>%s</ADC0M>\n" % production_data[5]
     data += "<ADC0B>%s</ADC0B>\n" % production_data[6]
     data += "<ADC1M>%s</ADC1M>\n" % production_data[7]
@@ -247,10 +247,10 @@ for hybrid in hybrid_list:
         data += "<DATA>\n"
         if dat:
             data += "<CHANNEL> %s </CHANNEL>" % i
-            data += "<ENC_VALUE> %s </THR_VALUE>" % dat
+            data += "<ENC_VALUE> %s </ENC_VALUE>" % dat
         else:
             data += "<CHANNEL> %s </CHANNEL>" % i
-            data += "<ENC_VALUE> NULL </THR_VALUE>"
+            data += "<ENC_VALUE> NULL </ENC_VALUE>"
         data += "</DATA>\n"
     data += "</DATASET>\n"
     outF = open(filename, "a")
