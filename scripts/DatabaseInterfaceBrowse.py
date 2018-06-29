@@ -6,6 +6,7 @@ class DatabaseInterfaceBrowse:
         self.user = "VFAT3"
         self.passwd = "1234"
         self.database_name = "VFAT3_Production"
+        #self.database_name = "Hybrids"
         self.connection = pymysql.connect(host="localhost", user=self.user, passwd=self.passwd, database=self.database_name)
         self.cursor = self.connection.cursor()
         self.connection.close()

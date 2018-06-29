@@ -3,7 +3,6 @@
 # Lappeenranta University of Technology
 ###########################################
 
-
 import math
 import time
 import matplotlib.pyplot as plt
@@ -148,7 +147,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         run_time = (stop - start) / 60
         text = "Run time (minutes): %f\n" % run_time
         obj.add_to_interactive_screen(text)
-    return [mean_th_fc, all_ch_data, noisy_channels, thr_list]
+    return [mean_th_fc, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc]
 
 
 def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
@@ -397,7 +396,7 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
         #text = "Scan duration: %f s\n" % run_time
         #obj.add_to_interactive_screen(text)
 
-    return output
+    return mv_adc0_values, mv_adc1_values
 
 
 def scurve_analyze_one_ch(scurve_data):

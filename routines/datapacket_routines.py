@@ -5,12 +5,14 @@
 
 from generator import *
 from output_decoder import *
+from luts import *
 import time
 import numpy as np
 
 
 def test_data_packets(obj, nr_loops=10, save_result="yes"):
     print "Running data packet test."
+    error = 0
     start = time.time()
     if save_result == "yes":
         save_data = 1
@@ -155,7 +157,6 @@ def test_data_packets(obj, nr_loops=10, save_result="yes"):
                     print line
                     myfile.write("%s\n" % line)
     error_list = [crc_error_counter, bc_error_counter, ec_error_counter, hit_counter]
-    error_sum = error_list[0] + error_list[1] + error_list[2] + error_list[3]
     if obj.database:
         obj.database.save_data_test(error_list)
 
@@ -173,8 +174,17 @@ def test_data_packets(obj, nr_loops=10, save_result="yes"):
     obj.write_register(130)
     stop = time.time()
     duration = stop - start
+    errors = [0]*4
+    errors[0] = obj.check_selection_criteria(bc_error_counter, lim_BC_Errors, "BC Errors")
+    errors[1] = obj.check_selection_criteria(ec_error_counter, lim_EC_Errors, "EC Errors")
+    errors[2] = obj.check_selection_criteria(crc_error_counter, lim_CRC_Errors, "CRC Errors")
+    errors[3] = obj.check_selection_criteria(hit_counter, lim_Hit_Errors, "HIT Errors")
+    if 'y' in errors:
+        error = 'y'
+    if 'r' in errors:
+        error = 'r'
     print "\nData Packet test duration: %f s\n" % duration
-    return error_sum
+    return error
 
 
 def check_data_packet(data_packet, ec_size=1, bc_size=2, data="", szp=0):

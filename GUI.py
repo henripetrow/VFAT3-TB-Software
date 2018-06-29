@@ -21,6 +21,7 @@ from routines.routines import *
 from routines.calibration_routines import *
 from routines.datapacket_routines import *
 from tti_serial_interface import *
+from luts import *
 
 
 class VFAT3_GUI:
@@ -1213,10 +1214,10 @@ class VFAT3_GUI:
         print "\nMeasuring ADC offset."
         self.register[0xffff].RUN[0] = 1
         self.write_register(0xffff)
-        time.sleep(0.1)
+        time.sleep(0.01)
         self.register[133].Monitor_Sel[0] = 32
         self.write_register(133)
-        time.sleep(0.1)
+        time.sleep(0.01)
         output = self.read_ext_adc()
         vbgr = output[5]
         vmon = output[1]
@@ -1234,25 +1235,23 @@ class VFAT3_GUI:
         print "\nAdjusting ADC0 reference voltage."
         self.register[0xffff].RUN[0] = 0
         self.write_register(0xffff)
-        time.sleep(1)
+        time.sleep(0.01)
         self.register[0xffff].RUN[0] = 1
         self.write_register(0xffff)
-        time.sleep(1)
+        time.sleep(0.01)
         self.register[133].Monitor_Sel[0] = 39
         self.write_register(133)
-        time.sleep(1)
+        time.sleep(0.01)
         diff_values = []
         for i in range(0, 4):
             self.register[133].VREF_ADC[0] = i
             self.write_register(133)
-            time.sleep(0.1)
+            time.sleep(0.01)
             output = self.read_ext_adc()
             diff_values.append(abs(1000-output[1]))
         print diff_values
         chosen_value = diff_values.index(min(diff_values))
         print "Chosen VREF_ADC value: %s" % chosen_value
-        #self.register[0xffff].RUN[0] = 0
-        #self.write_register(0xffff)
         self.register[133].VREF_ADC[0] = chosen_value
         self.write_register(133)
         if self.database:
@@ -1304,14 +1303,23 @@ class VFAT3_GUI:
         time.sleep(0.2)
         dvdd_power = self.interfaceFW.read_dvdd_power()
         iovdd_power = self.interfaceFW.read_iovdd_power()
-
-        ch2_power = 0
+        errors = [0]*2
         if self.database:
             self.database.save_power(dvdd_power, avdd_power, mode)
-            # if ch1_power > 0.1:
-            #     error = 1
-            # if ch2_power > 0.1:
-            #     error = 1
+            if mode == "SLEEP":
+                errors[0] = self.check_selection_criteria(dvdd_power, lim_Digital_Power_SLEEP, "Power measurement Digital SLEEP")
+                errors[1] = self.check_selection_criteria(avdd_power, lim_Analog_Power_SLEEP, "Power measurement Analog SLEEP")
+            elif mode == "RUN":
+                errors[0] = self.check_selection_criteria(dvdd_power, lim_Digital_Power_RUN, "Power measurement Digital RUN")
+                errors[1] = self.check_selection_criteria(avdd_power, lim_Analog_Power_RUN, "Power measurement Analog RUN")
+            else:
+                print "ERROR. Mode not found."
+                errors[0] = 'r'
+                errors[1] = 'r'
+            if 'y' in errors:
+                error = 'y'
+            if 'r' in errors:
+                error = 'r'
         print ""
         return error
 
@@ -1453,7 +1461,7 @@ class VFAT3_GUI:
         run_time = (stop - start)
         print "iref routine time: %f sec\n" % run_time
 
-        return result
+        return self.check_selection_criteria(self.register[134].Iref[0], lim_iref, "Iref Adjustment")
 
     def adc_calibration(self, production="no"):
         error = 0
@@ -1543,14 +1551,12 @@ class VFAT3_GUI:
             self.adcM =self.adc0M
             self.adcB = self.adc0B
             if self.adc0M <= 1 or self.adc0M > 2.5:
-                error += 1
                 print "ADC0 broken"
                 self.adc0M = 0
                 self.adc0B = 0
                 self.adcM = self.adc1M
                 self.adcB = self.adc1B
             if self.adc1M <= 1 or self.adc1M > 2.5:
-                error += 1
                 print "ADC1 broken"
                 self.adc1M = 0
                 self.adc1B = 0
@@ -1561,9 +1567,16 @@ class VFAT3_GUI:
             run_time = (stop - start)
             text = "\nScan duration: %f sec\n" % run_time
             self.add_to_interactive_screen(text)
-        if error == 1:
-            error = 'y'
         print ""
+        errors = [0]*4
+        errors[0] = self.check_selection_criteria(self.adc0M, lim_ADC0m, "ADC0 Multiplier")
+        errors[1] = self.check_selection_criteria(self.adc0B, lim_ADC0b, "ADC0 Offset")
+        errors[2] = self.check_selection_criteria(self.adc1M, lim_ADC1m, "ADC1 Multiplier")
+        errors[3] = self.check_selection_criteria(self.adc1B, lim_ADC1b, "ADC1 Offset")
+        if 'y' in errors:
+            error = 'y'
+        if 'r' in errors:
+            error = 'r'
         return error
 
     def scan_cal_dac_fc(self, production="no"):
@@ -1634,8 +1647,13 @@ class VFAT3_GUI:
             run_time = (stop - start)
             text = "\nScan duration: %f sec\n" % run_time
             self.add_to_interactive_screen(text)
-        if self.cal_dac_fcM > -0.1 or self.cal_dac_fcM < -0.3:
-            error = 1
+        errors = [0]*2
+        errors[0] = self.check_selection_criteria(self.cal_dac_fcM, lim_CAL_DACm, "CAL_DAD Conversion Multiplier")
+        errors[1] = self.check_selection_criteria(self.cal_dac_fcB, lim_CAL_DACb, "CAL_DAD Conversion Offset")
+        if 'y' in errors:
+            error = 'y'
+        if 'r' in errors:
+            error = 'r'
         stop_time = time.time()
         run_time = stop_time - start_time
         print "CAL_DAC calibration time: %f s\n" % run_time
@@ -1797,10 +1815,14 @@ class VFAT3_GUI:
                                            dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay,
                                            bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch,
                                            latency=self.latency, cal_phi=self.calphi)
-            if output[2] != "":
+            errors = [0] * 3
+            errors[0] = self.check_selection_criteria(len(output[2]), lim_Noisy_Channels, "Noisy Channels")
+            errors[1] = self.check_selection_criteria(len(output[4]), lim_Dead_Channels, "Dead Channels")
+            errors[2] = self.check_selection_criteria(output[5], lim_Mean_enc, "Noise")
+            if 'y' in errors:
                 prod_error = 'y'
-            if output[2] == "n":
-                prod_error = 1
+            if 'r' in errors:
+                prod_error = 'r'
         else:
             print "Aborting s-curve run."
         return prod_error
@@ -1846,7 +1868,6 @@ class VFAT3_GUI:
     def test_bist(self):
         print "\nTesting BIST."
         output = self.interfaceFW.run_bist()
-        error = 0
         data3 = int(output[3], 16) << 24
         data2 = int(output[2], 16) << 16
         data1 = int(output[1], 16) << 8
@@ -1855,15 +1876,32 @@ class VFAT3_GUI:
         print "BIST: %i" % bist_value_int
         if self.database:
             self.database.save_bist(bist_value_int)
-        if bist_value_int >= 1080306 or bist_value_int <= 1080296:
-            error = 1
-        print ""
-        return error
+        return self.check_selection_criteria(bist_value_int, lim_BIST, "BIST")
 
     def test_scan_chain(self):
         if self.database:
             self.database.save_scanchain()
         return 1
+
+    def check_selection_criteria(self, value,  lim, name):
+        result = 0
+        if value < lim[0] or value > lim[1]:
+            result = 'y'
+            if lim[2] != 'n':
+                if value < lim[2] or value > lim[3]:
+                    result = "r"
+                    print "%s result is RED." % name
+                    timestamp = time.strftime("%Y:%m:%d:%H:%M")
+                    with open('production_error.log', 'a') as outfile:
+                        outfile.write('%s Hybrid:%s Test:%s is red with value: %s\n' % (timestamp, self.database.name, name, value))
+            else:
+                print "%s result is YELLOW." % name
+                timestamp = time.strftime("%Y:%m:%d:%H:%M")
+                with open('production_error.log', 'a') as outfile:
+                        outfile.write('%s Hybrid:%s Test:%s is yellow with value: %s\n' % (timestamp, self.database.name, name, value))
+        else:
+            print "%s result is GREEN." % name
+        return result
 
     def run_production_tests(self):
         start = time.time()
@@ -1871,13 +1909,9 @@ class VFAT3_GUI:
         self.clear_interactive_screen()
         if not self.save_barcode():
             self.unset_calibration_variables()
-            # self.tti_if.set_outputs_on()
             result[0] = self.check_short_circuit()
             if result[0] == 0:
                 result[1] = self.test_bist()
-                #print "Test BIST ok"
-                #result.append(self.test_scan_chain())
-                #print "Test Scan Chain ok"
                 result[2] = self.send_reset()
                 if result[2] == 0:
                     print "Sync ok"
@@ -1889,14 +1923,11 @@ class VFAT3_GUI:
                     result[7] = self.adc_calibration(production="yes")
                     if result[7] == 0 or result[7] == 'y':
                         result[8] = self.scan_cal_dac_fc(production="yes")
-                        #self.save_calibration_values_to_file("s")
                         result[9] = test_data_packets(self, save_result="no")
                         result[10] = self.run_all_dac_scans(production="yes")
-                        #self.set_fe_nominal_values(chip=self.hybrid_model)
                         result[11] = self.run_scurve(production="yes")
                     else:
                         print "Internal ADCs broken. Abort production test."
-
                 else:
                     text = "->Production test aborted.\n"
                     self.add_to_interactive_screen(text)
@@ -1931,8 +1962,7 @@ class VFAT3_GUI:
         self.write_register(0xffff)
         print "hybrid number."
         print self.database.name
-        hybrid_browser(self.database.name)
-        #self.tti_if.set_outputs_off()
+        #hybrid_browser(self.database.name)
 
     def read_hw_id(self):
         value = self.read_register(0x10001, save_value='no')
@@ -1993,15 +2023,15 @@ class VFAT3_GUI:
                     print "Chip ID burn was success."
                 else:
                     print "Wrong Chip ID was burned."
-                    error = 1
+                    error = 'r'
             else:
                 print "Chip id has already been burned."
                 print "Register value:"
                 print self.read_register(0x10003)
-                error = 1
+                error = 'y'
         else:
             print "No Chip ID burn -mode has been selected. No Chip ID was burned."
-            error = 1
+            error = 'r'
         return error
 
     def save_barcode(self):
@@ -2088,7 +2118,7 @@ class VFAT3_GUI:
         run_time = (stop - start)
         line = "Run time (sec): %f\n" % run_time
         print line
-        return error_counter
+        return self.check_selection_criteria(error_counter, lim_Register_Test, "Register Test")
 
     def write_register(self, register_nr, data=""):
         if data == "":
@@ -2179,6 +2209,8 @@ class VFAT3_GUI:
         return output
 
     def run_all_dac_scans(self, production="no"):
+        error = 0
+        errors = []
         print "\nRunning all DAC scans."
         if production == "no":
             save_data = 1
@@ -2191,14 +2223,15 @@ class VFAT3_GUI:
             scan_nr = self.scan_options_value[self.scan_options.index(scan)]
             dac_size = self.dac_sizes[self.scan_options.index(scan)]
             output = scan_execute(self, scan, scan_nr, dac_size, save_data)
-            if output == "error":
-                break
-            else:
-                print "Scan done."
+            errors.append(self.check_selection_criteria(output[0][-1], adc0_dac_selection_criteria_lut[scan[:-5]], scan))
         stop = time.time()
         run_time = (stop - start)
         print "Runtime: %f s\n" % run_time
-        return 'y'
+        if 'y' in errors:
+            error = 'y'
+        if 'r' in errors:
+            error = 'r'
+        return error
 
     def run_xray_tests(self):
         while True:
