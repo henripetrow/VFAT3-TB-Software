@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 import numpy
 import csv
+from luts import *
+import numpy as np
+from scipy.optimize import curve_fit
 
 
 def find_threshold(obj):
@@ -97,6 +100,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.write_register(132)
             obj.register[0xffff].RUN[0] = 1
             obj.write_register(0xffff)
+            obj.set_fe_nominal_values()
             obj.measure_power("RUN")
         cal_dac_values.reverse()
         cal_dac_values[:] = [obj.cal_dac_fcM * x + obj.cal_dac_fcB for x in cal_dac_values]
@@ -145,8 +149,9 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         # Print routine duration.
         stop = time.time()
         run_time = (stop - start) / 60
-        text = "Run time (minutes): %f\n" % run_time
-        obj.add_to_interactive_screen(text)
+        text = "S-curve Run time (minutes): %f\n" % run_time
+        print text
+        # obj.add_to_interactive_screen(text)
     return [mean_th_fc, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc]
 
 
@@ -283,8 +288,22 @@ def fitScurve(scurve_g):
     return bestFit_f
 
 
-def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
+def find_closest_value(scan, dac_values, adc_values):
+    value = hv3b_biasing_lut[scan][0]
+    if value != 'n':
+        trialX = np.linspace(dac_values[0], dac_values[-1], dac_values[-1]+1)
+        # Fit a polynomial
+        fitted = np.polyfit(dac_values, adc_values, 5)[::-1]
+        y = np.zeros(len(trialX))
+        for i in range(len(fitted)):
+            y += fitted[i]*trialX**i
+        # find closest value
+        closest_dac_value = np.where(y == (min(y, key=lambda x: abs(x - value))))[0][0]
+        hv3b_biasing_lut[scan][1] = closest_dac_value
+        print "Found closest nominal DAC value: %i" % closest_dac_value
 
+
+def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
     if obj.adcM == 0:
         text = "\nADCs are not calibrated. Run ADC calibration first.\n"
         obj.add_to_interactive_screen(text)
@@ -349,6 +368,8 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
                     ivalue = ""
                     adc_flag = 0
         # Save the results.
+        # print mv_adc0_values
+        find_closest_value(scan_name[:-5], dac_values, mv_adc0_values)
         if obj.database:
             obj.database.save_dac_data(modified[:-5], "ADC0", int_adc0_values, dac_values)
             obj.database.save_dac_data(modified[:-5], "ADC1", int_adc1_values, dac_values)

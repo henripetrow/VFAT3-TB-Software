@@ -207,6 +207,12 @@ class DatabaseInterface:
     def save_adc_offset(self, value):
         self.set_float("BUFFER_OFFSET", value)
 
+    def save_temperature(self, value):
+        self.set_float("Temperature", value)
+
+    def save_location(self, value):
+        self.set_string("Location", value)
+
     def create_xml_file(self):
         command = "mysql -uVFAT3 -p1234 --xml -e 'SELECT * FROM %s.%s WHERE ChipID = %s' > ./results/hybrid_%s.xml" % (self.database_name, self.table_name, self.name, self.name)
         os.system(command)

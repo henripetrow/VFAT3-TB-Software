@@ -1,7 +1,6 @@
 from scipy import stats
 import matplotlib.pyplot as plt
 
-
 def calc_cal_dac_conversion_factor(obj, dac_values, base_value, ext_adc_values, production="no"):
 
     charge_values = []

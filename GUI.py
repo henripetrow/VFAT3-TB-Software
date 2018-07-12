@@ -31,6 +31,8 @@ class VFAT3_GUI:
         conn_mode = 1
         db_mode = 1
         self.burn_mode = 1
+        # Pilot run flag. Defines if results of single tests are displayed on production test.
+        self.pilot_run_flag = 0
 
         # Communication mode selection.
         for arg in sys.argv:
@@ -47,6 +49,9 @@ class VFAT3_GUI:
             if arg == '-no_id_burn':
                 print "Entering to mode with no chip id burn."
                 self.burn_mode = 0
+            if arg == '-pilot_run':
+                print "Entering the Production Pilot Run -mode."
+                self.pilot_run_flag = 1
 
         if psu_mode == 1:
             self.tti_if = TtiSerialInterface()
@@ -819,7 +824,7 @@ class VFAT3_GUI:
         self.p_run_button = Button(self.production_frame, text="RUN", command=lambda: self.run_production_tests())
         self.p_run_button.grid()
 
-        self.checks_label = Label(self.production_frame, text="\nTests:", width=25)
+        self.checks_label = Label(self.production_frame, text="\nTest Result:", width=25)
         self.checks_label.grid()
 
         self.tests = ['Short Circuit Check',
@@ -839,7 +844,10 @@ class VFAT3_GUI:
                  'All Channel S-curves']
         self.test_label = []
         for i, test in enumerate(self.tests):
-            self.test_label.append(Label(self.production_frame, text=test, width=25))
+            if self.pilot_run_flag:
+                self.test_label.append(Label(self.production_frame, text=test, width=25))
+            else:
+                self.test_label.append(Label(self.production_frame, width=25))
             self.test_label[i].grid()
 
         # self.production_frame.grid_forget()
@@ -1087,8 +1095,9 @@ class VFAT3_GUI:
         return new_data
 
     def add_to_interactive_screen(self, text):
-        self.interactive_screen.insert(END, text)
-        self.interactive_screen.see(END)
+        pass
+        #self.interactive_screen.insert(END, text)
+        #self.interactive_screen.see(END)
 
     def clear_interactive_screen(self):
         self.interactive_screen.delete(1.0, END)
@@ -1294,6 +1303,19 @@ class VFAT3_GUI:
             self.add_to_interactive_screen(text)
             error = 1
         return error
+
+    def measure_temperature(self, mode=""):
+        print "\nMeasuring Temperature."
+        temp_coeff = 0.264
+        temp_offset = -136
+        register[133].Monitor_Sel[0] = 37
+        self.write_register(133)
+        temperature = self.read_adc()[1]
+        print temperature
+        print "Temperature is %f mV, %f C" % (temperature, temp_coeff*temperature+temp_offset)
+        if self.database:
+            self.database.save_temperature(temperature)
+        print ""
 
     def measure_power(self, mode=""):
         print "\nMeasuring power."
@@ -1536,7 +1558,8 @@ class VFAT3_GUI:
             stop = time.time()
             run_time = (stop - start)
             text = "\nScan duration: %f sec\n" % run_time
-            self.add_to_interactive_screen(text)
+            print text
+            #self.add_to_interactive_screen(text)
             adc_values = calc_adc_conversion_constants(self, ext_adc_values, adc0_values, adc1_values, cal_dac_values,
                                                        production)
             self.adc0M = adc_values[0]
@@ -1828,6 +1851,21 @@ class VFAT3_GUI:
         return prod_error
 
     def set_fe_nominal_values(self, chip="VFAT3b"):
+        hv3b_biasing_lut = {'PRE_I_BSF': [230, 0],
+                            'PRE_I_BIT': [700, 0],
+                            'PRE_I_BLCC': [150, 0],
+                            'PRE_VREF': [430, 0],
+                            'SH_I_BFCAS': [620, 0],
+                            'SH_I_BDIFF': [420, 0],
+                            'SD_I_BDIFF': [660, 0],
+                            'SD_I_BSF': [250, 0],
+                            'SD_I_BFCAS': [640, 0],
+                            'CFD_DAC_1': [500, 0],
+                            'CFD_DAC_2': [500, 0],
+                            'HYST_DAC': [102, 0],
+                            'ARM_DAC': [64, 0],
+                            'ZCC_DAC': [22, 0],
+                            'CAL_DAC': ['n', 0]}
         if chip == "VFAT3a":
             print "Setting FE biasing for VFAT3a"
             register[141].PRE_I_BSF[0] = 13
@@ -1841,15 +1879,15 @@ class VFAT3_GUI:
             register[145].SD_I_BFCAS[0] = 255
         elif chip == "VFAT3b":
             print "Setting FE biasing for VFAT3b"
-            register[141].PRE_I_BSF[0] = 13
-            register[141].PRE_I_BIT[0] = 150
-            register[142].PRE_I_BLCC[0] = 25
-            register[142].PRE_VREF[0] = 86
-            register[143].SH_I_BFCAS[0] = 130
-            register[143].SH_I_BDIFF[0] = 80
-            register[144].SD_I_BDIFF[0] = 140
-            register[145].SD_I_BSF[0] = 15
-            register[145].SD_I_BFCAS[0] = 135
+            register[141].PRE_I_BSF[0] = hv3b_biasing_lut['PRE_I_BSF'][1]
+            register[141].PRE_I_BIT[0] = hv3b_biasing_lut['PRE_I_BIT'][1]
+            register[142].PRE_I_BLCC[0] = hv3b_biasing_lut['PRE_I_BLCC'][1]
+            register[142].PRE_VREF[0] = hv3b_biasing_lut['PRE_VREF'][1]
+            register[143].SH_I_BFCAS[0] = hv3b_biasing_lut['SH_I_BFCAS'][1]
+            register[143].SH_I_BDIFF[0] = hv3b_biasing_lut['SH_I_BDIFF'][1]
+            register[144].SD_I_BDIFF[0] = hv3b_biasing_lut['SD_I_BDIFF'][1]
+            register[145].SD_I_BSF[0] = hv3b_biasing_lut['SD_I_BSF'][1]
+            register[145].SD_I_BFCAS[0] = hv3b_biasing_lut['SD_I_BFCAS'][1]
 
         self.write_register(141)
         time.sleep(0.02)
@@ -1921,6 +1959,7 @@ class VFAT3_GUI:
                     result[6] = self.measure_power('SLEEP')
                     result[5] = self.adjust_iref(production="yes")
                     result[7] = self.adc_calibration(production="yes")
+                    self.measure_temperature()
                     if result[7] == 0 or result[7] == 'y':
                         result[8] = self.scan_cal_dac_fc(production="yes")
                         result[9] = test_data_packets(self, save_result="no")
@@ -1945,15 +1984,28 @@ class VFAT3_GUI:
         print "Errors:"
         print result
         print "Duration of the production test: %f min" % duration
-        for i, value in enumerate(result):
-            if value == 'y':
-                self.test_label[i].config(bg='yellow')
-            elif value == 'g':
-                self.test_label[i].config(bg=self.default_bg_color)
-            elif value != 0:
-                self.test_label[i].config(bg='red')
-            else:
-                self.test_label[i].config(bg='green')
+        if self.pilot_run_flag:
+            for i, value in enumerate(result):
+                if value == 'y':
+                    self.test_label[i].config(bg='yellow')
+                elif value == 'g':
+                    self.test_label[i].config(bg=self.default_bg_color)
+                elif value != 0:
+                    self.test_label[i].config(bg='red')
+                else:
+                    self.test_label[i].config(bg='green')
+            hybrid_browser(self.database.name)
+        else:
+            test_result = 'green'
+            if 'y' in result:
+                test_result = 'yellow'
+            if 'r' in result:
+                test_result = 'red'
+            for label in self.test_label:
+                label.config(bg=test_result)
+            self.test_label[3].config(text='Hybrid:')
+            self.test_label[4].config(text=self.database.name)
+            self.update_statistics(test_result)
         self.barcode_entry.delete(0, END)
         if self.database:
             self.database.create_xml_file()
@@ -1962,7 +2014,6 @@ class VFAT3_GUI:
         self.write_register(0xffff)
         print "hybrid number."
         print self.database.name
-        #hybrid_browser(self.database.name)
 
     def read_hw_id(self):
         value = self.read_register(0x10001, save_value='no')
@@ -1971,6 +2022,28 @@ class VFAT3_GUI:
             self.database.save_hw_id_ver(int(value, 2))
 
 # ################# SCAN/TEST -FUNCTIONS #############################
+
+    def update_statistics(self, result):
+        filename = "./data/production_statistics.dat"
+        with open(filename, 'r') as read_file:
+            lines = read_file.readlines()
+            title = lines[0]
+            values = lines[1].split(" ")
+            total = int(values[0]) + 1
+            green = int(values[1])
+            yellow = int(values[2])
+            red = int(values[3])
+            if result == 'green':
+                green += 1
+            elif result == 'yellow':
+                yellow += 1
+            elif result == 'red':
+                red += 1
+        text = "%s%i %i %i %i" % (title, total, green, yellow, red)
+        with open(filename, 'w') as write_file:
+            write_file.write(text)
+
+
 
     def run_full_calibration(self):
         start = time.time()
@@ -2052,6 +2125,8 @@ class VFAT3_GUI:
                     time.sleep(3)
                     if not result:
                         error = 1
+                    else:
+                        self.database.save_location(hybrid_location)
                 text = "Read barcode: %s\n" % barcode_value
                 self.add_to_interactive_screen(text)
         else:

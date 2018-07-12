@@ -1,12 +1,27 @@
-# hv3b_biasing_lut = {'PRE_I_BSF':,
-#                     'PRE_I_BIT':,
-#                     'PRE_I_BLCC':,
-#                     'PRE_VREF':,
-#                     'SH_I_BFCAS':,
-#                     'SH_I_BDIFF':,
-#                     'SD_I_BDIFF':,
-#                     'SD_I_BSF':,
-#                     'SD_I_BFCAS':}
+
+
+# Location that is set to the database
+hybrid_location = "Hybrid SA"
+
+
+# Nominal biasing value in voltages read from ADC
+# [nominal value in mv, DAC value found by scan]
+hv3b_biasing_lut = {'PRE_I_BSF': [230, 0],
+                    'PRE_I_BIT': [700, 0],
+                    'PRE_I_BLCC': [150, 0],
+                    'PRE_VREF': [430, 0],
+                    'SH_I_BFCAS': [620, 0],
+                    'SH_I_BDIFF': [420, 0],
+                    'SD_I_BDIFF': [660, 0],
+                    'SD_I_BSF': [250, 0],
+                    'SD_I_BFCAS': [640, 0],
+                    'CFD_DAC_1': [500, 0],
+                    'CFD_DAC_2': [500, 0],
+                    'HYST_DAC': [102, 0],
+                    'ARM_DAC': [64, 0],
+                    'ZCC_DAC': [22, 0],
+                    'CAL_DAC': ['n', 0]}
+
 
 
 # Selection Criteria for the production test
@@ -33,20 +48,20 @@ lim_Digital_Power_SLEEP = [59.167197, 69.376485, 'n', 'n']
 lim_Analog_Power_RUN = [211.955885, 297.586341, 'n', 'n']
 lim_Digital_Power_RUN = [75.770665, 86.720968, 'n', 'n']
 
-
-adc0_dac_selection_criteria_lut = {"CFD_DAC_1": [600, 850],
-                                   "CFD_DAC_2": [550, 900],
-                                   "HYST_DAC": [180, 300],
-                                   "PRE_I_BLCC": [180, 300],
-                                   "PRE_I_BSF": [640, 840],
-                                   "SD_I_BSF": [580, 720],
-                                   "ARM_DAC": [450, 700],
-                                   "CAL_DAC": [215, 260],
-                                   "PRE_VREF": [980, 1100],
-                                   "PRE_I_BIT": [720, 880],
-                                   "SD_I_BDIFF": [800, 980],
-                                   "SH_I_BDIFF": [860, 980],
-                                   "SD_I_BFCAS": [840, 1000],
-                                   "SH_I_BFCAS": [840, 980],
-                                   "ZCC_DAC": [400, 650]}
+# Selection criteria
+adc0_dac_selection_criteria_lut = {"CFD_DAC_1": [600, 850, 'n', 'n'],
+                                   "CFD_DAC_2": [550, 900, 'n', 'n'],
+                                   "HYST_DAC": [180, 300, 'n', 'n'],
+                                   "PRE_I_BLCC": [180, 300, 'n', 'n'],
+                                   "PRE_I_BSF": [640, 840, 'n', 'n'],
+                                   "SD_I_BSF": [580, 720, 'n', 'n'],
+                                   "ARM_DAC": [450, 700, 'n', 'n'],
+                                   "CAL_DAC": [215, 260, 'n', 'n'],
+                                   "PRE_VREF": [980, 1100, 'n', 'n'],
+                                   "PRE_I_BIT": [720, 880, 'n', 'n'],
+                                   "SD_I_BDIFF": [800, 980, 'n', 'n'],
+                                   "SH_I_BDIFF": [860, 980, 'n', 'n'],
+                                   "SD_I_BFCAS": [840, 1000, 'n', 'n'],
+                                   "SH_I_BFCAS": [840, 980, 'n', 'n'],
+                                   "ZCC_DAC": [400, 650, 'n', 'n']}
 
