@@ -172,13 +172,13 @@ for dac in dac_list:
             for i, dat in enumerate(db_data):
                 data += "<DATA>\n"
                 if dat:
-                    data += "<ADC_NAME> %s </ADC_NAME>\n" % adc
-                    data += "<DAC_SETTING> DAC%s </DAC_SETTING>\n" % i
-                    data += "<ADC_VALUE> %s </ADC_VALUE>\n" % dat
+                    data += "<ADC_NAME>%s</ADC_NAME>\n" % adc
+                    data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
+                    data += "<ADC_VALUE>%s</ADC_VALUE>\n" % dat
                 else:
-                    data += "<ADC_NAME> %s </ADC_NAME >\n" % adc
-                    data += "<DAC_SETTING> DAC%s </DAC_SETTING>\n" % i
-                    data += "<ADC_VALUE> NULL </ADC_VALUE>\n"
+                    data += "<ADC_NAME>%s</ADC_NAME >\n" % adc
+                    data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
+                    data += "<ADC_VALUE>NULL</ADC_VALUE>\n"
                 data += "</DATA>\n"
         data += "</DATASET>\n"
         outF = open(filename, "a")
@@ -211,11 +211,11 @@ for hybrid in hybrid_list:
     for i, dat in enumerate(db_data):
         data += "<DATA>\n"
         if dat:
-            data += "<CHANNEL> %s </CHANNEL>\n" % i
-            data += "<THR_VALUE> %s </THR_VALUE>\n" % dat
+            data += "<CHANNEL>%s</CHANNEL>\n" % i
+            data += "<THR_VALUE>%s</THR_VALUE>\n" % dat
         else:
-            data += "<CHANNEL> %s </CHANNEL>\n" % i
-            data += "<THR_VALUE> NULL </THR_VALUE>\n"
+            data += "<CHANNEL>%s</CHANNEL>\n" % i
+            data += "<THR_VALUE>NULL</THR_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATASET>\n"
     outF = open(filename, "a")
@@ -246,11 +246,11 @@ for hybrid in hybrid_list:
     for i, dat in enumerate(db_data):
         data += "<DATA>\n"
         if dat:
-            data += "<CHANNEL> %s </CHANNEL>" % i
-            data += "<ENC_VALUE> %s </ENC_VALUE>" % dat
+            data += "<CHANNEL>%s</CHANNEL>" % i
+            data += "<ENC_VALUE>%s</ENC_VALUE>" % dat
         else:
-            data += "<CHANNEL> %s </CHANNEL>" % i
-            data += "<ENC_VALUE> NULL </ENC_VALUE>"
+            data += "<CHANNEL>%s</CHANNEL>" % i
+            data += "<ENC_VALUE>NULL</ENC_VALUE>"
         data += "</DATA>\n"
     data += "</DATASET>\n"
     outF = open(filename, "a")
@@ -313,13 +313,13 @@ for hybrid in hybrid_list:
         db_data = database.get_table_values(hybrid, "%s_%s" % (adc, dac))
         for i, dat in enumerate(db_data):
             if dat:
-                data += "<ADC_NAME > %s </ADC_NAME>\n" % adc
-                data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
-                data += "<ADC_VALUE > %s </ADC_VALUE>\n" % dat
+                data += "<ADC_NAME>%s</ADC_NAME>\n" % adc
+                data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
+                data += "<ADC_VALUE>%s</ADC_VALUE>\n" % dat
             else:
-                data += "<ADC_NAME > %s </ADC_NAME>\n" % adc
-                data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
-                data += "<ADC_VALUE > NULL </ADC_VALUE>\n"
+                data += "<ADC_NAME>%s</ADC_NAME>\n" % adc
+                data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
+                data += "<ADC_VALUE>NULL</ADC_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATASET>\n"
     outF = open(filename, "a")
@@ -350,11 +350,11 @@ for hybrid in hybrid_list:
     for i, dat in enumerate(db_data):
         data += "<DATA>\n"
         if dat:
-            data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
-            data += "<CHRG_VALUE > %s </CHRG_VALUE>\n" % dat
+            data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
+            data += "<CHRG_VALUE>%s</CHRG_VALUE>\n" % dat
         else:
-            data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
-            data += "<CHRG_VALUE > NULL </CHRG_VALUE>\n"
+            data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
+            data += "<CHRG_VALUE>NULL</CHRG_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATASET>\n"
     outF = open(filename, "a")
@@ -384,11 +384,11 @@ for hybrid in hybrid_list:
     for i, dat in enumerate(db_data):
         data += "<DATA>\n"
         if dat:
-            data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
-            data += "<ADC_VALUE > %s </ADC_VALUE >" % dat
+            data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
+            data += "<ADC_VALUE>%s</ADC_VALUE >" % dat
         else:
-            data += "<DAC_SETTING > DAC%s </DAC_SETTING>\n" % i
-            data += "<ADC_VALUE > NULL </ADC_VALUE>\n"
+            data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
+            data += "<ADC_VALUE >NULL</ADC_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATASET>\n"
     outF = open(filename, "a")

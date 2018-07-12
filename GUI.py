@@ -2006,6 +2006,7 @@ class VFAT3_GUI:
             self.test_label[3].config(text='Hybrid:')
             self.test_label[4].config(text=self.database.name)
             self.update_statistics(test_result)
+            self.database.save_state(test_result)
         self.barcode_entry.delete(0, END)
         if self.database:
             self.database.create_xml_file()
@@ -2042,8 +2043,6 @@ class VFAT3_GUI:
         text = "%s%i %i %i %i" % (title, total, green, yellow, red)
         with open(filename, 'w') as write_file:
             write_file.write(text)
-
-
 
     def run_full_calibration(self):
         start = time.time()

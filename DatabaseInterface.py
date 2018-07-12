@@ -213,6 +213,9 @@ class DatabaseInterface:
     def save_location(self, value):
         self.set_string("Location", value)
 
+    def save_state(self, value):
+        self.set_string("State", value)
+
     def create_xml_file(self):
         command = "mysql -uVFAT3 -p1234 --xml -e 'SELECT * FROM %s.%s WHERE ChipID = %s' > ./results/hybrid_%s.xml" % (self.database_name, self.table_name, self.name, self.name)
         os.system(command)
