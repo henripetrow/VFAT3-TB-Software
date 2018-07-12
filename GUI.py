@@ -2024,7 +2024,7 @@ class VFAT3_GUI:
 # ################# SCAN/TEST -FUNCTIONS #############################
 
     def update_statistics(self, result):
-        filename = "./data/production_statistics.dat"
+        filename = "./data/production_statistics.data"
         with open(filename, 'r') as read_file:
             lines = read_file.readlines()
             title = lines[0]
