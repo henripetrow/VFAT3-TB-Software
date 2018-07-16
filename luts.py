@@ -26,7 +26,7 @@ hv3b_biasing_lut = {'PRE_I_BSF': [230, 0],
 
 # Selection Criteria for the production test
 # [yellow_low, yellow_high, red_low, red_high]
-lim_BIST = [1080300, 1080300, 'n', 'n']
+lim_BIST = [0, 1080300, 'n', 'n']
 lim_ADC0m = [1.785006, 2.065055, 'n', 'n']
 lim_ADC0b = [-349.691160, -285.799496, 'n', 'n']
 lim_ADC1m = [2.131612, 2.301601, 'n', 'n']

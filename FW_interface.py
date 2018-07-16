@@ -167,7 +167,7 @@ class FW_interface:
 
     def int_adc_calibration(self, start, step, stop):
         message = [0xca, 0x00, 0x06, start, step, stop]
-        output = self.execute_req(message, timeout=30, no_packets=2)
+        output = self.execute_req(message, timeout=30, no_packets=1)
         return output
 
     def cal_dac_calibration(self, start, stop, step):
@@ -175,8 +175,16 @@ class FW_interface:
         output = self.execute_req(message, no_packets=2, timeout=30)
         return output
 
-    def run_scurve(self, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, delay, arm_dac, triggers=100):
-        message = [0xca, 0x00, 0x08, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, 1, 0x0, 0x0, 0, triggers, arm_dac, 19, 0, delay, 0x01, 0xf4]
+    def run_scurve(self, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, delay, arm_dac, triggers=500):
+        # 1000 = 0x3e8
+        triggers_lsb = 200
+        triggers_msb = 0x0
+        # message = [0xca, 0x00, 0x08, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, 1, 0x0, 0x0, triggers_msb, triggers_lsb, arm_dac, 19, 0, delay, 0x01, 0xf4]
+        cal_dac_array = range(cal_dac_start, cal_dac_stop+1, 1)
+        message = [0xca, 0xff, 0x08, start_ch, stop_ch, step_ch, 0, 0, 0, 0x0, 0x0, triggers_msb,
+                   triggers_lsb, arm_dac, 1, 0, delay, 0x01, 0xf4, 1, len(cal_dac_array)]
+        for value in cal_dac_array:
+            message.append(value)
         nr_channels = stop_ch - start_ch + 1
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
         return output

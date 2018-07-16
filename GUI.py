@@ -27,7 +27,7 @@ from luts import *
 class VFAT3_GUI:
     def __init__(self, master):
 
-        psu_mode = 1
+        psu_mode = 0
         conn_mode = 1
         db_mode = 1
         self.burn_mode = 1
@@ -1005,12 +1005,12 @@ class VFAT3_GUI:
         if multiwrite == 0:
             with open(filename, 'r') as f:
                 for line in f:
-                    time.sleep(0.015)
+                    #time.sleep(0.015)
                     line = line.split(",")
                     reg_nr = int(line[0])
                     write_data = line[1]
                     self.register[reg_nr].change_values(write_data)
-                    self.write_register(reg_nr)
+                    # self.write_register(reg_nr)
         else:
             filler_16bits = [0]*16
             full_data = []
@@ -1301,7 +1301,7 @@ class VFAT3_GUI:
             text = "Short circuit detected.\n"
             self.database.save_power(dvdd_power, avdd_power, "SLEEP")
             self.add_to_interactive_screen(text)
-            error = 1
+            error = 'r'
         return error
 
     def measure_temperature(self, mode=""):
@@ -1356,7 +1356,7 @@ class VFAT3_GUI:
                 self.add_to_interactive_screen(text)
                 break
             if counter > 1:
-                error = 1
+                error = 'r'
                 text = "->Sync fail.\n"
                 self.add_to_interactive_screen(text)
                 break
@@ -1496,8 +1496,7 @@ class VFAT3_GUI:
             self.measure_adc_offset()
             start = time.time()
             print "\nStarting ADC calibration."
-            output = self.interfaceFW.int_adc_calibration(0, 1, 255)
-            #print output
+            output = self.interfaceFW.int_adc_calibration(0, 10, 255)
             ext_adc_values = []
             adc0_values = []
             adc1_values = []
@@ -1851,21 +1850,6 @@ class VFAT3_GUI:
         return prod_error
 
     def set_fe_nominal_values(self, chip="VFAT3b"):
-        hv3b_biasing_lut = {'PRE_I_BSF': [230, 0],
-                            'PRE_I_BIT': [700, 0],
-                            'PRE_I_BLCC': [150, 0],
-                            'PRE_VREF': [430, 0],
-                            'SH_I_BFCAS': [620, 0],
-                            'SH_I_BDIFF': [420, 0],
-                            'SD_I_BDIFF': [660, 0],
-                            'SD_I_BSF': [250, 0],
-                            'SD_I_BFCAS': [640, 0],
-                            'CFD_DAC_1': [500, 0],
-                            'CFD_DAC_2': [500, 0],
-                            'HYST_DAC': [102, 0],
-                            'ARM_DAC': [64, 0],
-                            'ZCC_DAC': [22, 0],
-                            'CAL_DAC': ['n', 0]}
         if chip == "VFAT3a":
             print "Setting FE biasing for VFAT3a"
             register[141].PRE_I_BSF[0] = 13
@@ -2185,8 +2169,9 @@ class VFAT3_GUI:
             with open(output_file, "a") as myfile:
                 for line in result:
                     myfile.write("%s\n" % line)
-        print "Writing back previous register values."
+        # print "Writing back previous register values."
         self.load_register_values_from_file_execute(temp_file, multiwrite=0)
+        self.send_reset()
         print "Done"
         stop = time.time()
         run_time = (stop - start)

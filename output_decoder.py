@@ -151,11 +151,11 @@ class datapacket:
 
     def ready(self, dataformat_register):
         # print "****************"
-        #print "DATA PACKET RECEIVED"
+        # print "DATA PACKET RECEIVED"
         # print "Header: %s" % self.header
         # print "FIFO warning: %d" % self.FIFO_warning
         # print "System BC: %d" % self.systemBC
-        #print self.data
+        # print self.data
         #print self.crc
         if self.szp == 0:
             if self.EC:
@@ -163,14 +163,14 @@ class datapacket:
                 self.EC = int(self.EC, 2)
                 # print "EC: %d" % self.EC
             else:
-                #print "No EC value."
+                # print "No EC value."
                 self.EC = 0
             if self.BC:
                 self.bc_size = len(self.BC)/8
                 self.BC = int(self.BC, 2)
                 # print "BC: %d" % self.BC
             else:
-                #print "No BC value."
+                # print "No BC value."
                 self.BC = 0
 
             indices = [i for i, x in enumerate(self.partition_table) if x == "1"]
@@ -182,11 +182,8 @@ class datapacket:
                         self.data += self.spzs_data[:8]
                         #print "Data found in partition %d, %s" % (i, self.spzs_data[:8])
                         self.spzs_data = self.spzs_data[8:]
-
-
                     else:
                         self.data += "00000000"
-
 
             if '1' in self.data:
                 self.hit_found = 1

@@ -10,7 +10,7 @@ import time
 import numpy as np
 
 
-def test_data_packets(obj, nr_loops=10, save_result="yes"):
+def test_data_packets(obj, nr_loops=5, save_result="yes"):
     print "Running data packet test."
     error = 0
     start = time.time()
@@ -99,7 +99,7 @@ def test_data_packets(obj, nr_loops=10, save_result="yes"):
         reply_list = []
         for i in output:
             if flag == 0:
-                reply_list.append(int(i,16))
+                reply_list.append(int(i, 16))
                 flag = 3
             else:
                 flag -= 1
