@@ -146,7 +146,6 @@ for hybrid in hybrid_list:
 
 generate_footer(filename)
 
-
 # Generation xml tables for the DAC scans
 
 dac_list = dac6bits
