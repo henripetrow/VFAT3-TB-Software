@@ -663,7 +663,7 @@ class VFAT3_GUI:
         self.calphi = 0
         self.arm_dac = 100
         self.start_cal_dac = 220
-        self.stop_cal_dac = 240
+        self.stop_cal_dac = 245
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
         self.start_ch_label.grid(column=1, row=1, sticky='w')
@@ -1943,8 +1943,8 @@ class VFAT3_GUI:
                     result[6] = self.measure_power('SLEEP')
                     result[5] = self.adjust_iref(production="yes")
                     result[7] = self.adc_calibration(production="yes")
-                    self.measure_temperature()
                     if result[7] == 0 or result[7] == 'y':
+                        self.measure_temperature()
                         result[8] = self.scan_cal_dac_fc(production="yes")
                         result[9] = test_data_packets(self, save_result="no")
                         result[10] = self.run_all_dac_scans(production="yes")
@@ -2084,7 +2084,7 @@ class VFAT3_GUI:
                 print "Chip id has already been burned."
                 print "Register value:"
                 print self.read_register(0x10003)
-                error = 'y'
+                error = 0
         else:
             print "No Chip ID burn -mode has been selected. No Chip ID was burned."
             error = 'r'

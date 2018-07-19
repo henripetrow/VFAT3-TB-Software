@@ -134,6 +134,9 @@ for hybrid in hybrid_list:
     data += "<SLEEP_PWR_DIGITAL>%s</SLEEP_PWR_DIGITAL>\n" % production_data[24]
     data += "<RUN_PWR_ANALOG>%s</RUN_PWR_ANALOG>\n" % production_data[25]
     data += "<RUN_PWR_DIGITAL>%s</RUN_PWR_DIGITAL>\n" % production_data[26]
+    data += "<LOCATION>%s</LOCATION>\n" % production_data[27]
+    data += "<TEMPERATURE>%s</TEMPERATURE>\n" % production_data[28]
+    data += "<STATE>%s</STATE>\n" % production_data[29]
     data += "</DATA>\n"
     data += "</DATASET>\n"
 
