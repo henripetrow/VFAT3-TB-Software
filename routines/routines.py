@@ -653,6 +653,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     rms_return_list = []
     dead_channels = []
     noisy_channels = []
+    unbonded_channels = []
 
     # fig = plt.figure(figsize=(10, 20))
     # sub1 = plt.subplot(511)
@@ -706,6 +707,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                 rms = 0
             else:
                 rms_list.append(rms)
+            if rms <= 0.11:
+                unbonded_channels.append(channel)
 
             # print "Threshold: %f" % mean
             # print "enc: %f" % rms
@@ -727,6 +730,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print noisy_channels
     print "Dead Channels:"
     print dead_channels
+    print "Possibly unbonded channels:"
+    print unbonded_channels
 
     if folder != "":
         fig = plt.figure(figsize=(10, 20))
