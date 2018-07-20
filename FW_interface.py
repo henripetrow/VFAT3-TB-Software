@@ -177,7 +177,7 @@ class FW_interface:
 
     def run_scurve(self, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, delay, arm_dac, triggers=500):
         # 1000 = 0x3e8
-        triggers_lsb = 200
+        triggers_lsb = 250
         triggers_msb = 0x0
         # message = [0xca, 0x00, 0x08, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, 1, 0x0, 0x0, triggers_msb, triggers_lsb, arm_dac, 19, 0, delay, 0x01, 0xf4]
         cal_dac_array = range(cal_dac_start, cal_dac_stop+1, 1)
