@@ -2052,7 +2052,7 @@ class VFAT3_GUI:
     def burn_chip_id(self, chip_id=""):
         print "\nBurning Chip ID."
         error = 0
-        if self.burn_mode == 1:
+        if self.burn_mode == 1 or self.pilot_run_flag == 1:
             print "Register value before:"
             reg_value = self.read_register(0x10003)
             print reg_value
