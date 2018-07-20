@@ -345,7 +345,7 @@ def hybrid_browser(hybrid=""):
         if production_data[13]:
             plt.text(100, 0.8, "Mean enc:\n %f" % production_data[13], bbox=dict(alpha=0.5))
         plt.title("%s enc" % hybrid)
-        plt.ylim([0, 1])
+        plt.ylim([0, 0.5])
         plt.xlim([0, 128])
         plt.xlabel("Channel")
         plt.ylabel("enc [fC]")
