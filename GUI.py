@@ -31,6 +31,7 @@ class VFAT3_GUI:
         conn_mode = 1
         db_mode = 1
         self.burn_mode = 1
+        self.tti_if = 0
         # Pilot run flag. Defines if results of single tests are displayed on production test.
         self.pilot_run_flag = 0
 
@@ -1946,6 +1947,8 @@ class VFAT3_GUI:
 
     def run_production_tests(self):
         start = time.time()
+        if self.tti_if:
+            self.tti_if.set_outputs_on()
         result = ['g'] * len(self.tests)
         self.clear_interactive_screen()
         if not self.save_barcode():
@@ -2016,6 +2019,8 @@ class VFAT3_GUI:
         self.unset_calibration_variables()
         self.register[0xffff].RUN[0] = 0
         self.write_register(0xffff)
+        if self.tti_if:
+            self.tti_if.set_outputs_off()
         print "***************************************"
         print "Finished production test for the %s" % self.database.name
         print "***************************************"
