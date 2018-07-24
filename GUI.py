@@ -60,7 +60,7 @@ class VFAT3_GUI:
                 print "Found Power Supply"
                 print "Device ID:"
                 print self.tti_if.req_device_id()
-                # self.tti_if.set_outputs_off()
+                self.tti_if.set_outputs_off()
                 self.tti_if.set_ch1_current_limit(0.5)
                 self.tti_if.set_ch2_current_limit(0.5)
                 self.tti_if.set_ch1_voltage(3)
