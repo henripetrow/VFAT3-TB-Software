@@ -20,7 +20,8 @@ hv3b_biasing_lut = {'PRE_I_BSF': [230, 0],
                     'HYST_DAC': [102, 0],
                     'ARM_DAC': [64, 0],
                     'ZCC_DAC': [22, 0],
-                    'CAL_DAC': ['n', 0]}
+                    'CAL_DAC': ['n', 0],
+                    'Iref': [100, 0]}
 
 
 # Selection Criteria for the production test

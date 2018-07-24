@@ -11,7 +11,7 @@ production_table = ["ChipID INT(10)", "HW_ID_VER INT", "BUFFER_OFFSET FLOAT", "V
                     "RegisterTest INT", "EC_errors INT", "BC_errors INT", "CRC_errors INT", "Hit_errors INT",
                     "NoisyChannels INT", "DeadChannels INT", "BIST INT", "ScanChain BOOLEAN", "SLEEP_Power_analog FLOAT",
                     "SLEEP_Power_digital FLOAT", "RUN_Power_analog FLOAT",
-                    "RUN_Power_digital FLOAT", "Location CHAR", 'Temperature FLOAT']
+                    "RUN_Power_digital FLOAT", "Location VARCHAR(20)", 'Temperature FLOAT', 'State VARCHAR(20)']
 
 production_table_sql = 'CREATE TABLE Production(%s' % production_table[0]
 for i, item in enumerate(production_table):

@@ -289,6 +289,8 @@ def fitScurve(scurve_g):
 
 
 def find_closest_value(scan, dac_values, adc_values):
+    #plt.plot(dac_values, adc_values)
+    #plt.grid()
     value = hv3b_biasing_lut[scan][0]
     if value != 'n':
         trialX = np.linspace(dac_values[0], dac_values[-1], dac_values[-1]+1)
@@ -298,9 +300,14 @@ def find_closest_value(scan, dac_values, adc_values):
         for i in range(len(fitted)):
             y += fitted[i]*trialX**i
         # find closest value
-        closest_dac_value = np.where(y == (min(y, key=lambda x: abs(x - value))))[0][0]
+        #print y
+        closest_value = np.where(y == (min(y, key=lambda x: abs(x - value))))[0][0]
+        print closest_value
+        closest_dac_value = int(trialX[closest_value])
         hv3b_biasing_lut[scan][1] = closest_dac_value
         print "Found closest nominal DAC value: %i" % closest_dac_value
+    #plt.plot(trialX, y)
+    #plt.show()
 
 
 def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):

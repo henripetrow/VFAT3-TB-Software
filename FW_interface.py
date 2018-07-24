@@ -24,6 +24,10 @@ class FW_interface:
         self.sock.sendall(bytearray(message))
         if scurve == "yes":
             channels = range(message[3], message[4]+1, message[5])
+            print "Triggers:"
+            triggers = message[11] << 8
+            triggers += message[12]
+            print triggers
         # print message
         try:
             self.sock.settimeout(timeout)
@@ -33,10 +37,7 @@ class FW_interface:
             for k in range(0, no_packets):
                 output = self.sock.recv(receive)
                 if scurve == "yes":
-                    print "Triggers:"
-                    triggers = message[11] << 8
-                    triggers += message[12]
-                    print triggers
+
                     for i in output:
                         hex_value = hex(ord(i))
                         hex_data.append(hex_value)
@@ -181,7 +182,7 @@ class FW_interface:
 
     def run_scurve(self, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, delay, arm_dac, triggers=500):
         # 1000 = 0x3e8
-        triggers_lsb = 0xe8
+        triggers_lsb = 200
         triggers_msb = 0x00
         # message = [0xca, 0x00, 0x08, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, 1, 0x0, 0x0, triggers_msb, triggers_lsb, arm_dac, 19, 0, delay, 0x01, 0xf4]
         cal_dac_array = range(cal_dac_start, cal_dac_stop+1, 1)

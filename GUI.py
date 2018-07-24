@@ -43,9 +43,9 @@ class VFAT3_GUI:
                 print "Entering no database-mode."
                 self.chip_id = 'n/a'
                 db_mode = 0
-            if arg == '-no_psu':
-                print "Entering no Power Supply-mode."
-                psu_mode = 0
+            if arg == '-psu':
+                print "Entering external Power Supply-mode."
+                psu_mode = 1
             if arg == '-no_id_burn':
                 print "Entering to mode with no chip id burn."
                 self.burn_mode = 0
@@ -60,10 +60,10 @@ class VFAT3_GUI:
                 print "Device ID:"
                 print self.tti_if.req_device_id()
                 # self.tti_if.set_outputs_off()
-                self.tti_if.set_ch1_current_limit(0.2)
-                self.tti_if.set_ch2_current_limit(0.2)
-                self.tti_if.set_ch1_voltage(1.2)
-                self.tti_if.set_ch2_voltage(1.2)
+                self.tti_if.set_ch1_current_limit(0.5)
+                self.tti_if.set_ch2_current_limit(0.5)
+                self.tti_if.set_ch1_voltage(3)
+                self.tti_if.set_ch2_voltage(3)
             else:
                 print "No Power Supply found"
         if conn_mode == 0:
@@ -1463,22 +1463,41 @@ class VFAT3_GUI:
         return result
 
     def adjust_iref(self, verbose='yes', production='no'):
-        result = 1
         start = time.time()
         if verbose == 'yes':
             text = "->Adjusting Iref.\n"
             self.add_to_interactive_screen(text)
             print text[:-2]
-        output = self.interfaceFW.adjust_iref()
-        if output[0] != '00':
-            result = 0
-            if verbose == 'yes':
-                text = "Iref adjusted to value %s.\n" % int(output[0], 16)
-                self.add_to_interactive_screen(text)
-                print text[:-2]
-                if production == "yes":
-                    self.database.save_iref(int(output[0], 16))
-        self.register[134].Iref[0] = int(output[0], 16)
+        result = 1
+        self.register[0xffff].RUN[0] = 1
+        self.write_register(0xffff)
+        time.sleep(0.01)
+        self.register[133].Monitor_Sel[0] = 0
+        self.write_register(133)
+        time.sleep(0.01)
+        adc_values = []
+        dac_values = []
+        for i in range(15, 46, 5):
+            self.register[134].Iref[0] = i
+            self.write_register(134)
+            time.sleep(0.01)
+            output = self.read_ext_adc(verbose='no')
+            adc_values.append(output[3])
+            dac_values.append(i)
+        find_closest_value('Iref', dac_values, adc_values)
+        print hv3b_biasing_lut['Iref'][1]
+        self.register[134].Iref[0] = hv3b_biasing_lut['Iref'][1]
+
+        # output = self.interfaceFW.adjust_iref()
+        # if output[0] != '00':
+        #     result = 0
+        #     if verbose == 'yes':
+        #         text = "Iref adjusted to value %s.\n" % int(output[0], 16)
+        #         self.add_to_interactive_screen(text)
+        #         print text[:-2]
+        #         if production == "yes":
+        #             self.database.save_iref(int(output[0], 16))
+        # self.register[134].Iref[0] = int(output[0], 16)
         stop = time.time()
         run_time = (stop - start)
         print "iref routine time: %f sec\n" % run_time
@@ -1997,8 +2016,9 @@ class VFAT3_GUI:
         self.unset_calibration_variables()
         self.register[0xffff].RUN[0] = 0
         self.write_register(0xffff)
-        print "hybrid number."
-        print self.database.name
+        print "***************************************"
+        print "Finished production test for the %s" % self.database.name
+        print "***************************************"
 
     def read_hw_id(self):
         value = self.read_register(0x10001, save_value='no')
