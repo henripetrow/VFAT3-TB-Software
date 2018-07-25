@@ -1318,12 +1318,15 @@ class VFAT3_GUI:
         temp_offset = -136
         register[133].Monitor_Sel[0] = 37
         self.write_register(133)
-        temperature = self.read_adc()[1]
-        print temperature
-        print "Temperature is %f mV, %f C" % (temperature, temp_coeff*temperature+temp_offset)
-        if self.database:
-            self.database.save_temperature(temperature)
-        print ""
+        output = self.read_adc()
+        if output != 'n':
+            temperature = output[1]
+            print temperature
+            print "Temperature is %f mV, %f C" % (temperature, temp_coeff*temperature+temp_offset)
+            if self.database:
+                self.database.save_temperature(temperature)
+            print ""
+
 
     def measure_power(self, mode=""):
         print "\nMeasuring power."
