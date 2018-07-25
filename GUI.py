@@ -1960,6 +1960,7 @@ class VFAT3_GUI:
 
     def run_production_tests(self):
         start = time.time()
+        os.system('clear')
         if self.tti_if:
             self.tti_if.set_outputs_off()
             self.tti_if.set_ch1_current_limit(0.5)
