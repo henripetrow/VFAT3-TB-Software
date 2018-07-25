@@ -130,14 +130,17 @@ class DatabaseInterface:
         self.close_connection()
 
     def save_ch_data(self, table_name, data):
-        self.open_connection()
-        table_sql = "UPDATE %s SET " % table_name
-        table_sql += "Ch%i = %f" % (0, data[0])
-        for i in range(1, len(data)):
-            table_sql += ", Ch%i = %f" % (i, data[i])
-        table_sql += " WHERE ChipID = '%s';" % self.name
-        self.cursor.execute(table_sql)
-        self.close_connection()
+        if data:
+            self.open_connection()
+            table_sql = "UPDATE %s SET " % table_name
+            table_sql += "Ch%i = %f" % (0, data[0])
+            for i in range(1, len(data)):
+                table_sql += ", Ch%i = %f" % (i, data[i])
+            table_sql += " WHERE ChipID = '%s';" % self.name
+            self.cursor.execute(table_sql)
+            self.close_connection()
+        else:
+            print "No data to save to database."
 
     def save_adc0(self, m_value, b_value):
         self.set_float("ADC0M", m_value)
