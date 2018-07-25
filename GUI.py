@@ -1958,6 +1958,12 @@ class VFAT3_GUI:
                     timestamp = time.strftime("%Y:%m:%d:%H:%M")
                     with open('production_error.log', 'a') as outfile:
                         outfile.write('%s Hybrid:%s Test:%s is red with value: %s\n' % (timestamp, self.database.name, name, value))
+                else:
+                    print "%s result is YELLOW." % name
+                    timestamp = time.strftime("%Y:%m:%d:%H:%M")
+                    with open('production_error.log', 'a') as outfile:
+                        outfile.write('%s Hybrid:%s Test:%s is yellow with value: %s\n' % (
+                        timestamp, self.database.name, name, value))
             else:
                 print "%s result is YELLOW." % name
                 timestamp = time.strftime("%Y:%m:%d:%H:%M")
