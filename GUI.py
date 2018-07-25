@@ -1983,7 +1983,6 @@ class VFAT3_GUI:
                 result[1] = self.test_bist()
                 result[2] = self.send_reset()
                 if result[2] == 0:
-                    print "Sync ok"
                     self.read_hw_id()
                     result[3] = self.test_registers(production="yes")
                     result[4] = self.burn_chip_id(chip_id=self.database.name)

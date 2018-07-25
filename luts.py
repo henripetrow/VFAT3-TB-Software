@@ -45,7 +45,7 @@ lim_Noisy_Channels = [0, 3, 'n', 'n']
 lim_Dead_Channels = [0, 3, 'n', 'n']
 lim_Analog_Power_SLEEP = [36.144520, 300.543496, 'n', 'n']
 lim_Digital_Power_SLEEP = [59.167197, 79.376485, 'n', 'n']
-lim_Analog_Power_RUN = [64, 94, 'n', 'n']
+lim_Analog_Power_RUN = [64, 300, 'n', 'n']
 lim_Digital_Power_RUN = [75.770665, 96.720968, 'n', 'n']
 
 # Selection criteria
