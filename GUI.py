@@ -1488,6 +1488,7 @@ class VFAT3_GUI:
         find_closest_value('Iref', dac_values, adc_values)
         print hv3b_biasing_lut['Iref'][1]
         self.register[134].Iref[0] = hv3b_biasing_lut['Iref'][1]
+        self.write_register(134)
 
         # output = self.interfaceFW.adjust_iref()
         # if output[0] != '00':
@@ -1948,6 +1949,11 @@ class VFAT3_GUI:
     def run_production_tests(self):
         start = time.time()
         if self.tti_if:
+            self.tti_if.set_outputs_off()
+            self.tti_if.set_ch1_current_limit(0.5)
+            self.tti_if.set_ch2_current_limit(0.5)
+            self.tti_if.set_ch1_voltage(3)
+            self.tti_if.set_ch2_voltage(3)
             self.tti_if.set_outputs_on()
         result = ['g'] * len(self.tests)
         self.clear_interactive_screen()
