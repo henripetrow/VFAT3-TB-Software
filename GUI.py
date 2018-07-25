@@ -31,6 +31,7 @@ class VFAT3_GUI:
         conn_mode = 1
         db_mode = 1
         self.burn_mode = 1
+        self.beep_mode = 0
         self.tti_if = 0
         # Pilot run flag. Defines if results of single tests are displayed on production test.
         self.pilot_run_flag = 0
@@ -53,6 +54,9 @@ class VFAT3_GUI:
             if arg == '-pilot_run':
                 print "Entering the Production Pilot Run -mode."
                 self.pilot_run_flag = 1
+            if arg == '-beep':
+                print "Usign system beep on Production test to indicate test end."
+                self.beep_mode = 1
 
         if psu_mode == 1:
             self.tti_if = TtiSerialInterface()
@@ -1495,7 +1499,9 @@ class VFAT3_GUI:
         print hv3b_biasing_lut['Iref'][1]
         self.register[134].Iref[0] = hv3b_biasing_lut['Iref'][1]
         self.write_register(134)
-
+        output = self.read_ext_adc(verbose='no')
+        iref_mv = output[3]
+        print "Iref adjusted to: %s mV" % iref_mv
 
         # output = self.interfaceFW.adjust_iref()
         # if output[0] != '00':
@@ -1511,7 +1517,7 @@ class VFAT3_GUI:
         run_time = (stop - start)
         print "iref routine time: %f sec\n" % run_time
 
-        return self.check_selection_criteria(self.register[134].Iref[0], lim_iref, "Iref Adjustment")
+        return self.check_selection_criteria(iref_mv, lim_iref, "Iref Adjustment")
 
     def adc_calibration(self, production="no"):
         error = 0
@@ -2040,6 +2046,8 @@ class VFAT3_GUI:
         self.write_register(0xffff)
         if self.tti_if:
             self.tti_if.set_outputs_off()
+        if self.beep_mode == 1:
+            print "\a"
         print "***************************************"
         print "Finished production test for the %s" % self.database.name
         print "***************************************"
