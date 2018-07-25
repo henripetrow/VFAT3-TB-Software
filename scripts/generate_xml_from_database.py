@@ -12,7 +12,7 @@ run_number = 1
 comment_description = "VFAT3 Production Data from Testing at CERN"
 run_type = "VFAT3 Production Data"
 
-kind_of_part = "GEM VFAT3 Hybrid"
+kind_of_part = "GEM VFAT3"
 
 file_path = "../results/xml/"
 #file_path = "/home/hpetrow/cernbox/Data/production_data_xml_test/"
@@ -65,8 +65,9 @@ database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids()
 print "Listing hybrids from the database."
 temp_list = []
+hybrid_number = int(h[6:])
 for h in hybrid_list:
-    if h in test_hybrids:
+    if h in test_hybrids or hybrid_number < 1000 or hybrid_number > 4443:
         pass
     else:
         temp_list.append(int(h[6:]))
@@ -180,7 +181,7 @@ for dac in dac_list:
                 else:
                     data += "<ADC_NAME>%s</ADC_NAME >\n" % adc
                     data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
-                    data += "<ADC_VALUE>NULL</ADC_VALUE>\n"
+                    data += "<ADC_VALUE></ADC_VALUE>\n"
                 data += "</DATA>\n"
         data += "</DATASET>\n"
         outF = open(filename, "a")
@@ -217,7 +218,7 @@ for hybrid in hybrid_list:
             data += "<THR_VALUE>%s</THR_VALUE>\n" % dat
         else:
             data += "<CHANNEL>%s</CHANNEL>\n" % i
-            data += "<THR_VALUE>NULL</THR_VALUE>\n"
+            data += "<THR_VALUE></THR_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATASET>\n"
     outF = open(filename, "a")
@@ -252,7 +253,7 @@ for hybrid in hybrid_list:
             data += "<ENC_VALUE>%s</ENC_VALUE>" % dat
         else:
             data += "<CHANNEL>%s</CHANNEL>" % i
-            data += "<ENC_VALUE>NULL</ENC_VALUE>"
+            data += "<ENC_VALUE></ENC_VALUE>"
         data += "</DATA>\n"
     data += "</DATASET>\n"
     outF = open(filename, "a")
@@ -321,7 +322,7 @@ for hybrid in hybrid_list:
             else:
                 data += "<ADC_NAME>%s</ADC_NAME>\n" % adc
                 data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
-                data += "<ADC_VALUE>NULL</ADC_VALUE>\n"
+                data += "<ADC_VALUE></ADC_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATASET>\n"
     outF = open(filename, "a")
@@ -356,7 +357,7 @@ for hybrid in hybrid_list:
             data += "<CHRG_VALUE>%s</CHRG_VALUE>\n" % dat
         else:
             data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
-            data += "<CHRG_VALUE>NULL</CHRG_VALUE>\n"
+            data += "<CHRG_VALUE></CHRG_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATASET>\n"
     outF = open(filename, "a")
@@ -390,7 +391,7 @@ for hybrid in hybrid_list:
             data += "<ADC_VALUE>%s</ADC_VALUE >" % dat
         else:
             data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
-            data += "<ADC_VALUE >NULL</ADC_VALUE>\n"
+            data += "<ADC_VALUE></ADC_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATASET>\n"
     outF = open(filename, "a")
