@@ -1490,6 +1490,7 @@ class VFAT3_GUI:
         self.register[134].Iref[0] = hv3b_biasing_lut['Iref'][1]
         self.write_register(134)
 
+
         # output = self.interfaceFW.adjust_iref()
         # if output[0] != '00':
         #     result = 0
