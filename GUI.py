@@ -2336,7 +2336,10 @@ class VFAT3_GUI:
             scan_nr = self.scan_options_value[self.scan_options.index(scan)]
             dac_size = self.dac_sizes[self.scan_options.index(scan)]
             output = scan_execute(self, scan, scan_nr, dac_size, save_data)
-            errors.append(self.check_selection_criteria(output[0][-1], adc0_dac_selection_criteria_lut[scan[:-5]], scan))
+            if output != 'Error':
+                errors.append(self.check_selection_criteria(output[0][-1], adc0_dac_selection_criteria_lut[scan[:-5]], scan))
+            else:
+                errors.append('r')
         stop = time.time()
         run_time = (stop - start)
         print "Runtime: %f s\n" % run_time
