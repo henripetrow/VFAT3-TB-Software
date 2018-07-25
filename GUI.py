@@ -1298,10 +1298,13 @@ class VFAT3_GUI:
         time.sleep(0.8)
         avdd_power = self.interfaceFW.read_avdd_power()
         dvdd_power = self.interfaceFW.read_dvdd_power()
-        if avdd_power > 400 or dvdd_power > 400:
-            text = "Short circuit detected.\n"
-            self.database.save_power(dvdd_power, avdd_power, "SLEEP")
-            self.add_to_interactive_screen(text)
+        if avdd_power != 'Error' and dvdd_power != 'Error':
+            if avdd_power > 400 or dvdd_power > 400:
+                text = "Short circuit detected.\n"
+                self.database.save_power(dvdd_power, avdd_power, "SLEEP")
+                self.add_to_interactive_screen(text)
+                error = 'r'
+        else:
             error = 'r'
         return error
 
@@ -1347,6 +1350,7 @@ class VFAT3_GUI:
         return error
 
     def send_reset(self):
+        print 'Synchronizing the chip.'
         counter = 0
         error = 0
         while True:
@@ -1355,11 +1359,13 @@ class VFAT3_GUI:
             if result[0] == '0x3a':
                 text = "->Sync success.\n"
                 self.add_to_interactive_screen(text)
+                print text
                 break
             if counter > 1:
                 error = 'r'
                 text = "->Sync fail.\n"
                 self.add_to_interactive_screen(text)
+                print text
                 break
             counter += 1
         return error
@@ -1911,16 +1917,21 @@ class VFAT3_GUI:
 
     def test_bist(self):
         print "\nTesting BIST."
+        error = 0
         output = self.interfaceFW.run_bist()
-        data3 = int(output[3], 16) << 24
-        data2 = int(output[2], 16) << 16
-        data1 = int(output[1], 16) << 8
-        data0 = int(output[0], 16)
-        bist_value_int = data3 + data2 + data1 + data0
-        print "BIST: %i" % bist_value_int
-        if self.database:
-            self.database.save_bist(bist_value_int)
-        return self.check_selection_criteria(bist_value_int, lim_BIST, "BIST")
+        if output[0] != 'Error':
+            data3 = int(output[3], 16) << 24
+            data2 = int(output[2], 16) << 16
+            data1 = int(output[1], 16) << 8
+            data0 = int(output[0], 16)
+            bist_value_int = data3 + data2 + data1 + data0
+            print "BIST: %i" % bist_value_int
+            if self.database:
+                self.database.save_bist(bist_value_int)
+            error = self.check_selection_criteria(bist_value_int, lim_BIST, "BIST")
+        else:
+            error = 'r'
+        return error
 
     def test_scan_chain(self):
         if self.database:

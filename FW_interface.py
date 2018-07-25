@@ -16,9 +16,11 @@ class FW_interface:
 
         # Connect the socket to the port where the server is listening
         self.server_address = ('192.168.1.10', 7)
+        self.connection_error = 0
 
     def execute_req(self, message, no_packets=1, timeout=2, scurve="no", receive=2000):
         # Create a TCP/IP socket
+        self.connection_error = 0
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect(self.server_address)
         self.sock.sendall(bytearray(message))
@@ -72,6 +74,11 @@ class FW_interface:
         except socket.timeout:
             output = ['Error']
             print "No response"
+            self.connection_error = 1
+        except socket.error:
+            print "Problems connecting to the system."
+            output = ['Error']
+            self.connection_error = 1
         finally:
             self.sock.close()
         # print output
@@ -206,54 +213,63 @@ class FW_interface:
 
     def read_ext_adc_vmon(self):
         message = [0xca, 0x00, 0x03, 0x49, 0x00]
-        output = self.execute_req(message,  timeout=30, receive=20)
+        output = self.execute_req(message,  timeout=10, receive=20)
         return output
 
     def read_ext_adc_vbgr(self):
         message = [0xca, 0x00, 0x03, 0x49, 0x02]
-        output = self.execute_req(message,  timeout=30, receive=20)
+        output = self.execute_req(message,  timeout=10, receive=20)
         return output
 
     def run_bist(self):
         message = [0xca, 0x00, 0x0a]
-        output = self.execute_req(message, timeout=30)
+        output = self.execute_req(message, timeout=10)
         return output
 
     def read_avdd_power(self):
         message = [0xca, 0x00, 0x03, 0x48, 0x00]
-        output = self.execute_req(message,  timeout=30, receive=20)
-        msb = int(output[1], 16) << 8
-        lsb = int(output[0], 16)
-        avdd_value_int = msb + lsb
-        avdd_value_mv = avdd_value_int * 0.0625
-        # print "AVDD voltage: %f" % avdd_value_mv
-        avdd_value_current = avdd_value_mv * 0.2346 - 4.17
-        avdd_power = avdd_value_current * 1.2
-        print "Power AVDD: %f" % avdd_power
-        return avdd_power
+        output = self.execute_req(message,  timeout=10, receive=20)
+        if output[0] != 'Error':
+            msb = int(output[1], 16) << 8
+            lsb = int(output[0], 16)
+            avdd_value_int = msb + lsb
+            avdd_value_mv = avdd_value_int * 0.0625
+            # print "AVDD voltage: %f" % avdd_value_mv
+            avdd_value_current = avdd_value_mv * 0.2346 - 4.17
+            avdd_power = avdd_value_current * 1.2
+            print "Power AVDD: %f" % avdd_power
+            return avdd_power
+        else:
+            return 'Error'
 
     def read_dvdd_power(self):
         message = [0xca, 0x00, 0x03, 0x48, 0x01]
-        output = self.execute_req(message,  timeout=30, receive=20)
-        msb = int(output[1], 16) << 8
-        lsb = int(output[0], 16)
-        dvdd_value_int = msb + lsb
-        dvdd_value_mv = dvdd_value_int * 0.0625
-        dvdd_value_current = dvdd_value_mv * 0.2346 - 4.17
-        dvdd_power = dvdd_value_current * 1.2
-        # print "DVDD voltage: %f" % dvdd_value_mv
-        print "Power DVDD: %f" % dvdd_power
-        return dvdd_power
+        output = self.execute_req(message,  timeout=10, receive=20)
+        if output[0] != 'Error':
+            msb = int(output[1], 16) << 8
+            lsb = int(output[0], 16)
+            dvdd_value_int = msb + lsb
+            dvdd_value_mv = dvdd_value_int * 0.0625
+            dvdd_value_current = dvdd_value_mv * 0.2346 - 4.17
+            dvdd_power = dvdd_value_current * 1.2
+            # print "DVDD voltage: %f" % dvdd_value_mv
+            print "Power DVDD: %f" % dvdd_power
+            return dvdd_power
+        else:
+            return 'Error'
 
     def read_iovdd_power(self):
         message = [0xca, 0x00, 0x03, 0x48, 0x02]
-        output = self.execute_req(message,  timeout=30, receive=20)
-        msb = int(output[1], 16) << 8
-        lsb = int(output[0], 16)
-        iovdd_value_int = msb + lsb
-        iovdd_value_mv = iovdd_value_int * 0.0625
-        iovdd_value_current = iovdd_value_mv * 0.2346 - 4.17
-        iovdd_power = iovdd_value_current * 2.5
-        # print "IOVDD voltage: %f" % iovdd_value_mv
-        print "Power IOVDD: %f" % iovdd_power
-        return iovdd_power
+        output = self.execute_req(message,  timeout=10, receive=20)
+        if output[0] != 'Error':
+            msb = int(output[1], 16) << 8
+            lsb = int(output[0], 16)
+            iovdd_value_int = msb + lsb
+            iovdd_value_mv = iovdd_value_int * 0.0625
+            iovdd_value_current = iovdd_value_mv * 0.2346 - 4.17
+            iovdd_power = iovdd_value_current * 2.5
+            # print "IOVDD voltage: %f" % iovdd_value_mv
+            print "Power IOVDD: %f" % iovdd_power
+            return iovdd_power
+        else:
+            return 'Error'
