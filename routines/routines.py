@@ -710,7 +710,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             for r in diff[2:]:
                 rms += r * (mean - dac_values[l]) ** 2
                 l += 1
-            print rms
+
             if 0 < (rms / summ):
                 rms = math.sqrt(rms / summ)
             else:
@@ -733,6 +733,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
     rms_mean = numpy.mean(rms_list)
     rms_rms = numpy.std(rms_list)
+    if numpy.isnan(rms_rms):
+        rms_rms = 0
     # print rms_list
     mean_mean = numpy.mean(mean_list)
     mean_rms = numpy.std(mean_list)
