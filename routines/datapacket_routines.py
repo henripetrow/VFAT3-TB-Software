@@ -95,7 +95,7 @@ def test_data_packets(obj, nr_loops=5, save_result="yes"):
         previous_EC = 0
         previous_BC = 0
         output = obj.interfaceFW.send_fcc("", file_name)
-        if output != 'Error':
+        if output[0] != 'Error':
             flag = 0
             reply_list = []
             for i in output:
