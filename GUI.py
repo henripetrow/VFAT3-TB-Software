@@ -2011,9 +2011,9 @@ class VFAT3_GUI:
                 else:
                     text = "->Production test aborted.\n"
                     self.add_to_interactive_screen(text)
+                    print text
             else:
-                text = "Short Circuit detected.\n"
-                text += "->Production test aborted.\n"
+                text = "->Production test aborted.\n"
                 self.add_to_interactive_screen(text)
                 print text
             time.sleep(0.1)
