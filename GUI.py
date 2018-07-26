@@ -1302,7 +1302,7 @@ class VFAT3_GUI:
         time.sleep(0.8)
         avdd_power = self.interfaceFW.read_avdd_power()
         dvdd_power = self.interfaceFW.read_dvdd_power()
-        if avdd_power != 'Error' and dvdd_power != 'Error':
+        if avdd_power == 'Error' or dvdd_power == 'Error':
             if avdd_power > 400 or dvdd_power > 400:
                 text = "Short circuit detected.\n"
                 self.database.save_power(dvdd_power, avdd_power, "SLEEP")
@@ -1939,6 +1939,7 @@ class VFAT3_GUI:
                 self.database.save_bist(bist_value_int)
             error = self.check_selection_criteria(bist_value_int, lim_BIST, "BIST")
         else:
+            print "Communication error."
             error = 'r'
         return error
 
