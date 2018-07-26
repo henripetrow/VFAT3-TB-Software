@@ -2347,6 +2347,7 @@ class VFAT3_GUI:
             if output != 'Error':
                 errors.append(self.check_selection_criteria(output[0][-1], adc0_dac_selection_criteria_lut[scan[:-5]], scan))
             else:
+                print "Error, Scan could not be performed."
                 errors.append('r')
         stop = time.time()
         run_time = (stop - start)
