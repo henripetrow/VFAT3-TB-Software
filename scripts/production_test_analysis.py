@@ -29,7 +29,9 @@ print yellow_hybrids
 print "Red Hybrids:"
 print red_hybrids
 
-print "Total. Green: %s, Yellow: %s, Red: %s" % (len(green_hybrids), len(yellow_hybrids), len(red_hybrids))
+total = len(green_hybrids) + len(yellow_hybrids) + len(red_hybrids)
+
+print "TOTAL: %s  \nGreen: %s, Yellow: %s, Red: %s" % (total, len(green_hybrids), len(yellow_hybrids), len(red_hybrids))
 
 
 
