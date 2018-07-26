@@ -11,6 +11,7 @@ hybrid_list = database.list_hybrids()
 green_hybrids = []
 yellow_hybrids = []
 red_hybrids = []
+none_values = []
 test_hybrids = ['Hybrid55555']
 print "List of tested hybrids:"
 for i, hybrid in enumerate(hybrid_list):
@@ -19,10 +20,13 @@ for i, hybrid in enumerate(hybrid_list):
         hybrid = hybrid[6:]
         if production_data[29] == 'green':
             green_hybrids.append(hybrid)
-        if production_data[29] == 'yellow':
+        elif production_data[29] == 'yellow':
             yellow_hybrids.append(hybrid)
-        if production_data[29] == 'red':
+        elif production_data[29] == 'red':
             red_hybrids.append(hybrid)
+        else:
+            none_values.append(hybrid)
+
 
 print "Green Hybrids:"
 print green_hybrids
@@ -30,10 +34,13 @@ print "Yellow Hybrids:"
 print yellow_hybrids
 print "Red Hybrids:"
 print red_hybrids
+print "No status value:"
+print none_values
+print ""
+print ""
+total = len(green_hybrids) + len(yellow_hybrids) + len(red_hybrids) + len(none_values)
 
-total = len(green_hybrids) + len(yellow_hybrids) + len(red_hybrids)
-
-print "TOTAL: %s  \nGreen: %s, Yellow: %s, Red: %s" % (total, len(green_hybrids), len(yellow_hybrids), len(red_hybrids))
+print "TOTAL: %s  \nGreen: %s, Yellow: %s, Red: %s \nwith no status information: %s" % (total, len(green_hybrids), len(yellow_hybrids), len(red_hybrids), len(none_values))
 
 
 

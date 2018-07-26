@@ -65,8 +65,9 @@ database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids()
 print "Listing hybrids from the database."
 temp_list = []
-hybrid_number = int(h[6:])
+
 for h in hybrid_list:
+    hybrid_number = int(h[6:])
     if h in test_hybrids or hybrid_number < 1000 or hybrid_number > 4443:
         pass
     else:
