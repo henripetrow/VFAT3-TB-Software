@@ -68,9 +68,12 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     all_ch_data = "n"
     noisy_channels = "n"
     thr_list = "n"
+    dead_channels = "n"
+    mean_enc_fc = "n"
 
     if obj.cal_dac_fcM == 0 or obj.cal_dac_fcB == 0:
         print "CAL_DAC not calibrated."
+        print "Aborting S-curve routine."
     else:
         start = time.time()
 
