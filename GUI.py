@@ -2008,7 +2008,10 @@ class VFAT3_GUI:
                         result[8] = self.scan_cal_dac_fc(production="yes")
                         result[9] = test_data_packets(self, save_result="no")
                         result[10] = self.run_all_dac_scans(production="yes")
-                        result[11] = self.run_scurve(production="yes")
+                        if result[9] == 0:
+                            result[11] = self.run_scurve(production="yes")
+                        else:
+                            print "S-curves are not run due to errors in data packets."
                     else:
                         print "Internal ADCs broken. Abort production test."
                 else:
