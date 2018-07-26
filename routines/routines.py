@@ -314,7 +314,7 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
     if obj.adcM == 0:
         text = "\nADCs are not calibrated. Run ADC calibration first.\n"
         obj.add_to_interactive_screen(text)
-        output = "error"
+        return_value = "Error"
     else:
         start = time.time()
 
@@ -332,7 +332,7 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
         if output[0] == "Error":
             text = "%s: %s\n" % (output[0], output[1])
             obj.add_to_interactive_screen(text)
-            return_value = 'n'
+            return_value = 'Error'
         else:
             adc_flag = 0
             int_adc0_values = []
