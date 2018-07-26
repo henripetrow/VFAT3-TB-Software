@@ -1303,13 +1303,14 @@ class VFAT3_GUI:
         avdd_power = self.interfaceFW.read_avdd_power()
         dvdd_power = self.interfaceFW.read_dvdd_power()
         if avdd_power == 'Error' or dvdd_power == 'Error':
+            print "Communication error."
+            error = 'r'
+        else:
             if avdd_power > 400 or dvdd_power > 400:
                 text = "Short circuit detected.\n"
                 self.database.save_power(dvdd_power, avdd_power, "SLEEP")
                 self.add_to_interactive_screen(text)
                 error = 'r'
-        else:
-            error = 'r'
         return error
 
     def measure_temperature(self, mode=""):
