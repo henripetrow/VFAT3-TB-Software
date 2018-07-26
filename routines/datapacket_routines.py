@@ -95,95 +95,101 @@ def test_data_packets(obj, nr_loops=5, save_result="yes"):
         previous_EC = 0
         previous_BC = 0
         output = obj.interfaceFW.send_fcc("", file_name)
-        flag = 0
-        reply_list = []
-        for i in output:
-            if flag == 0:
-                reply_list.append(int(i, 16))
-                flag = 3
+        if output != 'Error':
+            flag = 0
+            reply_list = []
+            for i in output:
+                if flag == 0:
+                    reply_list.append(int(i, 16))
+                    flag = 3
+                else:
+                    flag -= 1
+            output = decode_output_data(reply_list, obj.register)
+            if output[0] == "Error":
+                text = "%s: %s\n" % (output[0], output[1])
+                obj.add_to_interactive_screen(text)
             else:
-                flag -= 1
-        output = decode_output_data(reply_list, obj.register)
-        if output[0] == "Error":
-            text = "%s: %s\n" % (output[0], output[1])
-            obj.add_to_interactive_screen(text)
+                for i in output[3]:
+                    if i.type == "data_packet":
+                        data_packet_counter += 1
+                        if i.hit_found == 1:
+                            hit_counter += 1
+                        if i.crc_error == 1:
+                            crc_error_counter += 1
+                        ec_diff = i.EC - previous_EC
+                        if ec_diff != 1:
+                            if previous_EC == ecb_max and i.EC == 0:
+                                pass
+                            else:
+                                #print ""
+                                print "->EC error"
+                                print "Packet: %d" % data_packet_counter
+                                print "Previous EC: %d" % previous_EC
+                                print "Current EC: %d" % i.EC
+                                ec_error_counter += 1
+                        previous_EC = i.EC
+                        bc_diff = i.BC - previous_BC
+                        if bc_diff != nr_of_bc_between_triggers:
+                            if i.BC+(bcb_max-previous_BC) == nr_of_bc_between_triggers-1:  # -1 since counter starts from zero.
+                                pass
+                            else:
+                                print ""
+                                print "->BC error"
+                                print "Packet: %d" % data_packet_counter
+                                print "Previous BC: %d" % previous_BC
+                                print "Current BC: %d" % i.BC
+                                bc_error_counter += 1
+                        previous_BC = i.BC
         else:
-            for i in output[3]:
-                if i.type == "data_packet":
-                    data_packet_counter += 1
-                    if i.hit_found == 1:
-                        hit_counter += 1
-                    if i.crc_error == 1:
-                        crc_error_counter += 1
-                    ec_diff = i.EC - previous_EC
-                    if ec_diff != 1:
-                        if previous_EC == ecb_max and i.EC == 0:
-                            pass
-                        else:
-                            #print ""
-                            print "->EC error"
-                            print "Packet: %d" % data_packet_counter
-                            print "Previous EC: %d" % previous_EC
-                            print "Current EC: %d" % i.EC
-                            ec_error_counter += 1
-                    previous_EC = i.EC
-                    bc_diff = i.BC - previous_BC
-                    if bc_diff != nr_of_bc_between_triggers:
-                        if i.BC+(bcb_max-previous_BC) == nr_of_bc_between_triggers-1:  # -1 since counter starts from zero.
-                            pass
-                        else:
-                            print ""
-                            print "->BC error"
-                            print "Packet: %d" % data_packet_counter
-                            print "Previous BC: %d" % previous_BC
-                            print "Current BC: %d" % i.BC
-                            bc_error_counter += 1
-                    previous_BC = i.BC
+            print "Connection error."
+            error = 'r'
 
+        if error != 'r':
+            stop = time.time()
+            run_time = (stop - start)
+            result = []
+            result.append("-> %d Triggers sent." % trigger_counter)
+            result.append("%d Data packets received." % data_packet_counter)
+            result.append("CRC errors: %d" % crc_error_counter)
+            result.append("EC errors: %d" % ec_error_counter)
+            result.append("BC errors: %d" % bc_error_counter)
+            result.append("Hits found: %d" % hit_counter)
+            result.append("Time elapsed: %f s" % run_time)
+            result.append("***************")
+            if save_result == "yes":
+                with open(output_file, "a") as myfile:
+                    for line in result:
+                        print line
+                        myfile.write("%s\n" % line)
+    if error != 'r':
+        error_list = [crc_error_counter, bc_error_counter, ec_error_counter, hit_counter]
+        if obj.database:
+            obj.database.save_data_test(error_list)
+
+        obj.register[65535].RUN[0] = 0
+        obj.write_register(65535)
+        print "-> %d Triggers sent." % trigger_counter
+        print "%d Data packets received." % data_packet_counter
+        print "CRC errors: %d" % crc_error_counter
+        print "EC errors: %d" % ec_error_counter
+        print "BC errors: %d" % bc_error_counter
+        print "Hits found: %d" % hit_counter
+        print "Time elapsed: %f s" % run_time
+        obj.register[130].ECb[0] = 0
+        obj.register[130].BCb[0] = 0
+        obj.write_register(130)
         stop = time.time()
-        run_time = (stop - start)
-        result = []
-        result.append("-> %d Triggers sent." % trigger_counter)
-        result.append("%d Data packets received." % data_packet_counter)
-        result.append("CRC errors: %d" % crc_error_counter)
-        result.append("EC errors: %d" % ec_error_counter)
-        result.append("BC errors: %d" % bc_error_counter)
-        result.append("Hits found: %d" % hit_counter)
-        result.append("Time elapsed: %f s" % run_time)
-        result.append("***************")
-        if save_result == "yes":
-            with open(output_file, "a") as myfile:
-                for line in result:
-                    print line
-                    myfile.write("%s\n" % line)
-    error_list = [crc_error_counter, bc_error_counter, ec_error_counter, hit_counter]
-    if obj.database:
-        obj.database.save_data_test(error_list)
-
-    obj.register[65535].RUN[0] = 0
-    obj.write_register(65535)
-    print "-> %d Triggers sent." % trigger_counter
-    print "%d Data packets received." % data_packet_counter
-    print "CRC errors: %d" % crc_error_counter
-    print "EC errors: %d" % ec_error_counter
-    print "BC errors: %d" % bc_error_counter
-    print "Hits found: %d" % hit_counter
-    print "Time elapsed: %f s" % run_time
-    obj.register[130].ECb[0] = 0
-    obj.register[130].BCb[0] = 0
-    obj.write_register(130)
-    stop = time.time()
-    duration = stop - start
-    errors = [0]*4
-    errors[0] = obj.check_selection_criteria(bc_error_counter, lim_BC_Errors, "BC Errors")
-    errors[1] = obj.check_selection_criteria(ec_error_counter, lim_EC_Errors, "EC Errors")
-    errors[2] = obj.check_selection_criteria(crc_error_counter, lim_CRC_Errors, "CRC Errors")
-    errors[3] = obj.check_selection_criteria(hit_counter, lim_Hit_Errors, "HIT Errors")
-    if 'y' in errors:
-        error = 'y'
-    if 'r' in errors:
-        error = 'r'
-    print "\nData Packet test duration: %f s\n" % duration
+        duration = stop - start
+        errors = [0]*4
+        errors[0] = obj.check_selection_criteria(bc_error_counter, lim_BC_Errors, "BC Errors")
+        errors[1] = obj.check_selection_criteria(ec_error_counter, lim_EC_Errors, "EC Errors")
+        errors[2] = obj.check_selection_criteria(crc_error_counter, lim_CRC_Errors, "CRC Errors")
+        errors[3] = obj.check_selection_criteria(hit_counter, lim_Hit_Errors, "HIT Errors")
+        if 'y' in errors:
+            error = 'y'
+        if 'r' in errors:
+            error = 'r'
+        print "\nData Packet test duration: %f s\n" % duration
     return error
 
 
