@@ -1875,10 +1875,13 @@ class VFAT3_GUI:
                                            dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay,
                                            bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch,
                                            latency=self.latency, cal_phi=self.calphi)
-            errors = [0] * 3
-            errors[0] = self.check_selection_criteria(len(output[2]), lim_Noisy_Channels, "Noisy Channels")
-            errors[1] = self.check_selection_criteria(len(output[4]), lim_Dead_Channels, "Dead Channels")
-            errors[2] = self.check_selection_criteria(output[5], lim_Mean_enc, "Noise")
+            if output[0] == 'n':
+                errors = ['r']
+            else:
+                errors = [0] * 3
+                errors[0] = self.check_selection_criteria(len(output[2]), lim_Noisy_Channels, "Noisy Channels")
+                errors[1] = self.check_selection_criteria(len(output[4]), lim_Dead_Channels, "Dead Channels")
+                errors[2] = self.check_selection_criteria(output[5], lim_Mean_enc, "Noise")
             if 'y' in errors:
                 prod_error = 'y'
             if 'r' in errors:
