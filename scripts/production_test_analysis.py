@@ -6,12 +6,12 @@
 from DatabaseInterfaceBrowse import *
 import matplotlib.pyplot as plt
 
-database = DatabaseInterfaceBrowse(database_name="VFAT3_Production")
+database = DatabaseInterfaceBrowse(database_name="VFAT3_CERN_TESTSETUP_1")
 hybrid_list = database.list_hybrids()
-green_hybrids = []
-yellow_hybrids = []
-red_hybrids = []
-none_values = []
+green_hybrids1 = []
+yellow_hybrids1 = []
+red_hybrids1 = []
+none_values1 = []
 test_hybrids = ['Hybrid55555']
 print "List of tested hybrids:"
 for i, hybrid in enumerate(hybrid_list):
@@ -19,68 +19,159 @@ for i, hybrid in enumerate(hybrid_list):
         production_data = database.get_production_results(hybrid)
         hybrid = hybrid[6:]
         if production_data[29] == 'green':
-            green_hybrids.append(hybrid)
+            green_hybrids1.append(hybrid)
         elif production_data[29] == 'yellow':
-            yellow_hybrids.append(hybrid)
+            yellow_hybrids1.append(hybrid)
         elif production_data[29] == 'red':
-            red_hybrids.append(hybrid)
+            red_hybrids1.append(hybrid)
         else:
-            none_values.append(hybrid)
-
+            none_values1.append(hybrid)
 
 print "Green Hybrids:"
-print green_hybrids
+print green_hybrids1
 print "Yellow Hybrids:"
-print yellow_hybrids
+print yellow_hybrids1
 print "Red Hybrids:"
-print red_hybrids
+print red_hybrids1
 print "No status value:"
-print none_values
+print none_values1
 print ""
 print ""
+total1 = len(green_hybrids1) + len(yellow_hybrids1) + len(red_hybrids1) + len(none_values1)
+all_hybrids_1 = []
+all_hybrids_1.extend(green_hybrids1)
+all_hybrids_1.extend(yellow_hybrids1)
+all_hybrids_1.extend(red_hybrids1)
+all_hybrids_1.extend(none_values1)
+
+
+database = DatabaseInterfaceBrowse(database_name="VFAT3_CERN_TESTSETUP_2")
+hybrid_list = database.list_hybrids()
+green_hybrids2 = []
+yellow_hybrids2 = []
+red_hybrids2 = []
+none_values2 = []
+print "List of tested hybrids:"
+for i, hybrid in enumerate(hybrid_list):
+    if hybrid not in test_hybrids:
+        production_data = database.get_production_results(hybrid)
+        hybrid = hybrid[6:]
+        if production_data[29] == 'green':
+            green_hybrids2.append(hybrid)
+        elif production_data[29] == 'yellow':
+            yellow_hybrids2.append(hybrid)
+        elif production_data[29] == 'red':
+            red_hybrids2.append(hybrid)
+        else:
+            none_values2.append(hybrid)
+
+print "Green Hybrids:"
+print green_hybrids2
+print "Yellow Hybrids:"
+print yellow_hybrids2
+print "Red Hybrids:"
+print red_hybrids2
+print "No status value:"
+print none_values2
+print ""
+print ""
+total2 = len(green_hybrids2) + len(yellow_hybrids2) + len(red_hybrids2) + len(none_values2)
+all_hybrids_2 = []
+all_hybrids_2.extend(green_hybrids2)
+all_hybrids_2.extend(yellow_hybrids2)
+all_hybrids_2.extend(red_hybrids2)
+all_hybrids_2.extend(none_values2)
+
+print "Finding duplicates."
+green_hybrids = []
+yellow_hybrids = []
+red_hybrids = []
+none_values = []
+for hybrid in green_hybrids2:
+    found = 0
+    if hybrid in green_hybrids1:
+        print "%s, GREEN in setup 2, GREEN in setup 1" % hybrid
+        found += 1
+    if hybrid in yellow_hybrids1:
+        print "%s, GREEN in setup 2, YELLOW in setup 1" % hybrid
+        found += 1
+    if hybrid in red_hybrids1:
+        print "%s, GREEN in setup 2, RED in setup 1" % hybrid
+        found += 1
+    if hybrid in none_values1:
+        print "%s, GREEN in setup 2, None in setup 1" % hybrid
+        found += 1
+    if found == 0:
+        green_hybrids.append(hybrid)
+
+
+for hybrid in yellow_hybrids2:
+    found = 0
+    if hybrid in green_hybrids1:
+        print "%s, YELLOW in setup 2, GREEN in setup 1" % hybrid
+        found += 1
+    if hybrid in yellow_hybrids1:
+        print "%s, YELLOW in setup 2, YELLOW in setup 1" % hybrid
+        found += 1
+    if hybrid in red_hybrids1:
+        print "%s, YELLOW in setup 2, RED in setup 1" % hybrid
+        found += 1
+    if hybrid in none_values1:
+        print "%s, YELLOW in setup 2, None in setup 1" % hybrid
+        found += 1
+    if found == 0:
+        yellow_hybrids.append(hybrid)
+
+for hybrid in red_hybrids2:
+    found = 0
+    if hybrid in green_hybrids1:
+        print "%s, RED in setup 2, GREEN in setup 1" % hybrid
+        found += 1
+    if hybrid in yellow_hybrids1:
+        print "%s, RED in setup 2, YELLOW in setup 1" % hybrid
+        found += 1
+    if hybrid in red_hybrids1:
+        print "%s, RED in setup 2, RED in setup 1" % hybrid
+        found += 1
+    if hybrid in none_values1:
+        print "%s, RED in setup 2, None in setup 1" % hybrid
+        found += 1
+    if found == 0:
+        red_hybrids.append(hybrid)
+
+for hybrid in none_values2:
+    found = 0
+    if hybrid in green_hybrids1:
+        print "%s, None in setup 2, GREEN in setup 1" % hybrid
+        found += 1
+    if hybrid in yellow_hybrids1:
+        print "%s, None in setup 2, YELLOW in setup 1" % hybrid
+        found += 1
+    if hybrid in red_hybrids1:
+        print "%s, None in setup 2, RED in setup 1" % hybrid
+        found += 1
+    if hybrid in none_values1:
+        print "%s, None in setup 2, None in setup 1" % hybrid
+        found += 1
+    if found == 0:
+        none_values.append(hybrid)
+
+green_hybrids.extend(green_hybrids1)
+yellow_hybrids.extend(yellow_hybrids1)
+red_hybrids.extend(red_hybrids1)
+none_values.extend(none_values1)
+
 total = len(green_hybrids) + len(yellow_hybrids) + len(red_hybrids) + len(none_values)
 
-print "TOTAL: %s  \nGreen: %s, Yellow: %s, Red: %s \nwith no status information: %s" % (total, len(green_hybrids), len(yellow_hybrids), len(red_hybrids), len(none_values))
-
-
-
-
-# hybrid_nr = raw_input("Choose hybrid:")
-# hybrid = hybrid_list[int(hybrid_nr)]
-# show_data = [1, 1, 1, 1]
-#
-# production_data = database.get_production_results(hybrid)
-# adc0m = production_data[5]
-# adc0b = production_data[6]
-# adc1m = production_data[7]
-# adc1b = production_data[8]
-# cal_dacm = production_data[9]
-# cal_dacb = production_data[10]
-# print ""
-# print "------------------------"
-# print hybrid
-# print "------------------------"
-# print "HV_ID_VER:\t %s" % production_data[1]
-# print "BUFFER_OFFSET:\t %s" % production_data[2]
-# print "VREF_ADC:\t %s" % production_data[3]
-# print "V_BGR:\t\t %s" % production_data[4]
-# print "Iref:\t\t %s" % production_data[11]
-# print "ADC0:\t\t %s %s" % (adc0m, adc0b)
-# print "ADC1:\t\t %s %s" % (adc1m, adc1b)
-# print "CAL_DAC:\t %s + %s" % (cal_dacm, cal_dacb)
-# print "Register Test:\t %s" % production_data[14]
-# print "EC errors:\t %s" % production_data[15]
-# print "BC errors:\t %s" % production_data[16]
-# print "CRC errors:\t %s" % production_data[17]
-# print "Hit errors:\t %s" % production_data[18]
-# print "Noisy Channels:\t %s" % production_data[19]
-# print "Dead Channels:\t %s" % production_data[20]
-# print "BIST:\t\t %s" % production_data[21]
-# print "Scan Chain:\t %s" % production_data[22]
-# print "SLEEP POWER:\t A: %s D: %s" % (production_data[23], production_data[24])
-# print "RUN POWER:\t A: %s D: %s" % (production_data[25], production_data[26])
-# print "Location:\t %s" % production_data[27]
-# print "Temperature:\t %s" % production_data[28]
-# print "State:\t %s" % production_data[29]
-# print "------------------------"
-
+print ""
+print "Setup 1: TOTAL: %s  \nGreen: %s, Yellow: %s, Red: %s \nwith no status information: %s" % (total1, len(green_hybrids1), len(yellow_hybrids1), len(red_hybrids1), len(none_values1))
+print ""
+print "Setup 2: TOTAL: %s  \nGreen: %s, Yellow: %s, Red: %s \nwith no status information: %s" % (
+total2, len(green_hybrids2), len(yellow_hybrids2), len(red_hybrids2), len(none_values2))
+print ""
+print ""
+print "GRAND TOTAL: %s  \nGreen: %s, Yellow: %s, Red: %s \nwith no status information: %s" % (total, len(green_hybrids), len(yellow_hybrids), len(red_hybrids), len(none_values))
+print ""
+print ""
+print "No status:"
+print none_values
