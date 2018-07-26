@@ -11,16 +11,18 @@ hybrid_list = database.list_hybrids()
 green_hybrids = []
 yellow_hybrids = []
 red_hybrids = []
+test_hybrids = ['Hybrid55555']
 print "List of tested hybrids:"
 for i, hybrid in enumerate(hybrid_list):
-    production_data = database.get_production_results(hybrid)
-    hybrid = hybrid[6:]
-    if production_data[29] == 'green':
-        green_hybrids.append(hybrid)
-    if production_data[29] == 'yellow':
-        yellow_hybrids.append(hybrid)
-    if production_data[29] == 'red':
-        red_hybrids.append(hybrid)
+    if hybrid not in test_hybrids:
+        production_data = database.get_production_results(hybrid)
+        hybrid = hybrid[6:]
+        if production_data[29] == 'green':
+            green_hybrids.append(hybrid)
+        if production_data[29] == 'yellow':
+            yellow_hybrids.append(hybrid)
+        if production_data[29] == 'red':
+            red_hybrids.append(hybrid)
 
 print "Green Hybrids:"
 print green_hybrids
