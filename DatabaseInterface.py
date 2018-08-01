@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 class DatabaseInterface:
-    def __init__(self, name):
+    def __init__(self, name, db_name="VFAT3_Production_final"):
         self.id_exists = 0
         self.name = name
         self.user = "VFAT3"
@@ -14,7 +14,7 @@ class DatabaseInterface:
                           "SD_I_BFCAS", "CAL_DAC"]
         self.dacs_6bit = ["HYST_DAC", "CFD_DAC_1", "CFD_DAC_2", "PRE_I_BSF", "PRE_I_BLCC", "SD_I_BSF"]
         self.table_name = "Production"
-        self.database_name = "VFAT3_Production"
+        self.database_name = db_name
         self.connection = pymysql.connect(host="localhost", user=self.user, passwd=self.passwd, database=self.database_name)
         self.cursor = self.connection.cursor()
 

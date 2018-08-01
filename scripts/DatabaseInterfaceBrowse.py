@@ -25,6 +25,16 @@ class DatabaseInterfaceBrowse:
         self.connection.close()
         return hybrid_list
 
+    def get_production_column_names(self):
+        data_list = []
+        self.open_connection()
+        self.cursor.execute("SHOW columns FROM Production;")
+        output = self.cursor.fetchall()
+        for row in output:
+            data_list.append(row[0])
+        self.connection.close()
+        return data_list
+
     def get_production_results(self, chip_id):
         data_list = []
         self.open_connection()

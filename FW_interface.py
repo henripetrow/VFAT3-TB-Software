@@ -15,7 +15,7 @@ class FW_interface:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # Connect the socket to the port where the server is listening
-        self.server_address = ('192.168.1.10', 7)
+        self.server_address = ('192.168.3.10', 7)
         self.connection_error = 0
 
     def execute_req(self, message, no_packets=1, timeout=2, scurve="no", receive=2000):

@@ -33,6 +33,7 @@ class VFAT3_GUI:
         self.burn_mode = 1
         self.beep_mode = 0
         self.tti_if = 0
+        self.iref_mode = 0
         # Pilot run flag. Defines if results of single tests are displayed on production test.
         self.pilot_run_flag = 0
 
@@ -57,6 +58,9 @@ class VFAT3_GUI:
             if arg == '-beep':
                 print "Usign system beep on Production test to indicate test end."
                 self.beep_mode = 1
+            if arg == '-iref':
+                print "Entering Iref measurement-mode."
+                self.iref_mode = 1
 
         if psu_mode == 1:
             self.tti_if = TtiSerialInterface()
@@ -826,6 +830,13 @@ class VFAT3_GUI:
         self.barcode_entry.grid()
         self.barcode_entry.insert(0, self.barcode_id)
 
+        if self.iref_mode:
+            self.location_label = Label(self.production_frame, text="Location:")
+            self.location_label.grid()
+            self.location_entry = Entry(self.production_frame, width=20)
+            self.location_entry.grid()
+
+
         self.p_run_button = Button(self.production_frame, text="RUN", command=lambda: self.run_production_tests())
         self.p_run_button.grid()
 
@@ -1328,7 +1339,6 @@ class VFAT3_GUI:
                 self.database.save_temperature(temperature)
             print ""
 
-
     def measure_power(self, mode=""):
         print "\nMeasuring power."
         error = 0
@@ -1505,8 +1515,9 @@ class VFAT3_GUI:
         self.write_register(134)
         output = self.read_ext_adc(verbose='no')
         iref_mv = output[3]
-        print "Iref adjusted to: %s mV" % iref_mv
-
+        # print "Iref adjusted to: %s mV" % iref_mv
+        if production == "yes":
+            self.database.save_iref(hv3b_biasing_lut['Iref'][1])
         # output = self.interfaceFW.adjust_iref()
         # if output[0] != '00':
         #     result = 0
@@ -1514,8 +1525,7 @@ class VFAT3_GUI:
         #         text = "Iref adjusted to value %s.\n" % int(output[0], 16)
         #         self.add_to_interactive_screen(text)
         #         print text[:-2]
-        #         if production == "yes":
-        #             self.database.save_iref(int(output[0], 16))
+
         # self.register[134].Iref[0] = int(output[0], 16)
         stop = time.time()
         run_time = (stop - start)
@@ -1993,36 +2003,43 @@ class VFAT3_GUI:
         if not self.save_barcode():
             self.unset_calibration_variables()
             result[0] = self.check_short_circuit()
-            if result[0] == 0:
-                result[1] = self.test_bist()
-                result[2] = self.send_reset()
-                if result[2] == 0:
-                    self.read_hw_id()
-                    result[3] = self.test_registers(production="yes")
-                    result[4] = self.burn_chip_id(chip_id=self.database.name)
-                    result[6] = self.measure_power('SLEEP')
-                    result[5] = self.adjust_iref(production="yes")
-                    result[7] = self.adc_calibration(production="yes")
-                    if result[7] == 0 or result[7] == 'y':
-                        self.measure_temperature()
-                        result[8] = self.scan_cal_dac_fc(production="yes")
-                        result[9] = test_data_packets(self, save_result="no")
-                        result[10] = self.run_all_dac_scans(production="yes")
-                        if result[9] == 0:
-                            result[11] = self.run_scurve(production="yes")
+            if not self.iref_mode:
+                if result[0] == 0:
+                    result[1] = self.test_bist()
+                    result[2] = self.send_reset()
+                    if result[2] == 0:
+                        self.read_hw_id()
+                        result[3] = self.test_registers(production="yes")
+                        result[4] = self.burn_chip_id(chip_id=self.database.name)
+                        result[6] = self.measure_power('SLEEP')
+                        result[5] = self.adjust_iref(production="yes")
+                        result[7] = self.adc_calibration(production="yes")
+                        if result[7] == 0 or result[7] == 'y':
+                            self.measure_temperature()
+                            result[8] = self.scan_cal_dac_fc(production="yes")
+                            result[9] = test_data_packets(self, save_result="no")
+                            result[10] = self.run_all_dac_scans(production="yes")
+                            if result[9] == 0:
+                                result[11] = self.run_scurve(production="yes")
+                            else:
+                                print "S-curves are not run due to errors in data packets."
                         else:
-                            print "S-curves are not run due to errors in data packets."
+                            print "Internal ADCs broken. Abort production test."
                     else:
-                        print "Internal ADCs broken. Abort production test."
+                        text = "->Production test aborted.\n"
+                        self.add_to_interactive_screen(text)
+                        print text
                 else:
                     text = "->Production test aborted.\n"
                     self.add_to_interactive_screen(text)
                     print text
+                time.sleep(0.1)
             else:
-                text = "->Production test aborted.\n"
-                self.add_to_interactive_screen(text)
-                print text
-            time.sleep(0.1)
+                result = ['1'] * len(self.tests)
+                result[2] = self.send_reset()
+                result[5] = self.adjust_iref(production="yes")
+
+                self.database.save_location(self.location_entry.get())
         else:
             print "Production test aborted."
         stop = time.time()
@@ -2050,10 +2067,15 @@ class VFAT3_GUI:
                 test_result = 'red'
             for label in self.test_label:
                 label.config(bg=test_result)
-            self.test_label[3].config(text='Hybrid:')
-            self.test_label[4].config(text=self.database.name)
-            self.update_statistics(test_result)
-            self.database.save_state(test_result)
+
+            if not self.iref_mode:
+                self.test_label[3].config(text='Hybrid:')
+                self.test_label[4].config(text=self.database.name)
+                self.update_statistics(test_result)
+                self.database.save_state(test_result)
+            else:
+                self.test_label[3].config(text='Iref adjusted for:')
+                self.test_label[4].config(text=self.database.name)
         self.barcode_entry.delete(0, END)
         if self.database:
             self.database.create_xml_file()
@@ -2171,13 +2193,15 @@ class VFAT3_GUI:
             if error == 0:
                 #self.database.save_barcode(barcode_value)
                 self.database = DatabaseInterface(barcode_value)
+
                 if self.database.id_exists:
-                    result = tkMessageBox.askyesno("Barcode/Chip_ID found", "Would you like to re-run production tests for hybrid nr. %i" % barcode_value)
-                    time.sleep(3)
-                    if not result:
-                        error = 1
-                    else:
-                        self.database.save_location(hybrid_location)
+                    if not self.iref_mode:
+                        result = tkMessageBox.askyesno("Barcode/Chip_ID found", "Would you like to re-run production tests for hybrid nr. %i" % barcode_value)
+                        time.sleep(3)
+                        if not result:
+                            error = 1
+                        else:
+                            self.database.save_location(hybrid_location)
                 text = "Read barcode: %s\n" % barcode_value
                 self.add_to_interactive_screen(text)
         else:
