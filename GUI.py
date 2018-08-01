@@ -2037,9 +2037,12 @@ class VFAT3_GUI:
             else:
                 result = ['1'] * len(self.tests)
                 result[2] = self.send_reset()
-                result[5] = self.adjust_iref(production="yes")
+                if result[2] == 0:
+                    result[5] = self.adjust_iref(production="yes")
 
-                self.database.save_location(self.location_entry.get())
+                    self.database.save_location(self.location_entry.get())
+                else:
+                    print "Aborting test."
         else:
             print "Production test aborted."
         stop = time.time()
