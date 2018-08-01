@@ -1,6 +1,6 @@
 import pymysql
 
-connection = pymysql.connect(host="localhost", user="VFAT3", passwd="1234", database="VFAT3_Production")
+connection = pymysql.connect(host="localhost", user="VFAT3", passwd="1234", database="VFAT3_Production_final")
 cursor = connection.cursor()
 
 
@@ -75,7 +75,7 @@ cursor.execute(table)
 
 table = 'CREATE TABLE CAL_DAC_FC(ChipID INT'
 for i in range(0, 256):
-    table += ', DAC%i INT' % i
+    table += ', DAC%i FLOAT' % i
 table += ')'
 cursor.execute(table)
 
