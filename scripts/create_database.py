@@ -1,6 +1,6 @@
 import pymysql
 
-connection = pymysql.connect(host="localhost", user="VFAT3", passwd="1234", database="VFAT3_Production_final")
+connection = pymysql.connect(host="dbod-vfat3-db.cern.ch", port=5509, user="VFAT3", passwd="1234", database="VFAT3_Production")
 cursor = connection.cursor()
 
 

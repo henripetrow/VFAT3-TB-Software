@@ -289,10 +289,10 @@ print ""
 testsetup1_hybrids = green_hybrids1_f + yellow_hybrids1_f + red_hybrids1_f
 testsetup2_hybrids = green_hybrids2_f + yellow_hybrids2_f + red_hybrids2_f
 
-print len(testsetup1_hybrids)
-print len(testsetup2_hybrids)
-amount = len(testsetup2_hybrids)
-for i, hybrid in enumerate(testsetup2_hybrids):
-    print hybrid
-    print "%s/%s" % (i+1, amount)
-    move_hybrid_between_databases(hybrid, "VFAT3_CERN_TESTSETUP_2", "VFAT3_Production_final")
+# print len(testsetup1_hybrids)
+# print len(testsetup2_hybrids)
+# amount = len(testsetup1_hybrids)
+# for i, hybrid in enumerate(testsetup1_hybrids):
+#     print hybrid
+#     print "%s/%s" % (i+1, amount)
+#     move_hybrid_between_databases(hybrid, "VFAT3_CERN_TESTSETUP_1", "VFAT3_Production_final")
