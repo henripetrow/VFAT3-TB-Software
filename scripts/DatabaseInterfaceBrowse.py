@@ -1,12 +1,17 @@
 import pymysql
 from test_system_functions import read_database_info
 
+
 class DatabaseInterfaceBrowse:
     def __init__(self):
         [error, self.host, self.port, self.user, self.passwd, self.database_name] = read_database_info()
-        self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd, database=self.database_name)
-        self.cursor = self.connection.cursor()
-        self.connection.close()
+        self.db_error = 0
+        if not error:
+            self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd, database=self.database_name)
+            self.cursor = self.connection.cursor()
+            self.connection.close()
+        else:
+            self.db_error = 1
 
     def open_connection(self):
         self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd, database=self.database_name)

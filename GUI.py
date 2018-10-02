@@ -2196,17 +2196,19 @@ class VFAT3_GUI:
             if error == 0:
                 #self.database.save_barcode(barcode_value)
                 self.database = DatabaseInterface(barcode_value)
-
-                if self.database.id_exists:
-                    if not self.iref_mode:
-                        result = tkMessageBox.askyesno("Barcode/Chip_ID found", "Would you like to re-run production tests for hybrid nr. %i" % barcode_value)
-                        time.sleep(3)
-                        if not result:
-                            error = 1
-                        else:
-                            self.database.save_location(hybrid_location)
-                text = "Read barcode: %s\n" % barcode_value
-                self.add_to_interactive_screen(text)
+                if not self.database.error:
+                    if self.database.id_exists:
+                        if not self.iref_mode:
+                            result = tkMessageBox.askyesno("Barcode/Chip_ID found", "Would you like to re-run production tests for hybrid nr. %i" % barcode_value)
+                            time.sleep(3)
+                            if not result:
+                                error = 1
+                            else:
+                                self.database.save_location(hybrid_location)
+                    #text = "Read barcode: %s\n" % barcode_value
+                    #self.add_to_interactive_screen(text)
+                else:
+                    error = 1
         else:
             print "No barcode scanned."
             error = 1

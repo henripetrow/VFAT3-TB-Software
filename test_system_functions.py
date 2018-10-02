@@ -116,6 +116,7 @@ def read_database_info():
                 print host
             except:
                 print "Invalid host address."
+                host = 'error'
                 error = 1
         if data[0] == 'port':
             try:
@@ -123,6 +124,7 @@ def read_database_info():
                 print port
             except:
                 print "Invalid database port."
+                port = 'error'
                 error = 1
         if data[0] == 'user':
             try:
@@ -130,13 +132,14 @@ def read_database_info():
                 print user
             except:
                 print "Invalid database username."
+                user = 'error'
                 error = 1
         if data[0] == 'passwd':
             try:
                 passwd = data[2].strip()
-                print passwd
             except:
                 print "Invalid password."
+                passwd = 'error'
                 error = 1
         if data[0] == 'database':
             try:
@@ -144,6 +147,7 @@ def read_database_info():
                 print database
             except:
                 print "Invalid database."
+                database = 'error'
                 error = 1
     if error == 1:
         print "Invalid database information found, contact the database mainteiner for correct info."

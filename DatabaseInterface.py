@@ -7,74 +7,79 @@ from test_system_functions import read_database_info
 class DatabaseInterface:
     def __init__(self, name):
         self.id_exists = 0
+        self.error = 0
         self.name = name
 
         [error, self.host, self.port, self.user, self.passwd, self.database_name] = read_database_info()
-        self.dacs_8bit = ["ZCC_DAC", "ARM_DAC", "PRE_I_BIT", "PRE_VREF", "SH_I_BFCAS", "SH_I_BDIFF", "SD_I_BDIFF",
-                          "SD_I_BFCAS", "CAL_DAC"]
-        self.dacs_6bit = ["HYST_DAC", "CFD_DAC_1", "CFD_DAC_2", "PRE_I_BSF", "PRE_I_BLCC", "SD_I_BSF"]
-        self.table_name = "Production"
-        self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd,
-                                          database=self.database_name)
-        self.cursor = self.connection.cursor()
+        if not error:
+            self.dacs_8bit = ["ZCC_DAC", "ARM_DAC", "PRE_I_BIT", "PRE_VREF", "SH_I_BFCAS", "SH_I_BDIFF", "SD_I_BDIFF",
+                              "SD_I_BFCAS", "CAL_DAC"]
+            self.dacs_6bit = ["HYST_DAC", "CFD_DAC_1", "CFD_DAC_2", "PRE_I_BSF", "PRE_I_BLCC", "SD_I_BSF"]
+            self.table_name = "Production"
+            self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd,
+                                              database=self.database_name)
+            self.cursor = self.connection.cursor()
 
-        # Search if the name exists already.
-        update_sql = "SELECT * FROM %s WHERE ChipID = '%s' ;" % (self.table_name, name)
-        self.cursor.execute(update_sql)
-        self.connection.commit()
-        if self.cursor.rowcount == 0:
-            print "Database entry not found. Creating a new entry."
-            # Insert new row on Production table.
-            insert1 = "INSERT INTO %s(ChipID) VALUES('%s');" % (self.table_name, self.name)
-            self.cursor.execute(insert1)
+            # Search if the name exists already.
+            update_sql = "SELECT * FROM %s WHERE ChipID = '%s' ;" % (self.table_name, name)
+            self.cursor.execute(update_sql)
             self.connection.commit()
+            if self.cursor.rowcount == 0:
+                print "Database entry not found. Creating a new entry."
+                # Insert new row on Production table.
+                insert1 = "INSERT INTO %s(ChipID) VALUES('%s');" % (self.table_name, self.name)
+                self.cursor.execute(insert1)
+                self.connection.commit()
 
-            # Insert new table for Threshold data.
-            insert1 = "INSERT INTO Threshold(ChipID) VALUES('%s');" % self.name
-            self.cursor.execute(insert1)
-            self.connection.commit()
+                # Insert new table for Threshold data.
+                insert1 = "INSERT INTO Threshold(ChipID) VALUES('%s');" % self.name
+                self.cursor.execute(insert1)
+                self.connection.commit()
 
-            # Insert new table for Threshold data.
-            insert1 = "INSERT INTO enc(ChipID) VALUES('%s');" % self.name
-            self.cursor.execute(insert1)
-            self.connection.commit()
+                # Insert new table for Threshold data.
+                insert1 = "INSERT INTO enc(ChipID) VALUES('%s');" % self.name
+                self.cursor.execute(insert1)
+                self.connection.commit()
 
-            # Insert new table for Threshold data.
-            insert1 = "INSERT INTO ADC0_CAL_LUT(ChipID) VALUES('%s');" % self.name
-            self.cursor.execute(insert1)
-            self.connection.commit()
+                # Insert new table for Threshold data.
+                insert1 = "INSERT INTO ADC0_CAL_LUT(ChipID) VALUES('%s');" % self.name
+                self.cursor.execute(insert1)
+                self.connection.commit()
 
-            # Insert new table for Threshold data.
-            insert1 = "INSERT INTO ADC1_CAL_LUT(ChipID) VALUES('%s');" % self.name
-            self.cursor.execute(insert1)
-            self.connection.commit()
+                # Insert new table for Threshold data.
+                insert1 = "INSERT INTO ADC1_CAL_LUT(ChipID) VALUES('%s');" % self.name
+                self.cursor.execute(insert1)
+                self.connection.commit()
 
-            # Insert new table for Threshold data.
-            insert1 = "INSERT INTO EXT_ADC_CAL_LUT(ChipID) VALUES('%s');" % self.name
-            self.cursor.execute(insert1)
-            self.connection.commit()
+                # Insert new table for Threshold data.
+                insert1 = "INSERT INTO EXT_ADC_CAL_LUT(ChipID) VALUES('%s');" % self.name
+                self.cursor.execute(insert1)
+                self.connection.commit()
 
-            # Insert new table for Threshold data.
-            insert1 = "INSERT INTO CAL_DAC_FC(ChipID) VALUES('%s');" % self.name
-            self.cursor.execute(insert1)
-            self.connection.commit()
+                # Insert new table for Threshold data.
+                insert1 = "INSERT INTO CAL_DAC_FC(ChipID) VALUES('%s');" % self.name
+                self.cursor.execute(insert1)
+                self.connection.commit()
 
-            # Insert new tables for DACs.
-            adcs = ["ADC0", "ADC1"]
-            for adc in adcs:
-                for i in self.dacs_6bit:
-                    insert1 = "INSERT INTO %s_%s(ChipID) VALUES('%s');" % (i, adc, self.name)
-                    self.cursor.execute(insert1)
-                    self.connection.commit()
-                for i in self.dacs_8bit:
-                    insert1 = "INSERT INTO %s_%s(ChipID) VALUES('%s');" % (i, adc, self.name)
-                    self.cursor.execute(insert1)
-            self.connection.commit()
+                # Insert new tables for DACs.
+                adcs = ["ADC0", "ADC1"]
+                for adc in adcs:
+                    for i in self.dacs_6bit:
+                        insert1 = "INSERT INTO %s_%s(ChipID) VALUES('%s');" % (i, adc, self.name)
+                        self.cursor.execute(insert1)
+                        self.connection.commit()
+                    for i in self.dacs_8bit:
+                        insert1 = "INSERT INTO %s_%s(ChipID) VALUES('%s');" % (i, adc, self.name)
+                        self.cursor.execute(insert1)
+                self.connection.commit()
 
+            else:
+                print "Database entry found."
+                self.id_exists = 1
+            self.connection.close()
         else:
-            print "Database entry found."
-            self.id_exists = 1
-        self.connection.close()
+            print "Could not initialize the database."
+            self.error = 1
 
     def open_connection(self):
         self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd, database=self.database_name)

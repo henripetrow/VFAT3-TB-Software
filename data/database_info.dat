@@ -1,5 +1,5 @@
-host =
-port =
-user =
-passwd =
-database =
+host = localhost
+port = 3306
+user = VFAT3
+passwd = 1234
+database = VFAT3_Production
