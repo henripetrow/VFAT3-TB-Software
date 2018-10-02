@@ -147,7 +147,7 @@ class FW_interface:
         output = self.execute_req(message, receive=10)
         return output
 
-    def read_register(self, address): # Address in dec
+    def read_register(self, address):  # Address in dec
         address_hex = '0x%0*x' % (8, address)
         # print "Register address: %s" % address_hex
         # print "Reading register."

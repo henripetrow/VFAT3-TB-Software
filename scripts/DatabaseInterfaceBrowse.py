@@ -1,18 +1,15 @@
 import pymysql
-
+from test_system_functions import read_database_info
 
 class DatabaseInterfaceBrowse:
-    def __init__(self, database_name="VFAT3_Production"):
-        self.user = "VFAT3"
-        self.passwd = "1234"
-        self.database_name = database_name
-        #self.database_name = "Hybrids"
-        self.connection = pymysql.connect(host="localhost", user=self.user, passwd=self.passwd, database=self.database_name)
+    def __init__(self):
+        [error, self.host, self.port, self.user, self.passwd, self.database_name] = read_database_info()
+        self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd, database=self.database_name)
         self.cursor = self.connection.cursor()
         self.connection.close()
 
     def open_connection(self):
-        self.connection = pymysql.connect(host="localhost", user=self.user, passwd=self.passwd, database=self.database_name)
+        self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd, database=self.database_name)
         self.cursor = self.connection.cursor()
 
     def list_hybrids(self):

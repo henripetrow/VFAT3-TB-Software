@@ -2,20 +2,20 @@ import pymysql
 import os
 from scripts.DatabaseInterfaceBrowse import *
 import matplotlib.pyplot as plt
-
+from test_system_functions import read_database_info
 
 class DatabaseInterface:
-    def __init__(self, name, db_name="VFAT3_Production_final"):
+    def __init__(self, name):
         self.id_exists = 0
         self.name = name
-        self.user = "VFAT3"
-        self.passwd = "1234"
+
+        [error, self.host, self.port, self.user, self.passwd, self.database_name] = read_database_info()
         self.dacs_8bit = ["ZCC_DAC", "ARM_DAC", "PRE_I_BIT", "PRE_VREF", "SH_I_BFCAS", "SH_I_BDIFF", "SD_I_BDIFF",
                           "SD_I_BFCAS", "CAL_DAC"]
         self.dacs_6bit = ["HYST_DAC", "CFD_DAC_1", "CFD_DAC_2", "PRE_I_BSF", "PRE_I_BLCC", "SD_I_BSF"]
         self.table_name = "Production"
-        self.database_name = db_name
-        self.connection = pymysql.connect(host="localhost", user=self.user, passwd=self.passwd, database=self.database_name)
+        self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd,
+                                          database=self.database_name)
         self.cursor = self.connection.cursor()
 
         # Search if the name exists already.
@@ -77,7 +77,7 @@ class DatabaseInterface:
         self.connection.close()
 
     def open_connection(self):
-        self.connection = pymysql.connect(host="localhost", user=self.user, passwd=self.passwd, database=self.database_name)
+        self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd, database=self.database_name)
         self.cursor = self.connection.cursor()
 
     def close_connection(self):

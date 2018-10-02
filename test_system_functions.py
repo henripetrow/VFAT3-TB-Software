@@ -103,3 +103,49 @@ def crc_remainder(input_package):
                 crc_bin = crc_bin[1:]+'0'
                 crc = int(crc_bin, 2)
     return crc
+
+
+def read_database_info():
+    f = open("./data/database_info.dat", "r")  # opens file with name of "test.txt"
+    error = 0
+    for line in f:
+        data = line.split(" ")
+        if data[0] == 'host':
+            try:
+                host = data[2].strip()
+                print host
+            except:
+                print "Invalid host address."
+                error = 1
+        if data[0] == 'port':
+            try:
+                port = int(data[2].strip())
+                print port
+            except:
+                print "Invalid database port."
+                error = 1
+        if data[0] == 'user':
+            try:
+                user = data[2].strip()
+                print user
+            except:
+                print "Invalid database username."
+                error = 1
+        if data[0] == 'passwd':
+            try:
+                passwd = data[2].strip()
+                print passwd
+            except:
+                print "Invalid password."
+                error = 1
+        if data[0] == 'database':
+            try:
+                database = data[2].strip()
+                print database
+            except:
+                print "Invalid database."
+                error = 1
+    if error == 1:
+        print "Invalid database information found, contact the database mainteiner for correct info."
+    return [error, host, port, user, passwd, database]
+

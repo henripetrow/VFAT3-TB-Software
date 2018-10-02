@@ -2047,7 +2047,10 @@ class VFAT3_GUI:
             print "Production test aborted."
         stop = time.time()
         duration = (stop - start) / 60
-
+        self.register[0xffff].RUN[0] = 0
+        self.write_register(0xffff)
+        if self.tti_if:
+            self.tti_if.set_outputs_off()
         print "Errors:"
         print result
         print "Duration of the production test: %f min" % duration
@@ -2083,10 +2086,7 @@ class VFAT3_GUI:
         if self.database:
             self.database.create_xml_file()
         self.unset_calibration_variables()
-        self.register[0xffff].RUN[0] = 0
-        self.write_register(0xffff)
-        if self.tti_if:
-            self.tti_if.set_outputs_off()
+
         if self.beep_mode == 1:
             print "\a"
         print "***************************************"
