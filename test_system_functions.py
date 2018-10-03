@@ -111,11 +111,12 @@ def read_database_info():
         f = open("./data/database_login.dat", "r")  # opens file with name of "test.txt"
     except:
         fail = 1
-    try:
-        f = open("../data/database_login.dat", "r")  # opens file with name of "test.txt"
-        fail = 0
-    except:
-        fail = 1
+    if fail:
+        try:
+            f = open("../data/database_login.dat", "r")  # opens file with name of "test.txt"
+            fail = 0
+        except:
+            fail = 1
     if not fail:
         print "Resolving database login infromation."
         error = 0
