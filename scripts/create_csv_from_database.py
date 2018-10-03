@@ -19,7 +19,7 @@ if not os.path.exists(os.path.dirname(folder)):
 test_hybrids = []
 
 
-database = DatabaseInterfaceBrowse(database_name="VFAT3_Production_final")
+database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids()
 print "Listing hybrids from the database."
 temp_list = []
