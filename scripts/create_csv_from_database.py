@@ -64,7 +64,7 @@ for hybrid in hybrid_list:
     outF = open(file, "a")
     outF.write(text)
     outF.close()
-
+print "Generated csv-file for: Production"
 
 # Generation xml tables for the DAC scans
 adcs = ["ADC0", "ADC1"]
@@ -135,7 +135,7 @@ for adc in adcs:
             text += ",%s" % dat
         text += "\n"
         outF = open(file, "a")
-        outF.write(data)
+        outF.write(text)
         outF.close()
 
 print "Generated csv-file for: %s" % dac
