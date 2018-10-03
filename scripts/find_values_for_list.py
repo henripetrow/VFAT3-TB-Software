@@ -16,7 +16,7 @@ with open('hybrids_list.txt', 'r') as f:
         line.strip('\n')
         hybrids.append('Hybrid%s' % int(line))
 
-database_browse = DatabaseInterfaceBrowse(database_name="VFAT3_Production_final")
+database_browse = DatabaseInterfaceBrowse()
 text = "Hybrid Iref CAL_DACm CAL_DACb ADC0M ADC0B ADC1M ADC1B\n"
 for hybrid in hybrids:
     print hybrid
