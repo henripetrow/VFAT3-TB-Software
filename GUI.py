@@ -2028,11 +2028,11 @@ class VFAT3_GUI:
                             print "Internal ADCs broken. Abort production test."
                     else:
                         text = "->Production test aborted.\n"
-                        self.add_to_interactive_screen(text)
+                        # self.add_to_interactive_screen(text)
                         print text
                 else:
                     text = "->Production test aborted.\n"
-                    self.add_to_interactive_screen(text)
+                    # self.add_to_interactive_screen(text)
                     print text
                 time.sleep(0.1)
             else:

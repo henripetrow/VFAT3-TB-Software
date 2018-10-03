@@ -1,7 +1,7 @@
 
 
 # Location that is set to the database
-hybrid_location = "Hybrid SA"
+hybrid_location = "CERN 14-5-28"
 
 
 # Nominal biasing value in voltages read from ADC
