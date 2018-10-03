@@ -9,7 +9,8 @@ sys.path.append('../')
 from scripts.DatabaseInterfaceBrowse import *
 from DatabaseInterface import *
 
-
+file = 'hybrids_list.txt'
+print "Reading list of hybrids from the file: %s" % file
 with open('hybrids_list.txt', 'r') as f:
     hybrids = []
     for line in f:
