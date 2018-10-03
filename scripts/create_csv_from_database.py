@@ -61,7 +61,6 @@ for hybrid in hybrid_list:
     for name in production_data[1:]:
         text += ",%s" % name
     text += "\n"
-    print text
     outF = open(file, "a")
     outF.write(text)
     outF.close()
@@ -135,7 +134,7 @@ for adc in adcs:
         for dat in db_data:
             text += ",%s" % dat
         text += "\n"
-        outF = open(filename, "a")
+        outF = open(file, "a")
         outF.write(data)
         outF.close()
 
