@@ -3,6 +3,7 @@ import sys
 import time
 sys.path.append('../')
 from DatabaseInterfaceBrowse import *
+from test_system_functions import read_database_info
 
 
 timestamp = time.strftime("%Y%m%d%H%M")
