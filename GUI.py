@@ -2091,9 +2091,6 @@ class VFAT3_GUI:
                     self.test_label[3].config(text='Iref adjusted for:')
                     self.test_label[4].config(text=self.database.name)
             self.barcode_entry.delete(0, END)
-            if self.database:
-                if not self.database.error:
-                    self.database.create_xml_file()
             self.unset_calibration_variables()
 
             if self.beep_mode == 1:
