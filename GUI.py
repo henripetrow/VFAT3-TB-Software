@@ -1990,6 +1990,7 @@ class VFAT3_GUI:
 
     def run_production_tests(self):
         start = time.time()
+        test_aborted = 0
         os.system('clear')
         if self.tti_if:
             self.tti_if.set_outputs_off()
@@ -2045,53 +2046,65 @@ class VFAT3_GUI:
                     print "Aborting test."
         else:
             print "Production test aborted."
-        stop = time.time()
-        duration = (stop - start) / 60
-        self.register[0xffff].RUN[0] = 0
-        self.write_register(0xffff)
-        if self.tti_if:
-            self.tti_if.set_outputs_off()
-        print "Errors:"
-        print result
-        print "Duration of the production test: %f min" % duration
-        if self.pilot_run_flag:
-            for i, value in enumerate(result):
-                if value == 'y':
-                    self.test_label[i].config(bg='yellow')
-                elif value == 'g':
-                    self.test_label[i].config(bg=self.default_bg_color)
-                elif value != 0:
-                    self.test_label[i].config(bg='red')
-                else:
-                    self.test_label[i].config(bg='green')
-            hybrid_browser(self.database.name)
-        else:
-            test_result = 'green'
-            if 'y' in result:
-                test_result = 'yellow'
-            if 'r' in result:
-                test_result = 'red'
-            for label in self.test_label:
-                label.config(bg=test_result)
+            test_aborted = 1
+        if not test_aborted:
+            stop = time.time()
+            duration = (stop - start) / 60
+            self.register[0xffff].RUN[0] = 0
+            self.write_register(0xffff)
+            if self.tti_if:
+                self.tti_if.set_outputs_off()
 
-            if not self.iref_mode:
-                self.test_label[3].config(text='Hybrid:')
-                self.test_label[4].config(text=self.database.name)
-                self.update_statistics(test_result)
-                self.database.save_state(test_result)
+            print "Errors:"
+            print result
+            print "Duration of the production test: %f min" % duration
+            if self.pilot_run_flag:
+                for i, value in enumerate(result):
+                    if value == 'y':
+                        self.test_label[i].config(bg='yellow')
+                    elif value == 'g':
+                        self.test_label[i].config(bg=self.default_bg_color)
+                    elif value != 0:
+                        self.test_label[i].config(bg='red')
+                    else:
+                        self.test_label[i].config(bg='green')
+                hybrid_browser(self.database.name)
             else:
-                self.test_label[3].config(text='Iref adjusted for:')
-                self.test_label[4].config(text=self.database.name)
-        self.barcode_entry.delete(0, END)
-        if self.database:
-            self.database.create_xml_file()
-        self.unset_calibration_variables()
+                test_result = 'green'
+                if 'y' in result:
+                    test_result = 'yellow'
+                if 'r' in result:
+                    test_result = 'red'
+                if 'g' in result:
+                    test_result = self.default_bg_color
+                for label in self.test_label:
+                    label.config(bg=test_result)
 
-        if self.beep_mode == 1:
-            print "\a"
-        print "***************************************"
-        print "Finished production test for the %s" % self.database.name
-        print "***************************************"
+                if not self.iref_mode:
+                    self.test_label[3].config(text='Hybrid:')
+                    self.test_label[4].config(text=self.database.name)
+                    self.update_statistics(test_result)
+                    if self.database:
+                        if not self.database.error:
+                            self.database.save_state(test_result)
+                else:
+                    self.test_label[3].config(text='Iref adjusted for:')
+                    self.test_label[4].config(text=self.database.name)
+            self.barcode_entry.delete(0, END)
+            if self.database:
+                if not self.database.error:
+                    self.database.create_xml_file()
+            self.unset_calibration_variables()
+
+            if self.beep_mode == 1:
+                print "\a"
+            print "***************************************"
+            print "Finished production test for the %s" % self.database.name
+            print "***************************************"
+        else:
+            if self.tti_if:
+                self.tti_if.set_outputs_off()
+
 
     def read_hw_id(self):
         value = self.read_register(0x10001, save_value='no')

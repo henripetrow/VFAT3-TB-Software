@@ -11,6 +11,9 @@ class DatabaseInterface:
         self.name = name
 
         [error, self.host, self.port, self.user, self.passwd, self.database_name] = read_database_info()
+        if self.user == "VFAT3r":
+            print "This login information can be used for database read only"
+            error = 1
         if not error:
             self.dacs_8bit = ["ZCC_DAC", "ARM_DAC", "PRE_I_BIT", "PRE_VREF", "SH_I_BFCAS", "SH_I_BDIFF", "SD_I_BDIFF",
                               "SD_I_BFCAS", "CAL_DAC"]

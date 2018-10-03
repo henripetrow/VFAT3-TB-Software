@@ -170,7 +170,8 @@ class FW_interface:
     def send_sync(self):
         message = [0xca, 0x00, 0x02]
         output = self.execute_req(message)
-        return output
+        print output
+        return output[3]
 
     def adjust_iref(self):
         message = [0xca, 0x00, 0x05]

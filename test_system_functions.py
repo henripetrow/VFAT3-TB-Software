@@ -106,50 +106,49 @@ def crc_remainder(input_package):
 
 
 def read_database_info():
-    f = open("./data/database_info.dat", "r")  # opens file with name of "test.txt"
-    error = 0
-    for line in f:
-        data = line.split(" ")
-        if data[0] == 'host':
+    try:
+        f = open("./data/database_login.dat", "r")  # opens file with name of "test.txt"
+        print "Resolving database login infromation."
+        error = 0
+        for line in f:
+            data = line.split(" ")
+            field_name = data[0]
             try:
-                host = data[2].strip()
-                print host
+                value = data[2]
             except:
-                print "Invalid host address."
-                host = 'error'
-                error = 1
-        if data[0] == 'port':
-            try:
-                port = int(data[2].strip())
-                print port
-            except:
-                print "Invalid database port."
-                port = 'error'
-                error = 1
-        if data[0] == 'user':
-            try:
-                user = data[2].strip()
-                print user
-            except:
-                print "Invalid database username."
-                user = 'error'
-                error = 1
-        if data[0] == 'passwd':
-            try:
-                passwd = data[2].strip()
-            except:
-                print "Invalid password."
-                passwd = 'error'
-                error = 1
-        if data[0] == 'database':
-            try:
-                database = data[2].strip()
-                print database
-            except:
-                print "Invalid database."
-                database = 'error'
-                error = 1
-    if error == 1:
-        print "Invalid database information found, contact the database mainteiner for correct info."
+                value = ""
+
+            if field_name == 'host':
+                [error, host] = check_data(field_name, value, error)
+            if field_name == 'port':
+                [error, port] = check_data(field_name, value, error)
+            if field_name == 'user':
+                [error, user] = check_data(field_name, value, error)
+            if field_name == 'passwd':
+                [error, passwd] = check_data(field_name, value, error)
+            if field_name == 'database':
+                [error, database] = check_data(field_name, value, error)
+        if error:
+            print "Invalid database information found, contact the database admin for correct info."
+    except:
+        print "Database login information not found. Please contact the database admin for login information."
+        error = 1
+        host = ""
+        port = ""
+        user = ""
+        passwd = ""
+        database = ""
     return [error, host, port, user, passwd, database]
 
+
+def check_data(name, data, error):
+    if data:
+        if name == 'port':
+            output_data = int(data.strip())
+        else:
+            output_data = data.strip()
+    else:
+        print "Invalid %s." % name
+        output_data = 'error'
+        error += 1
+    return [error, output_data]
