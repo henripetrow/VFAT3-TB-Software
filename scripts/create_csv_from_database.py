@@ -2,7 +2,7 @@ import os
 import sys
 import time
 sys.path.append('../')
-from scripts.DatabaseInterfaceBrowse import *
+from DatabaseInterfaceBrowse import *
 
 
 timestamp = time.strftime("%Y%m%d%H%M")
