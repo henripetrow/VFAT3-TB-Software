@@ -6,8 +6,8 @@ from scripts.DatabaseInterfaceBrowse import *
 
 user = "Henri Petrow"
 location = "HybridSA"
-start_timestamp = "2018-09-04 13:55:06"
-stop_timestamp = "2018-09-04 14:55:03"
+start_timestamp = "2018-11-01 10:55:06"
+stop_timestamp = "2018-11-01 11:25:03"
 run_number = 1
 comment_description = "VFAT3 Production Data from Testing at CERN"
 
@@ -281,11 +281,11 @@ for hybrid in hybrid_list:
     for i, dat in enumerate(db_data):
         data += "<DATA>\n"
         if dat:
-            data += "<CHANNEL>%s</CHANNEL>" % i
-            data += "<ENC_VALUE>%s</ENC_VALUE>" % dat
+            data += "<CHANNEL>%s</CHANNEL>\n" % i
+            data += "<ENC_VALUE>%s</ENC_VALUE>\n" % dat
         else:
-            data += "<CHANNEL>%s</CHANNEL>" % i
-            data += "<ENC_VALUE></ENC_VALUE>"
+            data += "<CHANNEL>%s</CHANNEL>\n" % i
+            data += "<ENC_VALUE></ENC_VALUE>\n"
         data += "</DATA>\n"
     data += "</DATA_SET>\n"
     outF = open(filename, "a")
@@ -345,9 +345,9 @@ for hybrid in hybrid_list:
     data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
     data += "</PART>\n"
     for adc in adcs:
-        data += "<DATA>\n"
         db_data = database.get_table_values(hybrid, "%s_%s" % (adc, dac))
         for i, dat in enumerate(db_data):
+            data += "<DATA>\n"
             if dat:
                 data += "<ADC_NAME>%s</ADC_NAME>\n" % adc
                 data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
@@ -356,7 +356,7 @@ for hybrid in hybrid_list:
                 data += "<ADC_NAME>%s</ADC_NAME>\n" % adc
                 data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
                 data += "<ADC_VALUE></ADC_VALUE>\n"
-        data += "</DATA>\n"
+            data += "</DATA>\n"
     data += "</DATA_SET>\n"
     outF = open(filename, "a")
     outF.write(data)
@@ -423,7 +423,7 @@ for hybrid in hybrid_list:
         data += "<DATA>\n"
         if dat:
             data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
-            data += "<ADC_VALUE>%s</ADC_VALUE >" % dat
+            data += "<ADC_VALUE>%s</ADC_VALUE>" % dat
         else:
             data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
             data += "<ADC_VALUE></ADC_VALUE>\n"
