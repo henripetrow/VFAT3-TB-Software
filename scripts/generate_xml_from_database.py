@@ -211,7 +211,7 @@ for dac in dac_list:
                     data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
                     data += "<ADC_VALUE>%s</ADC_VALUE>\n" % dat
                 else:
-                    data += "<ADC_NAME>%s</ADC_NAME >\n" % adc
+                    data += "<ADC_NAME>%s</ADC_NAME>\n" % adc
                     data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
                     data += "<ADC_VALUE></ADC_VALUE>\n"
                 data += "</DATA>\n"

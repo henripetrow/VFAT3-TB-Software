@@ -2548,7 +2548,6 @@ class VFAT3_GUI:
                 j += 1
             self.write_register(addr)
 
-
     def change_channel(self):
         chosen_register = int(self.channel_entry.get())
         if chosen_register >= 0 and chosen_register <= 128:

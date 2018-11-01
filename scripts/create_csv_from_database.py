@@ -139,3 +139,4 @@ for adc in adcs:
         outF.close()
 
 print "Generated csv-file for: %s" % dac
+print "Results saved to the folder: % " % folder
