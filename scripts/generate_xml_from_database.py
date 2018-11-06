@@ -37,7 +37,7 @@ def generate_header(file_name, table_name, name, run_type):
     data += "<HEADER>\n"
     data += "<TYPE>\n"
     data += "<EXTENSION_TABLE_NAME>%s</EXTENSION_TABLE_NAME>\n" % table_name
-    data += "<NAME> %s</NAME>\n" % name
+    data += "<NAME>%s</NAME>\n" % name
     data += "</TYPE>\n"
     data += "<RUN>\n"
     data += "<RUN_TYPE>VFAT3 Production %s Data</RUN_TYPE>\n" % run_type
@@ -127,8 +127,13 @@ generate_header(filename, table_name, name, run_type)
 
 for hybrid in hybrid_list:
 
-    production_data = database.get_production_results(hybrid)
-
+    production_data_int = database.get_production_results(hybrid)
+    production_data = []
+    for item in production_data_int:
+        if item is None or item == "None":
+            production_data.append("")
+        else:
+            production_data.append(item)
     # Start of DATA_SET.
     data = "<DATA_SET>\n"
     data += "<COMMENT_DESCRIPTION>GEM VFAT3 Production Summary Data</COMMENT_DESCRIPTION>\n"
@@ -186,6 +191,17 @@ dac_list.extend(dac8bits)
 for dac in dac_list:
     filename = "%sVFAT3_%s.xml" % (file_path, dac)
     name = "VFAT3 %s DAC Lookup Table" % dac
+
+    # Exceptions for GEM database naming
+    if dac == "HYST_DAC":
+        name = "VFAT3 HYST DAC Lookup Table"
+    if dac == "ZCC_DAC":
+        name = "VFAT3 ZCC DAC Lookup Table"
+    if dac == "CFD_DAC_1":
+        name = "VFAT3 CFD DAC_1 Lookup Table"
+    if dac == "CFD_DAC_2":
+        name = "VFAT3 CFD DAC_2 Lookup Table"
+
     table_name = "VFAT3_%s" % dac
     description = "GEM VFAT3 %s Lookup Table" % dac
     run_type = "%s_LUT" % dac
@@ -330,7 +346,7 @@ print "Generated xml-file for: enc"
 dac = "CAL_LUT"
 filename = "%sVFAT3_%s.xml" % (file_path, dac)
 name = "VFAT3 ADC Calib Lookup Table"
-table_name = "VFAT3_%s_LUT" % dac
+table_name = "VFAT3_%s" % dac
 description = "GEM VFAT3 %s Lookup Table" % dac
 run_type = "CAL_LUT"
 generate_header(filename, table_name, name, run_type)
@@ -404,7 +420,7 @@ print "Generated xml-file for: %s" % dac
 dac = "EXT_ADC_CAL_LUT"
 filename = "%sVFAT3_%s.xml" % (file_path, dac)
 name = "VFAT3 Ext ADC Calib Lookup Table"
-table_name = "VFAT3_%s_LUT" % dac
+table_name = "VFAT3_%s" % dac
 description = "GEM VFAT3 %s Lookup Table" % dac
 run_type = "%s" % dac
 generate_header(filename, table_name, name, run_type)
