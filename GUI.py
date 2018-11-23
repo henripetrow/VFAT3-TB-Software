@@ -2182,6 +2182,8 @@ class VFAT3_GUI:
                     print "Chip ID burn was success."
                 else:
                     print "Wrong Chip ID was burned."
+                    print "Read chip ID: %s" % self.register[0x10003].CHIP_ID[0] == chip_id
+                    print "Written chip ID: %s" % chip_id
                     error = 'r'
             else:
                 print "Chip id has already been burned."
