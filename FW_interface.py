@@ -172,6 +172,11 @@ class FW_interface:
         output = self.execute_req(message)
         return output
 
+    def send_ext_reset(self):
+        message = [0xca, 0xdd, 0x02]
+        output = self.execute_req(message)
+        return output
+
     def adjust_iref(self):
         message = [0xca, 0x00, 0x05]
         output = self.execute_req(message)

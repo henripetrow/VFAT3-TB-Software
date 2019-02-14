@@ -33,7 +33,7 @@ class instruction_object:
             writer.writerows(self.event_list)
         return self.event_list
 
-    def add(self, command_type, BCd, command_addr_register, increment, delay = 0):
+    def add(self, command_type, BCd, command_addr_register, increment, delay=0):
         new_instruction = [command_type, BCd, command_addr_register, increment, delay]
         self.instruction_list.append(new_instruction)
 

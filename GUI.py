@@ -1371,6 +1371,7 @@ class VFAT3_GUI:
         print 'Synchronizing the chip.'
         counter = 0
         error = 0
+        self.interfaceFW.send_ext_reset()
         while True:
             result = self.interfaceFW.send_sync()
             time.sleep(0.1)

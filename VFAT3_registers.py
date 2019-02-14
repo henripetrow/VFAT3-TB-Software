@@ -6,6 +6,7 @@
 
 register = [None]*65541
 
+
 class GBL_CFG_CH:
     def __init__(self):
         self.cal = [0, 1]
@@ -22,8 +23,10 @@ class GBL_CFG_CH:
         self.zcc_dac[0] = int(new_values[2:9], 2)
         self.arm_dac[0] = int(new_values[9:], 2)
 
+
 for i in range(0, 129):
     register[i] = GBL_CFG_CH()
+
 
 class GBL_CFG_CTR_0:
     def __init__(self):
@@ -40,6 +43,7 @@ class GBL_CFG_CTR_0:
         self.SyncLevelEnable[0] = int(new_values[13],2)
         self.ST[0] = int(new_values[14],2)
         self.DDR[0] = int(new_values[15],2)
+
 
 register[129] = GBL_CFG_CTR_0()
 
@@ -70,6 +74,7 @@ class GBL_CFG_CTR_1:
         self.ECb[0] = int(new_values[13:15],2)
         self.BCb[0] = int(new_values[15],2)    
 
+
 register[130] = GBL_CFG_CTR_1()
 
 
@@ -92,7 +97,6 @@ class GBL_CFG_CTR_2:
 register[131] = GBL_CFG_CTR_2()
 
 
-
 class GBL_CFG_CTR_3:
     def __init__(self):
         self.empty1 = [0, 6]
@@ -113,6 +117,7 @@ class GBL_CFG_CTR_3:
         self.Force_TH[0] = int(new_values[13],2)
         self.SEL_COMP_MODE[0] = int(new_values[14:],2)
 
+
 register[132] = GBL_CFG_CTR_3()
 
 
@@ -131,6 +136,7 @@ class GBL_CFG_CTR_4:
         self.Mon_Gain[0] = int(new_values[8], 2)
         self.Monitor_Sel[0] = int(new_values[10:], 2)
 
+
 register[133] = GBL_CFG_CTR_4()
 
 
@@ -143,6 +149,7 @@ class GBL_CFG_CTR_5:
 
     def change_values(self, new_values):
         self.Iref[0] = int(new_values[10:], 2)
+
 
 register[134] = GBL_CFG_CTR_5()
 
@@ -158,6 +165,7 @@ class GBL_CFG_THR:
         self.ZCC_DAC[0] = int(new_values[0:8],2)
         self.ARM_DAC[0] = int(new_values[8:],2)
 
+
 register[135] = GBL_CFG_THR()
 
 
@@ -170,6 +178,7 @@ class GBL_CFG_HYS:
 
     def change_values(self, new_values):
         self.HYST_DAC[0] = int(new_values[10:],2)
+
 
 register[136] = GBL_CFG_HYS()
 
@@ -204,6 +213,7 @@ class GBL_CFG_CAL_0:
         self.CAL_DAC[0] = int(new_values[6:14],2)
         self.CAL_MODE[0] = int(new_values[14:],2)
 
+
 register[138] = GBL_CFG_CAL_0()
 
 
@@ -235,6 +245,7 @@ class GBL_CFG_BIAS_0:
         self.CFD_DAC_2[0] = int(new_values[4:10],2)
         self.CFD_DAC_1[0] = int(new_values[10:],2)
 
+
 register[140] = GBL_CFG_BIAS_0()
 
 
@@ -249,6 +260,7 @@ class GBL_CFG_BIAS_1:
     def change_values(self, new_values):
         self.PRE_I_BSF[0] = int(new_values[2:8],2)
         self.PRE_I_BIT[0] = int(new_values[8:],2)
+
 
 register[141] = GBL_CFG_BIAS_1()
 
@@ -265,7 +277,9 @@ class GBL_CFG_BIAS_2:
         self.PRE_I_BLCC[0] = int(new_values[2:8],2)
         self.PRE_VREF[0] = int(new_values[8:],2)
 
+
 register[142] = GBL_CFG_BIAS_2()
+
 
 class GBL_CFG_BIAS_3:
     def __init__(self):
@@ -277,6 +291,7 @@ class GBL_CFG_BIAS_3:
     def change_values(self, new_values):
         self.SH_I_BFCAS[0] = int(new_values[0:8],2)
         self.SH_I_BDIFF[0] = int(new_values[8:],2)
+
 
 register[143] = GBL_CFG_BIAS_3()
 
@@ -292,6 +307,7 @@ class GBL_CFG_BIAS_4:
     def change_values(self, new_values):
         self.SD_I_BDIFF[0] = int(new_values[8:],2)
 
+
 register[144] = GBL_CFG_BIAS_4()
 
 
@@ -306,6 +322,7 @@ class GBL_CFG_BIAS_5:
     def change_values(self, new_values):
         self.SD_I_BSF[0] = int(new_values[2:8], 2)
         self.SD_I_BFCAS[0] = int(new_values[8:], 2)
+
 
 register[145] = GBL_CFG_BIAS_5()
 
