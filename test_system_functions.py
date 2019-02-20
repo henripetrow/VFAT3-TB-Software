@@ -108,17 +108,17 @@ def crc_remainder(input_package):
 def read_database_info():
     fail = 0
     try:
-        f = open("./data/database_login.dat", "r")  # opens file with name of "test.txt"
+        f = open("./data/database_login.dat", "r")
     except:
         fail = 1
     if fail:
         try:
-            f = open("../data/database_login.dat", "r")  # opens file with name of "test.txt"
+            f = open("../data/database_login.dat", "r")
             fail = 0
         except:
             fail = 1
     if not fail:
-        print "Resolving database login infromation."
+        print "Resolving database login information."
         error = 0
         for line in f:
             data = line.split(" ")

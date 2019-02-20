@@ -15,7 +15,7 @@ class os1327dInterface:
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
             bytesize=serial.EIGHTBITS,
-            timeout=0)
+            timeout=10)
 
         print("connected to: " + self.ser.portstr)
 
@@ -53,7 +53,9 @@ class os1327dInterface:
             self.ser.close()
 
 
-interface = os1327dIterface()
-while True:
-    interface.read_value()
-    time.sleep(1)
+if __name__ == "__main__":   # This code is executed if the file is run as standalone.
+    interface = os1327dInterface()
+    while True:
+        interface.read_value()
+        time.sleep(1)
+
