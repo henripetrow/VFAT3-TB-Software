@@ -22,6 +22,7 @@ from routines.calibration_routines import *
 from routines.datapacket_routines import *
 from tti_serial_interface import *
 from luts import *
+from reedmuller import *
 
 
 class VFAT3_GUI:
