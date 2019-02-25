@@ -1338,7 +1338,8 @@ class VFAT3_GUI:
         register[133].Monitor_Sel[0] = 37
         self.write_register(133)
         output = self.read_adc()
-        self.temp_gun_interface.read_value()
+        if self.temp_gun_mode:
+            self.temp_gun_interface.read_value()
         if output != 'n':
             temperature = output[1]
             print temperature
