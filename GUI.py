@@ -35,6 +35,7 @@ class VFAT3_GUI:
         self.beep_mode = 0
         self.tti_if = 0
         self.iref_mode = 0
+        self.temp_gun_mode = 0
         # Pilot run flag. Defines if results of single tests are displayed on production test.
         self.pilot_run_flag = 0
 
