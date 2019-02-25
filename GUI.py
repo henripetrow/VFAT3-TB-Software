@@ -23,6 +23,7 @@ from routines.datapacket_routines import *
 from tti_serial_interface import *
 from luts import *
 from reedmuller import *
+from os1327dInterface import os1327dInterface
 
 
 class VFAT3_GUI:
@@ -62,6 +63,9 @@ class VFAT3_GUI:
             if arg == '-iref':
                 print "Entering Iref measurement-mode."
                 self.iref_mode = 1
+            if arg == '-temp_gun':
+                print "Entering Infrared temperature measurement-mode."
+                self.temp_gun_mode = 1
 
         if psu_mode == 1:
             self.tti_if = TtiSerialInterface()
@@ -86,6 +90,8 @@ class VFAT3_GUI:
             #self.read_chip_id()
             #print "Using Hybrid: %s" % self.chip_id
             pass
+        if self.temp_gun_mode == 1:
+            self.temp_gun_interface = os1327dInterface()
         # Local variables.
         self.hybrid_model = "HV3b"
         self.default_bg_color = master.cget("bg")
@@ -1332,6 +1338,7 @@ class VFAT3_GUI:
         register[133].Monitor_Sel[0] = 37
         self.write_register(133)
         output = self.read_adc()
+        self.temp_gun_interface.read_value()
         if output != 'n':
             temperature = output[1]
             print temperature
