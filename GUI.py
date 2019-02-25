@@ -28,7 +28,6 @@ from os1327dInterface import os1327dInterface
 
 class VFAT3_GUI:
     def __init__(self, master):
-
         psu_mode = 0
         conn_mode = 1
         db_mode = 1
