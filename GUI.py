@@ -36,6 +36,7 @@ class VFAT3_GUI:
         self.tti_if = 0
         self.iref_mode = 0
         self.temp_gun_mode = 0
+        self.chipid_encoding_mode = 0
         # Pilot run flag. Defines if results of single tests are displayed on production test.
         self.pilot_run_flag = 0
 
@@ -66,6 +67,9 @@ class VFAT3_GUI:
             if arg == '-temp_gun':
                 print "Entering Infrared temperature measurement-mode."
                 self.temp_gun_mode = 1
+            if arg == '-encode_chipid':
+                print "Entering Chip ID Reed-Muller encoding-mode."
+                self.chipid_encoding_mode = 1
 
         if psu_mode == 1:
             self.tti_if = TtiSerialInterface()
@@ -2172,7 +2176,16 @@ class VFAT3_GUI:
             if self.register[0x10003].CHIP_ID[0] == 0:
                 self.register[0x10004].PRG_TIME[0] = 2000
                 chip_id_bin = dec_to_bin_with_stuffing(chip_id, 32)
-                chip_id_bin.reverse()
+                print chip_id
+                print "Binary:"
+                print chip_id_bin
+                if self.chipid_encoding_mode:
+                    rm = reedmuller.ReedMuller(2, 5)
+                    chip_id_bin_rm = rm.encode(chip_id_bin[-16:])
+                    print "Reed-Muller encoded:"
+                    print chip_id_bin_rm
+                    chip_id_bin = chip_id_bin_rm
+                chip_id_bin.reverse()  # to use it in the for-loop.
                 print chip_id
                 print chip_id_bin
                 for i, bit in enumerate(chip_id_bin):
