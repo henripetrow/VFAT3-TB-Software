@@ -2182,6 +2182,7 @@ class VFAT3_GUI:
                 if self.chipid_encoding_mode:
                     rm = reedmuller.ReedMuller(2, 5)
                     chip_id_bin_rm = rm.encode(chip_id_bin[-16:])
+                    chip_id = int(''.join(map(str, chip_id_bin_rm)), 2)
                     print "Reed-Muller encoded:"
                     print chip_id_bin_rm
                     chip_id_bin = chip_id_bin_rm
@@ -2205,7 +2206,7 @@ class VFAT3_GUI:
                     print "Chip ID burn was success."
                 else:
                     print "Wrong Chip ID was burned."
-                    print "Read chip ID: %s" % self.register[0x10003].CHIP_ID[0] == chip_id
+                    print "Read chip ID: %s" % self.register[0x10003].CHIP_ID[0]
                     print "Written chip ID: %s" % chip_id
                     error = 'r'
             else:
