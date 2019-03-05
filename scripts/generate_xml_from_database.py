@@ -201,6 +201,10 @@ for dac in dac_list:
         name = "VFAT3 CFD DAC_1 Lookup Table"
     if dac == "CFD_DAC_2":
         name = "VFAT3 CFD DAC_2 Lookup Table"
+    if dac == "ARM_DAC":
+        name = "VFAT3 ARM DAC Lookup Table"
+    if dac == "CAL_DAC":
+        name = "VFAT3 CAL DAC Lookup Table"
 
     table_name = "VFAT3_%s" % dac
     description = "GEM VFAT3 %s Lookup Table" % dac
