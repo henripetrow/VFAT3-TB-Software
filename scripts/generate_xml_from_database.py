@@ -5,11 +5,13 @@ from scripts.DatabaseInterfaceBrowse import *
 
 
 user = "Henri Petrow"
-location = "HybridSA"
-start_timestamp = "2018-03-05 10:55:06"
-stop_timestamp = "2018-03-05 11:25:03"
+location = "Cern"
+start_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+stop_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 run_number = 4
 comment_description = "VFAT3 Production Data from Testing at CERN"
+
+run_number = input("Give the run number:")
 
 kind_of_part = "GEM VFAT3"
 
