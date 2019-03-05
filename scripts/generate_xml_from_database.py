@@ -6,9 +6,9 @@ from scripts.DatabaseInterfaceBrowse import *
 
 user = "Henri Petrow"
 location = "HybridSA"
-start_timestamp = "2018-11-01 10:55:06"
-stop_timestamp = "2018-11-01 11:25:03"
-run_number = 1
+start_timestamp = "2018-03-05 10:55:06"
+stop_timestamp = "2018-03-05 11:25:03"
+run_number = 4
 comment_description = "VFAT3 Production Data from Testing at CERN"
 
 kind_of_part = "GEM VFAT3"
