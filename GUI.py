@@ -1679,8 +1679,11 @@ class VFAT3_GUI:
             start = time.time()
             cal_dac_values = []
             output = self.interfaceFW.cal_dac_calibration(start=dac_start, stop=dac_stop, step=step)
-            base_value_hex = "%s%s" % (output[1], output[0][2:])
-            base_value_int = int(base_value_hex, 16)
+            msb = int(output[1], 16) << 8
+            lsb = int(output[0], 16)
+            base_value_int = msb + lsb
+            # base_value_hex = "%s%s" % (output[1], output[0][2:])
+            # base_value_int = int(base_value_hex, 16)
             if self.hybrid_model == "HV3b":
                 base_value_mv = base_value_int * 0.0625
             elif self.hybrid_model == "HV3a":
@@ -1691,25 +1694,31 @@ class VFAT3_GUI:
             ext_adc_values_hex = output[2:]
             flag = 0
             for value in ext_adc_values_hex:
-                if flag == 0:
-                    value_lsb = value[2:]
-                    if len(value_lsb) == 1:
-                        value_lsb = "0"+value_lsb
+                if flag == 0:  # Start of CAL_DAC value collection.
+                    lsb = int(output[0], 16)
+                    # value_lsb = value[2:]
+                    # if len(value_lsb) == 1:
+                    #     value_lsb = "0"+value_lsb
                     flag = 1
                 elif flag == 1:
-                    ivalue = value+value_lsb
-                    ivalue_dec = int(ivalue, 16)
+                    # ivalue = value+value_lsb
+                    # ivalue_dec = int(ivalue, 16)
+                    msb = int(output[1], 16) << 8
+                    ivalue_dec = msb + lsb
                     cal_dac_values.append(ivalue_dec)
-                    ivalue = ""
+                    # ivalue = ""
                     flag = 2
-                elif flag == 2:
-                    value_lsb = value[2:]
-                    if len(value_lsb) == 1:
-                        value_lsb = "0"+value_lsb
+                elif flag == 2:  # Start of ext adc value collection.
+                    lsb = int(output[0], 16)
+                    # value_lsb = value[2:]
+                    # if len(value_lsb) == 1:
+                    #    value_lsb = "0"+value_lsb
                     flag = 3
                 elif flag == 3:
-                    ivalue = value+value_lsb
-                    ivalue_dec = int(ivalue, 16)
+                    msb = int(output[1], 16) << 8
+                    ivalue_dec = msb + lsb
+                    # ivalue = value+value_lsb
+                    # ivalue_dec = int(ivalue, 16)
                     if self.hybrid_model == "HV3b":
                         ivalue_mv = ivalue_dec * 0.0625
                     elif self.hybrid_model == "HV3a":
