@@ -1,4 +1,6 @@
-from DatabaseInterfaceBrowse import *
+import sys
+sys.path.append('../')
+from scripts.DatabaseInterfaceBrowse import *
 import matplotlib.pyplot as plt
 import os
 
@@ -109,7 +111,7 @@ for dac in dacs:
     sub1.grid(True)
 
     sub2 = plt.subplot(212)
-    sub2.plot(final_value_hybrids, final_value_list)
+    sub2.plot(final_value_list, 'b*')
     sub2.set_xlabel('Hybrid')
     sub2.set_ylabel('Last DAC value [mV]')
     sub2.set_title('Final DAC Value of the Hybrids')
@@ -135,28 +137,28 @@ for dac in dacs:
 
 fig = plt.figure(figsize=(10, 20))
 sub1 = plt.subplot(411)
-sub1.plot(final_value_hybrids, adc0m_list)
+sub1.plot(adc0m_list, 'b*')
 sub1.set_xlabel('Hybrid')
 sub1.set_ylabel('Multiplier [mV/DAC count]')
 sub1.set_title('ADC0M')
 sub1.grid(True)
 
 sub2 = plt.subplot(412)
-sub2.plot(final_value_hybrids, adc0b_list)
+sub2.plot(adc0b_list, 'b*')
 sub2.set_xlabel('Hybrid')
 sub2.set_ylabel('Offset [mV]')
 sub2.set_title('ADC0B')
 sub2.grid(True)
 
 sub3 = plt.subplot(413)
-sub3.plot(final_value_hybrids, adc1m_list)
+sub3.plot(adc1m_list, 'b*')
 sub3.set_xlabel('Hybrid')
 sub3.set_ylabel('Multiplier [mV/DAC count]')
 sub3.set_title('ADC1M')
 sub3.grid(True)
 
 sub4 = plt.subplot(414)
-sub4.plot(final_value_hybrids, adc1b_list)
+sub4.plot(adc1b_list, 'b*')
 sub4.set_xlabel('Hybrid')
 sub4.set_ylabel('Offset [mV]')
 sub4.set_title('ADC1B')
@@ -170,14 +172,14 @@ print "Generated a plot for ADC-calibration."
 
 fig = plt.figure(figsize=(10, 20))
 sub1 = plt.subplot(211)
-sub1.plot(final_value_hybrids, cal_dacm_list)
+sub1.plot(cal_dacm_list, 'b*')
 sub1.set_xlabel('Hybrid')
 sub1.set_ylabel('Multiplier [fC/DAC count]')
 sub1.set_title('CAL_DACM')
 sub1.grid(True)
 
 sub2 = plt.subplot(212)
-sub2.plot(final_value_hybrids, cal_dacb_list)
+sub2.plot(cal_dacb_list, 'b*')
 sub2.set_xlabel('Hybrid')
 sub2.set_ylabel('Offset [fC]')
 sub2.set_title('CAL_DACB')
@@ -190,28 +192,28 @@ print "Generated a plot for CAL_DAC-calibration."
 
 fig = plt.figure(figsize=(10, 20))
 sub1 = plt.subplot(411)
-sub1.plot(final_value_hybrids, iref_list)
+sub1.plot(iref_list, 'b*')
 sub1.set_xlabel('Hybrid')
 sub1.set_ylabel('Ired [DAC count]')
 sub1.set_title('Iref of the Hybrids')
 sub1.grid(True)
 
 sub2 = plt.subplot(412)
-sub2.plot(final_value_hybrids, buffer_offsets)
+sub2.plot(buffer_offsets, 'b*')
 sub2.set_xlabel('Hybrid')
 sub2.set_ylabel('Buffer Offset [mV]')
 sub2.set_title('Buffer offset')
 sub2.grid(True)
 
 sub3 = plt.subplot(413)
-sub3.plot(final_value_hybrids, vref_adcs)
+sub3.plot(vref_adcs, 'b*')
 sub3.set_xlabel('Hybrid')
 sub3.set_ylabel('VREF_ADC []')
 sub3.set_title('VREF_ADC')
 sub3.grid(True)
 
 sub4 = plt.subplot(414)
-sub4.plot(final_value_hybrids, v_bgrs)
+sub4.plot(v_bgrs, 'b*')
 sub4.set_xlabel('Hybrid')
 sub4.set_ylabel('v_bgr []')
 sub4.set_title('Bandgap Reference')
@@ -225,14 +227,14 @@ print "Generated a plot for calibration."
 
 fig = plt.figure(figsize=(10, 20))
 sub1 = plt.subplot(211)
-sub1.plot(final_value_hybrids, mean_thresholds)
+sub1.plot(mean_thresholds, 'b*')
 sub1.set_xlabel('Hybrid')
 sub1.set_ylabel('Threshold [fC]')
 sub1.set_title('Thresholds')
 sub1.grid(True)
 
 sub2 = plt.subplot(212)
-sub2.plot(final_value_hybrids, mean_encs)
+sub2.plot(mean_encs, 'b*')
 sub2.set_xlabel('Hybrid')
 sub2.set_ylabel('enc [fC]')
 sub2.set_title('Noise')
