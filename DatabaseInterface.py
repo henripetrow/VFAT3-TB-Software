@@ -3,6 +3,7 @@ import os
 from scripts.DatabaseInterfaceBrowse import *
 import matplotlib.pyplot as plt
 from test_system_functions import read_database_info
+import time
 
 class DatabaseInterface:
     def __init__(self, name):
@@ -165,6 +166,9 @@ class DatabaseInterface:
     def save_iref(self, value):
         self.set_int("Iref", value)
 
+    def save_iref_mv(self, value):
+        self.set_float("Iref_mv", value)
+
     def save_mean_threshold(self, value):
         self.set_float("Mean_Threshold", value)
 
@@ -226,6 +230,10 @@ class DatabaseInterface:
 
     def save_state(self, value):
         self.set_string("State", value)
+
+    def save_date(self):
+        value = time.strftime("%d%m%Y")
+        self.set_string("Modified", value)
 
     def create_xml_file(self):
         command = "mysql -uVFAT3 -p1234 --xml -e 'SELECT * FROM %s.%s WHERE ChipID = %s' > ./results/hybrid_%s.xml" % (self.database_name, self.table_name, self.name, self.name)

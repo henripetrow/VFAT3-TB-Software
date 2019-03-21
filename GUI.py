@@ -1531,6 +1531,7 @@ class VFAT3_GUI:
         iref_mv = output[3]
         # print "Iref adjusted to: %s mV" % iref_mv
         if production == "yes":
+            self.database.save_iref_mv(iref_mv)
             self.database.save_iref(hv3b_biasing_lut['Iref'][1])
         # output = self.interfaceFW.adjust_iref()
         # if output[0] != '00':
@@ -2244,6 +2245,7 @@ class VFAT3_GUI:
             if error == 0:
                 #self.database.save_barcode(barcode_value)
                 self.database = DatabaseInterface(barcode_value)
+                self.database.save_date()
                 if not self.database.error:
                     if self.database.id_exists:
                         if not self.iref_mode:
