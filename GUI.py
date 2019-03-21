@@ -1695,7 +1695,7 @@ class VFAT3_GUI:
             flag = 0
             for value in ext_adc_values_hex:
                 if flag == 0:  # Start of CAL_DAC value collection.
-                    lsb = int(output[0], 16)
+                    lsb = int(value, 16)
                     # value_lsb = value[2:]
                     # if len(value_lsb) == 1:
                     #     value_lsb = "0"+value_lsb
@@ -1703,19 +1703,19 @@ class VFAT3_GUI:
                 elif flag == 1:
                     # ivalue = value+value_lsb
                     # ivalue_dec = int(ivalue, 16)
-                    msb = int(output[1], 16) << 8
+                    msb = int(value, 16) << 8
                     ivalue_dec = msb + lsb
                     cal_dac_values.append(ivalue_dec)
                     # ivalue = ""
                     flag = 2
                 elif flag == 2:  # Start of ext adc value collection.
-                    lsb = int(output[0], 16)
+                    lsb = int(value, 16)
                     # value_lsb = value[2:]
                     # if len(value_lsb) == 1:
                     #    value_lsb = "0"+value_lsb
                     flag = 3
                 elif flag == 3:
-                    msb = int(output[1], 16) << 8
+                    msb = int(value, 16) << 8
                     ivalue_dec = msb + lsb
                     # ivalue = value+value_lsb
                     # ivalue_dec = int(ivalue, 16)
@@ -1729,6 +1729,9 @@ class VFAT3_GUI:
                     ivalue = ""
                     flag = 0
             #cal_dac_values.reverse()
+            print cal_dac_values
+            print base_value_int
+            print ext_adc_values
             output = calc_cal_dac_conversion_factor(self, cal_dac_values, base_value_mv, ext_adc_values, production=production)
             self.cal_dac_fcM = output[0]
             self.cal_dac_fcB = output[1]
@@ -2208,7 +2211,7 @@ class VFAT3_GUI:
                         for x in register[0x10004].reg_array:
                             data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
                         print data
-                        self.write_register(0x10004)
+                        #self.write_register(0x10004)
                 print "Register value after:"
                 print self.read_register(0x10003)
                 if self.register[0x10003].CHIP_ID[0] == chip_id:
