@@ -14,8 +14,8 @@ run_number = 4
 comment_description = "VFAT3 Production Data from Testing at CERN"
 
 run_number = input("Give the run number:")
-create_zip = input("Compress files to zip? (Y/N):")
-
+#create_zip = input("Compress files to zip? (Y/N):")
+create_zip = 'N'
 kind_of_part = "GEM VFAT3"
 
 file_path = "../results/xml/"
