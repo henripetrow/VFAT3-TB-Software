@@ -2238,7 +2238,9 @@ class VFAT3_GUI:
             try:
                 barcode = self.barcode_entry.get()
                 if len(barcode) > 4:
+                    print "Detected a long barcode: %s" % barcode
                     barcode = barcode[-4:]
+                    print "Using only four digits: %s" % barcode
                 barcode_value = int(barcode)
             except Exception as e:
                 print(e)
@@ -2246,6 +2248,7 @@ class VFAT3_GUI:
                 self.add_to_interactive_screen(text)
                 error = 1
             if error == 0:
+                print "Chip ID to be used: %s" % barcode_value
                 #self.database.save_barcode(barcode_value)
                 self.database = DatabaseInterface(barcode_value)
                 self.database.save_date()
