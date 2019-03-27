@@ -2236,7 +2236,10 @@ class VFAT3_GUI:
         error = 0
         if self.barcode_entry.get() != "":
             try:
-                barcode_value = int(self.barcode_entry.get())
+                barcode = self.barcode_entry.get()
+                if len(barcode) > 4:
+                    barcode = barcode[-4:]
+                barcode_value = int(barcode)
             except Exception as e:
                 print(e)
                 text = "Invalid barcode.\n"
