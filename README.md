@@ -41,3 +41,20 @@ Cern BD login information from the maintainer.
 <br>git checkout new_FW
 <br>python ./scripts/create_database.py
 <br>python GUI.py -no_psu
+
+
+<h3>Using the Software</h3>
+
+<br><b>Launching the software</b>
+<br> The software can be launched by running:
+<br> python GUI.py
+
+<br><b>Launch options:</b>
+<br><i>-psu</i>
+<br> Allows the software to control the connected power supply. Only tested with TTi PL303QMD-P power supply.
+<br>
+<br><i>-temp_gun</i>
+<br> Use an external infrared temperature measurement for the calibration of the chips internal temperature measurement calibration. Works only Omega OS1327D.
+<br>
+<br><i>-encode_chipid</i>
+<br>The chip ID is burned to the chip by using Reed-Muller encoding.
