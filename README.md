@@ -47,7 +47,7 @@ Cern BD login information from the maintainer.
 
 <br><b>Launching the software</b>
 <br> The software can be launched by running:
-<br> python GUI.py
+<br> <i>python GUI.py</i>
 
 <br><b>Launch options:</b>
 <br><i>-psu</i>
