@@ -51,11 +51,11 @@ Cern BD login information from the maintainer.
 <br> <i>python GUI.py</i>
 
 <br><b>Launch options:</b>
-<br><i>-psu</i>
-<br> Allows the software to control the connected power supply. Only tested with TTi PL303QMD-P power supply.
+<br><i>-no_psu</i>
+<br> use if no controllable power supply is connected.
 <br>
-<br><i>-temp_gun</i>
-<br> Use an external infrared temperature measurement for the calibration of the chips internal temperature measurement calibration. Works only Omega OS1327D.
+<br><i>-no_temp_gun</i>
+<br> Don't external infrared temperature measurement for the calibration of the chips internal temperature measurement calibration.
 <br>
-<br><i>-encode_chipid</i>
-<br>The chip ID is burned to the chip by using Reed-Muller encoding.
+<br><i>-no_chipid_encoding</i>
+<br>Skip the Reed-Muller encoding chip_id.
