@@ -101,6 +101,7 @@ class TtiSerialInterface:
 
 
 if __name__ == "__main__":   # This code is executed if the file is run as standalone.
+    import time
     tti_if = TtiSerialInterface()
     print "Device ID:"
     print tti_if.req_device_id()
