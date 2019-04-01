@@ -97,15 +97,17 @@ class TtiSerialInterface:
         states[0] = self.read_int(self.req_ch1_state)
         states[1] = self.read_int(self.req_ch2_state)
         return states
-#
-#
-# tti_if = TtiSerialInterface()
-# print "Device ID:"
-# print tti_if.req_device_id()
-# tti_if.set_outputs_on()
-# time.sleep(3)
-# print "Channel 1 voltage: %.4f" % tti_if.req_ch1_voltage()
-# print "Channel 1 current: %.4f" % tti_if.req_ch1_current()
-# print "Channel 2 voltage: %.4f" % tti_if.req_ch2_voltage()
-# print "Channel 2 current: %.4f" % tti_if.req_ch2_current()
-# tti_if.set_outputs_off()
+
+
+
+if __name__ == "__main__":   # This code is executed if the file is run as standalone.
+    tti_if = TtiSerialInterface()
+    print "Device ID:"
+    print tti_if.req_device_id()
+    tti_if.set_outputs_on()
+    time.sleep(3)
+    print "Channel 1 voltage: %.4f" % tti_if.req_ch1_voltage()
+    print "Channel 1 current: %.4f" % tti_if.req_ch1_current()
+    print "Channel 2 voltage: %.4f" % tti_if.req_ch2_voltage()
+    print "Channel 2 current: %.4f" % tti_if.req_ch2_current()
+    tti_if.set_outputs_off()
