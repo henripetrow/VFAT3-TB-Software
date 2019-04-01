@@ -1335,7 +1335,7 @@ class VFAT3_GUI:
                 error = 'r'
         return error
 
-    def measure_temperature(self, mode=""):
+    def measure_temperature(self):
         print "\nMeasuring Temperature."
         temp_coeff = 3.79
         register[133].Monitor_Sel[0] = 37
@@ -1343,11 +1343,9 @@ class VFAT3_GUI:
         output = self.read_adc()
         if self.temp_gun_mode:
             temperature_c = self.temp_gun_interface.read_value()
-            temperature_k2 = 0
 
         if output != 'n':
             temperature_mv = output[1]
-
             offset = temperature_mv - temp_coeff * temperature_c
             temperature_k1 = 1/ temp_coeff
             temperature_k2 = -1 * offset / temp_coeff
