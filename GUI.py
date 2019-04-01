@@ -1352,7 +1352,7 @@ class VFAT3_GUI:
             temperature_k1 = 1/ temp_coeff
             temperature_k2 = -1 * offset / temp_coeff
             temperature_calc = temperature_k1 * temperature_mv + temperature_k2
-            print temperature
+            print temperature_calc
             print "Temperature is %f mV, %f C" % (temperature, temperature_calc)
             if self.database:
                 self.database.save_temperature(temperature_mv)
@@ -2222,7 +2222,7 @@ class VFAT3_GUI:
                         for x in register[0x10004].reg_array:
                             data.extend(dec_to_bin_with_stuffing(x[0], x[1]))
                         print data
-                        #self.write_register(0x10004)
+                        self.write_register(0x10004)
                 print "Register value after:"
                 print self.read_register(0x10003)
                 if self.register[0x10003].CHIP_ID[0] == chip_id:
