@@ -46,6 +46,8 @@ print "CRC errors:\t %s" % production_data[17]
 print "Hit errors:\t %s" % production_data[18]
 print "Noisy Channels:\t %s" % production_data[19]
 print "Dead Channels:\t %s" % production_data[20]
+print "Mean Threshold:\t %s" % production_data[12]
+print "Mean enc:\t %s" % production_data[13]
 print "BIST:\t\t %s" % production_data[21]
 print "Scan Chain:\t %s" % production_data[22]
 print "SLEEP POWER:\t A: %s D: %s" % (production_data[23], production_data[24])

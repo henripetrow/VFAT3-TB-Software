@@ -36,7 +36,7 @@ class VFAT3_GUI:
         self.tti_if = 0
         self.iref_mode = 0
         self.temp_gun_mode = 1
-        self.chipid_encoding_mode = 0
+        self.chipid_encoding_mode = 1
         # Pilot run flag. Defines if results of single tests are displayed on production test.
         self.pilot_run_flag = 0
 
@@ -67,9 +67,9 @@ class VFAT3_GUI:
             if arg == '-no_temp_gun':
                 print "Entering Infrared temperature measurement-mode."
                 self.temp_gun_mode = 0
-            if arg == '-encode_chipid':
+            if arg == '-no_chipid_encoding':
                 print "Entering Chip ID Reed-Muller encoding-mode."
-                self.chipid_encoding_mode = 1
+                self.chipid_encoding_mode = 0
 
         if psu_mode == 1:
             self.tti_if = TtiSerialInterface()
