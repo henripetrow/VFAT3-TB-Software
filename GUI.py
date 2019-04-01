@@ -1361,6 +1361,7 @@ class VFAT3_GUI:
                     self.database.save_temperature_k2(temperature_k2)
             print ""
 
+
     def measure_power(self, mode=""):
         print "\nMeasuring power."
         error = 0
