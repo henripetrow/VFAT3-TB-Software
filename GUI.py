@@ -2245,9 +2245,9 @@ class VFAT3_GUI:
         if self.barcode_entry.get() != "":
             try:
                 barcode = self.barcode_entry.get()
-                if len(barcode) > 4:
+                if len(barcode) > 5:
                     print "Detected a long barcode: %s" % barcode
-                    barcode = barcode[-4:]
+                    barcode = barcode[-5:]
                     print "Using only four digits: %s" % barcode
                 barcode_value = int(barcode)
             except Exception as e:
