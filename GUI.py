@@ -35,7 +35,7 @@ class VFAT3_GUI:
         self.beep_mode = 0
         self.tti_if = 0
         self.iref_mode = 0
-        self.temp_gun_mode = 0
+        self.temp_gun_mode = 1
         self.chipid_encoding_mode = 0
         # Pilot run flag. Defines if results of single tests are displayed on production test.
         self.pilot_run_flag = 0
@@ -64,9 +64,9 @@ class VFAT3_GUI:
             if arg == '-iref':
                 print "Entering Iref measurement-mode."
                 self.iref_mode = 1
-            if arg == '-temp_gun':
+            if arg == '-no_temp_gun':
                 print "Entering Infrared temperature measurement-mode."
-                self.temp_gun_mode = 1
+                self.temp_gun_mode = 0
             if arg == '-encode_chipid':
                 print "Entering Chip ID Reed-Muller encoding-mode."
                 self.chipid_encoding_mode = 1
@@ -1337,19 +1337,28 @@ class VFAT3_GUI:
 
     def measure_temperature(self, mode=""):
         print "\nMeasuring Temperature."
-        temp_coeff = 0.264
-        temp_offset = -136
+        temp_coeff = 3.79
         register[133].Monitor_Sel[0] = 37
         self.write_register(133)
         output = self.read_adc()
         if self.temp_gun_mode:
-            self.temp_gun_interface.read_value()
+            temperature_c = self.temp_gun_interface.read_value()
+            temperature_k2 = 0
+
         if output != 'n':
-            temperature = output[1]
+            temperature_mv = output[1]
+
+            offset = temperature_mv - temp_coeff * temperature_c
+            temperature_k1 = 1/ temp_coeff
+            temperature_k2 = -1 * offset / temp_coeff
+            temperature_calc = temperature_k1 * temperature_mv + temperature_k2
             print temperature
-            print "Temperature is %f mV, %f C" % (temperature, temp_coeff*temperature+temp_offset)
+            print "Temperature is %f mV, %f C" % (temperature, temperature_calc)
             if self.database:
-                self.database.save_temperature(temperature)
+                self.database.save_temperature(temperature_mv)
+                if self.temp_gun_mode:
+                    self.database.save_temperature_c(temperature_c)
+                    self.database.save_temperature_k2(temperature_k2)
             print ""
 
     def measure_power(self, mode=""):

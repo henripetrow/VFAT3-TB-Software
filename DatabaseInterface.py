@@ -228,6 +228,9 @@ class DatabaseInterface:
     def save_temperature_c(self, value):
         self.set_float("Temperature_C", value)
 
+    def save_temperature_k2(self, value):
+        self.set_float("Temperature_k2", value)
+
     def save_location(self, value):
         self.set_string("Location", value)
 

@@ -48,6 +48,7 @@ class os1327dInterface:
                     # outF.close()
                     run_flag = 0
         self.close_connection()
+        return infrared_temp
 
     def close_connection(self):
             self.ser.close()
