@@ -28,7 +28,7 @@ from os1327dInterface import os1327dInterface
 
 class VFAT3_GUI:
     def __init__(self, master):
-        psu_mode = 0
+        psu_mode = 1
         conn_mode = 1
         db_mode = 1
         self.burn_mode = 1
@@ -49,9 +49,9 @@ class VFAT3_GUI:
                 print "Entering no database-mode."
                 self.chip_id = 'n/a'
                 db_mode = 0
-            if arg == '-psu':
+            if arg == '-no_psu':
                 print "Entering external Power Supply-mode."
-                psu_mode = 1
+                psu_mode = 0
             if arg == '-no_id_burn':
                 print "Entering to mode with no chip id burn."
                 self.burn_mode = 0
