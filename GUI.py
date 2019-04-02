@@ -2196,7 +2196,7 @@ class VFAT3_GUI:
 
     def read_hw_id(self):
         print "\n*******************"
-        print "Reading hw_id.\n"
+        print "* Reading hw_id.\n"
         value = self.read_register(0x10001, save_value='no')
         value = ''.join(str(e) for e in value)
         if self.database:
@@ -2312,7 +2312,7 @@ class VFAT3_GUI:
     def save_barcode(self):
         error = 0
         print "\n*******************"
-        print "Reading the barcode.\n"
+        print "* Reading the barcode.\n"
         if self.barcode_entry.get() != "":
             try:
                 barcode = self.barcode_entry.get()
@@ -2354,7 +2354,7 @@ class VFAT3_GUI:
 
     def test_registers(self, production="no"):
         print "\n*******************"
-        print "Testing the VFAT3 Slow Control registers.\n"
+        print "* Testing the VFAT3 Slow Control registers.\n"
         if production == "no":
             timestamp = time.strftime("%Y%m%d_%H%M")
             output_file = "%s/register_test/%s_register_test.dat" % (self.data_folder, timestamp)
@@ -2508,7 +2508,7 @@ class VFAT3_GUI:
 
     def run_all_dac_scans(self, production="no"):
         print "\n*************************"
-        print "Running all DAC scans.\n"
+        print "* Running all DAC scans.\n"
         error = 0
         errors = []
         if production == "no":

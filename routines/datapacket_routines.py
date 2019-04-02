@@ -12,7 +12,7 @@ import numpy as np
 
 def test_data_packets(obj, nr_loops=5, save_result="yes"):
     print "\n*************************"
-    print "Running data packet test.\n"
+    print "* Running data packet test.\n"
     error = 0
     start = time.time()
     if save_result == "yes":
