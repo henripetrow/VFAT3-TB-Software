@@ -1798,7 +1798,7 @@ class VFAT3_GUI:
         stop_time = time.time()
         run_time = stop_time - start_time
         print "CAL_DAC calibration time: %f s\n" % run_time
-        print "\n*************************"
+        print "*************************"
         print ""
         return error
 
@@ -2067,6 +2067,9 @@ class VFAT3_GUI:
         return result
 
     def run_production_tests(self):
+        print "***************************************"
+        print "Startin production test. "
+        print "***************************************"
         start = time.time()
         test_aborted = 0
         os.system('clear')
@@ -2517,7 +2520,7 @@ class VFAT3_GUI:
             error = 'y'
         if 'r' in errors:
             error = 'r'
-        print "\n*************************"
+        print "*************************"
         print ""
         return error
 
