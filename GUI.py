@@ -1329,6 +1329,8 @@ class VFAT3_GUI:
         #self.database = 0
 
     def check_short_circuit(self):
+        print "*******************"
+        print "Checking short circuits."
         error = 0
         time.sleep(0.8)
         avdd_power = self.interfaceFW.read_avdd_power()
@@ -1342,6 +1344,10 @@ class VFAT3_GUI:
                 self.database.save_power(dvdd_power, avdd_power, "SLEEP")
                 self.add_to_interactive_screen(text)
                 error = 'r'
+            else:
+                print "Check ok."
+        print "*******************"
+        print ""
         return error
 
     def calibrate_temperature(self, production='yes'):
@@ -1996,7 +2002,8 @@ class VFAT3_GUI:
         concecutive_triggers(self, self.nr_trigger_loops)
 
     def test_bist(self):
-        print "\nTesting BIST."
+        print "*******************"
+        print "Testing BIST."
         error = 0
         output = self.interfaceFW.run_bist()
         if output[0] != 'Error':
@@ -2012,6 +2019,8 @@ class VFAT3_GUI:
         else:
             print "Communication error."
             error = 'r'
+        print "*******************"
+        print ""
         return error
 
     def test_scan_chain(self):
@@ -2161,10 +2170,14 @@ class VFAT3_GUI:
 
 
     def read_hw_id(self):
+        print "*******************"
+        print "Reading hw_id"
         value = self.read_register(0x10001, save_value='no')
         value = ''.join(str(e) for e in value)
         if self.database:
             self.database.save_hw_id_ver(int(value, 2))
+        print "*******************"
+        print ""
 
 # ################# SCAN/TEST -FUNCTIONS #############################
 
@@ -2212,7 +2225,8 @@ class VFAT3_GUI:
         return 1
 
     def burn_chip_id(self, chip_id=""):
-        print "\nBurning Chip ID."
+        print "*******************"
+        print "Burning Chip ID."
         error = 0
         if self.burn_mode == 1 and self.pilot_run_flag == 0:
             print "Register value before:"
@@ -2262,10 +2276,14 @@ class VFAT3_GUI:
         else:
             print "No Chip ID burn -mode has been selected. No Chip ID was burned."
             error = 'r'
+        print "*******************"
+        print ""
         return error
 
     def save_barcode(self):
         error = 0
+        print "*******************"
+        print "Reading the barcode."
         if self.barcode_entry.get() != "":
             try:
                 barcode = self.barcode_entry.get()
@@ -2301,9 +2319,13 @@ class VFAT3_GUI:
         else:
             print "No barcode scanned."
             error = 1
+        print "*******************"
+        print ""
         return error
 
     def test_registers(self, production="no"):
+        print "*******************"
+        print "Testing the VFAT3 Slow Control registers."
         if production == "no":
             timestamp = time.strftime("%Y%m%d_%H%M")
             output_file = "%s/register_test/%s_register_test.dat" % (self.data_folder, timestamp)
@@ -2349,7 +2371,6 @@ class VFAT3_GUI:
 
         result.append(line)
 
-
         result.append(line)
         if production == "no":
             with open(output_file, "a") as myfile:
@@ -2363,7 +2384,10 @@ class VFAT3_GUI:
         run_time = (stop - start)
         line = "Run time (sec): %f\n" % run_time
         print line
-        return self.check_selection_criteria(error_counter, lim_Register_Test, "Register Test")
+        result = self.check_selection_criteria(error_counter, lim_Register_Test, "Register Test")
+        print "*******************"
+        print ""
+        return result
 
     def write_register(self, register_nr, data=""):
         if data == "":
