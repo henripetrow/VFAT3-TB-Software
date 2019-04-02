@@ -5,11 +5,13 @@ import matplotlib.pyplot as plt
 from test_system_functions import read_database_info
 import time
 
+
 class DatabaseInterface:
     def __init__(self, name):
         self.id_exists = 0
         self.error = 0
         self.name = name
+        self.update_values = 0
 
         [error, self.host, self.port, self.user, self.passwd, self.database_name] = read_database_info()
         if self.user == "VFAT3r":
@@ -95,17 +97,26 @@ class DatabaseInterface:
 
     def set_string(self, field, data):
         self.open_connection()
-        self.cursor.execute("UPDATE  %s SET %s='%s'  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
+        if self.update_values:
+            self.cursor.execute("UPDATE  %s SET %s='%s'  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
+        else:
+            print "No DB, mode selected. Values were not updated in the database."
         self.close_connection()
 
     def set_int(self, field, data):
         self.open_connection()
-        self.cursor.execute("UPDATE  %s SET %s=%i  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
+        if self.update_values:
+            self.cursor.execute("UPDATE  %s SET %s=%i  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
+        else:
+            print "No DB, mode selected. Values were not updated in the database."
         self.close_connection()
 
     def set_float(self, field, data):
         self.open_connection()
-        self.cursor.execute("UPDATE  %s SET %s=%f  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
+        if self.update_values:
+            self.cursor.execute("UPDATE  %s SET %s=%f  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
+        else:
+            print "No DB, mode selected. Values were not updated in the database."
         self.close_connection()
 
     def save_dac_data(self, table_name, adc, adc_values, dac_values):

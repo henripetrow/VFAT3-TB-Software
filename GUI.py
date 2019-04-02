@@ -30,7 +30,7 @@ class VFAT3_GUI:
     def __init__(self, master):
         psu_mode = 1
         conn_mode = 1
-        db_mode = 1
+        self.db_mode = 1
         self.burn_mode = 1
         self.beep_mode = 0
         self.tti_if = 0
@@ -47,8 +47,7 @@ class VFAT3_GUI:
                 conn_mode = 0
             if arg == '-no_db':
                 print "Entering no database-mode."
-                self.chip_id = 'n/a'
-                db_mode = 0
+                self.db_mode = 0
             if arg == '-no_psu':
                 print "Entering external Power Supply-mode."
                 psu_mode = 0
@@ -58,6 +57,7 @@ class VFAT3_GUI:
             if arg == '-pilot_run':
                 print "Entering the Production Pilot Run -mode."
                 self.pilot_run_flag = 1
+                self.db_mode = 0
             if arg == '-beep':
                 print "Usign system beep on Production test to indicate test end."
                 self.beep_mode = 1
@@ -1384,8 +1384,6 @@ class VFAT3_GUI:
         else:
             print "Temperature coefficients are not calibrated."
 
-
-
     def measure_power(self, mode=""):
         print "\nMeasuring power."
         error = 0
@@ -2289,6 +2287,7 @@ class VFAT3_GUI:
                 print "Chip ID to be used: %s" % barcode_value
                 #self.database.save_barcode(barcode_value)
                 self.database = DatabaseInterface(barcode_value)
+                self.database.update_values = self.db_mode
                 self.database.save_date()
                 if not self.database.error:
                     if self.database.id_exists:
