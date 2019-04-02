@@ -1254,7 +1254,8 @@ class VFAT3_GUI:
 # ################ MISC-TAB FUNCTIONS ################################
 
     def measure_adc_offset(self):
-        print "\nMeasuring ADC offset."
+        print "\n*************************"
+        print "Measuring ADC offset.\n"
         self.register[0xffff].RUN[0] = 1
         self.write_register(0xffff)
         time.sleep(0.01)
@@ -1273,6 +1274,8 @@ class VFAT3_GUI:
         if self.database:
             self.database.save_vbgr(vbgr)
             self.database.save_adc_offset(adc_offset)
+        print "*************************"
+        print ""
 
     def adjust_adc0_ref(self):
         print "\nAdjusting ADC0 reference voltage."
@@ -1329,7 +1332,7 @@ class VFAT3_GUI:
         #self.database = 0
 
     def check_short_circuit(self):
-        print "*******************"
+        print "\n*******************"
         print "Checking short circuits.\n"
         error = 0
         time.sleep(0.8)
@@ -1351,7 +1354,8 @@ class VFAT3_GUI:
         return error
 
     def calibrate_temperature(self, production='yes'):
-        print "\nMeasuring Temperature."
+        print "*************************"
+        print "Calibrating Temperature.\n"
         register[133].Monitor_Sel[0] = 37
         self.write_register(133)
         output = self.read_adc()
@@ -1371,7 +1375,8 @@ class VFAT3_GUI:
                 if self.temp_gun_mode:
                     self.database.save_temperature_c(temperature_c)
                     self.database.save_temperature_k2(self.temperature_k2)
-            print ""
+        print "*************************"
+        print ""
 
     def read_temperature(self):
         if self.temperature_k1 != 0 and self.temperature_k2 != 0:
@@ -1387,7 +1392,8 @@ class VFAT3_GUI:
             print "Temperature coefficients are not calibrated."
 
     def measure_power(self, mode=""):
-        print "\nMeasuring power."
+        print "\n*************************"
+        print "Measuring power.\n"
         error = 0
         time.sleep(0.2)
         avdd_power = self.interfaceFW.read_avdd_power()
@@ -1411,6 +1417,7 @@ class VFAT3_GUI:
                 error = 'y'
             if 'r' in errors:
                 error = 'r'
+        print "*************************"
         print ""
         return error
 
@@ -1536,11 +1543,10 @@ class VFAT3_GUI:
         return result
 
     def adjust_iref(self, verbose='yes', production='no'):
+        print "\n*************************"
+        print "Adjusting Iref.\n"
         start = time.time()
-        if verbose == 'yes':
-            text = "->Adjusting Iref.\n"
-            self.add_to_interactive_screen(text)
-            print text[:-2]
+
         result = 1
         self.register[0xffff].RUN[0] = 1
         self.write_register(0xffff)
@@ -1579,12 +1585,14 @@ class VFAT3_GUI:
         stop = time.time()
         run_time = (stop - start)
         print "iref routine time: %f sec\n" % run_time
-
+        print "*************************"
+        print ""
         return self.check_selection_criteria(iref_mv, lim_iref, "Iref Adjustment")
 
     def adc_calibration(self, production="no"):
         error = 0
-
+        print "\n*************************"
+        print "Startin ADC calibration.\n"
         if self.Iref_cal == 0:
             text = "\nIref is not calibrated. Run Iref calibration first.\n"
             self.add_to_interactive_screen(text)
@@ -1699,7 +1707,8 @@ class VFAT3_GUI:
         return error
 
     def scan_cal_dac_fc(self, production="no"):
-        print "\nStarting CAL_DAC calibration."
+        print "\n*************************"
+        print "Starting CAL_DAC calibration.\n"
         start_time = time.time()
         error = 0
         dac_start = 0
@@ -2002,7 +2011,7 @@ class VFAT3_GUI:
         concecutive_triggers(self, self.nr_trigger_loops)
 
     def test_bist(self):
-        print "*******************"
+        print "\n*******************"
         print "Testing BIST.\n"
         error = 0
         output = self.interfaceFW.run_bist()
@@ -2170,7 +2179,7 @@ class VFAT3_GUI:
 
 
     def read_hw_id(self):
-        print "*******************"
+        print "\n*******************"
         print "Reading hw_id.\n"
         value = self.read_register(0x10001, save_value='no')
         value = ''.join(str(e) for e in value)
@@ -2225,7 +2234,7 @@ class VFAT3_GUI:
         return 1
 
     def burn_chip_id(self, chip_id=""):
-        print "*************************"
+        print "\n*******************"
         print "Burning Chip ID.\n"
         error = 0
         if self.burn_mode == 1 and self.pilot_run_flag == 0:
@@ -2282,7 +2291,7 @@ class VFAT3_GUI:
 
     def save_barcode(self):
         error = 0
-        print "*************************"
+        print "\n*******************"
         print "Reading the barcode.\n"
         if self.barcode_entry.get() != "":
             try:
@@ -2324,7 +2333,7 @@ class VFAT3_GUI:
         return error
 
     def test_registers(self, production="no"):
-        print "*************************"
+        print "*******************"
         print "Testing the VFAT3 Slow Control registers."
         if production == "no":
             timestamp = time.strftime("%Y%m%d_%H%M")
