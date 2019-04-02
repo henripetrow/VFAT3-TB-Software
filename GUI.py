@@ -346,7 +346,7 @@ class VFAT3_GUI:
 
         self.temp_button = Button(self.misc_frame, text="Read temp.", command=lambda: self.read_temperature(), width=bwidth)
         self.temp_button.grid(column=1, row=17, sticky='e')
-        self.temp_label = Label(self.sync_border_frame, text="n/a", width=11)
+        self.temp_label = Label(self.misc_frame, text="n/a", width=11)
         self.temp_label.grid(column=2, row=17, sticky='e')
 
         # ###############NEW TAB #######################################
