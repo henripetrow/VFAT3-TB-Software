@@ -97,6 +97,7 @@ class DatabaseInterface:
 
     def execute_command(self, command):
         if self.update_values:
+            print "Saving values to database."
             self.open_connection()
             self.cursor.execute(command)
             self.close_connection()
