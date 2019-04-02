@@ -2067,12 +2067,13 @@ class VFAT3_GUI:
         return result
 
     def run_production_tests(self):
+        os.system('clear')
         print "***************************************"
         print "Startin production test. "
         print "***************************************"
         start = time.time()
         test_aborted = 0
-        os.system('clear')
+
         if self.tti_if:
             self.tti_if.set_outputs_off()
             self.tti_if.set_ch1_current_limit(0.5)
@@ -2515,7 +2516,7 @@ class VFAT3_GUI:
                 errors.append('r')
         stop = time.time()
         run_time = (stop - start)
-        print "Runtime: %f s\n" % run_time
+        print "\nRuntime: %f s" % run_time
         if 'y' in errors:
             error = 'y'
         if 'r' in errors:
