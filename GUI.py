@@ -2077,6 +2077,9 @@ class VFAT3_GUI:
 
     def run_production_tests(self):
         os.system('clear')
+        print ""
+        print ""
+        print ""
         print "***************************************"
         print "Starting production test. "
         print "***************************************"
@@ -2153,10 +2156,12 @@ class VFAT3_GUI:
                 for i, value in enumerate(result):
                     if value == 'y':
                         self.test_label[i].config(bg='yellow')
+                        print "Yellow result in: %s" % self.tests[i]
                     elif value == 'g':
                         self.test_label[i].config(bg=self.default_bg_color)
                     elif value != 0:
                         self.test_label[i].config(bg='red')
+                        print "Red result in: %s" % self.tests[i]
                     else:
                         self.test_label[i].config(bg='green')
                 hybrid_browser(self.database.name)
