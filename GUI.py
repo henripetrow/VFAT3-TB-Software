@@ -1776,9 +1776,7 @@ class VFAT3_GUI:
                     ivalue = ""
                     flag = 0
             #cal_dac_values.reverse()
-            print cal_dac_values
-            print base_value_int
-            print ext_adc_values
+
             output = calc_cal_dac_conversion_factor(self, cal_dac_values, base_value_mv, ext_adc_values, production=production)
             self.cal_dac_fcM = output[0]
             self.cal_dac_fcB = output[1]
@@ -1800,6 +1798,8 @@ class VFAT3_GUI:
         stop_time = time.time()
         run_time = stop_time - start_time
         print "CAL_DAC calibration time: %f s\n" % run_time
+        print "\n*************************"
+        print ""
         return error
 
     def send_idle(self):
@@ -2490,9 +2490,10 @@ class VFAT3_GUI:
         return output
 
     def run_all_dac_scans(self, production="no"):
+        print "\n*************************"
+        print "Running all DAC scans.\n"
         error = 0
         errors = []
-        print "\nRunning all DAC scans."
         if production == "no":
             save_data = 1
         else:
@@ -2516,7 +2517,10 @@ class VFAT3_GUI:
             error = 'y'
         if 'r' in errors:
             error = 'r'
+        print "\n*************************"
+        print ""
         return error
+
 
     def run_xray_tests(self):
         while True:

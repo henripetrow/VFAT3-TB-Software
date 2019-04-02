@@ -11,7 +11,8 @@ import numpy as np
 
 
 def test_data_packets(obj, nr_loops=5, save_result="yes"):
-    print "Running data packet test."
+    print "\n*************************"
+    print "Running data packet test.\n"
     error = 0
     start = time.time()
     if save_result == "yes":
@@ -190,6 +191,8 @@ def test_data_packets(obj, nr_loops=5, save_result="yes"):
         if 'r' in errors:
             error = 'r'
         print "\nData Packet test duration: %f s\n" % duration
+    print "\n*************************"
+    print ""
     return error
 
 
