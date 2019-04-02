@@ -475,7 +475,7 @@ class VFAT3_GUI:
         self.vfat3b_button.grid(column=1, row=2, sticky='e')
 
         ########### CALIBRATION BORDER ###########
-        self.calibration_border_frame = LabelFrame(self.new_frame, text='Calibration', width=250, height=125)
+        self.calibration_border_frame = LabelFrame(self.new_frame, text='Calibration', width=250, height=140)
         self.calibration_border_frame.grid(sticky='w')
         self.calibration_border_frame.grid_propagate(False)
 
