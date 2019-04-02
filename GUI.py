@@ -504,7 +504,7 @@ class VFAT3_GUI:
         self.cal_dacc_label0.grid(column=2, row=4, sticky='w')
         self.temp_coeff_label = Label(self.calibration_border_frame, text="Temp coeff.:")
         self.temp_coeff_label.grid(column=1, row=5, sticky='e')
-        self.temp_coeff_label0 = Label(self.calibration_border_frame, text="n/a", width=12)
+        self.temp_coeff_label0 = Label(self.calibration_border_frame, text="n/a", width=14)
         self.temp_coeff_label0.grid(column=2, row=5, sticky='w')
 
         # ADD TABS
@@ -2207,7 +2207,7 @@ class VFAT3_GUI:
         self.adc0c_label0.config(text="%0.2f %0.1f" % (self.adc0M, self.adc0B))
         self.adc1c_label0.config(text="%0.2f %0.1f" % (self.adc1M, self.adc1B))
         self.cal_dacc_label0.config(text="%0.2f %0.3f" % (self.cal_dac_fcM, self.cal_dac_fcB))
-        self.temp_coeff_label0.config(text="K1:%0.2f K2%0.2f" % (self.temperature_k1, self.temperature_k2))
+        self.temp_coeff_label0.config(text="K1:%0.2f K2:%0.2f" % (self.temperature_k1, self.temperature_k2))
 
         print "Duration of the full calibration: %f sec" % duration
 
