@@ -1254,8 +1254,8 @@ class VFAT3_GUI:
 # ################ MISC-TAB FUNCTIONS ################################
 
     def measure_adc_offset(self):
-        print "\n*************************"
-        print "Measuring ADC offset.\n"
+
+        print "\nMeasuring ADC offset.\n"
         self.register[0xffff].RUN[0] = 1
         self.write_register(0xffff)
         time.sleep(0.01)
@@ -1333,7 +1333,7 @@ class VFAT3_GUI:
 
     def check_short_circuit(self):
         print "\n*******************"
-        print "Checking short circuits.\n"
+        print "* Checking short circuits.\n"
         error = 0
         time.sleep(0.8)
         avdd_power = self.interfaceFW.read_avdd_power()
@@ -1355,7 +1355,7 @@ class VFAT3_GUI:
 
     def calibrate_temperature(self, production='yes'):
         print "*************************"
-        print "Calibrating Temperature.\n"
+        print "* Calibrating Temperature.\n"
         register[133].Monitor_Sel[0] = 37
         self.write_register(133)
         output = self.read_adc()
@@ -1393,7 +1393,7 @@ class VFAT3_GUI:
 
     def measure_power(self, mode=""):
         print "\n*************************"
-        print "Measuring power.\n"
+        print "* Measuring power.\n"
         error = 0
         time.sleep(0.2)
         avdd_power = self.interfaceFW.read_avdd_power()
@@ -1544,7 +1544,7 @@ class VFAT3_GUI:
 
     def adjust_iref(self, verbose='yes', production='no'):
         print "\n*************************"
-        print "Adjusting Iref.\n"
+        print "* Adjusting Iref.\n"
         start = time.time()
 
         result = 1
@@ -1594,7 +1594,7 @@ class VFAT3_GUI:
         error = 0
         start = time.time()
         print "\n*************************"
-        print "Starting ADC calibration.\n"
+        print "* Starting ADC calibration.\n"
         if self.Iref_cal == 0:
             text = "\nIref is not calibrated. Run Iref calibration first.\n"
             self.add_to_interactive_screen(text)
@@ -1716,7 +1716,7 @@ class VFAT3_GUI:
 
     def scan_cal_dac_fc(self, production="no"):
         print "\n*************************"
-        print "Starting CAL_DAC calibration.\n"
+        print "* Starting CAL_DAC calibration.\n"
         start_time = time.time()
         error = 0
         dac_start = 0
@@ -2020,7 +2020,7 @@ class VFAT3_GUI:
 
     def test_bist(self):
         print "\n*******************"
-        print "Testing BIST.\n"
+        print "* Testing BIST.\n"
         start = time.time()
         error = 0
         output = self.interfaceFW.run_bist()
@@ -2251,7 +2251,7 @@ class VFAT3_GUI:
 
     def burn_chip_id(self, chip_id=""):
         print "\n*******************"
-        print "Burning Chip ID.\n"
+        print "* Burning Chip ID.\n"
         start = time.time()
         error = 0
         if self.burn_mode == 1 and self.pilot_run_flag == 0:
