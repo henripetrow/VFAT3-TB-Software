@@ -2225,7 +2225,7 @@ class VFAT3_GUI:
         return 1
 
     def burn_chip_id(self, chip_id=""):
-        print "*******************"
+        print "*************************"
         print "Burning Chip ID.\n"
         error = 0
         if self.burn_mode == 1 and self.pilot_run_flag == 0:
@@ -2282,7 +2282,7 @@ class VFAT3_GUI:
 
     def save_barcode(self):
         error = 0
-        print "*******************"
+        print "*************************"
         print "Reading the barcode.\n"
         if self.barcode_entry.get() != "":
             try:
@@ -2324,7 +2324,7 @@ class VFAT3_GUI:
         return error
 
     def test_registers(self, production="no"):
-        print "*******************"
+        print "*************************"
         print "Testing the VFAT3 Slow Control registers."
         if production == "no":
             timestamp = time.strftime("%Y%m%d_%H%M")
