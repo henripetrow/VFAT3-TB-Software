@@ -95,70 +95,55 @@ class DatabaseInterface:
         self.connection.commit()
         self.connection.close()
 
-    def set_string(self, field, data):
-        self.open_connection()
+    def execute_command(self, command):
         if self.update_values:
-            self.cursor.execute("UPDATE  %s SET %s='%s'  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
+            self.open_connection()
+            self.cursor.execute(command)
+            self.close_connection()
         else:
             print "No DB, mode selected. Values were not updated in the database."
-        self.close_connection()
+
+    def set_string(self, field, data):
+        self.execute_command("UPDATE  %s SET %s='%s'  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
 
     def set_int(self, field, data):
-        self.open_connection()
-        if self.update_values:
-            self.cursor.execute("UPDATE  %s SET %s=%i  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
-        else:
-            print "No DB, mode selected. Values were not updated in the database."
-        self.close_connection()
+        self.execute_command("UPDATE  %s SET %s=%i  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
 
     def set_float(self, field, data):
-        self.open_connection()
-        if self.update_values:
-            self.cursor.execute("UPDATE  %s SET %s=%f  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
-        else:
-            print "No DB, mode selected. Values were not updated in the database."
-        self.close_connection()
+        self.execute_command("UPDATE  %s SET %s=%f  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
 
     def save_dac_data(self, table_name, adc, adc_values, dac_values):
-        self.open_connection()
         table_sql = "UPDATE %s_%s SET " % (table_name, adc)
         table_sql += "DAC%i = %f" % (dac_values[0], adc_values[0])
         for i in range(1, len(dac_values)):
             table_sql += ", DAC%i = %f" % (dac_values[i], adc_values[i])
         table_sql += " WHERE ChipID = '%s';" % self.name
-        self.cursor.execute(table_sql)
-        self.close_connection()
+        self.execute_command(table_sql)
 
     def save_lut_data(self, table_name, data, dac_values):
-        self.open_connection()
         table_sql = "UPDATE %s SET " % table_name
         table_sql += "DAC%i = %i" % (dac_values[0], data[0])
         for i in range(1, len(data)):
             table_sql += ", DAC%i = %i" % (dac_values[i], data[i])
         table_sql += " WHERE ChipID = '%s';" % self.name
-        self.cursor.execute(table_sql)
-        self.close_connection()
+        self.execute_command(table_sql)
 
     def save_lut_data_float(self, table_name, data, dac_values):
-        self.open_connection()
         table_sql = "UPDATE %s SET " % table_name
         table_sql += "DAC%i = %f" % (dac_values[0], data[0])
         for i in range(1, len(data)):
             table_sql += ", DAC%i = %f" % (dac_values[i], data[i])
         table_sql += " WHERE ChipID = '%s';" % self.name
-        self.cursor.execute(table_sql)
-        self.close_connection()
+        self.execute_command(table_sql)
 
     def save_ch_data(self, table_name, data):
         if data:
-            self.open_connection()
             table_sql = "UPDATE %s SET " % table_name
             table_sql += "Ch%i = %f" % (0, data[0])
             for i in range(1, len(data)):
                 table_sql += ", Ch%i = %f" % (i, data[i])
             table_sql += " WHERE ChipID = '%s';" % self.name
-            self.cursor.execute(table_sql)
-            self.close_connection()
+            self.execute_command(table_sql)
         else:
             print "No data to save to database."
 
