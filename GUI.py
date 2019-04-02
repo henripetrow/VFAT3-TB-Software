@@ -1371,7 +1371,7 @@ class VFAT3_GUI:
                     self.database.save_temperature_k2(self.temperature_k2)
             print ""
 
-    def measure_temperature(self):
+    def read_temperature(self):
         if self.temperature_k1 != 0 and self.temperature_k2 != 0:
             register[133].Monitor_Sel[0] = 37
             self.write_register(133)
