@@ -2333,8 +2333,8 @@ class VFAT3_GUI:
         return error
 
     def test_registers(self, production="no"):
-        print "*******************"
-        print "Testing the VFAT3 Slow Control registers."
+        print "\n*******************"
+        print "Testing the VFAT3 Slow Control registers.\n"
         if production == "no":
             timestamp = time.strftime("%Y%m%d_%H%M")
             output_file = "%s/register_test/%s_register_test.dat" % (self.data_folder, timestamp)
