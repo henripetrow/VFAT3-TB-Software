@@ -346,8 +346,8 @@ class VFAT3_GUI:
 
         self.temp_button = Button(self.misc_frame, text="Read temp.", command=lambda: self.read_temperature(), width=bwidth)
         self.temp_button.grid(column=1, row=17, sticky='e')
-        self.temp_label = Label(self.misc_frame, text="n/a", width=11)
-        self.temp_label.grid(column=2, row=17, sticky='e')
+        # self.temp_label = Label(self.misc_frame, text="n/a", width=11)
+        # self.temp_label.grid(column=2, row=17, sticky='e')
 
         # ###############NEW TAB #######################################
 
@@ -475,7 +475,7 @@ class VFAT3_GUI:
         self.vfat3b_button.grid(column=1, row=2, sticky='e')
 
         ########### CALIBRATION BORDER ###########
-        self.calibration_border_frame = LabelFrame(self.new_frame, text='Calibration', width=250, height=120)
+        self.calibration_border_frame = LabelFrame(self.new_frame, text='Calibration', width=250, height=125)
         self.calibration_border_frame.grid(sticky='w')
         self.calibration_border_frame.grid_propagate(False)
 
