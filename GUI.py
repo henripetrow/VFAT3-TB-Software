@@ -1125,7 +1125,10 @@ class VFAT3_GUI:
         new_data = self.interfaceFW.read_register(reg)
         if new_data != 'Error':
             if save_value == 'yes':
-                self.register[reg].change_values(''.join(str(e) for e in new_data[16:]))
+                if reg == 0x10003:
+                    self.register[reg].change_values(''.join(str(e) for e in new_data))
+                else:
+                    self.register[reg].change_values(''.join(str(e) for e in new_data[16:]))
         return new_data
 
     def add_to_interactive_screen(self, text):
