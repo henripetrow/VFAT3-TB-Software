@@ -1584,15 +1584,16 @@ class VFAT3_GUI:
         # self.register[134].Iref[0] = int(output[0], 16)
         stop = time.time()
         run_time = (stop - start)
+        result = self.check_selection_criteria(iref_mv, lim_iref, "Iref Adjustment")
         print "iref routine time: %f sec\n" % run_time
         print "*************************"
         print ""
-        return self.check_selection_criteria(iref_mv, lim_iref, "Iref Adjustment")
+        return result
 
     def adc_calibration(self, production="no"):
         error = 0
         print "\n*************************"
-        print "Startin ADC calibration.\n"
+        print "Starting ADC calibration.\n"
         if self.Iref_cal == 0:
             text = "\nIref is not calibrated. Run Iref calibration first.\n"
             self.add_to_interactive_screen(text)
@@ -1600,7 +1601,7 @@ class VFAT3_GUI:
             self.adjust_adc0_ref()
             self.measure_adc_offset()
             start = time.time()
-            print "\nStarting ADC calibration."
+
             output = self.interfaceFW.int_adc_calibration(0, 10, 255)
             ext_adc_values = []
             adc0_values = []
@@ -1704,6 +1705,8 @@ class VFAT3_GUI:
             error = 'y'
         if 'r' in errors:
             error = 'r'
+        print "*************************"
+        print ""
         return error
 
     def scan_cal_dac_fc(self, production="no"):
