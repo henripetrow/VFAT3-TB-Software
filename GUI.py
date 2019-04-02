@@ -39,7 +39,7 @@ class VFAT3_GUI:
         self.chipid_encoding_mode = 1
         # Pilot run flag. Defines if results of single tests are displayed on production test.
         self.pilot_run_flag = 0
-
+        self.chip_id = 'n'
         # Communication mode selection.
         for arg in sys.argv:
             # print "sys.argv value: %s" % arg
@@ -123,7 +123,9 @@ class VFAT3_GUI:
         self.COM_port = "/dev/ttyUSB0"
         self.register_mode = 'r'
         self.register_names = []
-
+        self.temperature_k1 = 'n'
+        self.temperature_k2 = 'n'
+        self.temp_coeff = 3.79
         # Initiations
         self.SC_encoder = SC_encode()
         self.register = register
@@ -342,6 +344,11 @@ class VFAT3_GUI:
         self.cont_trig_button = Button(self.misc_frame, text="Charge distribution", command=lambda: charge_distribution_on_neighbouring_ch(self), width=bwidth, state=DISABLED)
         self.cont_trig_button.grid(column=1, row=16, sticky='e')
 
+        self.temp_button = Button(self.misc_frame, text="Read temp.", command=lambda: self.read_temperature(), width=bwidth)
+        self.temp_button.grid(column=1, row=17, sticky='e')
+        self.temp_label = Label(self.sync_border_frame, text="n/a", width=11)
+        self.temp_label.grid(column=2, row=17, sticky='e')
+
         # ###############NEW TAB #######################################
 
         ########### INFO BORDER ###########
@@ -495,6 +502,10 @@ class VFAT3_GUI:
         self.cal_dacc_label.grid(column=1, row=4, sticky='e')
         self.cal_dacc_label0 = Label(self.calibration_border_frame, text="n/a", width=12)
         self.cal_dacc_label0.grid(column=2, row=4, sticky='w')
+        self.temp_coeff_label = Label(self.calibration_border_frame, text="Temp coeff.:")
+        self.temp_coeff_label.grid(column=1, row=5, sticky='e')
+        self.temp_coeff_label0 = Label(self.calibration_border_frame, text="n/a", width=12)
+        self.temp_coeff_label0.grid(column=2, row=5, sticky='w')
 
         # ADD TABS
         self.nb.add(self.FCC_frame, text="FCC")
@@ -1317,6 +1328,8 @@ class VFAT3_GUI:
         self.adcB = 0.0
         self.cal_dac_fcM = 0.0
         self.cal_dac_fcB = 0.0
+        self.temperature_k1 = 0
+        self.temperature_k2 = 0
         #self.database = 0
 
     def check_short_circuit(self):
@@ -1335,9 +1348,8 @@ class VFAT3_GUI:
                 error = 'r'
         return error
 
-    def measure_temperature(self):
+    def calibrate_temperature(self, production='yes'):
         print "\nMeasuring Temperature."
-        temp_coeff = 3.79
         register[133].Monitor_Sel[0] = 37
         self.write_register(133)
         output = self.read_adc()
@@ -1346,18 +1358,30 @@ class VFAT3_GUI:
 
         if output != 'n':
             temperature_mv = output[1]
-            offset = temperature_mv - temp_coeff * temperature_c
-            temperature_k1 = 1/ temp_coeff
-            temperature_k2 = -1 * offset / temp_coeff
-            temperature_calc = temperature_k1 * temperature_mv + temperature_k2
+            offset = temperature_mv - self.temp_coeff * temperature_c
+            self.temperature_k1 = 1 / self.temp_coeff
+            self.temperature_k2 = -1 * offset / self.temp_coeff
+            temperature_calc = self.temperature_k1 * temperature_mv + self.temperature_k2
             print temperature_calc
             print "Temperature is %f mV, %f C" % (temperature_mv, temperature_calc)
-            if self.database:
+            if self.database and production == 'yes':
                 self.database.save_temperature(temperature_mv)
                 if self.temp_gun_mode:
                     self.database.save_temperature_c(temperature_c)
-                    self.database.save_temperature_k2(temperature_k2)
+                    self.database.save_temperature_k2(self.temperature_k2)
             print ""
+
+    def measure_temperature(self):
+        if self.temperature_k1 != 0 and self.temperature_k2 != 0:
+            register[133].Monitor_Sel[0] = 37
+            self.write_register(133)
+            output = self.read_adc()
+            temperature_mv = output[1]
+            temperature_calc = self.temperature_k1 * temperature_mv + self.temperature_k2
+            print "Temperature is %f mV, %f C" % (temperature_mv, temperature_calc)
+        else:
+            print "Temperature coefficients are not calibrated."
+
 
 
     def measure_power(self, mode=""):
@@ -1821,6 +1845,7 @@ class VFAT3_GUI:
         self.ext_adc_label0.config(text="%.2f mV" % ext_adc_value[1])
 
     def sync_fpga(self):
+        self.unset_calibration_variables()
         self.send_reset()
         output = self.read_register(0x10000, save_value='no')
         value = int(''.join(map(str, output)), 2)
@@ -1830,6 +1855,7 @@ class VFAT3_GUI:
         self.hw_id_ver_label0.config(text="%x" % value)
         output = self.read_register(0x10003, save_value='no')
         value = int(''.join(map(str, output)), 2)
+        self.chip_id = value
         self.chip_id_label0.config(text="%i" % value)
         self.toggle_run_bit(change_value="no")
 
@@ -2051,7 +2077,7 @@ class VFAT3_GUI:
                         result[5] = self.adjust_iref(production="yes")
                         result[7] = self.adc_calibration(production="yes")
                         if result[7] == 0 or result[7] == 'y':
-                            self.measure_temperature()
+                            self.calibrate_temperature()
                             result[8] = self.scan_cal_dac_fc(production="yes")
                             result[9] = test_data_packets(self, save_result="no")
                             result[10] = self.run_all_dac_scans(production="yes")
@@ -2172,6 +2198,7 @@ class VFAT3_GUI:
         self.adjust_iref()
         self.adc_calibration(production="no")
         self.scan_cal_dac_fc(production="no")
+        self.calibrate_temperature(production="no")
 
         stop = time.time()
         duration = (stop - start)
@@ -2180,6 +2207,7 @@ class VFAT3_GUI:
         self.adc0c_label0.config(text="%0.2f %0.1f" % (self.adc0M, self.adc0B))
         self.adc1c_label0.config(text="%0.2f %0.1f" % (self.adc1M, self.adc1B))
         self.cal_dacc_label0.config(text="%0.2f %0.3f" % (self.cal_dac_fcM, self.cal_dac_fcB))
+        self.temp_coeff_label0.config(text="K1:%0.2f K2%0.2f" % (self.temperature_k1, self.temperature_k2))
 
         print "Duration of the full calibration: %f sec" % duration
 

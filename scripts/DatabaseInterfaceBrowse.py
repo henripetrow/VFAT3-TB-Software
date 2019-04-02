@@ -27,6 +27,7 @@ class DatabaseInterfaceBrowse:
         self.connection.close()
         return hybrid_list
 
+
     def get_production_column_names(self):
         data_list = []
         self.open_connection()
@@ -40,11 +41,13 @@ class DatabaseInterfaceBrowse:
     def get_production_results(self, chip_id):
         data_list = []
         self.open_connection()
-        self.cursor.execute("SELECT * FROM Production WHERE ChipID = '%s';" % chip_id[6:])
-        output = self.cursor.fetchall()
-        for row in output[0]:
-            data_list.append(row)
+        rows_count = self.cursor.execute("SELECT * FROM Production WHERE ChipID = '%s';" % chip_id[6:])
+        if rows_count > 0:
+            output = self.cursor.fetchall()
+            for row in output[0]:
+                data_list.append(row)
         self.connection.close()
+
         return data_list
 
     def get_table_values(self, chip_id, table):
