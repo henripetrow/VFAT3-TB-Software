@@ -90,10 +90,6 @@ class VFAT3_GUI:
         if conn_mode == 1:
             self.interfaceFW = FW_interface(0)  # 0 - IPbus mode
             self.mode = 0
-        if db_mode == 1:
-            #self.read_chip_id()
-            #print "Using Hybrid: %s" % self.chip_id
-            pass
         if self.temp_gun_mode == 1:
             self.temp_gun_interface = os1327dInterface()
         # Local variables.
