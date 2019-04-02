@@ -2343,8 +2343,8 @@ class VFAT3_GUI:
                 self.database = DatabaseInterface(barcode_value)
                 self.database.update_values = self.db_mode
                 self.database.save_date()
-                self.database.save_arrival('00000000')
-                self.database.save_lot(0)
+                self.database.save_arrival('02042019')
+                self.database.save_lot(1)
                 if not self.database.error:
                     if self.database.id_exists:
                         if not self.iref_mode:
