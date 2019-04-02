@@ -1376,9 +1376,10 @@ class VFAT3_GUI:
             register[133].Monitor_Sel[0] = 37
             self.write_register(133)
             output = self.read_adc()
+            temperature_c = self.temp_gun_interface.read_value()
             temperature_mv = output[1]
             temperature_calc = self.temperature_k1 * temperature_mv + self.temperature_k2
-            print "Temperature is %f mV, %f C" % (temperature_mv, temperature_calc)
+            print "Internal temperature is %f mV, %f C,   Temp gun: %f C" % (temperature_mv, temperature_calc, temperature_c)
         else:
             print "Temperature coefficients are not calibrated."
 
