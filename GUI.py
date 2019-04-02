@@ -1920,6 +1920,8 @@ class VFAT3_GUI:
                 print "Error"
 
     def run_scurve(self, production="no"):
+        print "\n*************************"
+        print "* Starting S-curve test.\n"
         if production == "no":
             configuration = "yes"
         else:
@@ -1978,6 +1980,7 @@ class VFAT3_GUI:
                 prod_error = 'r'
         else:
             print "Aborting s-curve run."
+        print "\n*************************"
         return prod_error
 
     def set_fe_nominal_values(self, chip="VFAT3b"):
@@ -2337,6 +2340,8 @@ class VFAT3_GUI:
                 self.database = DatabaseInterface(barcode_value)
                 self.database.update_values = self.db_mode
                 self.database.save_date()
+                self.database.save_arrival('00000000')
+                self.database.save_lot(0)
                 if not self.database.error:
                     if self.database.id_exists:
                         if not self.iref_mode:
