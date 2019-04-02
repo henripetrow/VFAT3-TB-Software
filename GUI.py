@@ -1585,13 +1585,14 @@ class VFAT3_GUI:
         stop = time.time()
         run_time = (stop - start)
         result = self.check_selection_criteria(iref_mv, lim_iref, "Iref Adjustment")
-        print "iref routine time: %f sec\n" % run_time
+        print "\niref routine time: %f sec" % run_time
         print "*************************"
         print ""
         return result
 
     def adc_calibration(self, production="no"):
         error = 0
+        start = time.time()
         print "\n*************************"
         print "Starting ADC calibration.\n"
         if self.Iref_cal == 0:
@@ -1705,6 +1706,10 @@ class VFAT3_GUI:
             error = 'y'
         if 'r' in errors:
             error = 'r'
+
+        stop = time.time()
+        run_time = (stop - start)
+        print "\nADC calibration routine time: %f sec" % run_time
         print "*************************"
         print ""
         return error
@@ -1797,7 +1802,7 @@ class VFAT3_GUI:
             error = 'r'
         stop_time = time.time()
         run_time = stop_time - start_time
-        print "CAL_DAC calibration time: %f s\n" % run_time
+        print "\nCAL_DAC calibration time: %f s" % run_time
         print "*************************"
         print ""
         return error
@@ -2016,6 +2021,7 @@ class VFAT3_GUI:
     def test_bist(self):
         print "\n*******************"
         print "Testing BIST.\n"
+        start = time.time()
         error = 0
         output = self.interfaceFW.run_bist()
         if output[0] != 'Error':
@@ -2031,6 +2037,9 @@ class VFAT3_GUI:
         else:
             print "Communication error."
             error = 'r'
+        stop = time.time()
+        run_time = (stop - start)
+        print "\nBIST test routine time: %f sec" % run_time
         print "*******************"
         print ""
         return error
@@ -2069,7 +2078,7 @@ class VFAT3_GUI:
     def run_production_tests(self):
         os.system('clear')
         print "***************************************"
-        print "Startin production test. "
+        print "Starting production test. "
         print "***************************************"
         start = time.time()
         test_aborted = 0
@@ -2243,6 +2252,7 @@ class VFAT3_GUI:
     def burn_chip_id(self, chip_id=""):
         print "\n*******************"
         print "Burning Chip ID.\n"
+        start = time.time()
         error = 0
         if self.burn_mode == 1 and self.pilot_run_flag == 0:
             print "Register value before:"
@@ -2292,6 +2302,9 @@ class VFAT3_GUI:
         else:
             print "No Chip ID burn -mode has been selected. No Chip ID was burned."
             error = 'r'
+        stop = time.time()
+        run_time = (stop - start)
+        print "\nChip ID burning routine time: %f sec" % run_time
         print "*******************"
         print ""
         return error

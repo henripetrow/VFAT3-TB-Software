@@ -190,8 +190,8 @@ def test_data_packets(obj, nr_loops=5, save_result="yes"):
             error = 'y'
         if 'r' in errors:
             error = 'r'
-        print "\nData Packet test duration: %f s\n" % duration
-    print "\n*************************"
+        print "\nData Packet test duration: %f s" % duration
+    print "*************************"
     print ""
     return error
 
