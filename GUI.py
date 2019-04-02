@@ -1330,7 +1330,7 @@ class VFAT3_GUI:
 
     def check_short_circuit(self):
         print "*******************"
-        print "Checking short circuits."
+        print "Checking short circuits.\n"
         error = 0
         time.sleep(0.8)
         avdd_power = self.interfaceFW.read_avdd_power()
@@ -2003,7 +2003,7 @@ class VFAT3_GUI:
 
     def test_bist(self):
         print "*******************"
-        print "Testing BIST."
+        print "Testing BIST.\n"
         error = 0
         output = self.interfaceFW.run_bist()
         if output[0] != 'Error':
@@ -2171,7 +2171,7 @@ class VFAT3_GUI:
 
     def read_hw_id(self):
         print "*******************"
-        print "Reading hw_id"
+        print "Reading hw_id.\n"
         value = self.read_register(0x10001, save_value='no')
         value = ''.join(str(e) for e in value)
         if self.database:
@@ -2226,7 +2226,7 @@ class VFAT3_GUI:
 
     def burn_chip_id(self, chip_id=""):
         print "*******************"
-        print "Burning Chip ID."
+        print "Burning Chip ID.\n"
         error = 0
         if self.burn_mode == 1 and self.pilot_run_flag == 0:
             print "Register value before:"
@@ -2283,7 +2283,7 @@ class VFAT3_GUI:
     def save_barcode(self):
         error = 0
         print "*******************"
-        print "Reading the barcode."
+        print "Reading the barcode.\n"
         if self.barcode_entry.get() != "":
             try:
                 barcode = self.barcode_entry.get()
