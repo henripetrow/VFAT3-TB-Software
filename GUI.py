@@ -504,7 +504,7 @@ class VFAT3_GUI:
         self.cal_dacc_label0.grid(column=2, row=4, sticky='w')
         self.temp_coeff_label = Label(self.calibration_border_frame, text="Temp coeff.:")
         self.temp_coeff_label.grid(column=1, row=5, sticky='e')
-        self.temp_coeff_label0 = Label(self.calibration_border_frame, text="n/a", width=14)
+        self.temp_coeff_label0 = Label(self.calibration_border_frame, text="n/a", width=16)
         self.temp_coeff_label0.grid(column=2, row=5, sticky='w')
 
         # ADD TABS
