@@ -124,6 +124,8 @@ class VFAT3_GUI:
         self.temp_coeff = 3.79
         self.lot_nr = 0
         self.arrival_date = "00000000"
+        self.read_lot_information()
+
         # Initiations
         self.SC_encoder = SC_encode()
         self.register = register
@@ -2334,6 +2336,9 @@ class VFAT3_GUI:
             info = line.split()
             self.lot_nr = int(info[0])
             self.arrival_date = int(info[1])
+            print "Lot info:"
+            print self.lot_nr
+            print self.arrival_date
 
     def save_barcode(self):
         error = 0
