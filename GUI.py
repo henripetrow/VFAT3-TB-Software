@@ -2335,7 +2335,7 @@ class VFAT3_GUI:
             line = f.readline()
             info = line.split()
             self.lot_nr = int(info[0])
-            self.arrival_date = int(info[1])
+            self.arrival_date = info[1]
             print "Lot info:"
             print self.lot_nr
             print self.arrival_date
