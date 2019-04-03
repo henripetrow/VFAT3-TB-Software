@@ -2,7 +2,9 @@
 # Created by Henri Petrow 2018
 # Lappeenranta University of Technology
 ###########################################
-
+import os
+import sys
+sys.path.append('../')
 from DatabaseInterfaceBrowse import *
 import matplotlib.pyplot as plt
 
