@@ -122,6 +122,8 @@ class VFAT3_GUI:
         self.temperature_k1 = 'n'
         self.temperature_k2 = 'n'
         self.temp_coeff = 3.79
+        self.lot_nr = 0
+        self.arrival_date = "00000000"
         # Initiations
         self.SC_encoder = SC_encode()
         self.register = register
@@ -841,6 +843,12 @@ class VFAT3_GUI:
         #self.chip_id_entry.grid()
         #self.chip_id_entry.insert(0, self.chip_id)
         #self.chip_id_entry.config(state='disabled')
+
+        self.lot_label = Label(self.production_frame, text="Lot nr.:")
+        self.lot_label.grid()
+        self.lot_label0 = label(self.production_frame, text=self.lot_nr)
+        self.lot_label0.grid()
+
 
         self.barcode_label = Label(self.production_frame, text="Barcode ID:")
         self.barcode_label.grid()
@@ -2320,6 +2328,13 @@ class VFAT3_GUI:
         print ""
         return error
 
+    def read_lot_information(self):
+        with open('./data/lot_info.dat', 'r') as f:
+            line = f.readline()
+            info = line.split()
+            self.lot_nr = int(info[0])
+            self.arrival_date = int(info[1])
+
     def save_barcode(self):
         error = 0
         print "\n*******************"
@@ -2343,8 +2358,8 @@ class VFAT3_GUI:
                 self.database = DatabaseInterface(barcode_value)
                 self.database.update_values = self.db_mode
                 self.database.save_date()
-                self.database.save_arrival('02042019')
-                self.database.save_lot(1)
+                self.database.save_arrival(self.arrival_date)
+                self.database.save_lot(self.lot_nr)
                 if not self.database.error:
                     if self.database.id_exists:
                         if not self.iref_mode:
