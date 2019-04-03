@@ -846,7 +846,7 @@ class VFAT3_GUI:
 
         self.lot_label = Label(self.production_frame, text="Lot nr.:")
         self.lot_label.grid()
-        self.lot_label0 = label(self.production_frame, text=self.lot_nr)
+        self.lot_label0 = Label(self.production_frame, text=self.lot_nr)
         self.lot_label0.grid()
 
 
