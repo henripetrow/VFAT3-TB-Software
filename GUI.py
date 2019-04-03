@@ -2188,6 +2188,14 @@ class VFAT3_GUI:
                         self.test_label[i].config(bg='green')
                 hybrid_browser(self.database.name)
             else:
+                for i, value in enumerate(result):
+                    if value == 'y':
+                        print "Yellow result in: %s" % self.tests[i]
+                    elif value == 'g':
+                        pass
+                    elif value != 0:
+                        print "Red result in: %s" % self.tests[i]
+
                 test_result = 'green'
                 if 'y' in result:
                     test_result = 'yellow'
