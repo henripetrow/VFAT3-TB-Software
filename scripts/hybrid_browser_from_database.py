@@ -3,7 +3,7 @@
 # Lappeenranta University of Technology
 ###########################################
 
-from scripts.DatabaseInterfaceBrowse import *
+from DatabaseInterfaceBrowse import *
 import matplotlib.pyplot as plt
 
 database = DatabaseInterfaceBrowse()
