@@ -1383,6 +1383,7 @@ class VFAT3_GUI:
             self.temperature_k2 = -1 * offset / self.temp_coeff
             temperature_calc = self.temperature_k1 * temperature_mv + self.temperature_k2
             print temperature_calc
+            print "Calculated K2: %f" % self.temperature_k2
             print "Temperature is %f mV, %f C" % (temperature_mv, temperature_calc)
             if self.database and production == 'yes':
                 self.database.save_temperature(temperature_mv)
