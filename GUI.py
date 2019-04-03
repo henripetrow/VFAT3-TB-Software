@@ -2190,7 +2190,7 @@ class VFAT3_GUI:
             else:
                 print ""
                 print "**************"
-                print "Error report"
+                print "Error report:\n"
                 for i, value in enumerate(result):
                     if value == 'y':
                         print "Yellow result in: %s" % self.tests[i]
