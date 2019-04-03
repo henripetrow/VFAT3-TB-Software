@@ -882,6 +882,7 @@ class VFAT3_GUI:
                  'Iref adjustment',
                  'SLEEP power measurement',
                  'Internal ADC calibration',
+                 'Temperature calibration',
                  'CAL_DAC conversion',
                  'Data packet test',
                  'Scan of all DACs',
@@ -1388,8 +1389,10 @@ class VFAT3_GUI:
                 if self.temp_gun_mode:
                     self.database.save_temperature_c(temperature_c)
                     self.database.save_temperature_k2(self.temperature_k2)
+        result = self.check_selection_criteria(self.temperature_k2, lim_Temperature_k2, "Temperature calibration for K2.")
         print "*************************"
         print ""
+        return result
 
     def read_temperature(self):
         if self.temperature_k1 != 0 and self.temperature_k2 != 0:
@@ -2118,6 +2121,8 @@ class VFAT3_GUI:
                 if result[0] == 0:
                     result[1] = self.test_bist()
                     result[2] = self.send_reset()
+                    print "reset result"
+                    print result[2]
                     if result[2] == 0:
                         self.read_hw_id()
                         result[3] = self.test_registers(production="yes")
@@ -2126,12 +2131,12 @@ class VFAT3_GUI:
                         result[5] = self.adjust_iref(production="yes")
                         result[7] = self.adc_calibration(production="yes")
                         if result[7] == 0 or result[7] == 'y':
-                            self.calibrate_temperature()
-                            result[8] = self.scan_cal_dac_fc(production="yes")
-                            result[9] = test_data_packets(self, save_result="no")
-                            result[10] = self.run_all_dac_scans(production="yes")
+                            result[8] = self.calibrate_temperature()
+                            result[9] = self.scan_cal_dac_fc(production="yes")
+                            result[10] = test_data_packets(self, save_result="no")
+                            result[11] = self.run_all_dac_scans(production="yes")
                             if result[9] == 0:
-                                result[11] = self.run_scurve(production="yes")
+                                result[12] = self.run_scurve(production="yes")
                             else:
                                 print "S-curves are not run due to errors in data packets."
                         else:
