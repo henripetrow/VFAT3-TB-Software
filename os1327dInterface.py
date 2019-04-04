@@ -13,14 +13,14 @@ class os1327dInterface:
                 print "Found: %s" % serial_id
                 if islink('/dev/serial/by-id/%s' % serial_id):
                     link = readlink('/dev/serial/by-id/%s' % serial_id)
-                    port = "/dev/%s" % link[-6:]
-                    print port
+                    self.port = "/dev/%s" % link[-6:]
+                    print "In port: %s" % self.port
         self.open_connection()
         self.close_connection()
 
     def open_connection(self):
         self.ser = serial.Serial(
-            port='/dev/ttyUSB1',
+            port=self.port,
             baudrate=19200,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
