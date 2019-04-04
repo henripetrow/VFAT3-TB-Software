@@ -20,14 +20,13 @@ class os1327dInterface:
 
     def open_connection(self):
         self.ser = serial.Serial(
-            portself.port,
+            port=self.port,
             baudrate=19200,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
             bytesize=serial.EIGHTBITS,
             timeout=10)
 
-        print("connected to: " + self.ser.portstr)
 
     def read_value(self):
         self.open_connection()
