@@ -33,7 +33,7 @@ class TtiSerialInterface:
             self.serial_port = ports[0]
             self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
             for i in range(1, 10):
-                time.sleep(1)
+                time.sleep(2)
                 self.device_ID = self.req_device_id()
                 if "THURLBY" in self.device_ID:
                     self.psu_found = 1
