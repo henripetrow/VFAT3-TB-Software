@@ -26,16 +26,14 @@ class TtiSerialInterface:
 
         # test which port is the right one by requesting ID.
         ports = glob.glob('/dev/ttyACM*')
-        print ports
         for port in ports:
-            print port
-            #self.serial_port = serial.Serial(port)
             self.serial_port = port
             self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
             self.device_ID = self.req_device_id()
             if "THURLBY" in self.device_ID:
                 self.psu_found = 1
                 print "Found PSU: %s" % self.device_ID
+                print "From port: %s" %s
                 break
             else:
                 self.psu_found = 0
