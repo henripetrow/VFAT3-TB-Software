@@ -27,6 +27,15 @@ class DatabaseInterfaceBrowse:
         self.connection.close()
         return hybrid_list
 
+    def list_hybrids_by_lot(self, lot_nr):
+        hybrid_list = []
+        self.open_connection()
+        self.cursor.execute("SELECT * FROM Users WHERE Lot='%s';" % lot_nr)
+        output = self.cursor.fetchall()
+        for row in output:
+            hybrid_list.append(row[0])
+        self.connection.close()
+        return hybrid_list
 
     def get_production_column_names(self):
         data_list = []
