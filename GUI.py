@@ -2203,8 +2203,6 @@ class VFAT3_GUI:
                     test_result = 'yellow'
                 if 'r' in result:
                     test_result = 'red'
-                if 'g' in result:
-                    test_result = self.default_bg_color
                 for label in self.test_label:
                     label.config(bg=test_result)
 
