@@ -303,9 +303,7 @@ def find_closest_value(scan, dac_values, adc_values):
         for i in range(len(fitted)):
             y += fitted[i]*trialX**i
         # find closest value
-        #print y
         closest_value = np.where(y == (min(y, key=lambda x: abs(x - value))))[0][0]
-        print closest_value
         closest_dac_value = int(trialX[closest_value])
         hv3b_biasing_lut[scan][1] = closest_dac_value
         print "Found closest nominal DAC value: %i" % closest_dac_value

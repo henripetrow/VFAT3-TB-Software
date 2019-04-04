@@ -2565,7 +2565,7 @@ class VFAT3_GUI:
         start = time.time()
         for scan in self.scan_options:
             time.sleep(0.05)
-            print "Running %s" % scan
+            print "\nRunning %s" % scan
             scan_nr = self.scan_options_value[self.scan_options.index(scan)]
             dac_size = self.dac_sizes[self.scan_options.index(scan)]
             output = scan_execute(self, scan, scan_nr, dac_size, save_data)
