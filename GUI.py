@@ -2188,13 +2188,18 @@ class VFAT3_GUI:
                 print ""
                 print "**************"
                 print "Error report:\n"
+                report_text = ""
                 for i, value in enumerate(result):
                     if value == 'y':
-                        print "Yellow result in: %s" % self.tests[i]
+                        report_text += "Yellow result in: %s\n" % self.tests[i]
                     elif value == 'g':
                         pass
                     elif value != 0:
-                        print "Red result in: %s" % self.tests[i]
+                        report_text += "Red result in: %s" % self.tests[i]
+                if report_text == "":
+                    print "Empty"
+                else:
+                    print report_text
                 print "**************"
                 print ""
 
@@ -2383,7 +2388,7 @@ class VFAT3_GUI:
                     if self.database.id_exists:
                         if not self.iref_mode:
                             result = tkMessageBox.askyesno("Barcode/Chip_ID found", "Would you like to re-run production tests for hybrid nr. %i" % barcode_value)
-                            time.sleep(3)
+                            time.sleep(1)
                             if not result:
                                 error = 1
                             else:
