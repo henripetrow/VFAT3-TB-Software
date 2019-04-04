@@ -9,8 +9,10 @@ red_list = []
 yellow_list = []
 green_list = []
 
+lot_nr = input("Give the lot number:")
+
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids_by_lot(1)
+hybrid_list = database.list_hybrids_by_lot(lot_nr)
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)
     production_data = []
