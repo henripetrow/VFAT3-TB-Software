@@ -4,6 +4,7 @@ from os import listdir
 from os.path import islink
 from os import readlink
 
+
 class os1327dInterface:
     def __init__(self):
         print "Looking for connected temperature gun."

@@ -23,6 +23,7 @@ class TtiSerialInterface:
         self.req_ch2_state = "OP2?"
         self.instrument_identification = "*IDN?"
 
+        self.psu_found = 0
 
         # test which port is the right one by requesting ID.
         print "Looking for connected PSU."
