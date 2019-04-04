@@ -30,6 +30,7 @@ class TtiSerialInterface:
         for port in ports:
             print port
             self.serial_port = serial.Serial(port)
+            self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
             print self.req_device_id()
             # if hasattr(p, 'description'):
             #     if "PSU" in p.description:
