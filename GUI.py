@@ -2159,7 +2159,7 @@ class VFAT3_GUI:
                     print "Aborting test."
         else:
             print "Production test aborted."
-            test_aborted = 1
+            test_aborted = 0
         if not test_aborted:
             stop = time.time()
             duration = (stop - start) / 60
