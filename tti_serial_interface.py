@@ -29,7 +29,8 @@ class TtiSerialInterface:
         print ports
         for port in ports:
             print port
-            self.serial_port = serial.Serial(port)
+            #self.serial_port = serial.Serial(port)
+            self.serial_port = port
             self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
             print self.req_device_id()
             # if hasattr(p, 'description'):
