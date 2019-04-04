@@ -11,7 +11,7 @@ class TtiSerialInterface:
         ports = glob.glob('/dev/ttyACM*')
         print ports
         for port in ports:
-            print p
+            print port
             self.serial_port = serial.Serial(port)
             print self.req_device_id()
             # if hasattr(p, 'description'):
