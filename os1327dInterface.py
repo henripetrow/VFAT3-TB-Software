@@ -1,7 +1,7 @@
 import serial
 import time
-import os
-
+from os import listdir
+from os import *
 
 class os1327dInterface:
     def __init__(self):
