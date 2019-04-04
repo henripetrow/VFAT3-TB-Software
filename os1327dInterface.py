@@ -6,13 +6,15 @@ from os import readlink
 
 class os1327dInterface:
     def __init__(self):
+        print "Looking for connected temperature gun."
         serial_id_list = listdir('/dev/serial/by-id')
         for serial_id in serial_id_list:
-            print serial_id
             if "Prolific" in serial_id:
                 print "Found: %s" % serial_id
                 if islink('/dev/serial/by-id/%s' % serial_id):
-                    print readlink('/dev/serial/by-id/%s' % serial_id)
+                    link = readlink('/dev/serial/by-id/%s' % serial_id)
+                    port = "/dev/%s" % link[-6:]
+                    print port
         self.open_connection()
         self.close_connection()
 
