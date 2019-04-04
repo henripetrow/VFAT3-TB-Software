@@ -77,8 +77,8 @@ class VFAT3_GUI:
             if self.tti_if.psu_found:
                 print "Found Power Supply"
                 self.tti_if.set_outputs_off()
-                self.tti_if.set_ch1_current_limit(0.5)
-                self.tti_if.set_ch2_current_limit(0.5)
+                self.tti_if.set_ch1_current_limit(0.4)
+                self.tti_if.set_ch2_current_limit(0.4)
                 self.tti_if.set_ch1_voltage(3)
                 self.tti_if.set_ch2_voltage(3)
                 self.psu_found = 1
@@ -1354,19 +1354,13 @@ class VFAT3_GUI:
         print "* Checking short circuits.\n"
         error = 0
         time.sleep(0.8)
-        avdd_power = self.interfaceFW.read_avdd_power()
-        dvdd_power = self.interfaceFW.read_dvdd_power()
-        if avdd_power == 'Error' or dvdd_power == 'Error':
-            print "Communication error."
+        ch1_current = self.tti_if.req_ch1_current()
+        ch2_current = self.tti_if.req_ch2_current()
+        if ch1_current > 300 or ch2_current > 300:
+            print "Short circuit detected.\n"
             error = 'r'
         else:
-            if avdd_power > 400 or dvdd_power > 400:
-                text = "Short circuit detected.\n"
-                self.database.save_power(dvdd_power, avdd_power, "SLEEP")
-                self.add_to_interactive_screen(text)
-                error = 'r'
-            else:
-                print "Check ok."
+            print "Check ok."
         print "*******************"
         print ""
         return error
@@ -2109,7 +2103,9 @@ class VFAT3_GUI:
         print "***************************************"
         start = time.time()
         test_aborted = 0
-
+        result = ['g'] * len(self.tests)
+        self.clear_interactive_screen()
+        self.save_barcode()
         if self.tti_if:
             self.tti_if.set_outputs_off()
             self.tti_if.set_ch1_current_limit(0.5)
@@ -2117,44 +2113,38 @@ class VFAT3_GUI:
             self.tti_if.set_ch1_voltage(3)
             self.tti_if.set_ch2_voltage(3)
             self.tti_if.set_outputs_on()
-        result = ['g'] * len(self.tests)
-        self.clear_interactive_screen()
-        if not self.save_barcode():
-            self.unset_calibration_variables()
             result[0] = self.check_short_circuit()
+        else:
+            result[0] = 0
+        if result[0] == 0:
+            self.unset_calibration_variables()
             if not self.iref_mode:
-                if result[0] == 0:
-                    result[1] = self.test_bist()
-                    result[2] = self.send_reset()
-                    print "reset result"
-                    print result[2]
-                    if result[2] == 0:
-                        self.read_hw_id()
-                        result[3] = self.test_registers(production="yes")
-                        result[4] = self.burn_chip_id(chip_id=self.database.name)
-                        result[6] = self.measure_power('SLEEP')
-                        result[5] = self.adjust_iref(production="yes")
-                        result[7] = self.adc_calibration(production="yes")
-                        if result[7] == 0 or result[7] == 'y':
-                            result[8] = self.calibrate_temperature()
-                            result[9] = self.scan_cal_dac_fc(production="yes")
-                            result[10] = test_data_packets(self, save_result="no")
-                            result[11] = self.run_all_dac_scans(production="yes")
-                            if result[9] == 0:
-                                result[12] = self.run_scurve(production="yes")
-                            else:
-                                print "S-curves are not run due to errors in data packets."
+                result[1] = self.test_bist()
+                result[2] = self.send_reset()
+                print "reset result"
+                print result[2]
+                if result[2] == 0:
+                    self.read_hw_id()
+                    result[3] = self.test_registers(production="yes")
+                    result[4] = self.burn_chip_id(chip_id=self.database.name)
+                    result[6] = self.measure_power('SLEEP')
+                    result[5] = self.adjust_iref(production="yes")
+                    result[7] = self.adc_calibration(production="yes")
+                    if result[7] == 0 or result[7] == 'y':
+                        result[8] = self.calibrate_temperature()
+                        result[9] = self.scan_cal_dac_fc(production="yes")
+                        result[10] = test_data_packets(self, save_result="no")
+                        result[11] = self.run_all_dac_scans(production="yes")
+                        if result[9] == 0:
+                            result[12] = self.run_scurve(production="yes")
                         else:
-                            print "Internal ADCs broken. Abort production test."
+                            print "S-curves are not run due to errors in data packets."
                     else:
-                        text = "->Production test aborted.\n"
-                        # self.add_to_interactive_screen(text)
-                        print text
+                        print "Internal ADCs broken. Abort production test."
                 else:
                     text = "->Production test aborted.\n"
                     # self.add_to_interactive_screen(text)
                     print text
-                time.sleep(0.1)
             else:
                 result = ['1'] * len(self.tests)
                 result[2] = self.send_reset()
