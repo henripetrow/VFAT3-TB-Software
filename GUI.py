@@ -75,8 +75,6 @@ class VFAT3_GUI:
             self.tti_if = TtiSerialInterface()
             if self.tti_if.psu_found:
                 print "Found Power Supply"
-                print "Device ID:"
-                print self.tti_if.req_device_id()
                 self.tti_if.set_outputs_off()
                 self.tti_if.set_ch1_current_limit(0.5)
                 self.tti_if.set_ch2_current_limit(0.5)

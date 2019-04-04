@@ -1,12 +1,15 @@
 import serial
 import time
+from serial.tools import list_ports
 
 
 class os1327dInterface:
     def __init__(self):
+        device_list = list_ports.comports()
+        for device in device_list:
+            print device
         self.open_connection()
         self.close_connection()
-        self.output_file = "heat_gun_meas.txt"
 
     def open_connection(self):
         self.ser = serial.Serial(
