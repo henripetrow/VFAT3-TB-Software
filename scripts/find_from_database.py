@@ -27,3 +27,16 @@ for hybrid in hybrid_list:
         green_list.append(hybrid[6:])
     else:
         print "Problematic hybrid: %s" % hybrid[6:]
+
+
+print "Green hybrids: %s" % len(green_list)
+for hybrid in green_list:
+    print hybrid
+
+print "Yellow hybrids: %s" % len(yellow_list)
+for hybrid in yellow_list:
+    print hybrid
+
+print "Red hybrids: %s" % len(red_list)
+for hybrid in red_list:
+    print hybrid
