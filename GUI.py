@@ -2195,7 +2195,7 @@ class VFAT3_GUI:
                     elif value == 'g':
                         pass
                     elif value != 0:
-                        report_text += "Red result in: %s" % self.tests[i]
+                        report_text += "Red result in: %s\n" % self.tests[i]
                 if report_text == "":
                     print "Empty"
                 else:
