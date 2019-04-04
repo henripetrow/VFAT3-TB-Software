@@ -24,6 +24,6 @@ for hybrid in hybrid_list:
     elif production_data[29] == 'yellow':
         yellow_list.append(hybrid[6:])
     elif production_data[29] == 'green':
-        yellow_list.append(hybrid[6:])
+        green_list.append(hybrid[6:])
     else:
         print "Problematic hybrid: %s" % hybrid[6:]
