@@ -7,6 +7,7 @@ class os1327dInterface:
     def __init__(self):
         serial_id_list = listdir('/dev/serial/by-id')
         for serial_id in serial_id_list:
+            print serial_id
             if "Profilic" in serial_id:
                 print "Found: %s" % serial_id
         self.open_connection()
