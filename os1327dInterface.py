@@ -68,5 +68,5 @@ if __name__ == "__main__":   # This code is executed if the file is run as stand
     interface = os1327dInterface()
     while True:
         interface.read_value()
-        time.sleep(1)
+        #time.sleep(1)
 
