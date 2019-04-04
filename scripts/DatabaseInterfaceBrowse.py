@@ -33,7 +33,7 @@ class DatabaseInterfaceBrowse:
         self.cursor.execute("SELECT * FROM Production WHERE Lot='%s';" % lot_nr)
         output = self.cursor.fetchall()
         for row in output:
-            hybrid_list.append(row[0])
+            hybrid_list.append("Hybrid%i" % row[0])
         self.connection.close()
         return hybrid_list
 
