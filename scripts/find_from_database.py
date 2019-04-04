@@ -31,16 +31,16 @@ for hybrid in hybrid_list:
         print "Problematic hybrid: %s" % hybrid[6:]
 
 
-print "Green hybrids: %s" % len(green_list)
+print "\nGreen hybrids: %s" % len(green_list)
 print green_list
 
-print "Yellow hybrids: %s" % len(yellow_list)
+print "\nYellow hybrids: %s" % len(yellow_list)
 print yellow_list
 
-print "Red hybrids: %s" % len(red_list)
+print "\nRed hybrids: %s" % len(red_list)
 print red_list
 
-print "*****************"
+print "\n\n*****************"
 print "Found:"
 print "Green hybrids: %s" % len(green_list)
 print "Yellow hybrids: %s" % len(yellow_list)
