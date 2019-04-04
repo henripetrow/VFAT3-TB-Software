@@ -12,10 +12,12 @@ class TtiSerialInterface:
         print ports
         for p in ports:
             print p
-            if hasattr(p, 'description'):
-                if "PSU" in p.description:
-                    self.serial_port = p.device
-                    print self.serial_port
+            self.serial_port = serial.Serial(port)
+            print self.req_device_id()
+            # if hasattr(p, 'description'):
+            #     if "PSU" in p.description:
+            #         self.serial_port = p.device
+            #         print self.serial_port
 
         if self.serial_port != "":
             self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
