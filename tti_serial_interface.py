@@ -10,7 +10,7 @@ class TtiSerialInterface:
         # test which port is the right one by requesting ID.
         ports = glob.glob('/dev/ttyACM*')
         print ports
-        for p in ports:
+        for port in ports:
             print p
             self.serial_port = serial.Serial(port)
             print self.req_device_id()
