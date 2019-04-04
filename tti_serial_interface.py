@@ -25,6 +25,7 @@ class TtiSerialInterface:
 
 
         # test which port is the right one by requesting ID.
+        print "Looking for connected PSU."
         ports = glob.glob('/dev/ttyACM*')
         for port in ports:
             self.serial_port = port
