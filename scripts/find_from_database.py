@@ -45,3 +45,4 @@ print "Found:"
 print "Green hybrids: %s" % len(green_list)
 print "Yellow hybrids: %s" % len(yellow_list)
 print "Red hybrids: %s" % len(red_list)
+print "*****************\n"
