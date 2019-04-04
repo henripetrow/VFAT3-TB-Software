@@ -1,7 +1,7 @@
 import serial
 import time
 from os import listdir
-from os import *
+from os.path import islink
 
 class os1327dInterface:
     def __init__(self):
@@ -10,7 +10,7 @@ class os1327dInterface:
             print serial_id
             if "Prolific" in serial_id:
                 print "Found: %s" % serial_id
-                if os.path.islink('/dev/serial/by-id/%s' % serial_id):
+                if islink('/dev/serial/by-id/%s' % serial_id):
                     print "Hellurei"
         self.open_connection()
         self.close_connection()
