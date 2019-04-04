@@ -1359,7 +1359,7 @@ class VFAT3_GUI:
         print "ch1 current: %s" % ch1_current
         print "ch2 current: %s" % ch2_current
         if ch1_current > 0.300 or ch2_current > 0.300:
-            self.tti_if.turn_off_outputs()
+            self.tti_if.set_outputs_off()
             print "Short circuit detected.\n"
             error = 'r'
         else:
