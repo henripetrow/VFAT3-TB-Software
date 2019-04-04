@@ -2,6 +2,7 @@ import serial
 import serial.tools.list_ports
 import sys
 import glob
+import time
 
 
 class TtiSerialInterface:
@@ -28,17 +29,32 @@ class TtiSerialInterface:
         # test which port is the right one by requesting ID.
         print "Looking for connected PSU."
         ports = glob.glob('/dev/ttyACM*')
-        for port in ports:
-            self.serial_port = port
+        if len(ports) == 1:
+            self.serial_port = ports[0]
             self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
-            self.device_ID = self.req_device_id()
-            if "THURLBY" in self.device_ID:
-                self.psu_found = 1
-                print "Found PSU: %s" % self.device_ID
-                print "From port: %s" % port
-                break
-            else:
-                self.psu_found = 0
+            for i in range(1, 10):
+                time.sleep(1)
+                self.device_ID = self.req_device_id()
+                if "THURLBY" in self.device_ID:
+                    self.psu_found = 1
+                    print "Found PSU: %s" % self.device_ID
+                    print "From port: %s" % port
+                    break
+                else:
+                    self.psu_found = 0
+                print "PSU port found, waiting for response. %s" % i
+        else:
+            for port in ports:
+                self.serial_port = port
+                self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
+                self.device_ID = self.req_device_id()
+                if "THURLBY" in self.device_ID:
+                    self.psu_found = 1
+                    print "Found PSU: %s" % self.device_ID
+                    print "From port: %s" % port
+                    break
+                else:
+                    self.psu_found = 0
 
     # Functions
 
