@@ -2197,7 +2197,7 @@ class VFAT3_GUI:
                     elif value != 0:
                         report_text += "Red result in: %s\n" % self.tests[i]
                 if report_text == "":
-                    print "Empty"
+                    print "Empty\n"
                 else:
                     print report_text
                 print "**************"
