@@ -38,7 +38,7 @@ class TtiSerialInterface:
                 if "THURLBY" in self.device_ID:
                     self.psu_found = 1
                     print "Found PSU: %s" % self.device_ID
-                    print "From port: %s" % port
+                    print "From port: %s" % ports[0]
                     break
                 else:
                     self.psu_found = 0
