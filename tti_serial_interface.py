@@ -7,6 +7,23 @@ import glob
 class TtiSerialInterface:
 
     def __init__(self, baudrate=9600):
+
+        # Instrument specific commands.
+        self.ch1_voltage_req = "V1O?"
+        self.ch2_voltage_req = "V2O?"
+        self.ch1_voltage_set = "V1"
+        self.ch2_voltage_set = "V2"
+        self.ch1_current_req = "I1O?"
+        self.ch2_current_req = "I2O?"
+        self.ch1_current_set = "I1"
+        self.ch2_current_set = "I2"
+        self.turn_off_outputs = "OPALL 0"
+        self.turn_on_outputs = "OPALL 1"
+        self.req_ch1_state = "OP1?"
+        self.req_ch2_state = "OP2?"
+        self.instrument_identification = "*IDN?"
+
+
         # test which port is the right one by requesting ID.
         ports = glob.glob('/dev/ttyACM*')
         print ports
@@ -22,20 +39,7 @@ class TtiSerialInterface:
         if self.serial_port != "":
             self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
 
-            # Instrument specific commands.
-            self.ch1_voltage_req = "V1O?"
-            self.ch2_voltage_req = "V2O?"
-            self.ch1_voltage_set = "V1"
-            self.ch2_voltage_set = "V2"
-            self.ch1_current_req = "I1O?"
-            self.ch2_current_req = "I2O?"
-            self.ch1_current_set = "I1"
-            self.ch2_current_set = "I2"
-            self.turn_off_outputs = "OPALL 0"
-            self.turn_on_outputs = "OPALL 1"
-            self.req_ch1_state = "OP1?"
-            self.req_ch2_state = "OP2?"
-            self.instrument_identification = "*IDN?"
+
 
             self.device_ID = self.req_device_id()
             self.psu_found = 1
