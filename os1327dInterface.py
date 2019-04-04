@@ -5,9 +5,10 @@ from os import listdir
 
 class os1327dInterface:
     def __init__(self):
-        print listdir('/dev/serial/by-id')
-        for device in device_list:
-            print device
+        serial_id_list = listdir('/dev/serial/by-id')
+        for serial_id in serial_id_list:
+            if "Profilic" in serial_id:
+                print "Found: %s" % serial_id
         self.open_connection()
         self.close_connection()
 
