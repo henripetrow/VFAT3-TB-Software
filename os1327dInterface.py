@@ -1,6 +1,6 @@
 import serial
 import time
-from os import listdir
+import os
 
 
 class os1327dInterface:
