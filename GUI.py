@@ -28,7 +28,8 @@ from os1327dInterface import os1327dInterface
 
 class VFAT3_GUI:
     def __init__(self, master):
-        psu_mode = 1
+        self.psu_mode = 1
+        self.psu_found = 0
         conn_mode = 1
         self.db_mode = 1
         self.burn_mode = 1
@@ -50,7 +51,7 @@ class VFAT3_GUI:
                 self.db_mode = 0
             if arg == '-no_psu':
                 print "Entering external Power Supply-mode."
-                psu_mode = 0
+                self.psu_mode = 0
             if arg == '-no_id_burn':
                 print "Entering to mode with no chip id burn."
                 self.burn_mode = 0
@@ -71,7 +72,7 @@ class VFAT3_GUI:
                 print "Entering Chip ID Reed-Muller encoding-mode."
                 self.chipid_encoding_mode = 0
 
-        if psu_mode == 1:
+        if self.psu_mode == 1:
             self.tti_if = TtiSerialInterface()
             if self.tti_if.psu_found:
                 print "Found Power Supply"
@@ -80,8 +81,11 @@ class VFAT3_GUI:
                 self.tti_if.set_ch2_current_limit(0.5)
                 self.tti_if.set_ch1_voltage(3)
                 self.tti_if.set_ch2_voltage(3)
+                self.psu_found = 1
             else:
-                print "No Power Supply found"
+                print "\n******* No Power Supply found *******"
+                print "If power supply is connected, try to restart it.\n"
+                self.psu_found = 0
         if conn_mode == 0:
             self.interfaceFW = FW_interface(1)  # 1 - Simulation mode
             self.mode = 1
@@ -862,8 +866,10 @@ class VFAT3_GUI:
             self.location_entry = Entry(self.production_frame, width=20)
             self.location_entry.grid()
 
-
-        self.p_run_button = Button(self.production_frame, text="RUN", command=lambda: self.run_production_tests())
+        if self.psu_found or not self.psu_mode:
+            self.p_run_button = Button(self.production_frame, text="RUN", command=lambda: self.run_production_tests())
+        else:
+            self.p_run_button = Button(self.production_frame, state=DISABLED, text="RUN", command=lambda: self.run_production_tests())
         self.p_run_button.grid()
 
         self.checks_label = Label(self.production_frame, text="\nTest Result:", width=25)
