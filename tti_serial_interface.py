@@ -32,21 +32,13 @@ class TtiSerialInterface:
             #self.serial_port = serial.Serial(port)
             self.serial_port = port
             self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
-            print self.req_device_id()
-            # if hasattr(p, 'description'):
-            #     if "PSU" in p.description:
-            #         self.serial_port = p.device
-            #         print self.serial_port
-
-        if self.serial_port != "":
-            self.ser = serial.Serial(self.serial_port, baudrate=baudrate, timeout=0.01)
-
-
-
             self.device_ID = self.req_device_id()
-            self.psu_found = 1
-        else:
-            self.psu_found = 0
+            if "THURLBY" in self.device_ID:
+                self.psu_found = 1
+                print "Found PSU: %s" % self.device_ID
+                break
+            else:
+                self.psu_found = 0
 
     # Functions
 
