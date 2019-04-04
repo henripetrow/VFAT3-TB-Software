@@ -1,11 +1,11 @@
 import serial
 import time
-from serial.tools import list_ports
+from os import listdir
 
 
 class os1327dInterface:
     def __init__(self):
-        device_list = list_ports.comports()
+        print listdir('/dev/serial/by-id')
         for device in device_list:
             print device
         self.open_connection()
