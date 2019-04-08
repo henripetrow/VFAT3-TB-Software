@@ -159,7 +159,7 @@ for hybrid in hybrid_list:
     data += "<CAL_DACM>%s</CAL_DACM>\n" % production_data[9]
     data += "<CAL_DACB>%s</CAL_DACB>\n" % production_data[10]
     data += "<IREF>%s</IREF>\n" % production_data[11]
-    data += "<MEAN_THRSHLD>%s</MEAN_THRSHLD>\n" % production_data[12]
+    data += "<MEAN_THRESHOLD>%s</MEAN_THRESHOLD>\n" % production_data[12]
     data += "<MEAN_ENC>%s</MEAN_ENC>\n" % production_data[13]
     data += "<REGISTER_TEST>%s</REGISTER_TEST>\n" % production_data[14]
     data += "<EC_ERRORS>%s</EC_ERRORS>\n" % production_data[15]
@@ -209,7 +209,7 @@ for dac in dac_list:
     if dac == "ARM_DAC":
         name = "VFAT3 ARM DAC Lookup Table"
     if dac == "CAL_DAC":
-        name = "VFAT3 CAL DAC Lookup Table"
+        name = "VFAT3 Calib Pulse DAC Lookup Table"
 
     table_name = "VFAT3_%s" % dac
     description = "GEM VFAT3 %s Lookup Table" % dac
@@ -288,7 +288,7 @@ print "Generated xml-file for: Threshold"
 
 filename = "%sVFAT3_ENC.xml" % file_path
 name = "VFAT3 Channel Noise Values"
-table_name = "VFAT3_ENC_LUT"
+table_name = "VFAT3_ENC"
 description = "GEM VFAT3 enc Lookup Table"
 run_type = "Channel Noise"
 generate_header(filename, table_name, name, run_type)

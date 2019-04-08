@@ -55,7 +55,7 @@ Cern BD login information from the maintainer.
 <br> use if no controllable power supply is connected.
 <br>
 <br><i>-no_temp_gun</i>
-<br> Don't external infrared temperature measurement for the calibration of the chips internal temperature measurement calibration.
+<br> Don't use external infrared temperature measurement for the calibration of the chips internal temperature measurement calibration.
 <br>
 <br><i>-no_chipid_encoding</i>
-<br>Skip the Reed-Muller encoding chip_id.
+<br>Skip the Reed-Muller encoding for chip ID.
