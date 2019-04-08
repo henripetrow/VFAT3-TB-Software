@@ -159,7 +159,7 @@ for hybrid in hybrid_list:
     data += "<CAL_DACM>%s</CAL_DACM>\n" % production_data[9]
     data += "<CAL_DACB>%s</CAL_DACB>\n" % production_data[10]
     data += "<IREF>%s</IREF>\n" % production_data[11]
-    data += "<MEAN_THRESHOLD>%s</MEAN_THRESHOLD>\n" % production_data[12]
+    data += "<MEAN_THRSHLD>%s</MEAN_THRSHLD>\n" % production_data[12]
     data += "<MEAN_ENC>%s</MEAN_ENC>\n" % production_data[13]
     data += "<REGISTER_TEST>%s</REGISTER_TEST>\n" % production_data[14]
     data += "<EC_ERRORS>%s</EC_ERRORS>\n" % production_data[15]
