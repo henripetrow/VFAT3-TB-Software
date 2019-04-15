@@ -1371,13 +1371,15 @@ class VFAT3_GUI:
     def calibrate_temperature(self, production='yes'):
         print "*************************"
         print "* Calibrating Temperature.\n"
+        result = 0
         register[133].Monitor_Sel[0] = 37
         self.write_register(133)
         output = self.read_adc()
         if self.temp_gun_mode:
             temperature_c = self.temp_gun_interface.read_value()
+            result = self.check_selection_criteria(temperature_c, lim_Temperature, "Temperature measurement")
 
-        if output != 'n':
+        if output != 'n' and result == 0:
             temperature_mv = output[1]
             offset = temperature_mv - self.temp_coeff * temperature_c
             self.temperature_k1 = 1 / self.temp_coeff
@@ -1391,7 +1393,7 @@ class VFAT3_GUI:
                 if self.temp_gun_mode:
                     self.database.save_temperature_c(temperature_c)
                     self.database.save_temperature_k2(self.temperature_k2)
-        result = self.check_selection_criteria(self.temperature_k2, lim_Temperature_k2, "Temperature calibration for K2.")
+            result = self.check_selection_criteria(self.temperature_k2, lim_Temperature_k2, "Temperature calibration for K2.")
         print "*************************"
         print ""
         return result
