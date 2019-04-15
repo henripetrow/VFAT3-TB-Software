@@ -47,7 +47,7 @@ lim_Analog_Power_SLEEP = [36.144520, 300.543496, 'n', 'n']
 lim_Digital_Power_SLEEP = [59.167197, 79.376485, 'n', 'n']
 lim_Analog_Power_RUN = [64, 300, 'n', 'n']
 lim_Digital_Power_RUN = [75.770665, 96.720968, 'n', 'n']
-lim_Temperature_k2 = [-130, -80, 'n', 'n']
+lim_Temperature_k2 = [-140, -70, 'n', 'n']
 
 # Selection criteria
 adc0_dac_selection_criteria_lut = {"CFD_DAC_1": [500, 950, 'n', 'n'],
