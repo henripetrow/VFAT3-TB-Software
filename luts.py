@@ -42,13 +42,19 @@ lim_BC_Errors = [0, 0, 0, 0]
 lim_CRC_Errors = [0, 0, 0, 0]
 lim_Hit_Errors = [0, 0, 0, 100]
 lim_Noisy_Channels = [0, 3, 'n', 'n']
-lim_Dead_Channels = [0, 3, 'n', 'n']
-lim_Analog_Power_SLEEP = [36.144520, 300.543496, 'n', 'n']
+lim_Dead_Channels = [0, 0, 'n', 'n']
+lim_Analog_Power_SLEEP = [36.144520, 71.543496, 'n', 'n']
 lim_Digital_Power_SLEEP = [59.167197, 79.376485, 'n', 'n']
 lim_Analog_Power_RUN = [64, 300, 'n', 'n']
 lim_Digital_Power_RUN = [75.770665, 96.720968, 'n', 'n']
 lim_Temperature_k2 = [-140, -70, 'n', 'n']
 lim_Temperature = [20, 30, 'n', 'n']
+
+
+# selection criteria for S-curve channel classification.
+
+lim_enc_noisy_channel = 0.7
+lim_enc_unbonded_channel = 0.11
 
 # Selection criteria
 adc0_dac_selection_criteria_lut = {"CFD_DAC_1": [500, 950, 'n', 'n'],

@@ -713,12 +713,12 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                 rms = math.sqrt(rms / summ)
             else:
                 rms == 0
-            if 0 >= rms or rms > 0.7:
+            if 0 >= rms or rms > lim_enc_noisy_channel:
                 noisy_channels.append(channel)
                 rms = 0
             else:
                 rms_list.append(rms)
-            if rms <= 0.11:
+            if rms <= lim_enc_unbonded_channel:
                 unbonded_channels.append(channel)
 
             # print "Threshold: %f" % mean
