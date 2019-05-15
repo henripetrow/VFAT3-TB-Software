@@ -42,27 +42,32 @@ class DatabaseInterface:
                 self.cursor.execute(insert1)
                 self.connection.commit()
 
-                # Insert new table for Threshold data.
+                # Insert new row for enc data.
                 insert1 = "INSERT INTO enc(ChipID) VALUES('%s');" % self.name
                 self.cursor.execute(insert1)
                 self.connection.commit()
 
-                # Insert new table for Threshold data.
+                # Insert new row for channel category data.
+                insert1 = "INSERT INTO channel_category(ChipID) VALUES('%s');" % self.name
+                self.cursor.execute(insert1)
+                self.connection.commit()
+
+                # Insert new table for ADC0_CAL_LUT data.
                 insert1 = "INSERT INTO ADC0_CAL_LUT(ChipID) VALUES('%s');" % self.name
                 self.cursor.execute(insert1)
                 self.connection.commit()
 
-                # Insert new table for Threshold data.
+                # Insert new table for ADC1_CAL_LUT data.
                 insert1 = "INSERT INTO ADC1_CAL_LUT(ChipID) VALUES('%s');" % self.name
                 self.cursor.execute(insert1)
                 self.connection.commit()
 
-                # Insert new table for Threshold data.
+                # Insert new table for EXT_ADC_CAL_LUT data.
                 insert1 = "INSERT INTO EXT_ADC_CAL_LUT(ChipID) VALUES('%s');" % self.name
                 self.cursor.execute(insert1)
                 self.connection.commit()
 
-                # Insert new table for Threshold data.
+                # Insert new table for CAL_DAC_FC data.
                 insert1 = "INSERT INTO CAL_DAC_FC(ChipID) VALUES('%s');" % self.name
                 self.cursor.execute(insert1)
                 self.connection.commit()
@@ -143,6 +148,17 @@ class DatabaseInterface:
             table_sql += "Ch%i = %f" % (0, data[0])
             for i in range(1, len(data)):
                 table_sql += ", Ch%i = %f" % (i, data[i])
+            table_sql += " WHERE ChipID = '%s';" % self.name
+            self.execute_command(table_sql)
+        else:
+            print "No data to save to database."
+
+    def save_ch_char_data(self, table_name, data):
+        if data:
+            table_sql = "UPDATE %s SET " % table_name
+            table_sql += "Ch%i = %s" % (0, data[0])
+            for i in range(1, len(data)):
+                table_sql += ", Ch%i = %s" % (i, data[i])
             table_sql += " WHERE ChipID = '%s';" % self.name
             self.execute_command(table_sql)
         else:
