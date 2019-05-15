@@ -1993,7 +1993,7 @@ class VFAT3_GUI:
                 errors = [0] * 3
                 errors[0] = self.check_selection_criteria(len(output[2]), lim_Noisy_Channels, "Noisy Channels")
                 errors[1] = self.check_selection_criteria(len(output[4]), lim_Dead_Channels, "Dead Channels")
-                problematic_channels = len(output[4]) + len(output[4]) + len(output[4])
+                problematic_channels = len(output[2]) + len(output[4]) + len(output[6])
                 errors[1] = self.check_selection_criteria(problematic_channels, lim_Problematic_Channels, "Problematic Channels")
                 errors[2] = self.check_selection_criteria(output[5], lim_Mean_enc, "Noise")
             if 'y' in errors:
