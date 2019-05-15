@@ -1,4 +1,6 @@
 import pymysql
+import sys
+sys.path.append('../')
 from test_system_functions import read_database_info
 
 [error, host, port, user, passwd, database_name] = read_database_info()
