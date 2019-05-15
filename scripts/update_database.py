@@ -4,7 +4,12 @@ sys.path.append('../')
 from test_system_functions import read_database_info
 
 [error, host, port, user, passwd, database_name] = read_database_info()
-connection = pymysql.connect(host=host, user=user, passwd=passwd, database=database_name)
+print host
+print port
+print user
+print passwd
+print database_name
+connection = pymysql.connect(host=host, port=port, user=user, passwd=passwd, database=database_name)
 cursor = connection.cursor()
 
 
