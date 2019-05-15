@@ -94,7 +94,7 @@ for dac in dac_list:
 
 
 
-tables = ['Threshold', 'enc', "CAL_DAC_FC", "EXT_ADC_CAL_LUT"]
+tables = ['Threshold', 'enc', 'channel_category', "CAL_DAC_FC", "EXT_ADC_CAL_LUT"]
 
 for item in tables:
     file = "%s%s.csv" % (folder, item)

@@ -138,7 +138,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
 
         # Analyze data.
         # mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list = scurve_analyze(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
-        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data)
+        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data)
 
         # Save data to database.
         if obj.database:
@@ -155,7 +155,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         text = "S-curve Run time (minutes): %f\n" % run_time
         print text
         # obj.add_to_interactive_screen(text)
-    return [mean_th_fc, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc]
+    return [mean_th_fc, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc, unbonded_channels]
 
 
 def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
@@ -798,4 +798,4 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
         text = "Results were saved to the folder:\n %s \n" % folder
         obj.add_to_interactive_screen(text)
 
-    return mean_mean, rms_mean, noisy_channels, dead_channels, rms_return_list, mean_list, channel_category
+    return mean_mean, rms_mean, noisy_channels, dead_channels, rms_return_list, mean_list, channel_category, unbonded_channels
