@@ -199,7 +199,7 @@ class FW_interface:
         # message = [0xca, 0x00, 0x08, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, 1, 0x0, 0x0, triggers_msb, triggers_lsb, arm_dac, 19, 0, delay, 0x01, 0xf4]
         cal_dac_array = range(cal_dac_start, cal_dac_stop+1, 1)
         message = [0xca, 0xff, 0x08, start_ch, stop_ch, step_ch, 0, 0, 0, 0x0, 0x0, triggers_msb,
-                   triggers_lsb, arm_dac, 1, 0, delay, 0x01, 0xf4, 1, len(cal_dac_array)]
+                   triggers_lsb, arm_dac, delay, 0, 5, 0x01, 0xf4, 1, len(cal_dac_array)]
         for value in cal_dac_array:
             message.append(value)
         nr_channels = stop_ch - start_ch + 1

@@ -188,6 +188,9 @@ class DatabaseInterface:
     def save_threshold_data(self, values):
         self.save_ch_data("Threshold", values)
 
+    def save_channel_category(self, values):
+        self.save_ch_char_data("channel_category", values)
+
     def save_mean_enc(self, value):
         self.set_float("Mean_enc", value)
 
