@@ -158,12 +158,27 @@ class FW_interface:
         message = [0xca, 0x00, 0x01]
         message.append(0x00)  # R/W-byte
         message.extend([int(address_3, 16), int(address_2, 16), int(address_1, 16), int(address_0, 16)])
-        output = self.execute_req(message, receive=10)
+        output = self.execute_req(message, receive=20)
+        print output
         output_bin = []
         output_bin.extend(dec_to_bin_with_stuffing(int(output[3], 16), 8))
         output_bin.extend(dec_to_bin_with_stuffing(int(output[2], 16), 8))
         output_bin.extend(dec_to_bin_with_stuffing(int(output[1], 16), 8))
         output_bin.extend(dec_to_bin_with_stuffing(int(output[0], 16), 8))
+
+        ipbus_header = output[7]+output[6]+output[5]+output[4]
+
+        crc_r1 = int(output[9], 16) << 8
+        crc_r0 = int(output[8], 16)
+        crc_received = crc_r1 + crc_r0
+
+        crc_c1 = int(output[11], 16) << 8
+        crc_c0 = int(output[10], 16)
+        crc_calculated = crc_c1 + crc_c0
+
+        print ipbus_header
+        print crc_received
+        print crc_calculated
         # print output_bin
         return output_bin
 
