@@ -351,6 +351,9 @@ class VFAT3_GUI:
         # self.temp_label = Label(self.misc_frame, text="n/a", width=11)
         # self.temp_label.grid(column=2, row=17, sticky='e')
 
+        self.temp_button = Button(self.misc_frame, text="Test S-bits", command=lambda: self.test_trigger_outputs(), width=bwidth)
+        self.temp_button.grid(column=1, row=18, sticky='e')
+
         # ###############NEW TAB #######################################
 
         ########### INFO BORDER ###########
@@ -1371,7 +1374,7 @@ class VFAT3_GUI:
     def calibrate_temperature(self, production='yes'):
         print "*************************"
         print "* Calibrating Temperature.\n"
-        result = 0
+        result = 1
         register[133].Monitor_Sel[0] = 37
         self.write_register(133)
         output = self.read_adc()
@@ -1897,6 +1900,11 @@ class VFAT3_GUI:
         self.chip_id = value
         self.chip_id_label0.config(text="%i" % value)
         self.toggle_run_bit(change_value="no")
+
+
+    def test_trigger_outputs(self):
+        self.interfaceFW.send_fcc("01100110")
+        self.interfaceFW.test_trigger_bits()
 
     def send_cal_trigger(self):
         latency = int(self.scurve_entry.get())

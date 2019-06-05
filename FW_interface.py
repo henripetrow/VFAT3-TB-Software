@@ -70,7 +70,7 @@ class FW_interface:
                         hex_text = hex(ord(i))
                         hex_data.append(hex_text)
                     output = hex_data
-                    # print output
+                    print output
         except socket.timeout:
             output = ['Error']
             print "No response"
@@ -159,7 +159,7 @@ class FW_interface:
         message.append(0x00)  # R/W-byte
         message.extend([int(address_3, 16), int(address_2, 16), int(address_1, 16), int(address_0, 16)])
         output = self.execute_req(message, receive=20)
-        print output
+        # print output
         output_bin = []
         output_bin.extend(dec_to_bin_with_stuffing(int(output[3], 16), 8))
         output_bin.extend(dec_to_bin_with_stuffing(int(output[2], 16), 8))
@@ -176,9 +176,9 @@ class FW_interface:
         crc_c0 = int(output[10], 16)
         crc_calculated = crc_c1 + crc_c0
 
-        print ipbus_header
-        print crc_received
-        print crc_calculated
+        # print ipbus_header
+        # print crc_received
+        # print crc_calculated
         # print output_bin
         return output_bin
 
@@ -293,3 +293,119 @@ class FW_interface:
             return iovdd_power
         else:
             return 'Error'
+
+    def test_trigger_bits(self, channels=[0, 100]):
+        message1 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,255,0x00,0x04]
+        message2 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,255,255,0,0,0x00,0x01]
+        message3 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,255,255,0,0,0,0,0x00,0x01]
+        message4 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,255,255,0,0,0,0,0,0,0x00,0x01]
+        message5 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,255,255,0,0,0,0,0,0,0,0,0x00,0x01]
+        message6 = [0xca, 0xdd, 0x08, 0,0,0,0,255,255,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
+        message7 = [0xca, 0xdd, 0x08, 0,0,255,255,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
+        message8 = [0xca, 0xdd, 0x08, 255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
+        print "Testing trigger bit routine."
+        print "Sending:"
+        print message1
+        print "Reply:"
+        output = self.execute_req(message1,  timeout=30)
+        print "Output:"
+        print int(output[4], 16)
+        print int(output[5], 16)
+        print int(output[6], 16)
+        print int(output[7], 16)
+        print int(output[0], 16)
+        print int(output[1], 16)
+        print int(output[2], 16)
+        print int(output[3], 16)
+        print "Sending:"
+        print message2
+        print "Reply:"
+        output = self.execute_req(message2,  timeout=30)
+        print "Output:"
+        print int(output[4], 16)
+        print int(output[5], 16)
+        print int(output[6], 16)
+        print int(output[7], 16)
+        print int(output[0], 16)
+        print int(output[1], 16)
+        print int(output[2], 16)
+        print int(output[3], 16)
+        print "Sending:"
+        print message3
+        print "Reply:"
+        output = self.execute_req(message3,  timeout=30)
+        print "Output:"
+        print int(output[4], 16)
+        print int(output[5], 16)
+        print int(output[6], 16)
+        print int(output[7], 16)
+        print int(output[0], 16)
+        print int(output[1], 16)
+        print int(output[2], 16)
+        print int(output[3], 16)
+        print "Sending:"
+        print message4
+        print "Reply:"
+        output = self.execute_req(message4,  timeout=30)
+        print "Output:"
+        print int(output[4], 16)
+        print int(output[5], 16)
+        print int(output[6], 16)
+        print int(output[7], 16)
+        print int(output[0], 16)
+        print int(output[1], 16)
+        print int(output[2], 16)
+        print int(output[3], 16)
+        print "Sending:"
+        print message5
+        print "Reply:"
+        output = self.execute_req(message5,  timeout=30)
+        print "Output:"
+        print int(output[4], 16)
+        print int(output[5], 16)
+        print int(output[6], 16)
+        print int(output[7], 16)
+        print int(output[0], 16)
+        print int(output[1], 16)
+        print int(output[2], 16)
+        print int(output[3], 16)
+        print "Sending:"
+        print message6
+        print "Reply:"
+        output = self.execute_req(message6,  timeout=30)
+        print "Output:"
+        print int(output[4], 16)
+        print int(output[5], 16)
+        print int(output[6], 16)
+        print int(output[7], 16)
+        print int(output[0], 16)
+        print int(output[1], 16)
+        print int(output[2], 16)
+        print int(output[3], 16)
+        print "Sending:"
+        print message7
+        print "Reply:"
+        output = self.execute_req(message7,  timeout=30)
+
+        print "Output:"
+        print int(output[4], 16)
+        print int(output[5], 16)
+        print int(output[6], 16)
+        print int(output[7], 16)
+        print int(output[0], 16)
+        print int(output[1], 16)
+        print int(output[2], 16)
+        print int(output[3], 16)
+        print "Sending:"
+        print message8
+        print "Reply:"
+        output = self.execute_req(message8,  timeout=30)
+        print "Output:"
+        print int(output[4], 16)
+        print int(output[5], 16)
+        print int(output[6], 16)
+        print int(output[7], 16)
+        print int(output[0], 16)
+        print int(output[1], 16)
+        print int(output[2], 16)
+        print int(output[3], 16)
