@@ -295,7 +295,7 @@ class FW_interface:
             return 'Error'
 
     def test_trigger_bits(self, channels=[0, 100]):
-        message1 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,255,0x00,0x04]
+        message1 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,255,255,0x00,0x04]
         message2 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,255,255,0,0,0x00,0x01]
         message3 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,255,255,0,0,0,0,0x00,0x01]
         message4 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,255,255,0,0,0,0,0,0,0x00,0x01]
@@ -317,6 +317,12 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
+        if output[3]:
+            print "TU_TX0 working."
+        else:
+            print "TU_TX0 not working."
+        print "\n\n"
+
         print "Sending:"
         print message2
         print "Reply:"
@@ -330,6 +336,12 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
+        if output[2]:
+            print "TU_TX1 working."
+        else:
+            print "TU_TX1 not working."
+        print "\n\n"
+
         print "Sending:"
         print message3
         print "Reply:"
@@ -343,6 +355,12 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
+        if output[1]:
+            print "TU_TX2 working."
+        else:
+            print "TU_TX2 not working."
+        print "\n\n"
+
         print "Sending:"
         print message4
         print "Reply:"
@@ -356,6 +374,12 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
+        if output[0]:
+            print "TU_TX3 working."
+        else:
+            print "TU_TX3 not working."
+        print "\n\n"
+
         print "Sending:"
         print message5
         print "Reply:"
@@ -369,6 +393,12 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
+        if output[7]:
+            print "TU_TX4 working."
+        else:
+            print "TU_TX4 not working."
+        print "\n\n"
+
         print "Sending:"
         print message6
         print "Reply:"
@@ -382,6 +412,12 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
+        if output[6]:
+            print "TU_TX5 working."
+        else:
+            print "TU_TX5 not working."
+        print "\n\n"
+
         print "Sending:"
         print message7
         print "Reply:"
@@ -396,6 +432,12 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
+        if output[5]:
+            print "TU_TX6 working."
+        else:
+            print "TU_TX6 not working."
+        print "\n\n"
+
         print "Sending:"
         print message8
         print "Reply:"
@@ -409,3 +451,8 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
+        if output[4]:
+            print "TU_TX7 working."
+        else:
+            print "TU_TX7 not working."
+        print "\n\n"
