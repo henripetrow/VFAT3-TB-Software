@@ -317,7 +317,7 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
-        if output[3]:
+        if int(output[3], 16):
             print "TU_TX0 working."
         else:
             print "TU_TX0 not working."
@@ -336,7 +336,7 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
-        if output[2]:
+        if int(output[2], 16):
             print "TU_TX1 working."
         else:
             print "TU_TX1 not working."
@@ -355,7 +355,7 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
-        if output[1]:
+        if int(output[1], 16):
             print "TU_TX2 working."
         else:
             print "TU_TX2 not working."
@@ -374,7 +374,7 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
-        if output[0]:
+        if int(output[0], 16):
             print "TU_TX3 working."
         else:
             print "TU_TX3 not working."
@@ -393,7 +393,7 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
-        if output[7]:
+        if int(output[7], 16):
             print "TU_TX4 working."
         else:
             print "TU_TX4 not working."
@@ -412,7 +412,7 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
-        if output[6]:
+        if int(output[6], 16):
             print "TU_TX5 working."
         else:
             print "TU_TX5 not working."
@@ -432,7 +432,7 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
-        if output[5]:
+        if int(output[5], 16):
             print "TU_TX6 working."
         else:
             print "TU_TX6 not working."
@@ -451,7 +451,7 @@ class FW_interface:
         print int(output[1], 16)
         print int(output[2], 16)
         print int(output[3], 16)
-        if output[4]:
+        if int(output[4], 16):
             print "TU_TX7 working."
         else:
             print "TU_TX7 not working."
