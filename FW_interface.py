@@ -295,164 +295,41 @@ class FW_interface:
             return 'Error'
 
     def test_trigger_bits(self, channels=[0, 100]):
-        message1 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,255,255,0x00,0x04]
-        message2 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,255,255,0,0,0x00,0x01]
-        message3 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,255,255,0,0,0,0,0x00,0x01]
-        message4 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,255,255,0,0,0,0,0,0,0x00,0x01]
-        message5 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,255,255,0,0,0,0,0,0,0,0,0x00,0x01]
-        message6 = [0xca, 0xdd, 0x08, 0,0,0,0,255,255,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
-        message7 = [0xca, 0xdd, 0x08, 0,0,255,255,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
-        message8 = [0xca, 0xdd, 0x08, 255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
-        print "Testing trigger bit routine."
-        print "Sending:"
-        print message1
-        print "Reply:"
-        output = self.execute_req(message1,  timeout=30)
-        print "Output:"
-        print int(output[4], 16)
-        print int(output[5], 16)
-        print int(output[6], 16)
-        print int(output[7], 16)
-        print int(output[0], 16)
-        print int(output[1], 16)
-        print int(output[2], 16)
-        print int(output[3], 16)
-        if int(output[4], 16):
-            print "TU_TX0 working."
-        else:
-            print "TU_TX0 not working."
-        print "\n\n"
+        message0 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,255,255,0x00,0x04]
+        message1 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,255,255,0,0,0x00,0x01]
+        message2 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,255,255,0,0,0,0,0x00,0x01]
+        message3 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,255,255,0,0,0,0,0,0,0x00,0x01]
+        message4 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,255,255,0,0,0,0,0,0,0,0,0x00,0x01]
+        message5 = [0xca, 0xdd, 0x08, 0,0,0,0,255,255,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
+        message6 = [0xca, 0xdd, 0x08, 0,0,255,255,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
+        message7 = [0xca, 0xdd, 0x08, 255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
+        print "Trigger bit testing routine."
 
-        print "Sending:"
-        print message2
-        print "Reply:"
-        output = self.execute_req(message2,  timeout=30)
-        print "Output:"
-        print int(output[4], 16)
-        print int(output[5], 16)
-        print int(output[6], 16)
-        print int(output[7], 16)
-        print int(output[0], 16)
-        print int(output[1], 16)
-        print int(output[2], 16)
-        print int(output[3], 16)
-        if int(output[5], 16):
-            print "TU_TX1 working."
-        else:
-            print "TU_TX1 not working."
-        print "\n\n"
+        errors = []
 
-        print "Sending:"
-        print message3
-        print "Reply:"
-        output = self.execute_req(message3,  timeout=30)
-        print "Output:"
-        print int(output[4], 16)
-        print int(output[5], 16)
-        print int(output[6], 16)
-        print int(output[7], 16)
-        print int(output[0], 16)
-        print int(output[1], 16)
-        print int(output[2], 16)
-        print int(output[3], 16)
-        if int(output[6], 16):
-            print "TU_TX2 working."
-        else:
-            print "TU_TX2 not working."
-        print "\n\n"
+        errors.append(self.check_trigger_bit_result(message0, 0))
+        errors.append(self.check_trigger_bit_result(message1, 1))
+        errors.append(self.check_trigger_bit_result(message2, 2))
+        errors.append(self.check_trigger_bit_result(message3, 3))
+        errors.append(self.check_trigger_bit_result(message4, 4))
+        errors.append(self.check_trigger_bit_result(message5, 5))
+        errors.append(self.check_trigger_bit_result(message6, 6))
+        errors.append(self.check_trigger_bit_result(message7, 7))
 
-        print "Sending:"
-        print message4
-        print "Reply:"
-        output = self.execute_req(message4,  timeout=30)
-        print "Output:"
-        print int(output[4], 16)
-        print int(output[5], 16)
-        print int(output[6], 16)
-        print int(output[7], 16)
-        print int(output[0], 16)
-        print int(output[1], 16)
-        print int(output[2], 16)
-        print int(output[3], 16)
-        if int(output[7], 16):
-            print "TU_TX3 working."
-        else:
-            print "TU_TX3 not working."
-        print "\n\n"
+        print errors
 
+    def check_trigger_bit_result(self, message, ch):
+        error = 0
         print "Sending:"
-        print message5
+        print message
         print "Reply:"
-        output = self.execute_req(message5,  timeout=30)
+        output = self.execute_req(message,  timeout=30)
         print "Output:"
-        print int(output[4], 16)
-        print int(output[5], 16)
-        print int(output[6], 16)
-        print int(output[7], 16)
-        print int(output[0], 16)
-        print int(output[1], 16)
-        print int(output[2], 16)
-        print int(output[3], 16)
-        if int(output[0], 16):
-            print "TU_TX4 working."
+        sorted_output = [int(output[4], 16), int(output[5], 16), int(output[6], 16), int(output[7], 16), int(output[0], 16), int(output[1], 16), int(output[2], 16), int(output[3], 16)]
+        if sorted_output[ch]:
+            print "TU_TX%s working." % ch
         else:
-            print "TU_TX4 not working."
+            print "TU_TX%s not working." % ch
+            error = 1
         print "\n\n"
-
-        print "Sending:"
-        print message6
-        print "Reply:"
-        output = self.execute_req(message6,  timeout=30)
-        print "Output:"
-        print int(output[4], 16)
-        print int(output[5], 16)
-        print int(output[6], 16)
-        print int(output[7], 16)
-        print int(output[0], 16)
-        print int(output[1], 16)
-        print int(output[2], 16)
-        print int(output[3], 16)
-        if int(output[1], 16):
-            print "TU_TX5 working."
-        else:
-            print "TU_TX5 not working."
-        print "\n\n"
-
-        print "Sending:"
-        print message7
-        print "Reply:"
-        output = self.execute_req(message7,  timeout=30)
-
-        print "Output:"
-        print int(output[4], 16)
-        print int(output[5], 16)
-        print int(output[6], 16)
-        print int(output[7], 16)
-        print int(output[0], 16)
-        print int(output[1], 16)
-        print int(output[2], 16)
-        print int(output[3], 16)
-        if int(output[2], 16):
-            print "TU_TX6 working."
-        else:
-            print "TU_TX6 not working."
-        print "\n\n"
-
-        print "Sending:"
-        print message8
-        print "Reply:"
-        output = self.execute_req(message8,  timeout=30)
-        print "Output:"
-        print int(output[4], 16)
-        print int(output[5], 16)
-        print int(output[6], 16)
-        print int(output[7], 16)
-        print int(output[0], 16)
-        print int(output[1], 16)
-        print int(output[2], 16)
-        print int(output[3], 16)
-        if int(output[3], 16):
-            print "TU_TX7 working."
-        else:
-            print "TU_TX7 not working."
-        print "\n\n"
+        return error
