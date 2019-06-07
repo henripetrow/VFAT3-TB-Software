@@ -160,7 +160,6 @@ class DatabaseInterface:
             for i in range(1, len(data)):
                 table_sql += ", CH%i = '%s'" % (i, data[i])
             table_sql += " WHERE ChipID = %s;" % self.name
-            print table_sql
             self.execute_command(table_sql)
         else:
             print "No data to save to database."
