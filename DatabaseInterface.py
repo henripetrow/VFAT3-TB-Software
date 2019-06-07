@@ -160,6 +160,7 @@ class DatabaseInterface:
             for i in range(1, len(data)):
                 table_sql += ", Ch%i = %s" % (i, data[i])
             table_sql += " WHERE ChipID = '%s';" % self.name
+            print table_sql
             self.execute_command(table_sql)
         else:
             print "No data to save to database."
@@ -264,7 +265,6 @@ class DatabaseInterface:
         self.set_int("Lot", value)
 
     def save_sbit_errors(self, value):
-        print value
         self.set_string("Sbit_errors", value)
 
     def create_xml_file(self):

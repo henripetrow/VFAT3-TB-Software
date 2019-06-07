@@ -1964,7 +1964,6 @@ class VFAT3_GUI:
 
         self.register[0xffff].RUN[0] = 0
         self.write_register(0xffff)
-        print errors
         if production == "yes":
             self.database.save_sbit_errors(''.join(str(e) for e in errors))
 
