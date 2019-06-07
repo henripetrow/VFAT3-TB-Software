@@ -156,9 +156,9 @@ class DatabaseInterface:
     def save_ch_char_data(self, table_name, data):
         if data:
             table_sql = "UPDATE %s SET " % table_name
-            table_sql += "Ch%i = '%s'" % (0, data[0])
+            table_sql += "CH%i = '%s'" % (0, data[0])
             for i in range(1, len(data)):
-                table_sql += ", Ch%i = '%s'" % (i, data[i])
+                table_sql += ", CH%i = '%s'" % (i, data[i])
             table_sql += " WHERE ChipID = '%s';" % self.name
             print table_sql
             self.execute_command(table_sql)
