@@ -1937,23 +1937,39 @@ class VFAT3_GUI:
         message7 = [0xca, 0xdd, 0x08, 255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
         print "Trigger bit testing routine."
 
-        errors = []
+        errors = [0,0,0,0,0,0,0,0,0]
         timee = 0.4
-        errors.append(self.interfaceFW.test_trigger_bits(message0, 0))
+        output = self.interfaceFW.test_trigger_bits(message0, 0)
+        errors[0] = output[0]
+        errors[1] = output[1]
         time.sleep(timee)
-        errors.append(self.interfaceFW.test_trigger_bits(message1, 1))
+        output.append(self.interfaceFW.test_trigger_bits(message1, 1))
+        errors[0] = output[0]
+        errors[2] = output[1]
         time.sleep(timee)
         errors.append(self.interfaceFW.test_trigger_bits(message2, 2))
+        errors[0] = output[0]
+        errors[3] = output[1]
         time.sleep(timee)
         errors.append(self.interfaceFW.test_trigger_bits(message3, 3))
+        errors[0] = output[0]
+        errors[4] = output[1]
         time.sleep(timee)
         errors.append(self.interfaceFW.test_trigger_bits(message4, 4))
+        errors[0] = output[0]
+        errors[5] = output[1]
         time.sleep(timee)
         errors.append(self.interfaceFW.test_trigger_bits(message5, 5))
+        errors[0] = output[0]
+        errors[6] = output[1]
         time.sleep(timee)
         errors.append(self.interfaceFW.test_trigger_bits(message6, 6))
+        errors[0] = output[0]
+        errors[7] = output[1]
         time.sleep(timee)
         errors.append(self.interfaceFW.test_trigger_bits(message7, 7))
+        errors[0] = output[0]
+        errors[8] = output[1]
 
 
         self.register[132].PT[0] = 0
