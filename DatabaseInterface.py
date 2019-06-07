@@ -28,7 +28,8 @@ class DatabaseInterface:
 
 
             # Search if the chip has channel category table. (REMOVE THIS AFTER TESTING).
-            update_sql = "SELECT * FROM channel_category WHERE ChipID = '%s' ;" % (self.table_name, name)
+
+            update_sql = "SELECT * FROM channel_category WHERE ChipID = '%s' ;" % (name)
             self.cursor.execute(update_sql)
             self.connection.commit()
             if self.cursor.rowcount == 0:
