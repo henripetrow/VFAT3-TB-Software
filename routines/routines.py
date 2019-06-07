@@ -63,7 +63,7 @@ def find_threshold(obj):
 
 
 def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes",
-                          dac_range=[220, 240], delay=50, bc_between_calpulses=2000, pulsestretch=3, latency=45,
+                          dac_range=[220, 240], bc_between_calpulses=2000, pulsestretch=7, latency=40,
                           cal_phi=0, folder="scurve", triggers=100):
     mean_th_fc = "n"
     all_ch_data = "n"
@@ -91,29 +91,45 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
 
         if configuration == "no":
             print "Setting s-curve for production."
-            obj.register[129].ST[0] = 0
-            obj.register[129].PS[0] = 7
-            obj.write_register(129)
+
+            obj.register[0xffff].RUN[0] = 1
+            obj.write_register(0xffff)
+
+            obj.interfaceFW.send_fcc("01100110")
 
             obj.register[131].TP_FE[0] = 7
             obj.write_register(131)
-            obj.register[139].CAL_DUR[0] = 200
-            obj.write_register(139)
-            obj.register[132].PT[0] = 2
+
+            obj.register[132].PT[0] = 3
             obj.register[132].SEL_COMP_MODE[0] = 1
             obj.write_register(132)
-            obj.register[0xffff].RUN[0] = 1
-            obj.write_register(0xffff)
+
+
+            obj.register[129].PS[0] = pulsestretch
+            obj.write_register(129)
+
+            obj.register[139].CAL_DUR[0] = 200
+            obj.write_register(139)
+
+            obj.register[135].ARM_DAC[0] = arm_dac
+            obj.write_register(135)
+
+            obj.register[137].LAT[0] = latency
+            obj.write_register(137)
+
             obj.set_fe_nominal_values()
+
             obj.measure_power("RUN")
+
         cal_dac_values.reverse()
         cal_dac_values[:] = [obj.cal_dac_fcM * x + obj.cal_dac_fcB for x in cal_dac_values]
+
 
         # Create a list of channels the s-curve is run on.
         channels = range(start_ch, stop_ch+1, ch_step)
 
         # Launch S-curve routine in firmware.
-        scurve_data = obj.interfaceFW.run_scurve(start_ch, stop_ch, ch_step, start_dac_value, stop_dac_value, delay, triggers=triggers, arm_dac=arm_dac)
+        scurve_data = obj.interfaceFW.run_scurve(start_ch, stop_ch, ch_step, start_dac_value, stop_dac_value, arm_dac, triggers, latency)
 
         # Plot the s-curve data.
         if configuration == "yes":

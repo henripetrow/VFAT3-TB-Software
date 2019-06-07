@@ -50,6 +50,7 @@ lim_Analog_Power_RUN = [64, 300, 'n', 'n']
 lim_Digital_Power_RUN = [75.770665, 96.720968, 'n', 'n']
 lim_Temperature_k2 = [-140, -70, 'n', 'n']
 lim_Temperature = [20, 30, 'n', 'n']
+lim_sbits = [0, 0, 0, 0]
 
 
 # selection criteria for S-curve channel classification.

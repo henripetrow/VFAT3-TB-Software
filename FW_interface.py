@@ -70,7 +70,7 @@ class FW_interface:
                         hex_text = hex(ord(i))
                         hex_data.append(hex_text)
                     output = hex_data
-                    print output
+                    #print output
         except socket.timeout:
             output = ['Error']
             print "No response"
@@ -207,14 +207,16 @@ class FW_interface:
         output = self.execute_req(message, no_packets=2, timeout=30)
         return output
 
-    def run_scurve(self, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, delay, arm_dac, triggers=500):
-        # 1000 = 0x3e8
-        triggers_lsb = 200
-        triggers_msb = 0x00
-        # message = [0xca, 0x00, 0x08, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, 1, 0x0, 0x0, triggers_msb, triggers_lsb, arm_dac, 19, 0, delay, 0x01, 0xf4]
+    def run_scurve(self, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, arm_dac, triggers, latency):
+        delay= 1
+        d1 = 6
+        d2 = 300
+
         cal_dac_array = range(cal_dac_start, cal_dac_stop+1, 1)
-        message = [0xca, 0xff, 0x08, start_ch, stop_ch, step_ch, 0, 0, 0, 0x0, 0x0, triggers_msb,
-                   triggers_lsb, arm_dac, delay, 0, 5, 0x01, 0xf4, 1, len(cal_dac_array)]
+
+        message = [0xca, 0xff, 0x08, start_ch, stop_ch, step_ch, 0, 0, 0, latency >> 8, latency & 0xFF, triggers >> 8,
+                   triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF, 1, len(cal_dac_array)]
+        print message
         for value in cal_dac_array:
             message.append(value)
         nr_channels = stop_ch - start_ch + 1
@@ -294,42 +296,23 @@ class FW_interface:
         else:
             return 'Error'
 
-    def test_trigger_bits(self, channels=[0, 100]):
-        message0 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,255,255,0x00,0x04]
-        message1 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,255,255,0,0,0x00,0x01]
-        message2 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,255,255,0,0,0,0,0x00,0x01]
-        message3 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,255,255,0,0,0,0,0,0,0x00,0x01]
-        message4 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,255,255,0,0,0,0,0,0,0,0,0x00,0x01]
-        message5 = [0xca, 0xdd, 0x08, 0,0,0,0,255,255,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
-        message6 = [0xca, 0xdd, 0x08, 0,0,255,255,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
-        message7 = [0xca, 0xdd, 0x08, 255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
-        print "Trigger bit testing routine."
 
-        errors = []
-
-        errors.append(self.check_trigger_bit_result(message0, 0))
-        errors.append(self.check_trigger_bit_result(message1, 1))
-        errors.append(self.check_trigger_bit_result(message2, 2))
-        errors.append(self.check_trigger_bit_result(message3, 3))
-        errors.append(self.check_trigger_bit_result(message4, 4))
-        errors.append(self.check_trigger_bit_result(message5, 5))
-        errors.append(self.check_trigger_bit_result(message6, 6))
-        errors.append(self.check_trigger_bit_result(message7, 7))
-
-        print errors
-
-    def check_trigger_bit_result(self, message, ch):
+    def test_trigger_bits(self, message, ch):
         error = 0
-        print "Sending:"
+        print "\nSending:"
         print message
         print "Reply:"
         output = self.execute_req(message,  timeout=30)
-        print "Output:"
+        print output
+        if not output[8]:
+            print "ERROR: SoT signal not working."
+            error = 1
         sorted_output = [int(output[4], 16), int(output[5], 16), int(output[6], 16), int(output[7], 16), int(output[0], 16), int(output[1], 16), int(output[2], 16), int(output[3], 16)]
+        print sorted_output
         if sorted_output[ch]:
             print "TU_TX%s working." % ch
         else:
-            print "TU_TX%s not working." % ch
+            print "ERROR: TU_TX%s not working." % ch
             error = 1
-        print "\n\n"
+
         return error

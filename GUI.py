@@ -692,10 +692,10 @@ class VFAT3_GUI:
         self.start_channel = 0
         self.stop_channel = 127
         self.channel_step = 1
-        self.delay = 5
+        self.delay = 19
         self.interval = 2000
-        self.pulsestretch = 3
-        self.latency = 45
+        self.pulsestretch = 7
+        self.latency = 0
         self.calphi = 0
         self.arm_dac = 100
         self.start_cal_dac = 220
@@ -892,6 +892,7 @@ class VFAT3_GUI:
                  'Temperature calibration',
                  'CAL_DAC conversion',
                  'Data packet test',
+                 'S-bit test',
                  'Scan of all DACs',
                  'All Channel S-curves']
         self.test_label = []
@@ -1902,9 +1903,78 @@ class VFAT3_GUI:
         self.toggle_run_bit(change_value="no")
 
 
-    def test_trigger_outputs(self):
+    def test_trigger_outputs(self, production='no'):
+        print "\n*************************"
+        print "* Starting trigger bit testing.\n"
+        start_time = time.time()
+        error = 0
+        # Set RUN bit to one.
+        self.register[0xffff].RUN[0] = 1
+        self.write_register(0xffff)
+
+        #if production == 'no':
+        self.set_fe_nominal_values()
+
+        self.register[132].PT[0] = 3
+        self.write_register(132)
+
+        self.register[131].TP_FE[0] = 7
+        self.write_register(131)
+
+        self.register[135].ARM_DAC[0] = 100
+        self.write_register(135)
+
+        # Send RUNMode fcc.
         self.interfaceFW.send_fcc("01100110")
-        self.interfaceFW.test_trigger_bits()
+
+        message0 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,255,255,0x00,0x01]
+        message1 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,255,255,0,0,0x00,0x01]
+        message2 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,255,255,0,0,0,0,0x00,0x01]
+        message3 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,255,255,0,0,0,0,0,0,0x00,0x01]
+        message4 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,255,255,0,0,0,0,0,0,0,0,0x00,0x01]
+        message5 = [0xca, 0xdd, 0x08, 0,0,0,0,255,255,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
+        message6 = [0xca, 0xdd, 0x08, 0,0,255,255,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
+        message7 = [0xca, 0xdd, 0x08, 255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
+        print "Trigger bit testing routine."
+
+        errors = []
+        timee = 0.4
+        errors.append(self.interfaceFW.test_trigger_bits(message0, 0))
+        time.sleep(timee)
+        errors.append(self.interfaceFW.test_trigger_bits(message1, 1))
+        time.sleep(timee)
+        errors.append(self.interfaceFW.test_trigger_bits(message2, 2))
+        time.sleep(timee)
+        errors.append(self.interfaceFW.test_trigger_bits(message3, 3))
+        time.sleep(timee)
+        errors.append(self.interfaceFW.test_trigger_bits(message4, 4))
+        time.sleep(timee)
+        errors.append(self.interfaceFW.test_trigger_bits(message5, 5))
+        time.sleep(timee)
+        errors.append(self.interfaceFW.test_trigger_bits(message6, 6))
+        time.sleep(timee)
+        errors.append(self.interfaceFW.test_trigger_bits(message7, 7))
+
+
+        self.register[132].PT[0] = 0
+        self.write_register(132)
+
+        self.register[131].TP_FE[0] = 1
+        self.write_register(131)
+
+        self.register[0xffff].RUN[0] = 0
+        self.write_register(0xffff)
+
+        #if production == "yes":
+        #    self.database.save_sbit_errors(''.join(str(e) for e in errors))
+
+        error = self.check_selection_criteria(errors.count(1), lim_sbits, "S-bit")
+        stop_time = time.time()
+        run_time = stop_time - start_time
+        print "\nTrigger bit testing time: %f s" % run_time
+        print "*************************"
+        print ""
+        return error
 
     def send_cal_trigger(self):
         latency = int(self.scurve_entry.get())
@@ -1992,7 +2062,7 @@ class VFAT3_GUI:
             self.add_to_interactive_screen(text)
             output = scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel,
                                            self.stop_channel], ch_step=self.channel_step, configuration=configuration,
-                                           dac_range=[self.start_cal_dac, self.stop_cal_dac], delay=self.delay,
+                                           dac_range=[self.start_cal_dac, self.stop_cal_dac],
                                            bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch,
                                            latency=self.latency, cal_phi=self.calphi)
             if output[0] == 'n':
@@ -2027,15 +2097,15 @@ class VFAT3_GUI:
             register[145].SD_I_BFCAS[0] = 255
         elif chip == "VFAT3b":
             print "Setting FE biasing for VFAT3b"
-            register[141].PRE_I_BSF[0] = hv3b_biasing_lut['PRE_I_BSF'][1]
-            register[141].PRE_I_BIT[0] = hv3b_biasing_lut['PRE_I_BIT'][1]
-            register[142].PRE_I_BLCC[0] = hv3b_biasing_lut['PRE_I_BLCC'][1]
-            register[142].PRE_VREF[0] = hv3b_biasing_lut['PRE_VREF'][1]
-            register[143].SH_I_BFCAS[0] = hv3b_biasing_lut['SH_I_BFCAS'][1]
-            register[143].SH_I_BDIFF[0] = hv3b_biasing_lut['SH_I_BDIFF'][1]
-            register[144].SD_I_BDIFF[0] = hv3b_biasing_lut['SD_I_BDIFF'][1]
-            register[145].SD_I_BSF[0] = hv3b_biasing_lut['SD_I_BSF'][1]
-            register[145].SD_I_BFCAS[0] = hv3b_biasing_lut['SD_I_BFCAS'][1]
+            register[141].PRE_I_BSF[0] = 13
+            register[141].PRE_I_BIT[0] = 150
+            register[142].PRE_I_BLCC[0] = 25
+            register[142].PRE_VREF[0] = 86
+            register[143].SH_I_BFCAS[0] = 130
+            register[143].SH_I_BDIFF[0] = 80
+            register[144].SD_I_BDIFF[0] = 140
+            register[145].SD_I_BSF[0] = 15
+            register[145].SD_I_BFCAS[0] = 135
 
         self.write_register(141)
         time.sleep(0.02)
@@ -2149,9 +2219,10 @@ class VFAT3_GUI:
                         result[8] = self.calibrate_temperature()
                         result[9] = self.scan_cal_dac_fc(production="yes")
                         result[10] = test_data_packets(self, save_result="no")
-                        result[11] = self.run_all_dac_scans(production="yes")
+                        result[11] = self.test_trigger_outputs(production='yes')
+                        result[12] = self.run_all_dac_scans(production="yes")
                         if result[9] == 0:
-                            result[12] = self.run_scurve(production="yes")
+                            result[13] = self.run_scurve(production="yes")
                         else:
                             print "S-curves are not run due to errors in data packets."
                     else:
@@ -2219,6 +2290,8 @@ class VFAT3_GUI:
                 if 'y' in result:
                     test_result = 'yellow'
                 if 'r' in result:
+                    test_result = 'red'
+                if 1 in result:
                     test_result = 'red'
                 for label in self.test_label:
                     label.config(bg=test_result)
