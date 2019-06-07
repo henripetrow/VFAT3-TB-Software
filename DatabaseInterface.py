@@ -159,7 +159,7 @@ class DatabaseInterface:
             table_sql += "CH%i = '%s'" % (0, data[0])
             for i in range(1, len(data)):
                 table_sql += ", CH%i = '%s'" % (i, data[i])
-            table_sql += " WHERE ChipID = '%s';" % self.name
+            table_sql += " WHERE ChipID = %s;" % self.name
             print table_sql
             self.execute_command(table_sql)
         else:
