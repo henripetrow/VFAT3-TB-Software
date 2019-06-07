@@ -109,8 +109,11 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.write_register(129)
 
             obj.register[139].CAL_DUR[0] = 200
-            obj.register[139].CAL_PHI[0] = 1
             obj.write_register(139)
+
+            obj.register[139].CAL_PHI[0] = 1
+            obj.register[139].CAL_MODE[0] = 1
+            obj.write_register(138)
 
             obj.register[135].ARM_DAC[0] = arm_dac
             obj.write_register(135)
