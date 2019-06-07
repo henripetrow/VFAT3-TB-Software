@@ -26,6 +26,17 @@ class DatabaseInterface:
                                               database=self.database_name)
             self.cursor = self.connection.cursor()
 
+
+            # Search if the chip has channel category table. (REMOVE THIS AFTER TESTING).
+            update_sql = "SELECT * FROM channel_category WHERE ChipID = '%s' ;" % (self.table_name, name)
+            self.cursor.execute(update_sql)
+            self.connection.commit()
+            if self.cursor.rowcount == 0:
+                # Insert new row for channel category data.
+                insert1 = "INSERT INTO channel_category(ChipID) VALUES('%s');" % self.name
+                self.cursor.execute(insert1)
+                self.connection.commit()
+
             # Search if the name exists already.
             update_sql = "SELECT * FROM %s WHERE ChipID = '%s' ;" % (self.table_name, name)
             self.cursor.execute(update_sql)
