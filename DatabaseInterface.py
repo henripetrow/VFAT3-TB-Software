@@ -264,6 +264,7 @@ class DatabaseInterface:
         self.set_int("Lot", value)
 
     def save_sbit_errors(self, value):
+        print value
         self.set_string("Sbit_errors", value)
 
     def create_xml_file(self):
