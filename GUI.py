@@ -1983,7 +1983,7 @@ class VFAT3_GUI:
         if production == "yes":
             self.database.save_sbit_errors(''.join(str(e) for e in errors))
 
-        error = self.check_selection_criteria(errors.count(1), lim_sbits, "S-bit")
+        error = self.check_selection_criteria(sum(errors), lim_sbits, "S-bit")
         stop_time = time.time()
         run_time = stop_time - start_time
         print "\nTrigger bit testing time: %f s" % run_time
