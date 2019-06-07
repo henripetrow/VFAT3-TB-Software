@@ -101,9 +101,9 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.write_register(131)
 
             obj.register[132].PT[0] = 3
+            obj.register[132].SEL_POL[0] = 0
             obj.register[132].SEL_COMP_MODE[0] = 1
             obj.write_register(132)
-
 
             obj.register[129].PS[0] = pulsestretch
             obj.write_register(129)
