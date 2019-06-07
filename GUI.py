@@ -695,7 +695,7 @@ class VFAT3_GUI:
         self.delay = 19
         self.interval = 2000
         self.pulsestretch = 7
-        self.latency = 5
+        self.latency = 0
         self.calphi = 0
         self.arm_dac = 100
         self.start_cal_dac = 210
