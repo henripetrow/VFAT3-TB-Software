@@ -1971,15 +1971,6 @@ class VFAT3_GUI:
         errors[0] = output[0]
         errors[8] = output[1]
 
-
-        self.register[132].PT[0] = 0
-        self.write_register(132)
-
-        self.register[131].TP_FE[0] = 1
-        self.write_register(131)
-
-        self.register[0xffff].RUN[0] = 0
-        self.write_register(0xffff)
         print errors
         if production == "yes":
             self.database.save_sbit_errors(''.join(str(e) for e in errors))
@@ -2238,6 +2229,7 @@ class VFAT3_GUI:
                         result[11] = self.test_trigger_outputs(production='yes')
                         result[12] = self.run_all_dac_scans(production="yes")
                         if result[9] == 0:
+                            self.send_reset()
                             result[13] = self.run_scurve(production="yes")
                         else:
                             print "S-curves are not run due to errors in data packets."
