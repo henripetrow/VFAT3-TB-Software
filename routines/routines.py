@@ -165,6 +165,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.database.save_enc_data(enc_list)
             obj.database.save_noisy_channels(noisy_channels)
             obj.database.save_dead_channels(dead_channels)
+            # obj.database.save_channel_category(channel_category)
 
         # Print routine duration.
         stop = time.time()

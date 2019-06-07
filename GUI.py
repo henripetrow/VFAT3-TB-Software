@@ -698,8 +698,8 @@ class VFAT3_GUI:
         self.latency = 0
         self.calphi = 0
         self.arm_dac = 100
-        self.start_cal_dac = 220
-        self.stop_cal_dac = 245
+        self.start_cal_dac = 110
+        self.stop_cal_dac = 240
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
         self.start_ch_label.grid(column=1, row=1, sticky='w')
