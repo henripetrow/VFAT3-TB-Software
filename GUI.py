@@ -1930,7 +1930,7 @@ class VFAT3_GUI:
         self.register[139].CAL_FS[0] = 3
         self.write_register(139)
 
-        self.register[135].ARM_DAC[0] = 5
+        self.register[135].ARM_DAC[0] = 100
         self.write_register(135)
 
         # Send RUNMode fcc.
@@ -1946,7 +1946,7 @@ class VFAT3_GUI:
         message7 = [0xca, 0xdd, 0x08, 136,136,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x01]
         print "Trigger bit testing routine."
 
-        errors = [0,0,0,0,0,0,0,0,0]
+        errors = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         timee = 0.4
         output = self.interfaceFW.test_trigger_bits(message0, 0)
         errors[0] = output[0]
