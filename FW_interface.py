@@ -309,7 +309,7 @@ class FW_interface:
             error[0] = 1
         sorted_output = [int(output[4], 16), int(output[5], 16), int(output[6], 16), int(output[7], 16), int(output[0], 16), int(output[1], 16), int(output[2], 16), int(output[3], 16)]
         print sorted_output
-        print sorted_output[ch]
+        print dec_to_bin_with_stuffing(sorted_output[ch], 8)
         if sorted_output[ch]:
             print "TU_TX%s working." % ch
         else:
