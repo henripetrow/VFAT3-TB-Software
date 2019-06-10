@@ -299,11 +299,11 @@ class FW_interface:
 
     def test_trigger_bits(self, message, ch):
         error = [0, 0]
-        print "\nSending:"
-        print message
-        print "Reply:"
+        # print "\nSending:"
+        # print message
+        # print "Reply:"
         output = self.execute_req(message,  timeout=30)
-        print output
+        # print output
         if not output[8]:
             print "ERROR: SoT signal not working."
             error[0] = 1
