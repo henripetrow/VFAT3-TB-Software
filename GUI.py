@@ -2238,7 +2238,7 @@ class VFAT3_GUI:
                         result[11] = self.test_trigger_outputs(production='yes')
                         result[12] = self.run_all_dac_scans(production="yes")
                         if result[9] == 0:
-                            self.send_reset()
+                            #self.send_reset()
                             result[13] = self.run_scurve(production="yes")
                         else:
                             print "S-curves are not run due to errors in data packets."
