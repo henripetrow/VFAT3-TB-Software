@@ -1933,6 +1933,9 @@ class VFAT3_GUI:
         self.register[135].ARM_DAC[0] = 70
         self.write_register(135)
 
+        self.register[129].PS[0] = 7
+        self.write_register(129)
+
         # Send RUNMode fcc.
         self.interfaceFW.send_fcc("01100110")
 
