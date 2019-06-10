@@ -773,6 +773,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print unbonded_channels
     print channel_category
 
+    x_data = range(0, 128)
     mean_data = [mean_rms] * 128
     plt.plot(x_data, mean_data)
     plt.plot(x_data, data)
