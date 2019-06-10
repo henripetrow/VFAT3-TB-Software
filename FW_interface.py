@@ -177,7 +177,7 @@ class FW_interface:
         crc_c0 = int(output[10], 16)
         crc_calculated = crc_c1 + crc_c0
 
-        print ipbus_header
+        # print ipbus_header
         # print crc_received
         # print crc_calculated
         # print output_bin
