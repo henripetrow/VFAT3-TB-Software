@@ -1902,7 +1902,6 @@ class VFAT3_GUI:
         self.chip_id_label0.config(text="%i" % value)
         self.toggle_run_bit(change_value="no")
 
-
     def test_trigger_outputs(self, production='no'):
         print "\n*************************"
         print "* Starting trigger bit testing.\n"
@@ -1912,10 +1911,9 @@ class VFAT3_GUI:
         self.register[0xffff].RUN[0] = 1
         self.write_register(0xffff)
 
-        #if production == 'no':
         self.set_fe_nominal_values()
 
-        self.register[132].PT[0] = 3
+        self.register[132].PT[0] = 1
         self.register[132].SEL_POL[0] = 0
         self.register[132].SEL_COMP_MODE[0] = 1
         self.write_register(132)
@@ -1924,7 +1922,7 @@ class VFAT3_GUI:
         self.register[138].CAL_MODE[0] = 1
         self.write_register(138)
 
-        self.register[131].TP_FE[0] = 7
+        self.register[131].TP_FE[0] = 1
         self.write_register(131)
 
         self.register[135].ARM_DAC[0] = 30
