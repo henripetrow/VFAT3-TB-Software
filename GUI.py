@@ -1921,7 +1921,7 @@ class VFAT3_GUI:
         self.register[131].TP_FE[0] = 7
         self.write_register(131)
 
-        self.register[135].ARM_DAC[0] = 50
+        self.register[135].ARM_DAC[0] = 30
         self.write_register(135)
 
         # Send RUNMode fcc.

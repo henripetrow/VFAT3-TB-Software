@@ -160,7 +160,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         # Analyze data.
         # mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list = scurve_analyze(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
         mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data)
-        print enc_list
+        # print enc_list
         # Save data to database.
         if obj.database:
             obj.database.save_mean_threshold(mean_th_fc)
