@@ -773,6 +773,18 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print unbonded_channels
     print channel_category
 
+    mean_data = [mean_rms] * 128
+    plt.plot(x_data, mean_data)
+    plt.plot(x_data, data)
+
+    plt.text(100, 0.8, "Mean enc:\n %f" % mean_rms, bbox=dict(alpha=0.5))
+    plt.title("enc")
+    plt.ylim([0, 2])
+    plt.xlim([0, 128])
+    plt.xlabel("Channel")
+    plt.ylabel("enc [fC]")
+    plt.grid(True)
+    plt.show()
     if folder != "":
         fig = plt.figure(figsize=(10, 20))
         sub1 = plt.subplot(511)
