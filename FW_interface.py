@@ -303,7 +303,8 @@ class FW_interface:
         # print message
         # print "Reply:"
         output = self.execute_req(message,  timeout=30)
-        # print output
+        print output
+        print (len(output)-4)/8
         if not output[8]:
             print "ERROR: SoT signal not working."
             error[0] = 1
