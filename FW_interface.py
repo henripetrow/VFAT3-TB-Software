@@ -312,12 +312,14 @@ class FW_interface:
 
         temp_list = [0]*8
         for i in range(0, nr_packets):
+            print "Packet nr: %s" % i
             output = output0[i*8:i*8+8]
             sorted_output = [int(output[4], 16), int(output[5], 16), int(output[6], 16), int(output[7], 16), int(output[0], 16), int(output[1], 16), int(output[2], 16), int(output[3], 16)]
             print sorted_output
             fired_channels = dec_to_bin_with_stuffing(sorted_output[ch], 8)
             print "Trigger output"
             print fired_channels
+            print ""
             temp_list[0] += fired_channels[0]
             temp_list[1] += fired_channels[1]
             temp_list[2] += fired_channels[2]
