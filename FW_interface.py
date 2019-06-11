@@ -311,7 +311,7 @@ class FW_interface:
             error[0] = 1
 
         temp_list = [0]*8
-        for i in range(0,nr_packets):
+        for i in range(0, nr_packets):
             output = output0[i*8:i*8+8]
             sorted_output = [int(output[4], 16), int(output[5], 16), int(output[6], 16), int(output[7], 16), int(output[0], 16), int(output[1], 16), int(output[2], 16), int(output[3], 16)]
             print sorted_output
@@ -327,7 +327,8 @@ class FW_interface:
             temp_list[7] += fired_channels[7]
             #print temp_list
         print temp_list
-        if sorted_output[ch]:
+        sum = temp_list[0] + temp_list[2] + temp_list[4] + temp_list[6]
+        if sum > 11:
             print "TU_TX%s working.\n" % ch
         else:
             print "ERROR: TU_TX%s not working.\n" % ch
