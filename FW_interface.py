@@ -344,6 +344,7 @@ class FW_interface:
         error = 0
         message = [0xca, 0xdd, 0x09]
         output = self.execute_req(message,  timeout=10, receive=20)
+        print output
         if len(output) != 4:
             print output
             error = 1
