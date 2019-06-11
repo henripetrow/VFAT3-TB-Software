@@ -1933,7 +1933,7 @@ class VFAT3_GUI:
         self.register[139].CAL_FS[0] = 1
         self.write_register(139)
 
-        self.register[135].ARM_DAC[0] = 50
+        self.register[135].ARM_DAC[0] = 10
         self.write_register(135)
 
         self.register[129].PS[0] = 7
