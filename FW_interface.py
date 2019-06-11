@@ -343,7 +343,11 @@ class FW_interface:
     def sbit_phase_alingment(self):
         error = 0
         message = [0xca, 0xdd, 0x09]
+        print "Trigger bit phase alignment."
+        print "Sending:"
+        print message
         output = self.execute_req(message,  timeout=10, receive=20)
+        print "Received:"
         print output
         if len(output) != 4:
             print output
