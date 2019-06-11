@@ -310,32 +310,32 @@ class FW_interface:
             print "ERROR: No hits were found."
             error[0] = 1
             error[1] = 1
+
+        temp_list = [0]*8
+        for i in range(0, nr_packets):
+            print "Packet nr: %s" % i
+            output = output0[i*8:i*8+8]
+            sorted_output = [int(output[4], 16), int(output[5], 16), int(output[6], 16), int(output[7], 16), int(output[0], 16), int(output[1], 16), int(output[2], 16), int(output[3], 16)]
+            print sorted_output
+            fired_channels = dec_to_bin_with_stuffing(sorted_output[ch], 8)
+            print "Trigger output"
+            print fired_channels
+            print ""
+            temp_list[0] += fired_channels[0]
+            temp_list[1] += fired_channels[1]
+            temp_list[2] += fired_channels[2]
+            temp_list[3] += fired_channels[3]
+            temp_list[4] += fired_channels[4]
+            temp_list[5] += fired_channels[5]
+            temp_list[6] += fired_channels[6]
+            temp_list[7] += fired_channels[7]
+            #print temp_list
+        print temp_list
+        sum = temp_list[0] + temp_list[2] + temp_list[4] + temp_list[6]
+        if sum > 11:
+            print "TU_TX%s working.\n" % ch
         else:
-            temp_list = [0]*8
-            for i in range(0, nr_packets):
-                print "Packet nr: %s" % i
-                output = output0[i*8:i*8+8]
-                sorted_output = [int(output[4], 16), int(output[5], 16), int(output[6], 16), int(output[7], 16), int(output[0], 16), int(output[1], 16), int(output[2], 16), int(output[3], 16)]
-                print sorted_output
-                fired_channels = dec_to_bin_with_stuffing(sorted_output[ch], 8)
-                print "Trigger output"
-                print fired_channels
-                print ""
-                temp_list[0] += fired_channels[0]
-                temp_list[1] += fired_channels[1]
-                temp_list[2] += fired_channels[2]
-                temp_list[3] += fired_channels[3]
-                temp_list[4] += fired_channels[4]
-                temp_list[5] += fired_channels[5]
-                temp_list[6] += fired_channels[6]
-                temp_list[7] += fired_channels[7]
-                #print temp_list
-            print temp_list
-            sum = temp_list[0] + temp_list[2] + temp_list[4] + temp_list[6]
-            if sum > 11:
-                print "TU_TX%s working.\n" % ch
-            else:
-                print "ERROR: TU_TX%s not working.\n" % ch
-                error[1] = 1
+            print "ERROR: TU_TX%s not working.\n" % ch
+            error[1] = 1
 
         return error
