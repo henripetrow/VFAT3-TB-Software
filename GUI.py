@@ -1927,7 +1927,7 @@ class VFAT3_GUI:
         self.write_register(131)
 
         self.register[139].CAL_DUR[0] = 200
-        self.register[139].CAL_FS[0] = 3
+        self.register[139].CAL_FS[0] = 1
         self.write_register(139)
 
         self.register[135].ARM_DAC[0] = 70
