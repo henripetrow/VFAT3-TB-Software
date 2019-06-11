@@ -339,3 +339,13 @@ class FW_interface:
             error[1] = 1
 
         return error
+
+    def sbit_phase_alingment(self):
+        error = 0
+        message = [0xca, 0xdd, 0x09]
+        output = self.execute_req(message,  timeout=10, receive=20)
+        if len(output) != 4:
+            print output
+            error = 1
+        return error
+

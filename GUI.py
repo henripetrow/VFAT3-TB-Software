@@ -1940,7 +1940,7 @@ class VFAT3_GUI:
         # Send RUNMode fcc.
         self.interfaceFW.send_fcc("01100110")
 
-        message0 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0x00,0x04]
+        message0 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,136,136,0x00,0x04]
         message1 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,0,0,136,136,0,0,0x00,0x04]
         message2 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,0,0,136,136,0,0,0,0,0x00,0x04]
         message3 = [0xca, 0xdd, 0x08, 0,0,0,0,0,0,0,0,136,136,0,0,0,0,0,0,0x00,0x04]
@@ -1949,6 +1949,8 @@ class VFAT3_GUI:
         message6 = [0xca, 0xdd, 0x08, 0,0,136,136,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x04]
         message7 = [0xca, 0xdd, 0x08, 136,136,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x00,0x04]
         print "Trigger bit testing routine."
+
+        self.interfaceFW.sbit_phase_alingment()
 
         errors = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         timee = 0.4
