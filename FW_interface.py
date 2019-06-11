@@ -331,8 +331,9 @@ class FW_interface:
             temp_list[7] += fired_channels[7]
             #print temp_list
         print temp_list
-        sum = temp_list[0] + temp_list[2] + temp_list[4] + temp_list[6]
-        if sum > 11:
+        sum1 = temp_list[0] + temp_list[2] + temp_list[4] + temp_list[6]
+        sum2 = temp_list[1] + temp_list[3] + temp_list[5] + temp_list[7]
+        if sum1 > 11 and sum2 == 0 :
             print "TU_TX%s working.\n" % ch
         else:
             print "ERROR: TU_TX%s not working.\n" % ch
@@ -343,12 +344,12 @@ class FW_interface:
     def sbit_phase_alingment(self):
         error = 0
         message = [0xca, 0xdd, 0x09]
-        print "Trigger bit phase alignment."
-        print "Sending:"
-        print message
+        # print "Trigger bit phase alignment."
+        # print "Sending:"
+        # print message
         output = self.execute_req(message,  timeout=10, receive=20)
-        print "Received:"
-        print output
+        # print "Received:"
+        # print output
         if len(output) != 4:
             print output
             error = 1
