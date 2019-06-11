@@ -299,7 +299,7 @@ class FW_interface:
 
     def test_trigger_bits(self, message, ch):
         error = [0, 0]
-        print "Testing TU_TX%s.\n" % ch
+        print "\nTesting TU_TX%s." % ch
         print "\nSending:"
         print message
         print "Reply:"
