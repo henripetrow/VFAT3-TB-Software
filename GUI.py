@@ -1913,6 +1913,9 @@ class VFAT3_GUI:
 
         self.set_fe_nominal_values()
 
+        self.register[1].mask[0] = 1
+        self.write_register(1)
+
         self.register[132].PT[0] = 3
         self.register[132].SEL_POL[0] = 0
         self.register[132].SEL_COMP_MODE[0] = 0
