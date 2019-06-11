@@ -300,27 +300,27 @@ class FW_interface:
     def test_trigger_bits(self, message, ch):
         error = [0, 0]
         print "\nTesting TU_TX%s." % ch
-        print "\nSending:"
-        print message
-        print "Reply:"
+        # print "\nSending:"
+        # print message
+        # print "Reply:"
         output0 = self.execute_req(message,  timeout=30)
-        print output0
+        # print output0
         nr_packets = (len(output0)-4)/8
-        if int(output0[-4], 16) is not 3:
-            print "ERROR: No hits were found."
+        if not output0[-4]:
+            print "ERROR: SoT signal is broken."
             error[0] = 1
             error[1] = 1
 
         temp_list = [0]*8
         for i in range(0, nr_packets):
-            print "Packet nr: %s" % i
+            # print "Packet nr: %s" % i
             output = output0[i*8:i*8+8]
             sorted_output = [int(output[4], 16), int(output[5], 16), int(output[6], 16), int(output[7], 16), int(output[0], 16), int(output[1], 16), int(output[2], 16), int(output[3], 16)]
-            print sorted_output
+            # print sorted_output
             fired_channels = dec_to_bin_with_stuffing(sorted_output[ch], 8)
-            print "Trigger output"
-            print fired_channels
-            print ""
+            # print "Trigger output"
+            # print fired_channels
+            # print ""
             temp_list[0] += fired_channels[0]
             temp_list[1] += fired_channels[1]
             temp_list[2] += fired_channels[2]
