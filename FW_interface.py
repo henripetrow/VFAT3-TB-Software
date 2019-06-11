@@ -333,7 +333,7 @@ class FW_interface:
         print temp_list
         sum1 = temp_list[0] + temp_list[2] + temp_list[4] + temp_list[6]
         sum2 = temp_list[1] + temp_list[3] + temp_list[5] + temp_list[7]
-        if sum1 > 11 and sum2 == 0 :
+        if sum1 > 11 and sum2 == 0:
             print "TU_TX%s working.\n" % ch
         else:
             print "ERROR: TU_TX%s not working.\n" % ch
