@@ -2323,7 +2323,7 @@ class VFAT3_GUI:
                     self.test_label[3].config(text='Hybrid:')
                     self.test_label[4].config(text=self.database.name)
                     if self.problematic_channels < 4 and self.problematic_channels > 0:
-                        self.test_label[4].config("Problematic channels: %s" % self.problematic_channels)
+                        self.test_label[4].config(text="Problematic channels: %s" % self.problematic_channels)
                     self.update_statistics(test_result)
                     if self.database:
                         if not self.database.error:
