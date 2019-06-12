@@ -112,6 +112,7 @@ class VFAT3_GUI:
         self.cal_dac_fcB = 0.0
         self.cal_dac_fc_values = [0]*256
         self.Iref_cal = 1
+        self.problematic_channels = 0
         self.CalPulseLV1A_latency = 4
         self.xray_routine_flag = 0
         self.scurve_channel = 0
@@ -1351,6 +1352,7 @@ class VFAT3_GUI:
         self.cal_dac_fcB = 0.0
         self.temperature_k1 = 0
         self.temperature_k2 = 0
+        self.problematic_channels = 0
         #self.database = 0
 
     def check_short_circuit(self):
@@ -2092,11 +2094,8 @@ class VFAT3_GUI:
                 errors = [0] * 3
                 errors[0] = self.check_selection_criteria(len(output[2]), lim_Noisy_Channels, "Noisy Channels")
                 errors[1] = self.check_selection_criteria(len(output[4]), lim_Dead_Channels, "Dead Channels")
-                problematic_channels = len(output[2]) + len(output[4]) + len(output[6])
-
-                if problematic_channels < 4:
-                    print "There are %s problematic channels on this hybrid. It can be marked as green with the sticker %s" % (problematic_channels, problematic_channels)
-                errors[1] = self.check_selection_criteria(problematic_channels, lim_Problematic_Channels, "Problematic Channels")
+                self.problematic_channels = len(output[2]) + len(output[4]) + len(output[6])
+                errors[1] = self.check_selection_criteria(self.problematic_channels, lim_Problematic_Channels, "Problematic Channels")
                 errors[2] = self.check_selection_criteria(output[5], lim_Mean_enc, "Noise")
             if 'y' in errors:
                 prod_error = 'y'
@@ -2310,7 +2309,6 @@ class VFAT3_GUI:
                     print report_text
                 print "**************"
                 print ""
-
                 test_result = 'green'
                 if 'y' in result:
                     test_result = 'yellow'
@@ -2324,6 +2322,8 @@ class VFAT3_GUI:
                 if not self.iref_mode:
                     self.test_label[3].config(text='Hybrid:')
                     self.test_label[4].config(text=self.database.name)
+                    if self.problematic_channels < 4 and self.problematic_channels > 0:
+                        self.test_label[4].config("Problematic channels: %s" % self.problematic_channels)
                     self.update_statistics(test_result)
                     if self.database:
                         if not self.database.error:
