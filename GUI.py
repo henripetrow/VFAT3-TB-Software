@@ -2093,6 +2093,7 @@ class VFAT3_GUI:
                 errors[0] = self.check_selection_criteria(len(output[2]), lim_Noisy_Channels, "Noisy Channels")
                 errors[1] = self.check_selection_criteria(len(output[4]), lim_Dead_Channels, "Dead Channels")
                 problematic_channels = len(output[2]) + len(output[4]) + len(output[6])
+
                 if problematic_channels < 4:
                     print "There are %s problematic channels on this hybrid. It can be marked as green with the sticker %s" % (problematic_channels, problematic_channels)
                 errors[1] = self.check_selection_criteria(problematic_channels, lim_Problematic_Channels, "Problematic Channels")
