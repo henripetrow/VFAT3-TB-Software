@@ -1915,7 +1915,7 @@ class VFAT3_GUI:
 
         self.register[132].PT[0] = 3
         self.register[132].SEL_POL[0] = 0
-        self.register[132].SEL_COMP_MODE[0] = 0
+        self.register[132].SEL_COMP_MODE[0] = 1
         self.write_register(132)
 
         self.register[138].CAL_SEL_POL[0] = 0
@@ -1930,7 +1930,7 @@ class VFAT3_GUI:
         self.register[139].CAL_FS[0] = 1
         self.write_register(139)
 
-        self.register[135].ARM_DAC[0] = 50
+        self.register[135].ARM_DAC[0] = 100
         self.write_register(135)
 
         self.register[129].PS[0] = 7
