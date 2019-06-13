@@ -738,8 +738,6 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     x_data = range(0, 128)
     mean_data = [mean_rms] * 128
     plt.plot(x_data, mean_data)
-    print len(x_data)
-    print len(rms_return_list)
     plt.plot(rms_return_list)
 
     plt.text(100, 0.8, "Mean enc:\n %f" % rms_mean, bbox=dict(alpha=0.5))
