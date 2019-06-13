@@ -733,21 +733,21 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print unbonded_channels
     #print channel_category
 
-    #x_data = range(0, 128)
-    #mean_data = [mean_rms] * 128
-    #plt.plot(x_data, mean_data)
-    #print len(x_data)
-    #print len(rms_return_list)
-    # plt.plot(rms_return_list)
-    #
-    # plt.text(100, 0.8, "Mean enc:\n %f" % rms_mean, bbox=dict(alpha=0.5))
-    # plt.title("enc")
-    # plt.ylim([0, 2])
-    # plt.xlim([0, 128])
-    # plt.xlabel("Channel")
-    # plt.ylabel("enc [fC]")
-    # plt.grid(True)
-    # plt.show()
+    x_data = range(0, 128)
+    mean_data = [mean_rms] * 128
+    plt.plot(x_data, mean_data)
+    print len(x_data)
+    print len(rms_return_list)
+    plt.plot(rms_return_list)
+
+    plt.text(100, 0.8, "Mean enc:\n %f" % rms_mean, bbox=dict(alpha=0.5))
+    plt.title("enc")
+    plt.ylim([0, 2])
+    plt.xlim([0, 128])
+    plt.xlabel("Channel")
+    plt.ylabel("enc [fC]")
+    plt.grid(True)
+    plt.show()
     if folder != "":
         fig = plt.figure(figsize=(10, 20))
         sub1 = plt.subplot(511)
@@ -852,6 +852,7 @@ def fit_scurve(hit_data, charge_data):
     #plt.plot(charge_data, yc)
     #plt.show()
     return params[0], params[1], r_squared
+
 
 def calculate_r2_score(xdata, ydata, popt):
     residuals = ydata - fit_func(xdata, popt[0], popt[1])
