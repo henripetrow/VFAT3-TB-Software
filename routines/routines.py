@@ -873,7 +873,7 @@ def fit_scurve(charge_data, hit_data):
 
 
 def calculate_r2_score(xdata, ydata, popt):
-    residuals = ydata - fit_func(xdata, popt)
+    residuals = ydata - fit_func(xdata, popt[0], popt[1])
     ss_res = numpy.sum(residuals ** 2)
     ss_tot = numpy.sum((ydata - numpy.mean(ydata)) ** 2)
     r_squared = 1 - (ss_res / ss_tot)
