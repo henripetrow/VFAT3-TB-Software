@@ -68,7 +68,7 @@ class DatabaseInterfaceBrowse:
         print "Fetched"
         print output
         print len(output)
-        if len(output) == 0:
+        if len(output) != 0:
             for row in output[0]:
                 data_list.append(row)
             self.connection.close()
