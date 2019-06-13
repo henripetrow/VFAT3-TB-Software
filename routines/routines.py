@@ -716,8 +716,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             channel_category[channel] = "00100"
         else:
             l = 0
-            diff.append(channel)
-            diff.append("")
+            # diff.append(channel)
+            # diff.append("")
             for j in data:
                 if l != 0:
                     diff_value = j - previous_value
@@ -736,7 +736,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             mean_list.append(mean)
             l = 1
             rms = 0
-            for r in diff[2:]:
+            for r in diff:
                 rms += r * (mean - dac_values[l]) ** 2
                 l += 1
 
