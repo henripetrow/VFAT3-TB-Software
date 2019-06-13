@@ -69,7 +69,7 @@ for hybrid in hybrid_list:
 print "Generated csv-file for: Production"
 
 
-tables = ['Threshold', 'enc', 'channel_category', "CAL_DAC_FC", "EXT_ADC_CAL_LUT"]
+tables = ['Threshold', 'enc', "CAL_DAC_FC", "EXT_ADC_CAL_LUT"]
 
 for item in tables:
     file = "%s%s.csv" % (folder, item)
