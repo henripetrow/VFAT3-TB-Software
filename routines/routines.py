@@ -757,8 +757,6 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             # print "Threshold: %f" % mean
             # print "enc: %f" % rms
 
-            diff.append(mean)
-            diff.append(rms)
             full_data.append(diff)
             rms_return_list.append(rms)
             mean_list.append(mean)
@@ -877,6 +875,9 @@ def find_mean__and_enc(data, dac_values):
         rms = math.sqrt(rms / summ)
     else:
         rms == 0
+
+    diff.append(mean)
+    diff.append(rms)
 
     return mean, rms
 
