@@ -838,11 +838,10 @@ def fit_func(x, a, b):
 def fit_scurve(hit_data, charge_data):
 
     hit_data[:] = [x / 100 for x in hit_data]
-    print hit_data
     np_x = np.array(charge_data)
     np_y = np.array(hit_data)
-    st_x = 1
-    st_y = 0.1
+    st_x = 2
+    st_y = 0.2
     params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
     r_squared = calculate_r2_score(np_x, np_y, params)
     print "R^2: %s" % r_squared
