@@ -56,69 +56,65 @@ print "Generating csv-files for the found hybrids."
 # Generation of the production summary table csv-file
 
 
-# for hybrid in hybrid_list:
-#
-#     production_data = database.get_production_results(hybrid)
-#     text = "%s" % production_data[0]
-#     for name in production_data[1:]:
-#         text += ",%s" % name
-#     text += "\n"
-#     outF = open(file, "a")
-#     outF.write(text)
-#     outF.close()
-# print "Generated csv-file for: Production"
-#
-# # Generation xml tables for the DAC scans
-# adcs = ["ADC0", "ADC1"]
-# dac6bits = ["CFD_DAC_1", "CFD_DAC_2", "HYST_DAC", "PRE_I_BLCC", "PRE_I_BSF", "SD_I_BSF"]
-# dac8bits = ["ARM_DAC", "CAL_DAC", "PRE_VREF", "PRE_I_BIT", "SD_I_BDIFF", "SH_I_BDIFF", "SD_I_BFCAS", "SH_I_BFCAS", "ZCC_DAC"]
-# dac_list = dac6bits
-# dac_list.extend(dac8bits)
-#
-# for dac in dac_list:
-#     for adc in adcs:
-#         file = "%s%s_%s.csv" % (folder, dac, adc)
-#         text = "Data\n"
-#         outF = open(file, "w")
-#         outF.write(text)
-#         outF.close()
-#         for hybrid in hybrid_list:
-#             #production_data = database.get_production_results(hybrid)
-#             #print production_data[0]
-#             #print hybrid[6:]
-#             text = "%s" % hybrid[6:]
-#             db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
-#             for dat in db_data:
-#                 text += ",%s" % dat
-#             text += "\n"
-#             outF = open(file, "a")
-#             outF.write(text)
-#             outF.close()
-#     print "Generated csv-file for: %s" % dac
-#
-#
-#
-# tables = ['Threshold', 'enc', 'channel_category', "CAL_DAC_FC", "EXT_ADC_CAL_LUT"]
-#
-# for item in tables:
-#     file = "%s%s.csv" % (folder, item)
-#     text = "Data\n"
-#     outF = open(file, "w")
-#     outF.write(text)
-#     outF.close()
-#
-#     for hybrid in hybrid_list:
-#         # production_data = database.get_production_results(hybrid)
-#         text = "%s" % hybrid[6:]
-#         db_data = database.get_table_values(hybrid, item)
-#         for dat in db_data:
-#             text += ",%s" % dat
-#         text += "\n"
-#         outF = open(file, "a")
-#         outF.write(text)
-#         outF.close()
-#
-#     print "Generated csv-file for: %s" % item
+for hybrid in hybrid_list:
+
+    production_data = database.get_production_results(hybrid)
+    text = "%s" % production_data[0]
+    for name in production_data[1:]:
+        text += ",%s" % name
+    text += "\n"
+    outF = open(file, "a")
+    outF.write(text)
+    outF.close()
+print "Generated csv-file for: Production"
+
+# Generation xml tables for the DAC scans
+adcs = ["ADC0", "ADC1"]
+dac6bits = ["CFD_DAC_1", "CFD_DAC_2", "HYST_DAC", "PRE_I_BLCC", "PRE_I_BSF", "SD_I_BSF"]
+dac8bits = ["ARM_DAC", "CAL_DAC", "PRE_VREF", "PRE_I_BIT", "SD_I_BDIFF", "SH_I_BDIFF", "SD_I_BFCAS", "SH_I_BFCAS", "ZCC_DAC"]
+dac_list = dac6bits
+dac_list.extend(dac8bits)
+
+for dac in dac_list:
+    for adc in adcs:
+        file = "%s%s_%s.csv" % (folder, dac, adc)
+        text = "Data\n"
+        outF = open(file, "w")
+        outF.write(text)
+        outF.close()
+        for hybrid in hybrid_list:
+            text = "%s" % hybrid[6:]
+            db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
+            for dat in db_data:
+                text += ",%s" % dat
+            text += "\n"
+            outF = open(file, "a")
+            outF.write(text)
+            outF.close()
+    print "Generated csv-file for: %s" % dac
+
+
+
+tables = ['Threshold', 'enc', 'channel_category', "CAL_DAC_FC", "EXT_ADC_CAL_LUT"]
+
+for item in tables:
+    file = "%s%s.csv" % (folder, item)
+    text = "Data\n"
+    outF = open(file, "w")
+    outF.write(text)
+    outF.close()
+
+    for hybrid in hybrid_list:
+        text = "%s" % hybrid[6:]
+        db_data = database.get_table_values(hybrid, item)
+        for dat in db_data:
+            text += ",%s" % dat
+        text += "\n"
+        outF = open(file, "a")
+        outF.write(text)
+        outF.close()
+
+    print "Generated csv-file for: %s" % item
 
 
 tables = ['channel_category']
@@ -131,7 +127,6 @@ for item in tables:
     outF.close()
 
     for hybrid in hybrid_list:
-        # production_data = database.get_production_results(hybrid)
         text = "%s" % hybrid[6:]
         db_data = database.get_table_values(hybrid, item, allow_non_existing_hybrids=1)
         for dat in db_data:
@@ -144,26 +139,26 @@ for item in tables:
     print "Generated csv-file for: %s" % item
 
 
-# dac = "CAL_LUT"
-#
-# for adc in adcs:
-#     file = "%s%s_%s.csv" % (folder, adc, dac)
-#     text = "Data\n"
-#     outF = open(file, "w")
-#     outF.write(text)
-#     outF.close()
-#     for hybrid in hybrid_list:
-#         # production_data = database.get_production_results(hybrid)
-#         db_data = database.get_table_values(hybrid, "%s_%s" % (adc, dac))
-#         for dat in db_data:
-#             text += ",%s" % dat
-#         text += "\n"
-#         outF = open(file, "a")
-#         outF.write(text)
-#         outF.close()
-#
-# print "Generated csv-file for: %s" % dac
-# print "Results saved to the folder: %s " % folder
+dac = "CAL_LUT"
+
+for adc in adcs:
+    file = "%s%s_%s.csv" % (folder, adc, dac)
+    text = "Data\n"
+    outF = open(file, "w")
+    outF.write(text)
+    outF.close()
+    for hybrid in hybrid_list:
+        # production_data = database.get_production_results(hybrid)
+        db_data = database.get_table_values(hybrid, "%s_%s" % (adc, dac))
+        for dat in db_data:
+            text += ",%s" % dat
+        text += "\n"
+        outF = open(file, "a")
+        outF.write(text)
+        outF.close()
+
+print "Generated csv-file for: %s" % dac
+print "Results saved to the folder: %s " % folder
 
 
 
