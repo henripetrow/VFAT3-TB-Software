@@ -14,6 +14,7 @@ from luts import *
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.special import erf
+from scipy import sqrt
 
 
 def find_threshold(obj):
@@ -844,7 +845,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
 
 def fit_func(x, a, b):
-    return 0.5 * erf((x-a)/(math.sqrt(2)*b)) + 0.5
+    return 0.5 * erf((x-a)/(sqrt(2)*b)) + 0.5
 
 
 def fit_scurve(charge_data, hit_data):
