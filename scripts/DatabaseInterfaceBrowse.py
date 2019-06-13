@@ -65,7 +65,9 @@ class DatabaseInterfaceBrowse:
         self.open_connection()
         self.cursor.execute("SELECT * FROM %s WHERE ChipID = '%s';" % (table, chip_id[6:]))
         output = self.cursor.fetchall()
+        print "Fetched"
         print output
+        print len(output)
         if len(output) == 0:
             for row in output[0]:
                 data_list.append(row)
