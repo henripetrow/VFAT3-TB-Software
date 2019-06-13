@@ -107,7 +107,7 @@ for item in tables:
 
     for hybrid in hybrid_list:
         # production_data = database.get_production_results(hybrid)
-        text = "%s" % production_data[0]
+        text = "%s" % hybrid[6:]
         db_data = database.get_table_values(hybrid, item)
         for dat in db_data:
             text += ",%s" % dat
