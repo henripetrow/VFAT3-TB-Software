@@ -689,6 +689,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     unbonded_channels = []
     channel_category = ['00000']*128
 
+    fit_scurve(dac_values, scurve_data)
+
     # fig = plt.figure(figsize=(10, 20))
     # sub1 = plt.subplot(511)
 
@@ -838,3 +840,16 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
         obj.add_to_interactive_screen(text)
 
     return mean_mean, rms_mean, noisy_channels, dead_channels, rms_return_list, mean_list, channel_category, unbonded_channels
+
+
+def fit_func(x, a, b):
+    return 0.5 * math.erf((x-a)/(math.sqrt(2)*b)) + 0.5
+
+
+def fit_scurve(charge_data, hit_data):
+
+    s_tx = 0
+    s_ty = 0
+    params, params_covariance = optimize.curve_fit(test_func, charge_data, hit_data, p0=[st_x, st_y])
+    print "Optimal parameters:"
+    print params
