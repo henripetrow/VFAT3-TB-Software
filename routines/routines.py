@@ -682,7 +682,6 @@ def gain_histogram(obj):
 
 def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     timestamp = time.strftime("%d.%m.%Y %H:%M")
-    full_data = []
     mean_list = []
     rms_list = []
     rms_return_list = []
@@ -691,19 +690,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     unbonded_channels = []
     channel_category = ['00000']*128
 
-    fit_scurve(dac_values, scurve_data[7])
-
-    # fig = plt.figure(figsize=(10, 20))
-    # sub1 = plt.subplot(511)
-
     for i, channel in enumerate(channels):
-        # print ""
-        # print "Channel: %i" % channel
-
         data = scurve_data[i]
-
-        print_data = [int(i) for i in data]
-        # print print_data
         if all(v == 0 for v in data):
             # print "Dead channel."
             dead_channels.append(channel)
@@ -712,7 +700,6 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             rms_return_list.append(0)
             channel_category[channel] = "00100"
         else:
-
             #mean, rms = find_mean_and_enc(data, dac_values)
             mean, rms, r_squared = fit_scurve(data, dac_values)
 
@@ -853,8 +840,8 @@ def fit_scurve(hit_data, charge_data):
     hit_data[:] = [x / 100 for x in hit_data]
     np_x = np.array(charge_data)
     np_y = np.array(hit_data)
-    st_x = 1
-    st_y = 0.1
+    st_x = 4
+    st_y = 0.4
     params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
     r_squared = calculate_r2_score(np_x, np_y, params)
     print "R^2: %s" % r_squared
