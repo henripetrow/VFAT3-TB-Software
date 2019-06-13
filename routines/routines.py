@@ -848,8 +848,8 @@ def fit_func(x, a, b):
 
 def fit_scurve(charge_data, hit_data):
 
-    s_tx = 0
-    s_ty = 0
+    st_x = 2
+    st_y = 0.5
     params, params_covariance = optimize.curve_fit(test_func, charge_data, hit_data, p0=[st_x, st_y])
     print "Optimal parameters:"
     print params
