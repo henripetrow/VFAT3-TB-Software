@@ -68,32 +68,6 @@ for hybrid in hybrid_list:
     outF.close()
 print "Generated csv-file for: Production"
 
-# Generation xml tables for the DAC scans
-adcs = ["ADC0", "ADC1"]
-dac6bits = ["CFD_DAC_1", "CFD_DAC_2", "HYST_DAC", "PRE_I_BLCC", "PRE_I_BSF", "SD_I_BSF"]
-dac8bits = ["ARM_DAC", "CAL_DAC", "PRE_VREF", "PRE_I_BIT", "SD_I_BDIFF", "SH_I_BDIFF", "SD_I_BFCAS", "SH_I_BFCAS", "ZCC_DAC"]
-dac_list = dac6bits
-dac_list.extend(dac8bits)
-
-for dac in dac_list:
-    for adc in adcs:
-        file = "%s%s_%s.csv" % (folder, dac, adc)
-        text = "Data\n"
-        outF = open(file, "w")
-        outF.write(text)
-        outF.close()
-        for hybrid in hybrid_list:
-            text = "%s" % hybrid[6:]
-            db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
-            for dat in db_data:
-                text += ",%s" % dat
-            text += "\n"
-            outF = open(file, "a")
-            outF.write(text)
-            outF.close()
-    print "Generated csv-file for: %s" % dac
-
-
 
 tables = ['Threshold', 'enc', 'channel_category', "CAL_DAC_FC", "EXT_ADC_CAL_LUT"]
 
@@ -138,6 +112,32 @@ for item in tables:
             outF.close()
 
     print "Generated csv-file for: %s" % item
+
+
+# Generation xml tables for the DAC scans
+adcs = ["ADC0", "ADC1"]
+dac6bits = ["CFD_DAC_1", "CFD_DAC_2", "HYST_DAC", "PRE_I_BLCC", "PRE_I_BSF", "SD_I_BSF"]
+dac8bits = ["ARM_DAC", "CAL_DAC", "PRE_VREF", "PRE_I_BIT", "SD_I_BDIFF", "SH_I_BDIFF", "SD_I_BFCAS", "SH_I_BFCAS", "ZCC_DAC"]
+dac_list = dac6bits
+dac_list.extend(dac8bits)
+
+for dac in dac_list:
+    for adc in adcs:
+        file = "%s%s_%s.csv" % (folder, dac, adc)
+        text = "Data\n"
+        outF = open(file, "w")
+        outF.write(text)
+        outF.close()
+        for hybrid in hybrid_list:
+            text = "%s" % hybrid[6:]
+            db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
+            for dat in db_data:
+                text += ",%s" % dat
+            text += "\n"
+            outF = open(file, "a")
+            outF.write(text)
+            outF.close()
+    print "Generated csv-file for: %s" % dac
 
 
 dac = "CAL_LUT"
