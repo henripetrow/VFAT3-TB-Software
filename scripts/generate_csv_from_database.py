@@ -129,12 +129,13 @@ for item in tables:
     for hybrid in hybrid_list:
         text = "%s" % hybrid[6:]
         db_data = database.get_table_values(hybrid, item, allow_non_existing_hybrids=1)
-        for dat in db_data:
-            text += ",%s" % dat
-        text += "\n"
-        outF = open(file, "a")
-        outF.write(text)
-        outF.close()
+        if db_data:
+            for dat in db_data:
+                text += ",%s" % dat
+            text += "\n"
+            outF = open(file, "a")
+            outF.write(text)
+            outF.close()
 
     print "Generated csv-file for: %s" % item
 
