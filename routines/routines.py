@@ -707,6 +707,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             dead_channels.append(channel)
             mean_list.append(0)
             rms_list.append(0)
+            rms_return_list.append(0)
             channel_category[channel] = "00100"
         else:
             l = 0

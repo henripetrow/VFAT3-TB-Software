@@ -59,15 +59,22 @@ class DatabaseInterfaceBrowse:
 
         return data_list
 
-    def get_table_values(self, chip_id, table):
+    def get_table_values(self, chip_id, table, allow_non_existing_hybrids=0):
         data_list = []
+        return_list = []
         self.open_connection()
         self.cursor.execute("SELECT * FROM %s WHERE ChipID = '%s';" % (table, chip_id[6:]))
         output = self.cursor.fetchall()
-        for row in output[0]:
-            data_list.append(row)
-        self.connection.close()
-        return data_list[1:]
+        print output
+        if len(output) == 0:
+            for row in output[0]:
+                data_list.append(row)
+            self.connection.close()
+            return_list = data_list[1:]
+        else:
+            if not allow_non_existing_hybrids:
+                print "%s not fund in the table." % chip_id
+        return return_list
 
     def get_enc_values(self, chip_id):
         return self.get_table_values(chip_id, "enc")
