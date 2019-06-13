@@ -853,20 +853,29 @@ def fit_func(x, a, b):
 
 
 def fit_scurve(charge_data, hit_data):
-    print "Fitting function."
-    print charge_data
-    hit_data[:] = [x / 100 for x in hit_data]
-    print hit_data
 
+    hit_data[:] = [x / 100 for x in hit_data]
     np_x = np.array(charge_data)
     np_y = np.array(hit_data)
     st_x = 1
     st_y = 0.1
     params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
+    r_squared = calculate_r2_score(np_x, np_y, params)
     print "Optimal parameters:"
     print params
+    print "R^2:"
+    print r_squared
     plt.figure()
     plt.plot(charge_data, hit_data)
     yc = fit_func(charge_data, params[0], params[1])
     plt.plot(charge_data, yc)
     plt.show()
+
+
+def calculate_r2_score(xdata, ydata, popt):
+    residuals = ydata - fit_func(xdata, popt)
+    ss_res = numpy.sum(residuals ** 2)
+    ss_tot = numpy.sum((ydata - numpy.mean(ydata)) ** 2)
+    r_squared = 1 - (ss_res / ss_tot)
+    return r_squared
+
