@@ -757,7 +757,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             # print "Threshold: %f" % mean
             # print "enc: %f" % rms
 
-            full_data.append(diff)
+            #full_data.append(diff)
             rms_return_list.append(rms)
             mean_list.append(mean)
 
