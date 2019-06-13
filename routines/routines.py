@@ -712,37 +712,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             rms_return_list.append(0)
             channel_category[channel] = "00100"
         else:
-            # diff = []
-            # mean_calc = 0
-            # summ = 0
-            # l = 0
-            # for j in data:
-            #     if l != 0:
-            #         diff_value = j - previous_value
-            #         diff.append(diff_value)
-            #         mean_calc += dac_values[l] * diff_value
-            #         summ += diff_value
-            #     previous_value = j
-            #     l += 1
-            # if summ != 0:
-            #     mean = mean_calc / float(summ)
-            # else:
-            #     mean = 0
-            # if mean <= 0 or mean > 70:
-            #     # print "Invalid threshold."
-            #     mean = 0
-            #
-            # l = 1
-            # rms = 0
-            # for r in diff:
-            #     rms += r * (mean - dac_values[l]) ** 2
-            #     l += 1
-            #
-            # if 0 < (rms / summ):
-            #     rms = math.sqrt(rms / summ)
-            # else:
-            #     rms == 0
-            mean, rms = find_mean__and_enc(data, dac_values)
+
+            mean, rms = find_mean_and_enc(data, dac_values)
 
             if 0 >= rms or rms > lim_enc_noisy_channel:
                 noisy_channels.append(channel)
@@ -844,7 +815,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     return mean_mean, rms_mean, noisy_channels, dead_channels, rms_return_list, mean_list, channel_category, unbonded_channels
 
 
-def find_mean__and_enc(data, dac_values):
+def find_mean_and_enc(data, dac_values):
     diff = []
     mean_calc = 0
     summ = 0
@@ -864,22 +835,18 @@ def find_mean__and_enc(data, dac_values):
     if mean <= 0 or mean > 70:
         # print "Invalid threshold."
         mean = 0
-
-    l = 1
+    #l = 1
     rms = 0
     for r in diff:
         rms += r * (mean - dac_values[l]) ** 2
-        l += 1
-
+        #l += 1
     if 0 < (rms / summ):
         rms = math.sqrt(rms / summ)
     else:
         rms == 0
 
-    diff.append(mean)
-    diff.append(rms)
-
     return mean, rms
+
 
 def fit_func(x, a, b):
     return 0.5 * erf((x-a)/(sqrt(2)*b)) + 0.5
