@@ -769,7 +769,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     # print rms_list
     mean_mean = numpy.mean(mean_list)
     mean_rms = numpy.std(mean_list)
-    print "Old Method:"
+
     print "Mean Threshold: %f" % mean_mean
     print "Mean enc: %f" % rms_mean
     print "Noisy Channels:"
@@ -779,7 +779,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print "Possibly unbonded channels:"
     print unbonded_channels
     print channel_category
-
+    print rms_return_list
     #x_data = range(0, 128)
     #mean_data = [mean_rms] * 128
     #plt.plot(x_data, mean_data)
