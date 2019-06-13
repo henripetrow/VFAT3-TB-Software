@@ -81,10 +81,10 @@ for dac in dac_list:
         outF.write(text)
         outF.close()
         for hybrid in hybrid_list:
-            production_data = database.get_production_results(hybrid)
-            print production_data[0]
-            print hybrid[5:]
-            text = "%s" % production_data[0]
+            #production_data = database.get_production_results(hybrid)
+            #print production_data[0]
+            #print hybrid[6:]
+            text = "%s" % hybrid[6:]
             db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
             for dat in db_data:
                 text += ",%s" % dat
