@@ -700,10 +700,12 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             rms_return_list.append(0)
             channel_category[channel] = "00100"
         else:
-            #mean, rms = find_mean_and_enc(data, dac_values)
             mean, rms, r_squared = fit_scurve(data, dac_values)
-
+            if channel is 2 or channel is 125:   # Setting an offset to compensate for the flex cables noise.
+                if rms > 2.5:
+                    rms = rms - flex_cable_rms_offset
             if 0 >= rms or rms > lim_enc_noisy_channel:
+
                 noisy_channels.append(channel)
                 channel_category[channel] = "00010"
             elif rms <= lim_enc_unbonded_channel:
