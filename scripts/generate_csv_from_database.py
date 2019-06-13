@@ -55,6 +55,7 @@ print ""
 print "Generating csv-files for the found hybrids."
 # Generation of the production summary table csv-file
 
+
 # for hybrid in hybrid_list:
 #
 #     production_data = database.get_production_results(hybrid)
