@@ -82,6 +82,8 @@ for dac in dac_list:
         outF.close()
         for hybrid in hybrid_list:
             production_data = database.get_production_results(hybrid)
+            print production_data[0]
+            print hybrid
             text = "%s" % production_data[0]
             db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
             for dat in db_data:
@@ -104,7 +106,7 @@ for item in tables:
     outF.close()
 
     for hybrid in hybrid_list:
-        production_data = database.get_production_results(hybrid)
+        # production_data = database.get_production_results(hybrid)
         text = "%s" % production_data[0]
         db_data = database.get_table_values(hybrid, item)
         for dat in db_data:
@@ -129,7 +131,7 @@ for adc in adcs:
     outF.write(text)
     outF.close()
     for hybrid in hybrid_list:
-        production_data = database.get_production_results(hybrid)
+        # production_data = database.get_production_results(hybrid)
         db_data = database.get_table_values(hybrid, "%s_%s" % (adc, dac))
         for dat in db_data:
             text += ",%s" % dat
