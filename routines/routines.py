@@ -713,7 +713,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             channel_category[channel] = "00100"
         else:
 
-            mean, rms = find_mean_and_enc(data, dac_values)
+            mean, rms, r_squared = find_mean_and_enc(data, dac_values)
+            mean, rms, r_squared = fit_scurve(data, dac_values)
 
             if 0 >= rms or rms > lim_enc_noisy_channel:
                 noisy_channels.append(channel)
@@ -724,11 +725,6 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             else:
                 rms_list.append(rms)
 
-
-            # print "Threshold: %f" % mean
-            # print "enc: %f" % rms
-
-            #full_data.append(diff)
             rms_return_list.append(rms)
             mean_list.append(mean)
 
@@ -852,7 +848,7 @@ def fit_func(x, a, b):
     return 0.5 * erf((x-a)/(sqrt(2)*b)) + 0.5
 
 
-def fit_scurve(charge_data, hit_data):
+def fit_scurve(hit_data, charge_data):
 
     hit_data[:] = [x / 100 for x in hit_data]
     np_x = np.array(charge_data)
@@ -861,16 +857,13 @@ def fit_scurve(charge_data, hit_data):
     st_y = 0.1
     params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
     r_squared = calculate_r2_score(np_x, np_y, params)
-    print "Optimal parameters:"
-    print params
-    print "R^2:"
-    print r_squared
-    plt.figure()
-    plt.plot(charge_data, hit_data)
-    yc = fit_func(charge_data, params[0], params[1])
-    plt.plot(charge_data, yc)
-    plt.show()
-
+    print "R^2: %s" % r_squared
+    #plt.figure()
+    #plt.plot(charge_data, hit_data)
+    #yc = fit_func(charge_data, params[0], params[1])
+    #plt.plot(charge_data, yc)
+    #plt.show()
+    return params[0], params[1], r_squared
 
 def calculate_r2_score(xdata, ydata, popt):
     residuals = ydata - fit_func(xdata, popt[0], popt[1])
