@@ -713,7 +713,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             channel_category[channel] = "00100"
         else:
 
-            mean, rms, r_squared = find_mean_and_enc(data, dac_values)
+            #mean, rms = find_mean_and_enc(data, dac_values)
             mean, rms, r_squared = fit_scurve(data, dac_values)
 
             if 0 >= rms or rms > lim_enc_noisy_channel:
