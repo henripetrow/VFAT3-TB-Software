@@ -853,9 +853,11 @@ def fit_scurve(charge_data, hit_data):
     print "Fitting function."
     print charge_data
     print hit_data
+    np_x = np.array(charge_data)
+    np_y = np.array(hit_data)
     st_x = 2
     st_y = 0.5
-    params, params_covariance = curve_fit(fit_func, charge_data, hit_data, p0=[st_x, st_y])
+    params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
     print "Optimal parameters:"
     print params
     plt.figure()
