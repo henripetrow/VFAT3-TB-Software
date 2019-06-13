@@ -835,11 +835,11 @@ def find_mean_and_enc(data, dac_values):
     if mean <= 0 or mean > 70:
         # print "Invalid threshold."
         mean = 0
-    #l = 1
+    l = 1
     rms = 0
     for r in diff:
         rms += r * (mean - dac_values[l]) ** 2
-        #l += 1
+        l += 1
     if 0 < (rms / summ):
         rms = math.sqrt(rms / summ)
     else:
