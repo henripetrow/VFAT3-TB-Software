@@ -858,6 +858,7 @@ def fit_scurve(hit_data, charge_data):
     params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
     r_squared = calculate_r2_score(np_x, np_y, params)
     print "R^2: %s" % r_squared
+    print params
     #plt.figure()
     #plt.plot(charge_data, hit_data)
     #yc = fit_func(charge_data, params[0], params[1])
