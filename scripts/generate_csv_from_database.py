@@ -83,7 +83,7 @@ for dac in dac_list:
         for hybrid in hybrid_list:
             production_data = database.get_production_results(hybrid)
             print production_data[0]
-            print hybrid
+            print hybrid[5:]
             text = "%s" % production_data[0]
             db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
             for dat in db_data:
