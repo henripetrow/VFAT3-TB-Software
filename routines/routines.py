@@ -691,7 +691,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     unbonded_channels = []
     channel_category = ['00000']*128
 
-    fit_scurve(dac_values, scurve_data)
+
 
     # fig = plt.figure(figsize=(10, 20))
     # sub1 = plt.subplot(511)
@@ -704,6 +704,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
         mean_calc = 0
         summ = 0
         data = scurve_data[i]
+        fit_scurve(dac_values, data)
         print_data = [int(i) for i in data]
         # print print_data
         if all(v == 0 for v in data):
