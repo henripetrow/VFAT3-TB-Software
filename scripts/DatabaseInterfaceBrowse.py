@@ -65,9 +65,6 @@ class DatabaseInterfaceBrowse:
         self.open_connection()
         self.cursor.execute("SELECT * FROM %s WHERE ChipID = '%s';" % (table, chip_id[6:]))
         output = self.cursor.fetchall()
-        print "Fetched"
-        print output
-        print len(output)
         if len(output) != 0:
             for row in output[0]:
                 data_list.append(row)
@@ -75,7 +72,7 @@ class DatabaseInterfaceBrowse:
             return_list = data_list[1:]
         else:
             if not allow_non_existing_hybrids:
-                print "%s not fund in the table." % chip_id
+                print "%s not found in the table." % chip_id
         return return_list
 
     def get_enc_values(self, chip_id):
