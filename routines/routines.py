@@ -835,7 +835,7 @@ def fit_func(x, a, b):
     return 0.5 * erf((x-a)/(sqrt(2)*b)) + 0.5
 
 
-def fit_scurve(charge_data, hit_data):
+def fit_scurve(hit_data, charge_data):
 
     hit_data[:] = [x / 100 for x in hit_data]
     print hit_data
