@@ -56,12 +56,12 @@ lim_sbits = [0, 0, 0, 0]
 # selection criteria for S-curve channel classification.
 
 lim_enc_noisy_channel = 2
-lim_enc_noisy_channel_flex_end_channels = 1
-lim_enc_unbonded_channel = 0.30
+lim_enc_noisy_channel_flex_end_channels = 4
+lim_enc_unbonded_channel = 0.14
 
-# untrimmable channel calculation.
-lim_sigma = 0
-lim_trim_dac_scale = 1
+# Untrimmable channel calculation.
+lim_sigma = 5
+lim_trim_dac_scale = 2
 
 # Selection criteria
 adc0_dac_selection_criteria_lut = {"CFD_DAC_1": [500, 950, 'n', 'n'],
