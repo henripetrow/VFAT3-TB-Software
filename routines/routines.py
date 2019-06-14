@@ -733,7 +733,10 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     mean_rms = numpy.std(mean_list)
     print min(mean_list)
     print max(mean_list)
+
     for i, channel in enumerate(channels):
+        print abs(mean_mean - mean_list[i])
+        print mean_rms * lim_sigma + lim_trim_dac_scale / 2
         if abs(mean_mean - mean_list[i]) > mean_rms * lim_sigma + lim_trim_dac_scale/2:
             channel_category[channel][0] = 1
             untrimmable_channels.append(channel)
