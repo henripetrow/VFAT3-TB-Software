@@ -73,7 +73,7 @@ class VFAT3_GUI:
                 print "Entering Chip ID Reed-Muller encoding-mode."
                 self.chipid_encoding_mode = 0
             if arg == '-plot_enc':
-                print "Entering Chip ID Reed-Muller encoding-mode."
+                print "Entering S-curve enc plotting-mode."
                 self.plot_enc = 1
 
         if self.psu_mode == 1:
