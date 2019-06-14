@@ -121,13 +121,6 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.register[135].ARM_DAC[0] = arm_dac
             obj.write_register(135)
 
-            for i in range(0, 129):
-                time.sleep(0.1)
-                #obj.register[i].arm_dac[0] = 127
-                obj.register[i].arm_dac[0] = 63
-                obj.write_register(i)
-
-
             #obj.register[137].LAT[0] = latency
             #obj.write_register(137)
 
@@ -764,21 +757,21 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     # plt.show()
 
 
-    fig, ax = plt.subplots()
-
-    textstr = '\n'.join((
-        'mean=%.2f$' % (mean_mean,),
-        'rms=%.2f$' % (mean_rms,)))
-
-    ax.hist(mean_list, 100)
-    # these are matplotlib.patch.Patch properties
-    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-
-    # place a text box in upper left in axes coords
-    ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14,
-            verticalalignment='top', bbox=props)
-
-    plt.show()
+    # fig, ax = plt.subplots()
+    #
+    # textstr = '\n'.join((
+    #     'mean=%.2f$' % (mean_mean,),
+    #     'rms=%.2f$' % (mean_rms,)))
+    #
+    # ax.hist(mean_list, 100)
+    # # these are matplotlib.patch.Patch properties
+    # props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+    #
+    # # place a text box in upper left in axes coords
+    # ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14,
+    #         verticalalignment='top', bbox=props)
+    #
+    # plt.show()
 
 
     if folder != "":
