@@ -122,6 +122,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.write_register(135)
 
             for i in range(0, 129):
+                time.sleep(0.1)
                 obj.register[i].arm_dac[0] = 127
                 #obj.register[i].arm_dac[0] = 63
                 obj.write_register(i)
