@@ -741,12 +741,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     # print rms_list
     mean_mean = numpy.mean(mean_list)
     mean_rms = numpy.std(mean_list)
-    print min(mean_list)
-    print max(mean_list)
 
     for i, channel in enumerate(channels):
-        print abs(mean_mean - mean_list[i])
-        print mean_rms * lim_sigma + lim_trim_dac_scale / 2.0
         if abs(mean_mean - mean_list[i]) > mean_rms * lim_sigma + lim_trim_dac_scale/2:
             channel_category[channel] = change_character_in_string(channel_category[channel], 0, 1)
             untrimmable_channels.append(channel)
@@ -755,11 +751,11 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print "Mean enc: %f fC, sigma: %f fC" % (rms_mean, rms_rms)
     print "Dead Channels:"
     print dead_channels
-    print "Noisy Channels (lim1:%s, lim2:%s):" % (lim_enc_noisy_channel, lim_enc_noisy_channel_flex_end_channels)
+    print "Noisy Channels (lim1:%s fC, lim2:%s fC):" % (lim_enc_noisy_channel, lim_enc_noisy_channel_flex_end_channels)
     print noisy_channels
-    print "Unbonded channels (lim: %s):" % lim_enc_unbonded_channel
+    print "Unbonded channels (lim: %s fC):" % lim_enc_unbonded_channel
     print unbonded_channels
-    print "Untrimmable channels (lim: %s*sigma + %s/2):" % (lim_sigma, lim_trim_dac_scale)
+    print "Untrimmable channels (lim: %s*sigma + %s fC/2):" % (lim_sigma, lim_trim_dac_scale)
     print untrimmable_channels
     print ""
     print channel_category
