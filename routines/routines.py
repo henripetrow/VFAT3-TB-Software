@@ -121,9 +121,9 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.register[135].ARM_DAC[0] = arm_dac
             obj.write_register(135)
 
-            # for i in range(0, 129):
-            #     register[i].arm_dac[0] = 127
-            #     register[i].arm_dac[0] = 63
+            for i in range(0, 129):
+                register[i].arm_dac[0] = 127
+                #register[i].arm_dac[0] = 63
 
             #obj.register[137].LAT[0] = latency
             #obj.write_register(137)
