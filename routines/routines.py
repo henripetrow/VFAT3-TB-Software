@@ -699,7 +699,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             mean_list.append(0)
             rms_list.append(0)
             rms_return_list.append(0)
-            channel_category[channel][3] = 1
+            channel_category[channel] = change_character_in_string(channel_category[channel], 3, 1)
         else:
             mean, rms, r_squared = fit_scurve(data, dac_values)
 
@@ -709,13 +709,13 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                 if channel is 2 or channel is 125:
                     if 0 >= rms or rms > lim_enc_noisy_channel_flex_end_channels:
                         noisy_channels.append(channel)
-                        channel_category[channel][2] = 1
+                        channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
                 else:
                     noisy_channels.append(channel)
-                    channel_category[channel][2] = 1
+                    channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
             elif rms <= lim_enc_unbonded_channel:
                 unbonded_channels.append(channel)
-                channel_category[channel][1] = 1
+                channel_category[channel] = change_character_in_string(channel_category[channel], 1, 1)
             else:
                 rms_list.append(rms)
 
@@ -738,7 +738,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
         print abs(mean_mean - mean_list[i])
         print mean_rms * lim_sigma + lim_trim_dac_scale / 2
         if abs(mean_mean - mean_list[i]) > mean_rms * lim_sigma + lim_trim_dac_scale/2:
-            channel_category[channel][0] = 1
+            channel_category[channel] = change_character_in_string(channel_category[channel], 0, 1)
             untrimmable_channels.append(channel)
     print ""
     print "Mean Threshold: %f" % mean_mean
@@ -900,3 +900,7 @@ def calculate_r2_score(xdata, ydata, popt):
     r_squared = 1 - (ss_res / ss_tot)
     return r_squared
 
+def change_character_in_string(text, nr_character, new_character):
+    new = list(text)
+    new[nr_character] = new_character
+    return ''.join(new)
