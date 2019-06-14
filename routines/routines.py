@@ -753,8 +753,9 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     # plt.grid(True)
     # plt.show()
 
-    plt.hist(mean_list, bins=20)
-    plt.xlabel('Thr')
+    plt.hist(mean_list, bins=100)
+    plt.title('Threshold spread')
+    plt.xlabel('Thr [fC]')
     plt.ylabel('#')
     plt.grid()
     plt.show()
