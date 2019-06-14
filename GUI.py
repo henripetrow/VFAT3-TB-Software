@@ -38,6 +38,7 @@ class VFAT3_GUI:
         self.iref_mode = 0
         self.temp_gun_mode = 1
         self.chipid_encoding_mode = 1
+        self.plot_enc = 0
         # Pilot run flag. Defines if results of single tests are displayed on production test.
         self.pilot_run_flag = 0
         self.chip_id = 'n'
@@ -71,6 +72,9 @@ class VFAT3_GUI:
             if arg == '-no_chipid_encoding':
                 print "Entering Chip ID Reed-Muller encoding-mode."
                 self.chipid_encoding_mode = 0
+            if arg == '-plot_enc':
+                print "Entering Chip ID Reed-Muller encoding-mode."
+                self.plot_enc = 1
 
         if self.psu_mode == 1:
             self.tti_if = TtiSerialInterface()

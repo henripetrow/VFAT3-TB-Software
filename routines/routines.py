@@ -179,7 +179,16 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         run_time = (stop - start) / 60
         text = "S-curve Run time (minutes): %f\n" % run_time
         print text
-        # obj.add_to_interactive_screen(text)
+        if obj.plot_enc:
+            plt.plot(enc_list)
+            plt.text(100, 0.8, "Mean enc:\n %f" % mean_enc_fc, bbox=dict(alpha=0.5))
+            plt.title("enc")
+            plt.ylim([0, 2])
+            plt.xlim([0, 128])
+            plt.xlabel("Channel")
+            plt.ylabel("enc [fC]")
+            plt.grid(True)
+            plt.show()
     return [mean_th_fc, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc, unbonded_channels]
 
 
@@ -281,6 +290,7 @@ def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
         drawHisto(chi2_h, cc, '%s/%s/chi2Histo%s.png' % (obj.data_folder, folder, timestamp))
         chi2_h.Write()
         outF.Close()
+
 
     return mean_th, mean_enc, noisy_channels, dead_channels, enc_list, thr_list
 
@@ -741,31 +751,20 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             channel_category[channel] = change_character_in_string(channel_category[channel], 0, 1)
             untrimmable_channels.append(channel)
     print ""
-    print "Mean Threshold: %f" % mean_mean
-    print "Mean enc: %f" % rms_mean
-    print "Noisy Channels:"
-    print noisy_channels
+    print "Mean Threshold: %f fC, sigma: %f fC" % (mean_mean, mean_rms)
+    print "Mean enc: %f fC, sigma: %f fC" % (rms_mean, rms_rms)
     print "Dead Channels:"
     print dead_channels
-    print "Unbonded channels:"
+    print "Noisy Channels (lim1:%s, lim2:%s):" % (lim_enc_noisy_channel, lim_enc_noisy_channel_flex_end_channels)
+    print noisy_channels
+    print "Unbonded channels (lim: %s):" % lim_enc_unbonded_channel
     print unbonded_channels
-    print "Untrimmable channels:"
+    print "Untrimmable channels (lim: %s*sigma + %s/2):" % (lim_sigma, lim_trim_dac_scale)
     print untrimmable_channels
     print ""
     print channel_category
 
-    # x_data = range(0, 128)
-    # mean_data = [mean_rms] * 128
-    # plt.plot(x_data, mean_data)
-    # plt.plot(rms_return_list)
-    # plt.text(100, 0.8, "Mean enc:\n %f" % rms_mean, bbox=dict(alpha=0.5))
-    # plt.title("enc")
-    # plt.ylim([0, 2])
-    # plt.xlim([0, 128])
-    # plt.xlabel("Channel")
-    # plt.ylabel("enc [fC]")
-    # plt.grid(True)
-    # plt.show()
+
 
     # plt.hist(mean_list, bins=100)
     # plt.title('Threshold spread')
