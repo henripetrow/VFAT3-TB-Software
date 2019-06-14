@@ -762,21 +762,21 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     # plt.show()
 
 
-    fig, ax = plt.subplots()
-
-    textstr = '\n'.join((
-        'mean=%.2f$' % (mean_mean,),
-        'rms=%.2f$' % (mean_rms,)))
-
-    ax.hist(mean_list, 100)
-    # these are matplotlib.patch.Patch properties
-    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-
-    # place a text box in upper left in axes coords
-    ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14,
-            verticalalignment='top', bbox=props)
-
-    plt.show()
+    # fig, ax = plt.subplots()
+    #
+    # textstr = '\n'.join((
+    #     'mean=%.2f$' % (mean_mean,),
+    #     'rms=%.2f$' % (mean_rms,)))
+    #
+    # ax.hist(mean_list, 100)
+    # # these are matplotlib.patch.Patch properties
+    # props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+    #
+    # # place a text box in upper left in axes coords
+    # ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14,
+    #         verticalalignment='top', bbox=props)
+    #
+    # plt.show()
 
 
     if folder != "":
