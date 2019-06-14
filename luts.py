@@ -60,8 +60,8 @@ lim_enc_noisy_channel_flex_end_channels = 1
 lim_enc_unbonded_channel = 0.14
 
 # untrimmable channel calculation.
-lim_sigma = 5
-lim_trim_dac_scale = 2
+lim_sigma = 0
+lim_trim_dac_scale = 1
 
 # Selection criteria
 adc0_dac_selection_criteria_lut = {"CFD_DAC_1": [500, 950, 'n', 'n'],
@@ -80,3 +80,13 @@ adc0_dac_selection_criteria_lut = {"CFD_DAC_1": [500, 950, 'n', 'n'],
                                    "SH_I_BFCAS": [740, 1080, 'n', 'n'],
                                    "ZCC_DAC": [300, 750, 'n', 'n']}
 
+# production s-curve parameters
+par_start_channel = 0
+par_stop_channel = 127
+par_channel_step = 1
+par_pulsestretch = 7
+par_latency = 50
+par_calphi = 0
+par_arm_dac = 150
+par_start_cal_dac = 200
+par_stop_cal_dac = 240

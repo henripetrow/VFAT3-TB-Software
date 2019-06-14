@@ -690,17 +690,18 @@ class VFAT3_GUI:
 
         # ############### S-curve tab #########################################
 
-        self.start_channel = 0
-        self.stop_channel = 127
-        self.channel_step = 1
+        self.start_channel = par_start_channel
+        self.stop_channel = par_stop_channel
+        self.channel_step = par_channel_step
         self.delay = 19
         self.interval = 2000
-        self.pulsestretch = 7
-        self.latency = 50
-        self.calphi = 0
-        self.arm_dac = 150
-        self.start_cal_dac = 200
-        self.stop_cal_dac = 240
+        self.pulsestretch = par_pulsestretch
+        self.latency = par_latency
+        self.calphi = par_calphi
+        self.arm_dac = par_arm_dac
+        self.start_cal_dac = par_start_cal_dac
+        self.stop_cal_dac = par_stop_cal_dac
+
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
         self.start_ch_label.grid(column=1, row=1, sticky='w')
