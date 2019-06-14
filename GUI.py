@@ -131,6 +131,7 @@ class VFAT3_GUI:
         self.temp_coeff = 3.79
         self.lot_nr = 0
         self.arrival_date = "00000000"
+        self.terminal = ""
         self.read_lot_information()
 
         # Initiations
@@ -2476,9 +2477,12 @@ class VFAT3_GUI:
             info = line.split()
             self.lot_nr = int(info[0])
             self.arrival_date = info[1]
+            self.terminal = info[2]
             print "Lot info:"
             print self.lot_nr
             print self.arrival_date
+            print self.terminal
+
 
     def save_barcode(self):
         error = 0
@@ -2505,6 +2509,7 @@ class VFAT3_GUI:
                 self.database.save_date()
                 self.database.save_arrival(self.arrival_date)
                 self.database.save_lot(self.lot_nr)
+                self.database.save_terminal(self.terminal)
                 if not self.database.error:
                     if self.database.id_exists:
                         if not self.iref_mode:

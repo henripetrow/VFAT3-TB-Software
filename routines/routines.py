@@ -162,7 +162,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
 
         # Analyze data.
         # mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list = scurve_analyze(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
-        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data)
+        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels, untrimmable_channels = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data)
         # print enc_list
         # Save data to database.
         if obj.database:
@@ -189,7 +189,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             plt.ylabel("enc [fC]")
             plt.grid(True)
             plt.show()
-    return [mean_th_fc, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc, unbonded_channels]
+    return [mean_th_fc, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc, unbonded_channels, untrimmable_channels]
 
 
 def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):

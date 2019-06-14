@@ -272,6 +272,9 @@ class DatabaseInterface:
     def save_arrival(self, arrival):
         self.set_string("Arrival", arrival)
 
+    def save_terminal(self, terminal):
+        self.set_string("Terminal", terminal)
+
     def save_lot(self, value):
         self.set_int("Lot", value)
 
