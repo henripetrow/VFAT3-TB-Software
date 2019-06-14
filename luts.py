@@ -57,7 +57,7 @@ lim_sbits = [0, 0, 0, 0]
 
 lim_enc_noisy_channel = 2
 lim_enc_noisy_channel_flex_end_channels = 1
-lim_enc_unbonded_channel = 0.14
+lim_enc_unbonded_channel = 0.30
 
 # untrimmable channel calculation.
 lim_sigma = 0
