@@ -688,7 +688,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     dead_channels = []
     noisy_channels = []
     unbonded_channels = []
-    channel_category = ['00000']*128
+    channel_category = ['0000']*128
 
     for i, channel in enumerate(channels):
         data = scurve_data[i]
@@ -698,22 +698,27 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             mean_list.append(0)
             rms_list.append(0)
             rms_return_list.append(0)
-            channel_category[channel] = "00100"
+            channel_category[channel][3] = 1
         else:
             mean, rms, r_squared = fit_scurve(data, dac_values)
+
+            # Channel Categorization ######
+
             if 0 >= rms or rms > lim_enc_noisy_channel:
                 if channel is 2 or channel is 125:
                     if 0 >= rms or rms > lim_enc_noisy_channel_flex_end_channels:
                         noisy_channels.append(channel)
-                        channel_category[channel] = "00010"
+                        channel_category[channel][2] = 1
                 else:
                     noisy_channels.append(channel)
-                    channel_category[channel] = "00010"
+                    channel_category[channel][2] = 1
             elif rms <= lim_enc_unbonded_channel:
                 unbonded_channels.append(channel)
-                channel_category[channel] = "00100"
+                channel_category[channel][1] = 1
             else:
                 rms_list.append(rms)
+
+            # Append values to list
 
             rms_return_list.append(rms)
             mean_list.append(mean)
@@ -725,6 +730,10 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     # print rms_list
     mean_mean = numpy.mean(mean_list)
     mean_rms = numpy.std(mean_list)
+
+    for i, channel in enumerate(channels):
+        if abs(mean_mean - mean_list[i]) > mean_rms * lim_sigma + lim_trim_dac_scale/2:
+            channel_category[channel][0] = 1
 
     print "Mean Threshold: %f" % mean_mean
     print "Mean enc: %f" % rms_mean
