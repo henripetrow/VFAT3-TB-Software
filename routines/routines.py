@@ -762,13 +762,10 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
 
     fig, ax = plt.subplots()
-    mu = mean_list.mean()
-    median = np.median(mean_list)
-    sigma = mean_list.std()
+
     textstr = '\n'.join((
-        r'$\mu=%.2f$' % (mu,),
-        r'$\mathrm{median}=%.2f$' % (median,),
-        r'$\sigma=%.2f$' % (sigma,)))
+        'mean=%.2f$' % (mean_mean,),
+        'rms=%.2f$' % (mean_rms,)))
 
     ax.hist(mean_list, 100)
     # these are matplotlib.patch.Patch properties
