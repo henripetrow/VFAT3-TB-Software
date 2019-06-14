@@ -902,5 +902,5 @@ def calculate_r2_score(xdata, ydata, popt):
 
 def change_character_in_string(text, nr_character, new_character):
     new = list(text)
-    new[nr_character] = new_character
+    new[nr_character] = "%s" % new_character
     return ''.join(new)
