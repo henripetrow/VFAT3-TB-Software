@@ -688,6 +688,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     dead_channels = []
     noisy_channels = []
     unbonded_channels = []
+    untrimmable_channels = []
     channel_category = ['0000']*128
 
     for i, channel in enumerate(channels):
@@ -734,16 +735,20 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     for i, channel in enumerate(channels):
         if abs(mean_mean - mean_list[i]) > mean_rms * lim_sigma + lim_trim_dac_scale/2:
             channel_category[channel][0] = 1
-
+            untrimmable_channels.append(channel)
+    print ""
     print "Mean Threshold: %f" % mean_mean
     print "Mean enc: %f" % rms_mean
     print "Noisy Channels:"
     print noisy_channels
     print "Dead Channels:"
     print dead_channels
-    print "Possibly unbonded channels:"
+    print "Unbonded channels:"
     print unbonded_channels
-    #print channel_category
+    print "Untrimmable channels:"
+    print untrimmable_channels
+    print ""
+    print channel_category
 
     # x_data = range(0, 128)
     # mean_data = [mean_rms] * 128
