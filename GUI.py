@@ -2481,7 +2481,7 @@ class VFAT3_GUI:
             print "Lot info:"
             print self.lot_nr
             print self.arrival_date
-            print self.terminal
+            print "Terminal %s" % self.terminal
 
 
     def save_barcode(self):
