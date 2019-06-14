@@ -760,6 +760,27 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     plt.grid()
     plt.show()
 
+
+    fig, ax = plt.subplots()
+    mu = mean_list.mean()
+    median = np.median(mean_list)
+    sigma = mean_list.std()
+    textstr = '\n'.join((
+        r'$\mu=%.2f$' % (mu,),
+        r'$\mathrm{median}=%.2f$' % (median,),
+        r'$\sigma=%.2f$' % (sigma,)))
+
+    ax.hist(mean_list, 100)
+    # these are matplotlib.patch.Patch properties
+    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+
+    # place a text box in upper left in axes coords
+    ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14,
+            verticalalignment='top', bbox=props)
+
+    plt.show()
+
+
     if folder != "":
         fig = plt.figure(figsize=(10, 20))
         sub1 = plt.subplot(511)
