@@ -88,6 +88,6 @@ par_pulsestretch = 7
 par_latency = 50
 par_calphi = 0
 par_arm_dac = 130
-par_start_cal_dac = 205
+par_start_cal_dac = 210
 par_stop_cal_dac = 245
 par_triggers = 1000
