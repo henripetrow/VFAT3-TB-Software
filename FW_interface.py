@@ -223,7 +223,7 @@ class FW_interface:
         nr_channels = stop_ch - start_ch + 1
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
         data_output = []
-        # print output
+        print output
         #print len(output)
         for i, data in enumerate(output):
             if all(v == 0 for v in data):
@@ -238,7 +238,7 @@ class FW_interface:
                 data_output.extend(out)
             else:
                 data_output.extend(data)
-        # print data_output
+        print data_output
         # print len(output)
 
 
