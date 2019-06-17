@@ -222,6 +222,8 @@ class FW_interface:
             message.append(value)
         nr_channels = stop_ch - start_ch + 1
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
+        print "output"
+        print output[0]
         return output
 
     def run_dac_scan(self, start, step, stop, mon_sel):
