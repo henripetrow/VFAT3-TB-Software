@@ -233,8 +233,12 @@ class FW_interface:
                            triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF, 1,
                            len(cal_dac_array)]
                 out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
-                print out
-                time.sleep(0.5)
+                if all(v == 0 for v in out):
+                    time.sleep(0.5)
+                    out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
+                if all(v == 0 for v in out):
+                    time.sleep(0.5)
+                    out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
                 output.pop(i)
                 output.insert(i, out)
 
