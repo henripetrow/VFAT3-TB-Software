@@ -720,8 +720,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             mean_loop_mean = []
             np_x = np.array(dac_values)
             np_y = np.array(data)
-            st_x = 3
-            st_y = 0.3
+            st_x = 1
+            st_y = 0.1
             params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
             r_squared = calculate_r2_score(np_x, np_y, params)
             print "R^2: %s" % r_squared
@@ -736,8 +736,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             print params
             rms_loop_mean.append(params[1])
             mean_loop_mean.append(params[0])
-            st_x = 3
-            st_y = 0.3
+            st_x = 1
+            st_y = 0.1
             params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
             r_squared = calculate_r2_score(np_x, np_y, params)
             print "R^2: %s" % r_squared
