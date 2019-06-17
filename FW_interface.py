@@ -224,9 +224,9 @@ class FW_interface:
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
         print "output"
         print output[0]
-        for data in output:
+        for i, data in enumerate(output):
             if all(v == 0 for v in data):
-                print "Detected zero output."
+                print "Detected zero output in channel %s." % i
 
         return output
 
