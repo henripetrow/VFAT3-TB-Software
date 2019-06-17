@@ -121,7 +121,7 @@ class FW_interface:
         address_2 = address_hex[4:6]
         address_1 = address_hex[6:8]
         address_0 = address_hex[8:10]
-        # print "\nWriting register: %s Value: %s" % (hex(address), ''.join(str(e) for e in value))
+        print "\nWriting register: %s Value: %s" % (hex(address), ''.join(str(e) for e in value))
         # Data from bit-string to hex bytes
         # print value
         if len(value) == 16:
