@@ -229,35 +229,35 @@ class FW_interface:
                 print "Detected zero output in channel %s." % i
                 print "Trying to re-run s-curve for it."
                 d1 = 55
-                message = [0xca, 0xff, 0x08, i, i, step_ch, 0, 0, 0, latency >> 8, latency & 0xFF,
+                message = [0xca, 0xff, 0x08, i-1, i+1, step_ch, 0, 0, 0, latency >> 8, latency & 0xFF,
                            triggers >> 65,
                            triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF, 1,
                            len(cal_dac_array)]
                 out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
-                out = out[0]
+                out = out[1]
                 if all(v == 0 for v in out):
                     print "Detected zero output in channel %s." % i
                     print "Trying to re-run s-curve for it."
                     time.sleep(0.5)
                     d1 = 60
-                    message = [0xca, 0xff, 0x08, i, i, step_ch, 0, 0, 0, latency >> 8, latency & 0xFF,
+                    message = [0xca, 0xff, 0x08, i-1, i+1, step_ch, 0, 0, 0, latency >> 8, latency & 0xFF,
                                triggers >> 8,
                                triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF, 1,
                                len(cal_dac_array)]
                     out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
-                    out = out[0]
+                    out = out[1]
                 if all(v == 0 for v in out):
                     print "Detected zero output in channel %s." % i
                     print "Trying to re-run s-curve for it."
                     d1 = 70
                     time.sleep(0.5)
-                    message = [0xca, 0xff, 0x08, i, i, step_ch, 0, 0, 0, latency >> 8, latency & 0xFF,
+                    message = [0xca, 0xff, 0x08, i-1, i+1, step_ch, 0, 0, 0, latency >> 8, latency & 0xFF,
                                triggers >> 8,
                                triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF, 1,
                                len(cal_dac_array)]
                     time.sleep(0.5)
                     out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
-                    out = out[0]
+                    out = out[1]
                 output.pop(i)
                 output.insert(i, out)
 
