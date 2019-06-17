@@ -728,7 +728,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             print params
             rms = params[1]
             mean = params[0]
-            if r_squared < 0.99:
+            if r_squared < 0.999:
                 print "R^2 too low, trying with new starting values."
                 st_x = 2
                 st_y = 0.2
@@ -738,7 +738,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                 print params
                 rms = params[1]
                 mean = params[0]
-            if r_squared < 0.99:
+            if r_squared < 0.999:
                 print "R^2 too low, trying with new starting values."
                 st_x = 1
                 st_y = 0.1
