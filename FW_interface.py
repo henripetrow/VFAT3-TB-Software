@@ -208,7 +208,7 @@ class FW_interface:
         output = self.execute_req(message, no_packets=2, timeout=30)
         return output
 
-    def run_scurve(self, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, arm_dac, triggers, latency):
+    def run_scurve(self, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, arm_dac, triggers, latency, obj):
         delay = 1
         d1 = 58
         d2 = 500
@@ -230,10 +230,8 @@ class FW_interface:
                 for k in range(0, 5):
                     d1 = 58
                     print k
-                    cal_dac_start = k*40
-                    cal_dac_stop = k*40+40
-                    print cal_dac_start
-                    print cal_dac_stop
+                    obj.register[i].mask[0] = 0
+                    obj.write_register()
                     message = [0xca, 0, 0x08, i-1, i+1, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8, latency & 0xFF,
                                triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
 

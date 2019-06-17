@@ -136,7 +136,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         channels = range(start_ch, stop_ch+1, ch_step)
 
         # Launch S-curve routine in firmware.
-        scurve_data = obj.interfaceFW.run_scurve(start_ch, stop_ch, ch_step, start_dac_value, stop_dac_value, arm_dac, triggers, latency)
+        scurve_data = obj.interfaceFW.run_scurve(start_ch, stop_ch, ch_step, start_dac_value, stop_dac_value, arm_dac, triggers, latency, obj)
 
         # Plot the s-curve data.
         if configuration == "yes":
