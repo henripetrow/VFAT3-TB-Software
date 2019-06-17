@@ -239,11 +239,13 @@ class FW_interface:
                     print "Trying to re-run s-curve for it."
                     time.sleep(0.5)
                     out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
+                    out = out[0]
                 if all(v == 0 for v in out):
                     print "Detected zero output in channel %s." % i
                     print "Trying to re-run s-curve for it."
                     time.sleep(0.5)
                     out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
+                    out = out[0]
                 output.pop(i)
                 output.insert(i, out)
 
