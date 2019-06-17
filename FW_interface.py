@@ -235,9 +235,12 @@ class FW_interface:
                            len(cal_dac_array)]
                 out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
                 time.sleep(0.1)
-                data_output.extend(out)
+                data_output.append(out)
             else:
-                data_output.extend(data)
+                data_output.append(data)
+        print "Printing new data."
+        print data_output
+        print "Starting comparison."
         for i, data in enumerate(data_output):
             print data
             print output[i]
