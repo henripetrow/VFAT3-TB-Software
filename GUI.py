@@ -706,6 +706,7 @@ class VFAT3_GUI:
         self.arm_dac = par_arm_dac
         self.start_cal_dac = par_start_cal_dac
         self.stop_cal_dac = par_stop_cal_dac
+        self.triggers = par_triggers
 
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
@@ -2093,7 +2094,7 @@ class VFAT3_GUI:
                                            self.stop_channel], ch_step=self.channel_step, configuration=configuration,
                                            dac_range=[self.start_cal_dac, self.stop_cal_dac],
                                            bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch,
-                                           latency=self.latency, cal_phi=self.calphi)
+                                           latency=self.latency, cal_phi=self.calphi, triggers=self.triggers)
             if output[0] == 'n':
                 errors = ['r']
             else:
