@@ -719,7 +719,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             for i in range(0, 3):
                 mean, rms, r_squared = fit_scurve(data, dac_values)
                 rms_loop_mean.append(rms)
-                mean_loop_mean(mean)
+                mean_loop_mean.append(mean)
             rms = numpy.mean(rms_loop_mean)
             mean = numpy.mean(mean_loop_mean)
             # Channel Categorization ######
