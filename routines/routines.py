@@ -729,6 +729,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             rms = params[1]
             mean = params[0]
             if r_squared < 0.99:
+                print "R^2 too low, trying with new starting values."
                 st_x = 2
                 st_y = 0.2
                 params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
@@ -738,6 +739,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                 rms = params[1]
                 mean = params[0]
             if r_squared < 0.99:
+                print "R^2 too low, trying with new starting values."
                 st_x = 1
                 st_y = 0.1
                 params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
