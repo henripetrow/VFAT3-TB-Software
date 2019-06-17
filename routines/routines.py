@@ -718,8 +718,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
         else:
             rms_loop_mean = []
             mean_loop_mean = []
-            np_x = np.array(charge_data)
-            np_y = np.array(hit_data)
+            np_x = np.array(adc_values)
+            np_y = np.array(data)
             st_x = 3
             st_y = 0.3
             for i in range(0, 3):
