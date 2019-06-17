@@ -714,10 +714,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             channel_category[channel] = change_character_in_string(channel_category[channel], 3, 1)
         else:
             mean, rms, r_squared = fit_scurve(data, dac_values)
-
-
             # Channel Categorization ######
-            if channel is not 2 and channel is not 125:
+            if channel is not "2" and channel is not "125":
                 if 0 >= rms or rms > lim_enc_noisy_channel:
                     if channel is 2 or channel is 125:
                         if 0 >= rms or rms > lim_enc_noisy_channel_flex_end_channels:
@@ -731,6 +729,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                     channel_category[channel] = change_character_in_string(channel_category[channel], 1, 1)
                 else:
                     rms_list.append(rms)
+            else:
+                print "skipped channel 2 or 125"
 
             # Append values to list
 
