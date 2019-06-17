@@ -232,6 +232,8 @@ class FW_interface:
                     print k
                     cal_dac_start = k*40
                     cal_dac_stop = k*40+40
+                    print cal_dac_start
+                    print cal_dac_stop
                     message = [0xca, 0, 0x08, i-1, i+1, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8, latency & 0xFF,
                                triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
 
