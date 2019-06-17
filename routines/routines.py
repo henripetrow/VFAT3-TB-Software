@@ -715,10 +715,13 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             channel_category[channel] = change_character_in_string(channel_category[channel], 3, 1)
         else:
             rms_loop_mean = []
-            for i in range(0,3):
+            mean_loop_mean = []
+            for i in range(0, 3):
                 mean, rms, r_squared = fit_scurve(data, dac_values)
                 rms_loop_mean.append(rms)
+                mean_loop_mean(mean)
             rms = numpy.mean(rms_loop_mean)
+            mean = numpy.mean(mean_loop_mean)
             # Channel Categorization ######
             if channel != 2 and channel != 125:
                 if 0 >= rms or rms > lim_enc_noisy_channel:
