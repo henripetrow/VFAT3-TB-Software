@@ -234,7 +234,8 @@ class FW_interface:
                            len(cal_dac_array)]
                 out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
                 time.sleep(0.5)
-                output.insert(i-1, out)
+                output.pop(i)
+                output.insert(i, out)
 
         return output
 
