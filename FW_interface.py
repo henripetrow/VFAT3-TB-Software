@@ -222,7 +222,7 @@ class FW_interface:
             message.append(value)
         nr_channels = stop_ch - start_ch + 1
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
-
+        print output
         data_output = []
         # print output
         #print len(output)
@@ -239,7 +239,7 @@ class FW_interface:
                 data_output.append(out)
             else:
                 data_output.append(data)
-        #print output
+        print data_output
         # print len(output)
 
 
