@@ -235,6 +235,7 @@ class FW_interface:
 
                     out = self.execute_req(message, no_packets=3, timeout=30, scurve="yes")
                     out = out[1]
+                    time.sleep(0.5)
 
                 output.pop(i)
                 output.insert(i, out)
