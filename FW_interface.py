@@ -224,8 +224,8 @@ class FW_interface:
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
 
         data_output = []
-        print output
-        print len(output)
+        # print output
+        #print len(output)
         for i, data in enumerate(output):
             if all(v == 0 for v in data):
                 print "Detected zero output in channel %s." % i
@@ -239,11 +239,11 @@ class FW_interface:
                 data_output.append(out)
             else:
                 data_output.append(data)
-        print output
-        print len(output)
+        #print output
+        # print len(output)
 
 
-        return output
+        return data_output
 
     def run_dac_scan(self, start, step, stop, mon_sel):
         message = [0xca, 0x00, 0x09, start, step, stop, 0, 0, 0, mon_sel]
