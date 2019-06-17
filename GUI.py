@@ -2100,11 +2100,12 @@ class VFAT3_GUI:
                 errors = [0] * 3
                 errors[0] = self.check_selection_criteria(len(output[2]), lim_Noisy_Channels, "Noisy Channels")
                 errors[1] = self.check_selection_criteria(len(output[4]), lim_Dead_Channels, "Dead Channels")
-
+                self.problematic_channels = 0
                 problematic_ch = list(output[2])
                 problematic_ch.extend(x for x in output[4] if x not in problematic_ch)
                 problematic_ch.extend(x for x in output[6] if x not in problematic_ch)
                 problematic_ch.extend(x for x in output[7] if x not in problematic_ch)
+                print problematic_ch
                 self.problematic_channels = len(problematic_ch)
                 print "Problematic channels: %s" % self.problematic_channels
                 errors[1] = self.check_selection_criteria(self.problematic_channels, lim_Problematic_Channels, "Problematic Channels")
@@ -2221,6 +2222,7 @@ class VFAT3_GUI:
         print "***************************************"
         print "Starting production test. "
         print "***************************************"
+        self.test_label[5].config(text="")
         start = time.time()
         test_aborted = 0
         result = ['g'] * len(self.tests)
