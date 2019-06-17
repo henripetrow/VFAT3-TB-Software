@@ -227,35 +227,15 @@ class FW_interface:
             if all(v == 0 for v in data):
                 print "Detected zero output in channel %s." % i
                 print "Trying to re-run s-curve for it."
-                d1 = 58
-                message = [0xca, 0, 0x08, i-1, i+1, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8, latency & 0xFF,
-                           triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
-
-                out = self.execute_req(message, no_packets=3, timeout=30, scurve="yes")
-                out = out[1]
-                if all(v == 0 for v in out):
-                    print "Detected zero output in channel %s." % i
-                    print "Trying to re-run s-curve for it."
-                    time.sleep(0.5)
+                for i in range(0, 80):
                     d1 = 58
-                    delay = 2
-                    message = [0xca, 0, 0x08, i - 1, i + 1, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8,
-                               latency & 0xFF,triggers >> 8,triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
+                    delay = 1
+                    message = [0xca, 0, 0x08, i-1, i+1, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8, latency & 0xFF,
+                               triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
 
                     out = self.execute_req(message, no_packets=3, timeout=30, scurve="yes")
                     out = out[1]
-                if all(v == 0 for v in out):
-                    print "Detected zero output in channel %s." % i
-                    print "Trying to re-run s-curve for it."
-                    d1 = 58
-                    delay = 3
-                    time.sleep(0.5)
-                    message = [0xca, 0, 0x08, i - 1, i + 1, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8,
-                               latency & 0xFF, triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
 
-                    time.sleep(0.5)
-                    out = self.execute_req(message, no_packets=3, timeout=30, scurve="yes")
-                    out = out[1]
                 output.pop(i)
                 output.insert(i, out)
 
