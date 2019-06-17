@@ -248,7 +248,7 @@ class FW_interface:
                     print "Trying to re-run s-curve for it."
                     d1 = 58
                     time.sleep(0.5)
-                    message = [0xca, 0, 0x08, i - 1, i + 1, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8,
+                    message = [0xca, 0, 0x08, i - 1, i + 1, step_ch, cal_dac_start-120, cal_dac_stop-120, 1, latency >> 8,
                                latency & 0xFF, triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
 
                     time.sleep(0.5)
