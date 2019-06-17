@@ -227,10 +227,11 @@ class FW_interface:
             if all(v == 0 for v in data):
                 print "Detected zero output in channel %s." % i
                 print "Trying to re-run s-curve for it."
-                for k in range(0, 80):
+                for k in range(0, 5):
                     d1 = 58
                     print k
-                    arm_dac = k
+                    cal_dac_start = k*40
+                    cal_dac_stop = k*40+40
                     message = [0xca, 0, 0x08, i-1, i+1, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8, latency & 0xFF,
                                triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
 
