@@ -717,7 +717,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
 
             # Channel Categorization ######
-            if channel is not 2 or channel is not 125:
+            if channel is not 2 and channel is not 125:
                 if 0 >= rms or rms > lim_enc_noisy_channel:
                     if channel is 2 or channel is 125:
                         if 0 >= rms or rms > lim_enc_noisy_channel_flex_end_channels:
