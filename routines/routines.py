@@ -716,20 +716,20 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             mean, rms, r_squared = fit_scurve(data, dac_values)
 
             # Channel Categorization ######
-
-            if 0 >= rms or rms > lim_enc_noisy_channel:
-                if channel is 2 or channel is 125:
-                    if 0 >= rms or rms > lim_enc_noisy_channel_flex_end_channels:
+            if channel is not 2 or channel is not 125:
+                if 0 >= rms or rms > lim_enc_noisy_channel:
+                    if channel is 2 or channel is 125:
+                        if 0 >= rms or rms > lim_enc_noisy_channel_flex_end_channels:
+                            noisy_channels.append(channel)
+                            channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
+                    else:
                         noisy_channels.append(channel)
                         channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
+                elif rms <= lim_enc_unbonded_channel:
+                    unbonded_channels.append(channel)
+                    channel_category[channel] = change_character_in_string(channel_category[channel], 1, 1)
                 else:
-                    noisy_channels.append(channel)
-                    channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
-            elif rms <= lim_enc_unbonded_channel:
-                unbonded_channels.append(channel)
-                channel_category[channel] = change_character_in_string(channel_category[channel], 1, 1)
-            else:
-                rms_list.append(rms)
+                    rms_list.append(rms)
 
             # Append values to list
 
