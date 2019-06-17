@@ -722,13 +722,24 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             np_y = np.array(data)
             st_x = 3
             st_y = 0.3
-            for i in range(0, 3):
-                params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
-                r_squared = calculate_r2_score(np_x, np_y, params)
-                print "R^2: %s" % r_squared
-                print params
-                rms_loop_mean.append(params[0])
-                mean_loop_mean.append(params[1])
+            params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
+            r_squared = calculate_r2_score(np_x, np_y, params)
+            print "R^2: %s" % r_squared
+            print params
+            rms_loop_mean.append(params[0])
+            mean_loop_mean.append(params[1])
+            params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
+            r_squared = calculate_r2_score(np_x, np_y, params)
+            print "R^2: %s" % r_squared
+            print params
+            rms_loop_mean.append(params[0])
+            mean_loop_mean.append(params[1])
+            params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
+            r_squared = calculate_r2_score(np_x, np_y, params)
+            print "R^2: %s" % r_squared
+            print params
+            rms_loop_mean.append(params[0])
+            mean_loop_mean.append(params[1])
             rms = numpy.mean(rms_loop_mean)
             mean = numpy.mean(mean_loop_mean)
             # Channel Categorization ######
