@@ -224,8 +224,8 @@ class FW_interface:
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
 
 
-        print "output"
-        print output[0]
+        print output
+        print len(output)
         for i, data in enumerate(output):
             if all(v == 0 for v in data):
                 print "Detected zero output in channel %s." % i
@@ -234,8 +234,11 @@ class FW_interface:
                            triggers >> 8,
                            triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF, 1,
                            len(cal_dac_array)]
-                output = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
+                output[i] = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
                 time.sleep(0.1)
+        print output
+        print len(output)
+
 
         return output
 
