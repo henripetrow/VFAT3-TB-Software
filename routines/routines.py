@@ -888,6 +888,7 @@ def fit_func(x, a, b):
 def fit_scurve(hit_data, charge_data):
 
     hit_data[:] = [x / 100 for x in hit_data]
+    print hit_data
     np_x = np.array(charge_data)
     np_y = np.array(hit_data)
     st_x = 3
