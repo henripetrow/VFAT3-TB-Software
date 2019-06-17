@@ -703,13 +703,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
     for i, channel in enumerate(channels):
         data = scurve_data[i]
-        print channel
-        if channel is "2":
-            print "pass"
-        if channel == "2":
-            print "pAss"
-        if channel == 2:
-            print "pASS"
+
         if len(data) == 1:
             data = data[0]
         if all(v == 0 for v in data):
@@ -722,7 +716,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
         else:
             mean, rms, r_squared = fit_scurve(data, dac_values)
             # Channel Categorization ######
-            if channel is not "2" and channel is not "125":
+            if channel != 2 and channel != 125:
                 if 0 >= rms or rms > lim_enc_noisy_channel:
                     if channel is 2 or channel is 125:
                         if 0 >= rms or rms > lim_enc_noisy_channel_flex_end_channels:
