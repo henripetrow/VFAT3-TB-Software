@@ -222,11 +222,19 @@ class FW_interface:
             message.append(value)
         nr_channels = stop_ch - start_ch + 1
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
+
+
         print "output"
         print output[0]
         for i, data in enumerate(output):
             if all(v == 0 for v in data):
                 print "Detected zero output in channel %s." % i
+                print "Trying to re-run s-curve for it."
+                message = [0xca, 0xff, 0x08, i, i, step_ch, 0, 0, 0, latency >> 8, latency & 0xFF,
+                           triggers >> 8,
+                           triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF, 1,
+                           len(cal_dac_array)]
+                output = self.execute_req(message, no_packets=nr_channels, timeout=30, scurve="yes")
 
         return output
 
