@@ -703,9 +703,11 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
     for i, channel in enumerate(channels):
         data = scurve_data[i]
+
         print "Analyzing channel %s" % channel
         if len(data) == 1:
             data = data[0]
+        data[:] = [x / 100 for x in data]
         if all(v == 0 for v in data):
             print "Dead channel."
             dead_channels.append(channel)
@@ -887,7 +889,7 @@ def fit_func(x, a, b):
 
 def fit_scurve(hit_data, charge_data):
 
-    hit_data[:] = [x / 100 for x in hit_data]
+
     print hit_data
     np_x = np.array(charge_data)
     np_y = np.array(hit_data)
