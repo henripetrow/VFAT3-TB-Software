@@ -66,7 +66,7 @@ def find_threshold(obj):
 
 def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes",
                           dac_range=[220, 240], bc_between_calpulses=2000, pulsestretch=7, latency=40,
-                          cal_phi=0, folder="scurve", triggers=300):
+                          cal_phi=0, folder="scurve", triggers=500):
     mean_th_fc = "n"
     all_ch_data = "n"
     noisy_channels = "n"
