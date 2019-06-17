@@ -90,4 +90,4 @@ par_calphi = 0
 par_arm_dac = 130
 par_start_cal_dac = 210
 par_stop_cal_dac = 245
-par_triggers = 100
+par_triggers = 200
