@@ -2707,7 +2707,9 @@ class VFAT3_GUI:
                 errors.append(self.check_selection_criteria(output[0][-1], adc0_dac_selection_criteria_lut[scan[:-5]], scan))
             else:
                 print "Error, Scan could not be performed."
-        errors.append('r')
+                errors.append('r')
+
+        # write the found nominal values to registers.
         self.register[141].PRE_I_BSF[0] = hv3b_biasing_lut['PRE_I_BSF'][1]
         self.register[141].PRE_I_BIT[0] = hv3b_biasing_lut['PRE_I_BIT'][1]
         self.write_register(141)
@@ -2730,7 +2732,7 @@ class VFAT3_GUI:
         self.register[140].CFD_DAC_1[0] = hv3b_biasing_lut['CFD_DAC_1'][1]
         self.register[140].CFD_DAC_2[0] = hv3b_biasing_lut['CFD_DAC_2'][1]
         self.write_register(140)
-        time.sleep(0.5)
+
         stop = time.time()
         run_time = (stop - start)
         print "\nRuntime: %f s" % run_time
