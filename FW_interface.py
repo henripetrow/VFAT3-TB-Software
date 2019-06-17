@@ -224,8 +224,9 @@ class FW_interface:
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
         print "output"
         print output[0]
-        if all(v == 0 for v in output[0]):
-            print "Detected zero output."
+        for data in output:
+            if all(v == 0 for v in data):
+                print "Detected zero output."
 
         return output
 
