@@ -731,8 +731,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                 else:
                     rms_list.append(rms)
             else:
-                print "skipped channel 2 or 125"
-
+                print "skipped channel %s" % channel
             # Append values to list
 
             rms_return_list.append(rms)
@@ -745,8 +744,9 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     # print rms_list
     mean_mean = numpy.mean(mean_list)
     mean_rms = numpy.std(mean_list)
-    if channel != 2 and channel != 125:
-        for i, channel in enumerate(channels):
+
+    for i, channel in enumerate(channels):
+        if channel != 2 and channel != 125:
             if abs(mean_mean - mean_list[i]) > mean_rms * lim_sigma + lim_trim_dac_scale/2 and mean_list[i] is not 0:
                 channel_category[channel] = change_character_in_string(channel_category[channel], 0, 1)
                 untrimmable_channels.append(channel)
