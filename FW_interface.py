@@ -238,7 +238,9 @@ class FW_interface:
                 data_output.extend(out)
             else:
                 data_output.extend(data)
-        print data_output
+        for i, data in enumerate(data_output):
+            print data
+            print output[i]
         # print len(output)
 
 
