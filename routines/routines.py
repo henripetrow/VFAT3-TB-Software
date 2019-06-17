@@ -703,7 +703,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
     for i, channel in enumerate(channels):
         data = scurve_data[i]
-        if isinstance(data, (list,)):
+        if len(data) == 1:
             data = data[0]
         if all(v == 0 for v in data):
             print "Dead channel."
