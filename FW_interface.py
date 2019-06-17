@@ -246,7 +246,7 @@ class FW_interface:
                 if all(v == 0 for v in out):
                     print "Detected zero output in channel %s." % i
                     print "Trying to re-run s-curve for it."
-                    d1 = 70
+                    d1 = 65
                     time.sleep(0.5)
                     message = [0xca, 0, 0x08, i - 1, i + 1, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8,
                                latency & 0xFF, triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
