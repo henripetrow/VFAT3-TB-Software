@@ -2222,6 +2222,7 @@ class VFAT3_GUI:
         print "***************************************"
         print "Starting production test. "
         print "***************************************"
+        self.test_label[5].config(text="")
         start = time.time()
         test_aborted = 0
         result = ['g'] * len(self.tests)
