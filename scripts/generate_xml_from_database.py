@@ -345,15 +345,15 @@ for hybrid in hybrid_list:
     print hybrid
     if k == 0:
         file_nr = file_nr + 1
+        print "Creating header"
         filename = "%sVFAT3_THRESHOLD_%s.xml" % (file_path, file_nr)
         table_name = "VFAT3_THRESHOLD"
         name = "VFAT3 Channel Threshold Values"
         description = "GEM VFAT3 Threshold Lookup Table"
         run_type = "THRESHOLD"
         generate_header(filename, table_name, name, run_type)
-        data = "<DATA_SET>\n"
-    else:
-        data += "<DATA_SET>\n"
+
+    data = "<DATA_SET>\n"
     k = k + 1
     production_data = database.get_production_results(hybrid)
 
