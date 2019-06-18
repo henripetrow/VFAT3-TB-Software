@@ -97,7 +97,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.register[0xffff].RUN[0] = 1
             obj.write_register(0xffff)
 
-
+            print "Sending RUNMode."
             obj.interfaceFW.send_fcc("01100110")
 
             obj.register[131].TP_FE[0] = 7
@@ -120,11 +120,11 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
 
             obj.register[135].ARM_DAC[0] = arm_dac
             obj.write_register(135)
-
+            print "Unmasking all channels."
             for k in range(0, 128):
                 obj.register[k].mask[0] = 0
                 obj.write_register(k)
-                time.sleep(0.1)
+                time.sleep(0.015)
 
             #obj.register[137].LAT[0] = latency
             #obj.write_register(137)
