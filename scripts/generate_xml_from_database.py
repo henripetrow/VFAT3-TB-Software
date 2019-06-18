@@ -192,7 +192,6 @@ print "Generated xml-file for: %s" % name
 # Generation xml tables for the DAC scans
 
 dac_list = dac6bits
-dac_list.extend(dac8bits)
 
 for dac in dac_list:
     file_nr = 0
@@ -202,7 +201,7 @@ for dac in dac_list:
         print hybrid
         if k == 0:
             file_nr = file_nr + 1
-            filename = "%sVFAT3_%s%s.xml" % (file_path, dac, file_nr)
+            filename = "%sVFAT3_%s_%s.xml" % (file_path, dac, file_nr)
             print "Generating file: %s" % filename
             print "From %s" % hybrid
             name = "VFAT3 %s DAC Lookup Table" % dac
@@ -246,7 +245,7 @@ for dac in dac_list:
                     data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
                     data += "<ADC_VALUE></ADC_VALUE>\n"
                 data += "</DATA>\n"
-        if k == 25:
+        if k == 100:
             data += "</DATA_SET>\n"
             outF = open(filename, "a")
             outF.write(data)
@@ -255,6 +254,9 @@ for dac in dac_list:
             print "To %s" % hybrid
             k = 0
     print "Generated xml-file for: %s" % dac
+
+
+
 
 
 # # Thresholds
