@@ -220,10 +220,12 @@ for dac in dac_list:
             description = "GEM VFAT3 %s Lookup Table" % dac
             run_type = "%s_LUT" % dac
             generate_header(filename, table_name, name, run_type)
-
+            data = "<DATA_SET>\n"
+        else:
+            data += "<DATA_SET>\n"
         k = k + 1
         production_data = database.get_production_results(hybrid)
-        data = "<DATA_SET>\n"
+
         data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
         data += "<VERSION>1</VERSION>\n"
         data += "<PART>\n"
@@ -243,7 +245,7 @@ for dac in dac_list:
                     data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
                     data += "<ADC_VALUE></ADC_VALUE>\n"
                 data += "</DATA>\n"
-        if k == 500:
+        if k == 50:
             data += "</DATA_SET>\n"
             outF = open(filename, "a")
             outF.write(data)
