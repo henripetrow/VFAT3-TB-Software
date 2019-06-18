@@ -377,6 +377,7 @@ for hybrid in hybrid_list:
     outF.close()
     if k == 100:
         generate_footer(filename)
+        k = 0
 if k != 0:
     generate_footer(filename)
 print "Generated xml-file for: Threshold"
