@@ -374,7 +374,7 @@ for hybrid in hybrid_list:
     outF = open(filename, "a")
     outF.write(data)
     outF.close()
-    if k == 100:
+    if k == 120:
         generate_footer(filename)
         k = 0
 if k != 0:
@@ -416,7 +416,7 @@ for hybrid in hybrid_list:
     outF = open(filename, "a")
     outF.write(data)
     outF.close()
-    if k == 100:
+    if k == 120:
         generate_footer(filename)
         k = 0
 if k != 0:
@@ -461,7 +461,7 @@ for hybrid in hybrid_list:
     outF = open(filename, "a")
     outF.write(data)
     outF.close()
-    if k == 100:
+    if k == 20:
         generate_footer(filename)
         k = 0
 if k != 0:
@@ -506,7 +506,7 @@ for hybrid in hybrid_list:
     outF = open(filename, "a")
     outF.write(data)
     outF.close()
-    if k == 100:
+    if k == 80:
         generate_footer(filename)
         k = 0
 if k != 0:
@@ -548,7 +548,7 @@ for hybrid in hybrid_list:
     outF = open(filename, "a")
     outF.write(data)
     outF.close()
-    if k == 100:
+    if k == 80:
         generate_footer(filename)
         k = 0
 if k != 0:
