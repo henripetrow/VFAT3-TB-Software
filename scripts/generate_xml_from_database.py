@@ -198,7 +198,7 @@ for dac in dac_list:
     file_nr = 0
     k = 0
     for hybrid in hybrid_list:
-        print i
+        print k
         print hybrid
         if k == 0:
             file_nr = file_nr + 1
