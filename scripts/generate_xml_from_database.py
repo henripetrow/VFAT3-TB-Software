@@ -198,6 +198,8 @@ for dac in dac_list:
     file_nr = 0
     i = 0
     for hybrid in hybrid_list:
+        print i
+        print hybrid
         if i == 0:
             file_nr = file_nr + 1
             filename = "%sVFAT3_%s%s.xml" % (file_path, dac, file_nr)
