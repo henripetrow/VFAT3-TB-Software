@@ -263,113 +263,123 @@ print "Generated xml-file for: %s" % name
 #         k = 0
 #     print "Generated xml-file for: %s" % dac
 
-dac_list = dac8bits
-
-for dac in dac_list:
-    file_nr = 0
-    k = 0
-    for hybrid in hybrid_list:
-        if k == 0:
-            file_nr = file_nr + 1
-            filename = "%sVFAT3_%s_%s.xml" % (file_path, dac, file_nr)
-            print "Generating file: %s" % filename
-            print "From %s" % hybrid
-            name = "VFAT3 %s DAC Lookup Table" % dac
-            # Exceptions for GEM database naming
-            if dac == "HYST_DAC":
-                name = "VFAT3 HYST DAC Lookup Table"
-            if dac == "ZCC_DAC":
-                name = "VFAT3 ZCC DAC Lookup Table"
-            if dac == "CFD_DAC_1":
-                name = "VFAT3 CFD DAC_1 Lookup Table"
-            if dac == "CFD_DAC_2":
-                name = "VFAT3 CFD DAC_2 Lookup Table"
-            if dac == "ARM_DAC":
-                name = "VFAT3 ARM DAC Lookup Table"
-            if dac == "CAL_DAC":
-                name = "VFAT3 Calib Pulse DAC Lookup Table"
-            table_name = "VFAT3_%s" % dac
-            description = "GEM VFAT3 %s Lookup Table" % dac
-            run_type = "%s_LUT" % dac
-            generate_header(filename, table_name, name, run_type)
-            data = "<DATA_SET>\n"
-        else:
-            data += "<DATA_SET>\n"
-        k = k + 1
-        production_data = database.get_production_results(hybrid)
-
-        data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
-        data += "<VERSION>1</VERSION>\n"
-        data += "<PART>\n"
-        data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
-        data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
-        data += "</PART>\n"
-        for adc in adcs:
-            db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
-            for i, dat in enumerate(db_data):
-                data += "<DATA>\n"
-                if dat:
-                    data += "<ADC_NAME>%s</ADC_NAME>\n" % adc
-                    data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
-                    data += "<ADC_VALUE>%s</ADC_VALUE>\n" % dat
-                else:
-                    data += "<ADC_NAME>%s</ADC_NAME>\n" % adc
-                    data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
-                    data += "<ADC_VALUE></ADC_VALUE>\n"
-                data += "</DATA>\n"
-        if k == 25:
-            data += "</DATA_SET>\n"
-            outF = open(filename, "a")
-            outF.write(data)
-            outF.close()
-            generate_footer(filename)
-            print "To %s" % hybrid
-            k = 0
-    if k != 0:
-        data += "</DATA_SET>\n"
-        outF = open(filename, "a")
-        outF.write(data)
-        outF.close()
-        generate_footer(filename)
-        print "To %s" % hybrid
-        k = 0
-    print "Generated xml-file for: %s" % dac
-
-
-# # Thresholds
+# dac_list = dac8bits
 #
-# filename = "%sVFAT3_THRESHOLD.xml" % file_path
-# table_name = "VFAT3_THRESHOLD"
-# name = "VFAT3 Channel Threshold Values"
-# description = "GEM VFAT3 Threshold Lookup Table"
-# run_type = "THRESHOLD"
-# generate_header(filename, table_name, name, run_type)
-#
-# for hybrid in hybrid_list:
-#     production_data = database.get_production_results(hybrid)
-#     data = "<DATA_SET>\n"
-#     data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
-#     data += "<VERSION>1</VERSION>\n"
-#     data += "<PART>\n"
-#     data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
-#     data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
-#     data += "</PART>\n"
-#     db_data = database.get_table_values(hybrid, "Threshold")
-#     for i, dat in enumerate(db_data):
-#         data += "<DATA>\n"
-#         if dat:
-#             data += "<CHANNEL>%s</CHANNEL>\n" % i
-#             data += "<THR_VALUE>%s</THR_VALUE>\n" % dat
+# for dac in dac_list:
+#     file_nr = 0
+#     k = 0
+#     for hybrid in hybrid_list:
+#         if k == 0:
+#             file_nr = file_nr + 1
+#             filename = "%sVFAT3_%s_%s.xml" % (file_path, dac, file_nr)
+#             print "Generating file: %s" % filename
+#             print "From %s" % hybrid
+#             name = "VFAT3 %s DAC Lookup Table" % dac
+#             # Exceptions for GEM database naming
+#             if dac == "HYST_DAC":
+#                 name = "VFAT3 HYST DAC Lookup Table"
+#             if dac == "ZCC_DAC":
+#                 name = "VFAT3 ZCC DAC Lookup Table"
+#             if dac == "CFD_DAC_1":
+#                 name = "VFAT3 CFD DAC_1 Lookup Table"
+#             if dac == "CFD_DAC_2":
+#                 name = "VFAT3 CFD DAC_2 Lookup Table"
+#             if dac == "ARM_DAC":
+#                 name = "VFAT3 ARM DAC Lookup Table"
+#             if dac == "CAL_DAC":
+#                 name = "VFAT3 Calib Pulse DAC Lookup Table"
+#             table_name = "VFAT3_%s" % dac
+#             description = "GEM VFAT3 %s Lookup Table" % dac
+#             run_type = "%s_LUT" % dac
+#             generate_header(filename, table_name, name, run_type)
+#             data = "<DATA_SET>\n"
 #         else:
-#             data += "<CHANNEL>%s</CHANNEL>\n" % i
-#             data += "<THR_VALUE></THR_VALUE>\n"
-#         data += "</DATA>\n"
-#     data += "</DATA_SET>\n"
-#     outF = open(filename, "a")
-#     outF.write(data)
-#     outF.close()
-# generate_footer(filename)
-# print "Generated xml-file for: Threshold"
+#             data += "<DATA_SET>\n"
+#         k = k + 1
+#         production_data = database.get_production_results(hybrid)
+#
+#         data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
+#         data += "<VERSION>1</VERSION>\n"
+#         data += "<PART>\n"
+#         data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
+#         data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
+#         data += "</PART>\n"
+#         for adc in adcs:
+#             db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
+#             for i, dat in enumerate(db_data):
+#                 data += "<DATA>\n"
+#                 if dat:
+#                     data += "<ADC_NAME>%s</ADC_NAME>\n" % adc
+#                     data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
+#                     data += "<ADC_VALUE>%s</ADC_VALUE>\n" % dat
+#                 else:
+#                     data += "<ADC_NAME>%s</ADC_NAME>\n" % adc
+#                     data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
+#                     data += "<ADC_VALUE></ADC_VALUE>\n"
+#                 data += "</DATA>\n"
+#         if k == 25:
+#             data += "</DATA_SET>\n"
+#             outF = open(filename, "a")
+#             outF.write(data)
+#             outF.close()
+#             generate_footer(filename)
+#             print "To %s" % hybrid
+#             k = 0
+#     if k != 0:
+#         data += "</DATA_SET>\n"
+#         outF = open(filename, "a")
+#         outF.write(data)
+#         outF.close()
+#         generate_footer(filename)
+#         print "To %s" % hybrid
+#         k = 0
+#     print "Generated xml-file for: %s" % dac
+
+
+# Thresholds
+
+file_nr = 0
+k = 0
+for hybrid in hybrid_list:
+    if k == 0:
+        file_nr = file_nr + 1
+        filename = "%sVFAT3_THRESHOLD_%s.xml" % (file_path, file_nr)
+        table_name = "VFAT3_THRESHOLD"
+        name = "VFAT3 Channel Threshold Values"
+        description = "GEM VFAT3 Threshold Lookup Table"
+        run_type = "THRESHOLD"
+        generate_header(filename, table_name, name, run_type)
+        data = "<DATA_SET>\n"
+    else:
+        data += "<DATA_SET>\n"
+    k = k + 1
+    production_data = database.get_production_results(hybrid)
+
+    data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
+    data += "<VERSION>1</VERSION>\n"
+    data += "<PART>\n"
+    data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
+    data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
+    data += "</PART>\n"
+    db_data = database.get_table_values(hybrid, "Threshold")
+    for i, dat in enumerate(db_data):
+        data += "<DATA>\n"
+        if dat:
+            data += "<CHANNEL>%s</CHANNEL>\n" % i
+            data += "<THR_VALUE>%s</THR_VALUE>\n" % dat
+        else:
+            data += "<CHANNEL>%s</CHANNEL>\n" % i
+            data += "<THR_VALUE></THR_VALUE>\n"
+        data += "</DATA>\n"
+    data += "</DATA_SET>\n"
+    outF = open(filename, "a")
+    outF.write(data)
+    outF.close()
+    if k == 100:
+        generate_footer(filename)
+if k != 0:
+    generate_footer(filename)
+print "Generated xml-file for: Threshold"
 #
 # # enc
 #
