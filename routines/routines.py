@@ -125,6 +125,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             print "Unmasking all channels."
             for k in range(0, 128):
                 obj.register[k].mask[0] = 0
+                obj.register[k].arm_dac[0] = 127
                 obj.write_register(k)
                 time.sleep(0.015)
 
