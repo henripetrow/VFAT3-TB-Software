@@ -246,8 +246,8 @@ for dac in dac_list:
                     data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
                     data += "<ADC_VALUE></ADC_VALUE>\n"
                 data += "</DATA>\n"
+        data += "</DATA_SET>\n"
         if k == 120:
-            data += "</DATA_SET>\n"
             outF = open(filename, "a")
             outF.write(data)
             outF.close()
@@ -255,7 +255,6 @@ for dac in dac_list:
             print "To %s" % hybrid
             k = 0
     if k != 0:
-        data += "</DATA_SET>\n"
         outF = open(filename, "a")
         outF.write(data)
         outF.close()
