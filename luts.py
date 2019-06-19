@@ -55,12 +55,12 @@ lim_sbits = [0, 0, 0, 0]
 
 # selection criteria for S-curve channel classification.
 
-lim_enc_noisy_channel = 2
+lim_enc_noisy_channel = 1.5
 lim_enc_noisy_channel_flex_end_channels = 4
 lim_enc_unbonded_channel = 0.13
 
 # Untrimmable channel calculation.
-lim_sigma = 4
+lim_sigma = 3
 lim_trim_dac_scale = 2
 
 # Selection criteria
