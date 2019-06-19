@@ -101,6 +101,8 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.interfaceFW.send_fcc("01100110")
 
             obj.register[131].TP_FE[0] = 7
+            obj.register[131].RES_PRE[0] = 2
+            obj.register[131].CAP_PRE[0] = 1
             obj.write_register(131)
 
             obj.register[132].PT[0] = 3
