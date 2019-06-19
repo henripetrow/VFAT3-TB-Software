@@ -178,6 +178,7 @@ for hybrid in hybrid_list:
     data += "<LOCATION>%s</LOCATION>\n" % production_data[27]
     data += "<TEMPERATURE>%s</TEMPERATURE>\n" % production_data[28]
     data += "<STATE>%s</STATE>\n" % production_data[29]
+    data += "<TEMPERATURE_K2>%s</TEMPERATURE_K2>\n" % production_data[33]
     data += "</DATA>\n"
     data += "</DATA_SET>\n"
 
