@@ -723,19 +723,19 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             rms_return_list.append(0)
             channel_category[channel] = change_character_in_string(channel_category[channel], 3, 1)
         else:
-            st_x = 0
-            st_y = 0
+            st_x = 10
+            st_y = 0.3
             mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
             if r_squared < 0.99:
                 print "R^2 too low, trying with new starting values."
-                st_x = 3
-                st_y = 0.3
+                st_x = 11
+                st_y = 0.4
                 mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
 
             if r_squared < 0.99:
                 print "R^2 too low, trying with new starting values."
-                st_x = 10
-                st_y = 0.1
+                st_x = 9
+                st_y = 0.2
                 mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
             print rms
             print mean
