@@ -245,7 +245,7 @@ for dac in dac_list:
                     data += "<DAC_SETTING>DAC%s</DAC_SETTING>\n" % i
                     data += "<ADC_VALUE></ADC_VALUE>\n"
                 data += "</DATA>\n"
-        if k == 20:
+        if k == 120:
             data += "</DATA_SET>\n"
             outF = open(filename, "a")
             outF.write(data)
