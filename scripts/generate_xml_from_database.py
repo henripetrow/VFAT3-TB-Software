@@ -73,7 +73,7 @@ temp_list = []
 
 for h in hybrid_list:
     hybrid_number = int(h[6:])
-    if hybrid_number > 6200:
+    if hybrid_number > 6000:
         temp_list.append(int(h[6:]))
 
 temp_list.sort()
