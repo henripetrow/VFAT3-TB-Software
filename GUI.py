@@ -2084,9 +2084,6 @@ class VFAT3_GUI:
         if self.stop_cal_dac < self.start_cal_dac:
             print "Stop CAL_DAC should be higher than start CAL_DAC."
             error += 1
-        if (self.stop_cal_dac - self.start_cal_dac) > 40:
-            print "Max CAL_DAC steps is 40."
-            error += 1
         if error == 0:
             text = "->Running S-curve\n"
             self.add_to_interactive_screen(text)
