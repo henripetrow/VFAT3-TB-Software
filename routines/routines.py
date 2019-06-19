@@ -793,12 +793,12 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
 
 
-    # plt.hist(mean_list, bins=100)
-    # plt.title('Threshold spread')
-    # plt.xlabel('Thr [fC]')
-    # plt.ylabel('#')
-    # plt.grid()
-    # plt.show()
+    plt.hist(mean_list, bins=100)
+    plt.title('Threshold spread')
+    plt.xlabel('Thr [fC]')
+    plt.ylabel('#')
+    plt.grid()
+    plt.show()
 
 
     # fig, ax = plt.subplots()
