@@ -93,6 +93,9 @@ par_calphi = 0
 par_arm_dac = 90
 par_start_cal_dac = 170
 par_stop_cal_dac = 235
-par_cal_dac_start_flex = 160
-par_cal_dac_stop_flex = 250
 par_triggers = 400
+
+par_rerun_scurve_channel_list = [2, 125]
+par_cal_dac_start_rerun = 160
+par_cal_dac_stop_rerun = 250
+
