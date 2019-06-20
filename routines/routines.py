@@ -735,7 +735,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             if len(par_st_x_list) == len(par_st_y_list):
                 r_squared = 1
                 for h, st_x in enumerate(par_st_x_list):
-                    st_y = par_st_y_list[i]
+                    st_y = par_st_y_list[h]
                     if r_squared < 0.99:
                         print "Trying a fit with starting values. %s %s" % (st_x, st_y)
                     else:
