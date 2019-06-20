@@ -23,6 +23,7 @@ hv3b_biasing_lut = {'PRE_I_BSF': [230, 0],
                     'CAL_DAC': ['n', 0],
                     'Iref': [100, 0]}
 
+lim_short_circuit = 0.450  # A
 
 # Selection Criteria for the production test
 # [yellow_low, yellow_high, red_low, red_high]
