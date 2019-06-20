@@ -777,10 +777,14 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     mean_rms = numpy.std(mean_list)
 
     for i, channel in enumerate(channels):
-        if channel != 2 and channel != 125:
-            if abs(mean_mean - mean_list[i]) > mean_rms * lim_sigma + lim_trim_dac_scale/2 and mean_list[i] is not 0:
-                channel_category[channel] = change_character_in_string(channel_category[channel], 0, 1)
-                untrimmable_channels.append(channel)
+        if channel == 2 or channel == 125:
+            sigma = lim_sigma * lim_sigma_flex_end_channels_multiplier
+        else:
+            sigma = lim_sigma
+        if abs(mean_mean - mean_list[i]) > mean_rms * sigma + lim_trim_dac_scale/2 and mean_list[i] is not 0:
+            channel_category[channel] = change_character_in_string(channel_category[channel], 0, 1)
+            untrimmable_channels.append(channel)
+
     print ""
     print "Mean Threshold: %f fC, sigma: %f fC" % (mean_mean, mean_rms)
     print "Mean enc: %f fC, sigma: %f fC" % (rms_mean, rms_rms)
