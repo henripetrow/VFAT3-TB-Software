@@ -230,7 +230,6 @@ class FW_interface:
                        latency & 0xFF,
                        triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
             out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
-            out = out[1]
             time.sleep(0.5)
             output[re_channel] = out
 
