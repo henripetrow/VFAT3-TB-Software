@@ -63,7 +63,7 @@ lim_enc_unbonded_channel_flex_end_channels_multiplier = 1
 
 # Untrimmable channel calculation.
 lim_sigma = 3
-lim_sigma_flex_end_channels_multiplier = 0
+lim_sigma_flex_end_channels = 5
 lim_trim_dac_scale = 4
 
 # Selection criteria

@@ -778,7 +778,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
     for i, channel in enumerate(channels):
         if channel == 2 or channel == 125:
-            sigma = lim_sigma * lim_sigma_flex_end_channels_multiplier
+            sigma = lim_sigma_flex_end_channels
         else:
             sigma = lim_sigma
         if abs(mean_mean - mean_list[i]) > mean_rms * sigma + lim_trim_dac_scale/2 and mean_list[i] is not 0:
@@ -794,7 +794,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print noisy_channels
     print "Unbonded channels (lim1:%s fC, lim2:%s fC):" % (lim_enc_unbonded_channel, lim_enc_unbonded_channel*lim_enc_unbonded_channel_flex_end_channels_multiplier)
     print unbonded_channels
-    print "Untrimmable channels (lim1: %s*sigma + %s fC/2, lim2: %s*sigma + %s fC/2):" % (lim_sigma, lim_trim_dac_scale, lim_sigma * lim_sigma_flex_end_channels_multiplier, lim_trim_dac_scale)
+    print "Untrimmable channels (lim1: %s*sigma + %s fC/2, lim2: %s*sigma + %s fC/2):" % (lim_sigma, lim_trim_dac_scale, lim_sigma_flex_end_channels, lim_trim_dac_scale)
     print untrimmable_channels
     print ""
     print channel_category
