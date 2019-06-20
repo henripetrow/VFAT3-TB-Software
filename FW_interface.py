@@ -225,8 +225,8 @@ class FW_interface:
 
         # Re-run S-curve for specified channels
 
-        for re_channel in par_rerun_scurve_channel_list:
-            message = [0xca, 0, 0x08, re_channel, re_channel, step_ch, par_cal_dac_start_rerun, par_cal_dac_stop_rerun, 1, latency >> 8,
+        for re_channel in obj.rerun_scurve_channel_list:
+            message = [0xca, 0, 0x08, re_channel, re_channel, step_ch, obj.cal_dac_start_rerun, obj.cal_dac_stop_rerun, 1, latency >> 8,
                        latency & 0xFF,
                        triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
             out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")

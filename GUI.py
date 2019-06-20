@@ -708,6 +708,10 @@ class VFAT3_GUI:
         self.stop_cal_dac = par_stop_cal_dac
         self.triggers = par_triggers
 
+        self.rerun_scurve_channel_list = par_rerun_scurve_channel_list
+        self.cal_dac_start_rerun = par_cal_dac_start_rerun
+        self.cal_dac_stop_rerun = par_cal_dac_stop_rerun
+
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
         self.start_ch_label.grid(column=1, row=1, sticky='w')

@@ -712,8 +712,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     for i, channel in enumerate(channels):
         data = scurve_data[i]
 
-        if channel in par_rerun_scurve_channel_list:
-            cal_dac_values = range(par_cal_dac_start_rerun, par_cal_dac_stop_rerun + 1)
+        if channel in obj.rerun_scurve_channel_list:
+            cal_dac_values = range(obj.cal_dac_start_rerun, obj.cal_dac_stop_rerun + 1)
             cal_dac_values.reverse()
             cal_dac_values[:] = [obj.cal_dac_fcM * x + obj.cal_dac_fcB for x in cal_dac_values]
             dac_values = cal_dac_values
