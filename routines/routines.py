@@ -733,7 +733,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             channel_category[channel] = change_character_in_string(channel_category[channel], 3, 1)
         else:
             if len(par_st_x_list) == len(par_st_y_list):
-                r_squared = 1
+                r_squared = 0
                 for h, st_x in enumerate(par_st_x_list):
                     st_y = par_st_y_list[h]
                     if r_squared < 0.99:
