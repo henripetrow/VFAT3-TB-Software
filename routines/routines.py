@@ -747,7 +747,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                 mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
             if r_squared < 0.99:
                 print "R^2 too low, trying with new starting values."
-                st_x = 14
+                st_x = 12
                 st_y = 3
                 mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
             print rms
