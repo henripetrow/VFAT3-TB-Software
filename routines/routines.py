@@ -708,9 +708,17 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     unbonded_channels = []
     untrimmable_channels = []
     channel_category = ['0000']*128
-
+    dac_values_temp = dac_values
     for i, channel in enumerate(channels):
         data = scurve_data[i]
+
+        if channel is 2 or channel is 125:
+            cal_dac_values = range(par_cal_dac_start_flex, par_cal_dac_stop_flex + 1)
+            cal_dac_values.reverse()
+            cal_dac_values[:] = [obj.cal_dac_fcM * x + obj.cal_dac_fcB for x in cal_dac_values]
+            dac_values = cal_dac_values
+        else:
+            dac_values = dac_values_temp
 
         print "Analyzing channel %s" % channel
         if len(data) == 1:

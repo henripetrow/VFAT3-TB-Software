@@ -223,6 +223,17 @@ class FW_interface:
         nr_channels = stop_ch - start_ch + 1
         output = self.execute_req(message, no_packets=nr_channels,  timeout=30, scurve="yes")
 
+        # Re-run S-curve for specified channels
+        re_channel_list = [2, 125]
+        for re_channel in re_channel_list:
+            message = [0xca, 0, 0x08, re_channel, re_channel, step_ch, cal_dac_start_flex, cal_dac_stop_flex, 1, latency >> 8,
+                       latency & 0xFF,
+                       triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
+            out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
+            out = out[1]
+            time.sleep(0.5)
+            output[re_channel] = out
+
         for i, data in enumerate(output):
             if all(v == 0 for v in data):
                 print "Detected zero output in channel %s." % i
