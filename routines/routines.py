@@ -743,22 +743,22 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
 
             # Channel Categorization ######
-            if channel != 2 and channel != 125:
-                if 0 >= rms or rms > lim_enc_noisy_channel:
-                    if channel is 2 or channel is 125:
-                        if 0 >= rms or rms > lim_enc_noisy_channel_flex_end_channels:
-                            noisy_channels.append(channel)
-                            channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
-                    else:
-                        noisy_channels.append(channel)
-                        channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
-                elif rms <= lim_enc_unbonded_channel:
-                    unbonded_channels.append(channel)
-                    channel_category[channel] = change_character_in_string(channel_category[channel], 1, 1)
-                else:
-                    rms_list.append(rms)
+            if channel is 2 or channel is 125:
+                lim_noisy = lim_enc_noisy_channel * lim_enc_noisy_channel_flex_end_channels_multiplier
+                lim_unbonded = lim_enc_unbonded_channel * lim_enc_unbonded_channelflex_end_channels_multiplier
             else:
-                print "skipped channel %s" % channel
+                lim_noisy = lim_enc_noisy_channel
+                lim_unbonded = lim_enc_unbonded_channel
+
+            if 0 >= rms or rms > lim_noisy:
+                noisy_channels.append(channel)
+                channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
+            elif rms <= lim_unbonded:
+                unbonded_channels.append(channel)
+                channel_category[channel] = change_character_in_string(channel_category[channel], 1, 1)
+            else:
+                rms_list.append(rms)
+
             # Append values to list
 
             rms_return_list.append(rms)
