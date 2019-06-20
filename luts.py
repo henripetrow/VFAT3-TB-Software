@@ -26,7 +26,7 @@ hv3b_biasing_lut = {'PRE_I_BSF': [230, 0],
 
 par_psu_voltage = 3  # V
 par_psu_current_limit = 0.5  # A
-lim_short_circuit = 0.450  # A
+lim_short_circuit = 0.300  # A
 
 # Selection Criteria for the production test
 # [yellow_low, yellow_high, red_low, red_high]

@@ -282,7 +282,10 @@ class DatabaseInterface:
         self.set_string("Sbit_errors", value)
 
     def save_short_circuit(self, value):
-        self.set_string("Short_circuit", value)
+        self.set_int("Short_circuit", value)
+
+    def save_sync_error(self, value):
+        self.set_int("Sync_error", value)
 
     def create_xml_file(self):
         command = "mysql -uVFAT3 -p1234 --xml -e 'SELECT * FROM %s.%s WHERE ChipID = %s' > ./results/hybrid_%s.xml" % (self.database_name, self.table_name, self.name, self.name)
