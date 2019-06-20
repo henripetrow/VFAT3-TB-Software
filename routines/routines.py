@@ -732,31 +732,21 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             rms_return_list.append(0)
             channel_category[channel] = change_character_in_string(channel_category[channel], 3, 1)
         else:
-            st_x = 10
-            st_y = 0.3
-            mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
-            if r_squared < 0.99:
-                print "R^2 too low, trying with new starting values."
-                st_x = 12
-                st_y = 0.4
-                mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
-            if r_squared < 0.99:
-                print "R^2 too low, trying with new starting values."
-                st_x = 13
-                st_y = 0.2
-                mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
-            if r_squared < 0.99:
-                print "R^2 too low, trying with new starting values."
-                st_x = 10
-                st_y = 0.1
-                mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
-            if r_squared < 0.99:
-                print "R^2 too low, trying with new starting values."
-                st_x = 12
-                st_y = 3
-                mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
-            print rms
-            print mean
+            if len(par_st_x_list) == len(par_st_y_list):
+                r_squared = 1
+                for h, st_x in enumerate(par_st_x_list):
+                    st_y = par_st_y_list[i]
+                    if r_squared < 0.99:
+                        print "Trying a fit with starting values. %s %s" % (st_x, st_y)
+                    else:
+                        break
+                    mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
+
+                print rms
+                print mean
+            else:
+                print "Error. Starting paramter lists are not of equal length."
+
 
 
             # Channel Categorization ######

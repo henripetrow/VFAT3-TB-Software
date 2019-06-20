@@ -99,3 +99,7 @@ par_rerun_scurve_channel_list = [2, 125]
 par_cal_dac_start_rerun = 160
 par_cal_dac_stop_rerun = 250
 
+# Scurve fit startin value pairs
+
+par_st_x_list = [13, 12, 11, 15]
+par_st_y_list = [0.4, 0.3, 0.2, 5]
