@@ -81,10 +81,10 @@ class VFAT3_GUI:
             if self.tti_if.psu_found:
                 print "Found Power Supply"
                 self.tti_if.set_outputs_off()
-                self.tti_if.set_ch1_current_limit(0.4)
-                self.tti_if.set_ch2_current_limit(0.4)
-                self.tti_if.set_ch1_voltage(3)
-                self.tti_if.set_ch2_voltage(3)
+                self.tti_if.set_ch1_current_limit(par_psu_current_limit)
+                self.tti_if.set_ch2_current_limit(par_psu_current_limit)
+                self.tti_if.set_ch1_voltage(par_psu_voltage)
+                self.tti_if.set_ch2_voltage(par_psu_voltage)
                 self.psu_found = 1
             else:
                 print "\n******* No Power Supply found *******"

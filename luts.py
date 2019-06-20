@@ -23,6 +23,9 @@ hv3b_biasing_lut = {'PRE_I_BSF': [230, 0],
                     'CAL_DAC': ['n', 0],
                     'Iref': [100, 0]}
 
+
+par_psu_voltage = 3  # V
+par_psu_current_limit = 0.5  # A
 lim_short_circuit = 0.450  # A
 
 # Selection Criteria for the production test
@@ -84,7 +87,7 @@ adc0_dac_selection_criteria_lut = {"CFD_DAC_1": [500, 950, 'n', 'n'],
                                    "SH_I_BFCAS": [740, 1080, 'n', 'n'],
                                    "ZCC_DAC": [300, 750, 'n', 'n']}
 
-# production s-curve parameters
+# Production s-curve parameters
 par_start_channel = 0
 par_stop_channel = 127
 par_channel_step = 1
@@ -96,11 +99,11 @@ par_start_cal_dac = 170
 par_stop_cal_dac = 235
 par_triggers = 400
 
+# For re-running the S-curve on certain channels with different cal dac window.
 par_rerun_scurve_channel_list = [2, 125]
 par_cal_dac_start_rerun = 160
 par_cal_dac_stop_rerun = 250
 
-# Scurve fit startin value pairs
-
+# Scurve fit starting value pairs
 par_st_x_list = [13, 12, 11, 15]
 par_st_y_list = [0.4, 0.3, 0.2, 5]
