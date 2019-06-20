@@ -60,6 +60,7 @@ lim_enc_noisy_channel_flex_end_channels_multiplier = 4
 
 lim_enc_unbonded_channel = 0.13
 lim_enc_unbonded_channelflex_end_channels_multiplier = 1
+
 # Untrimmable channel calculation.
 lim_sigma = 3
 lim_trim_dac_scale = 4
