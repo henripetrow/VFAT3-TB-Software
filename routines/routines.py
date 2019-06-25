@@ -805,7 +805,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print "Mean enc: %f fC, sigma: %f fC" % (rms_mean, rms_rms)
     print "Dead Channels:"
     print dead_channels
-    print "Noisy Channels (lim1:%s fC, lim2:%s fC):" % (rms_mean + lim_enc_noisy_channel, rms_mean + lim_enc_noisy_channel_flex_end_channels)
+    print "Noisy Channels (lim1:%s fC, lim2:%s fC):" % (rms_mean + lim_enc_noisy_channel, lim_enc_noisy_channel_flex_end_channels)
     print noisy_channels
     print "Unbonded channels (lim1:%s fC, lim2:%s fC):" % (lim_enc_unbonded_channel, lim_enc_unbonded_channel_flex_end_channels)
     print unbonded_channels
