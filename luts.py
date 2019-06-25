@@ -60,10 +60,10 @@ lim_sbits = [0, 0, 0, 0]
 # selection criteria for S-curve channel classification.
 
 lim_enc_noisy_channel = 1
-lim_enc_noisy_channel_flex_end_channels_multiplier = 5
+lim_enc_noisy_channel_flex_end_channels_divider = 5
 
 lim_enc_unbonded_channel = 0.13
-lim_enc_unbonded_channel_flex_end_channels_multiplier = 1
+lim_enc_unbonded_channel_flex_end_channels_divider = 1
 
 # Untrimmable channel calculation.
 lim_sigma = 3
@@ -98,6 +98,10 @@ par_arm_dac = 90
 par_start_cal_dac = 170
 par_stop_cal_dac = 235
 par_triggers = 400
+
+# Enc plot y-range. mean enc plus
+
+par_enc_plot_lim = 1
 
 # For re-running the S-curve on certain channels with different cal dac window.
 par_rerun_scurve_channel_list = []
