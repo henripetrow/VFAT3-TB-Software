@@ -754,7 +754,6 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                     else:
                         break
                     mean, rms, r_squared = fit_scurve(filtered_data, dac_values, st_x, st_y)
-
                 print rms
                 print mean
             else:
@@ -782,7 +781,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
         if abs(mean_mean - mean_list[i]) > mean_rms * sigma + lim_trim_dac_scale/2 and mean_list[i] is not 0:
             channel_category[channel] = change_character_in_string(channel_category[channel], 0, 1)
             untrimmable_channels.append(channel)
-        if 0 >= rms_list[i] or rms_list[i] > rms_mean + lim_noisy:
+        if rms_list[i] > rms_mean + lim_noisy:
             noisy_channels.append(channel)
             channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
         if rms_list[i] <= lim_unbonded:
@@ -794,7 +793,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print "Mean enc: %f fC, sigma: %f fC" % (rms_mean, rms_rms)
     print "Dead Channels:"
     print dead_channels
-    print "Noisy Channels (lim1:%s fC, lim2:%s fC):" % (lim_enc_noisy_channel, lim_enc_noisy_channel_flex_end_channels)
+    print "Noisy Channels (lim1:%s fC, lim2:%s fC):" % (rms_mean + lim_enc_noisy_channel, rms_mean + lim_enc_noisy_channel_flex_end_channels)
     print noisy_channels
     print "Unbonded channels (lim1:%s fC, lim2:%s fC):" % (lim_enc_unbonded_channel, lim_enc_unbonded_channel_flex_end_channels)
     print unbonded_channels
