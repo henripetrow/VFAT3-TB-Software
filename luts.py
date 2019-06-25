@@ -98,6 +98,8 @@ par_arm_dac = 90
 par_start_cal_dac = 170
 par_stop_cal_dac = 235
 par_triggers = 400
+par_d1 = 58
+par_d2 = 200
 
 # Enc plot y-range. mean enc plus
 

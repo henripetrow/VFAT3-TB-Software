@@ -210,8 +210,8 @@ class FW_interface:
 
     def run_scurve(self, start_ch, stop_ch, step_ch, cal_dac_start, cal_dac_stop, arm_dac, triggers, latency, obj):
         delay = 1
-        d1 = 58
-        d2 = 200
+        d1 = obj.d1
+        d2 = obj.d2
 
         cal_dac_array = range(cal_dac_start, cal_dac_stop+1, 1)
 

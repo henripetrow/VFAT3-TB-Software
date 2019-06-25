@@ -711,7 +711,8 @@ class VFAT3_GUI:
         self.rerun_scurve_channel_list = par_rerun_scurve_channel_list
         self.cal_dac_start_rerun = par_cal_dac_start_rerun
         self.cal_dac_stop_rerun = par_cal_dac_stop_rerun
-
+        self.d1 = par_d1
+        self.d2 = par_d2
 
         self.start_ch_label = Label(self.scurve_frame, text="start ch.:")
         self.start_ch_label.grid(column=1, row=1, sticky='w')

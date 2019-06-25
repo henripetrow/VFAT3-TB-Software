@@ -713,7 +713,6 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     timestamp = time.strftime("%d.%m.%Y %H:%M")
     mean_list = []
     rms_list = []
-    rms_return_list = []
     dead_channels = []
     noisy_channels = []
     unbonded_channels = []
@@ -744,7 +743,6 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
             dead_channels.append(channel)
             mean_list.append(0)
             rms_list.append(0)
-            rms_return_list.append(0)
             channel_category[channel] = change_character_in_string(channel_category[channel], 3, 1)
         else:
             if len(par_st_x_list) == len(par_st_y_list):
@@ -761,47 +759,35 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                 print mean
             else:
                 print "Error. Starting paramter lists are not of equal length."
-
-
-
-            # Channel Categorization ######
-            if channel is 2 or channel is 125:
-                lim_noisy = lim_enc_noisy_channel_flex_end_channels
-                lim_unbonded = lim_enc_unbonded_channel_flex_end_channels
-            else:
-                lim_noisy = lim_enc_noisy_channel
-                lim_unbonded = lim_enc_unbonded_channel
-
-            if 0 >= rms or rms > lim_noisy:
-                noisy_channels.append(channel)
-                channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
-            elif rms <= lim_unbonded:
-                unbonded_channels.append(channel)
-                channel_category[channel] = change_character_in_string(channel_category[channel], 1, 1)
-            else:
-                rms_list.append(rms)
-
             # Append values to list
-
-            rms_return_list.append(rms)
+            rms_list.append(rms)
             mean_list.append(mean)
 
     rms_mean = numpy.mean(rms_list)
     rms_rms = numpy.std(rms_list)
     if numpy.isnan(rms_mean):
         rms_mean = 0
-    # print rms_list
     mean_mean = numpy.mean(mean_list)
     mean_rms = numpy.std(mean_list)
 
     for i, channel in enumerate(channels):
         if channel == 2 or channel == 125:
+            lim_noisy = lim_enc_noisy_channel_flex_end_channels
+            lim_unbonded = lim_enc_unbonded_channel_flex_end_channels
             sigma = lim_sigma_flex_end_channels
         else:
+            lim_noisy = lim_enc_noisy_channel
+            lim_unbonded = lim_enc_unbonded_channel
             sigma = lim_sigma
         if abs(mean_mean - mean_list[i]) > mean_rms * sigma + lim_trim_dac_scale/2 and mean_list[i] is not 0:
             channel_category[channel] = change_character_in_string(channel_category[channel], 0, 1)
             untrimmable_channels.append(channel)
+        if 0 >= rms_list[i] or rms_list[i] > rms_mean + lim_noisy:
+            noisy_channels.append(channel)
+            channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
+        if rms_list[i] <= lim_unbonded:
+            unbonded_channels.append(channel)
+            channel_category[channel] = change_character_in_string(channel_category[channel], 1, 1)
 
     print ""
     print "Mean Threshold: %f fC, sigma: %f fC" % (mean_mean, mean_rms)
@@ -891,7 +877,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
         text = "Results were saved to the folder:\n %s \n" % folder
         obj.add_to_interactive_screen(text)
 
-    return mean_mean, rms_mean, noisy_channels, dead_channels, rms_return_list, mean_list, channel_category, unbonded_channels, untrimmable_channels
+    return mean_mean, rms_mean, noisy_channels, dead_channels, rms_list, mean_list, channel_category, unbonded_channels, untrimmable_channels
 
 
 def find_mean_and_enc(data, dac_values):
