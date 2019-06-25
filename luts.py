@@ -103,6 +103,10 @@ par_triggers = 400
 
 par_enc_plot_lim = 1
 
+# Threshold plot y-range. mean thr plus
+
+par_thr_plot_lim = 3
+
 # For re-running the S-curve on certain channels with different cal dac window.
 par_rerun_scurve_channel_list = []
 par_cal_dac_start_rerun = 160

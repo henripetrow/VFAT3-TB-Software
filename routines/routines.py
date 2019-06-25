@@ -198,6 +198,16 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             plt.ylabel("enc [fC]")
             plt.grid(True)
             plt.show()
+
+            plt.plot(thr_list)
+            plt.text(100, 0.8, "Mean Thr:\n %f" % mean_th_fc, bbox=dict(alpha=0.5))
+            plt.title("Threshold")
+            plt.ylim([0, mean_th_fc + par_enc_plot_lim])
+            plt.xlim([0, 128])
+            plt.xlabel("Channel")
+            plt.ylabel("Threshold [fC]")
+            plt.grid(True)
+            plt.show()
     return [mean_th_fc, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc, unbonded_channels, untrimmable_channels]
 
 
