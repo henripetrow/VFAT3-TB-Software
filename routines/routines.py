@@ -766,8 +766,8 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
             # Channel Categorization ######
             if channel is 2 or channel is 125:
-                lim_noisy = lim_enc_noisy_channel / lim_enc_noisy_channel_flex_end_channels_divider
-                lim_unbonded = lim_enc_unbonded_channel / lim_enc_unbonded_channel_flex_end_channels_divider
+                lim_noisy = lim_enc_noisy_channel_flex_end_channels
+                lim_unbonded = lim_enc_unbonded_channel_flex_end_channels
             else:
                 lim_noisy = lim_enc_noisy_channel
                 lim_unbonded = lim_enc_unbonded_channel
@@ -808,9 +808,9 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     print "Mean enc: %f fC, sigma: %f fC" % (rms_mean, rms_rms)
     print "Dead Channels:"
     print dead_channels
-    print "Noisy Channels (lim1:%s fC, lim2:%s fC):" % (lim_enc_noisy_channel, lim_enc_noisy_channel/lim_enc_noisy_channel_flex_end_channels_divider)
+    print "Noisy Channels (lim1:%s fC, lim2:%s fC):" % (lim_enc_noisy_channel, lim_enc_noisy_channel_flex_end_channels)
     print noisy_channels
-    print "Unbonded channels (lim1:%s fC, lim2:%s fC):" % (lim_enc_unbonded_channel, lim_enc_unbonded_channel/lim_enc_unbonded_channel_flex_end_channels_divider)
+    print "Unbonded channels (lim1:%s fC, lim2:%s fC):" % (lim_enc_unbonded_channel, lim_enc_unbonded_channel_flex_end_channels_divider)
     print unbonded_channels
     print "Untrimmable channels (lim1: %s*sigma + %s fC/2, lim2: %s*sigma + %s fC/2):" % (lim_sigma, lim_trim_dac_scale, lim_sigma_flex_end_channels, lim_trim_dac_scale)
     print untrimmable_channels
