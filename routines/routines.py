@@ -770,21 +770,33 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     mean_rms = numpy.std(mean_list)
 
     for i, channel in enumerate(channels):
+        # Set the limits according to the channel
         if channel == 2 or channel == 125:
             lim_noisy = lim_enc_noisy_channel_flex_end_channels
             lim_unbonded = lim_enc_unbonded_channel_flex_end_channels
             sigma = lim_sigma_flex_end_channels
         else:
-            lim_noisy = lim_enc_noisy_channel
+            lim_noisy = rms_mean + lim_enc_noisy_channel
             lim_unbonded = lim_enc_unbonded_channel
             sigma = lim_sigma
+
+        # Categorize the channel.
+
+        # Untrimmable channel.
         if abs(mean_mean - mean_list[i]) > mean_rms * sigma + lim_trim_dac_scale/2 and mean_list[i] is not 0:
+
             channel_category[channel] = change_character_in_string(channel_category[channel], 0, 1)
             untrimmable_channels.append(channel)
-        if rms_list[i] > rms_mean + lim_noisy:
+
+        # Noisy channel.
+        if rms_list[i] > lim_noisy:
+
             noisy_channels.append(channel)
             channel_category[channel] = change_character_in_string(channel_category[channel], 2, 1)
+
+        # Unbonded channel.
         if rms_list[i] <= lim_unbonded:
+
             unbonded_channels.append(channel)
             channel_category[channel] = change_character_in_string(channel_category[channel], 1, 1)
 
