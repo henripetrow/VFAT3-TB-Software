@@ -237,7 +237,7 @@ class FW_interface:
             if all(v == 0 for v in data):
                 print "Detected zero output in channel %s." % i
                 print "Trying to re-run s-curve for it."
-                for k in range(0, 5):
+                for k in range(0, 3):
                     obj.register[i].mask[0] = 0
                     obj.write_register(i)
                     time.sleep(1)

@@ -100,9 +100,13 @@ par_stop_cal_dac = 235
 par_triggers = 400
 
 # For re-running the S-curve on certain channels with different cal dac window.
-par_rerun_scurve_channel_list = [2, 125]
+par_rerun_scurve_channel_list = []
 par_cal_dac_start_rerun = 160
 par_cal_dac_stop_rerun = 250
+
+# Parameters for the median filtering.
+
+par_kernel_size = 7
 
 # Scurve fit starting value pairs
 par_st_x_list = [13, 12, 11, 15]

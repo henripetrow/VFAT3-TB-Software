@@ -723,6 +723,10 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
         print "Analyzing channel %s" % channel
         if len(data) == 1:
             data = data[0]
+
+        filtered_data = scipy.signal.medfilt(data, par_kernel_size)  # Filter the scurve
+
+        filtered_data[:] = [y / max(filtered_data) for y in filtered_data]  # Normalize filtered data
         data[:] = [x / 100 for x in data]
         if all(v == 0 for v in data):
             print "Dead channel."
@@ -740,7 +744,7 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                         print "Trying a fit with starting values. %s %s" % (st_x, st_y)
                     else:
                         break
-                    mean, rms, r_squared = fit_scurve(data, dac_values, st_x, st_y)
+                    mean, rms, r_squared = fit_scurve(filtered_data, dac_values, st_x, st_y)
 
                 print rms
                 print mean
