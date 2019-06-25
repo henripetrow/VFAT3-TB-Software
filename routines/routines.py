@@ -15,6 +15,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy.special import erf
 from scipy import sqrt
+import scipy.signal #To filter the S-curves
 
 
 def find_threshold(obj):
