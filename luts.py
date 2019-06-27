@@ -24,6 +24,23 @@ hv3b_biasing_lut = {'PRE_I_BSF': [230, 0],
                     'Iref': [100, 0]}
 
 
+# Selection criteria mV
+adc0_dac_selection_criteria_lut = {"CFD_DAC_1": [500, 950, 'n', 'n'],
+                                   "CFD_DAC_2": [450, 1000, 'n', 'n'],
+                                   "HYST_DAC": [80, 400, 'n', 'n'],
+                                   "PRE_I_BLCC": [150, 400, 'n', 'n'],
+                                   "PRE_I_BSF": [540, 940, 'n', 'n'],
+                                   "SD_I_BSF": [480, 820, 'n', 'n'],
+                                   "ARM_DAC": [350, 800, 'n', 'n'],
+                                   "CAL_DAC": [115, 360, 'n', 'n'],
+                                   "PRE_VREF": [880, 1200, 'n', 'n'],
+                                   "PRE_I_BIT": [700, 980, 'n', 'n'],
+                                   "SD_I_BDIFF": [700, 1080, 'n', 'n'],
+                                   "SH_I_BDIFF": [760, 1080, 'n', 'n'],
+                                   "SD_I_BFCAS": [740, 1100, 'n', 'n'],
+                                   "SH_I_BFCAS": [740, 1080, 'n', 'n'],
+                                   "ZCC_DAC": [300, 750, 'n', 'n']}
+
 par_psu_voltage = 3  # V
 par_psu_current_limit = 0.5  # A
 lim_short_circuit = 0.300  # A
@@ -70,22 +87,7 @@ lim_sigma = 3
 lim_sigma_flex_end_channels = 5
 lim_trim_dac_scale = 4
 
-# Selection criteria
-adc0_dac_selection_criteria_lut = {"CFD_DAC_1": [500, 950, 'n', 'n'],
-                                   "CFD_DAC_2": [450, 1000, 'n', 'n'],
-                                   "HYST_DAC": [80, 400, 'n', 'n'],
-                                   "PRE_I_BLCC": [80, 400, 'n', 'n'],
-                                   "PRE_I_BSF": [540, 940, 'n', 'n'],
-                                   "SD_I_BSF": [480, 820, 'n', 'n'],
-                                   "ARM_DAC": [350, 800, 'n', 'n'],
-                                   "CAL_DAC": [115, 360, 'n', 'n'],
-                                   "PRE_VREF": [880, 1200, 'n', 'n'],
-                                   "PRE_I_BIT": [620, 980, 'n', 'n'],
-                                   "SD_I_BDIFF": [700, 1080, 'n', 'n'],
-                                   "SH_I_BDIFF": [760, 1080, 'n', 'n'],
-                                   "SD_I_BFCAS": [740, 1100, 'n', 'n'],
-                                   "SH_I_BFCAS": [740, 1080, 'n', 'n'],
-                                   "ZCC_DAC": [300, 750, 'n', 'n']}
+
 
 # Production s-curve parameters
 par_start_channel = 0
