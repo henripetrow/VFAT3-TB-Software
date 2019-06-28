@@ -1594,7 +1594,7 @@ class VFAT3_GUI:
         time.sleep(0.01)
         adc_values = []
         dac_values = []
-        for i in range(15, 46, 5):
+        for i in range(15, 46, 2):
             self.register[134].Iref[0] = i
             self.write_register(134)
             time.sleep(0.01)
