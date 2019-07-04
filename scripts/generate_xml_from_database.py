@@ -40,6 +40,11 @@ if not os.path.exists(os.path.dirname(file_path)):
         print "Unable to create directory"
 else:
     filelist = glob.glob('%s*.xml' % file_path)
+    for file in filelist:
+        try:
+            os.remove(file)
+        except:
+            print "Error while removing file: %s" % file
     print filelist
 test_hybrids = []
 
