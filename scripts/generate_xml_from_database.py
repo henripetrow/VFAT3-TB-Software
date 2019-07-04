@@ -218,13 +218,12 @@ for dac in dac_list:
         else:
             data += "<DATA_SET>\n"
         k = k + 1
-        production_data = database.get_production_results(hybrid)
 
         data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
         data += "<VERSION>1</VERSION>\n"
         data += "<PART>\n"
         data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
-        data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
+        data += "<BARCODE>%s</BARCODE>\n" % hybrid
         data += "</PART>\n"
         for adc in adcs:
             db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
@@ -289,13 +288,12 @@ for dac in dac_list:
         else:
             data += "<DATA_SET>\n"
         k = k + 1
-        production_data = database.get_production_results(hybrid)
 
         data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
         data += "<VERSION>1</VERSION>\n"
         data += "<PART>\n"
         data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
-        data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
+        data += "<BARCODE>%s</BARCODE>\n" % hybrid
         data += "</PART>\n"
         for adc in adcs:
             db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
@@ -344,13 +342,12 @@ for hybrid in hybrid_list:
 
     data = "<DATA_SET>\n"
     k = k + 1
-    production_data = database.get_production_results(hybrid)
 
     data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
     data += "<VERSION>1</VERSION>\n"
     data += "<PART>\n"
     data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
-    data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
+    data += "<BARCODE>%s</BARCODE>\n" % hybrid
     data += "</PART>\n"
     db_data = database.get_table_values(hybrid, "Threshold")
     for i, dat in enumerate(db_data):
@@ -386,13 +383,12 @@ for hybrid in hybrid_list:
         run_type = "Channel Noise"
         generate_header(filename, table_name, name, run_type)
     k = k + 1
-    production_data = database.get_production_results(hybrid)
     data = "<DATA_SET>\n"
     data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
     data += "<VERSION>1</VERSION>\n"
     data += "<PART>\n"
     data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
-    data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
+    data += "<BARCODE>%s</BARCODE>\n" % hybrid
     data += "</PART>\n"
     db_data = database.get_table_values(hybrid, "enc")
     for i, dat in enumerate(db_data):
@@ -428,13 +424,13 @@ for hybrid in hybrid_list:
         run_type = "CAL_LUT"
         generate_header(filename, table_name, name, run_type)
     k = k + 1
-    production_data = database.get_production_results(hybrid)
+
     data = "<DATA_SET>\n"
     data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
     data += "<VERSION>1</VERSION>\n"
     data += "<PART>\n"
     data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
-    data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
+    data += "<BARCODE>%s</BARCODE>\n" % hybrid
     data += "</PART>\n"
     for adc in adcs:
         db_data = database.get_table_values(hybrid, "%s_%s" % (adc, dac))
@@ -475,13 +471,12 @@ for hybrid in hybrid_list:
         run_type = "%s_LUT" % dac
         generate_header(filename, table_name, name, run_type)
     k = k + 1
-    production_data = database.get_production_results(hybrid)
     data = "<DATA_SET>\n"
     data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
     data += "<VERSION>1</VERSION>\n"
     data += "<PART>\n"
     data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
-    data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
+    data += "<BARCODE>%s</BARCODE>\n" % hybrid
     data += "</PART>\n"
 
     db_data = database.get_table_values(hybrid, "%s" % dac)
@@ -518,13 +513,12 @@ for hybrid in hybrid_list:
         run_type = "%s" % dac
         generate_header(filename, table_name, name, run_type)
     k = k + 1
-    production_data = database.get_production_results(hybrid)
     data = "<DATA_SET>\n"
     data += "<COMMENT_DESCRIPTION>%s</COMMENT_DESCRIPTION>\n" % description
     data += "<VERSION>1</VERSION>\n"
     data += "<PART>\n"
     data += "<KIND_OF_PART>%s</KIND_OF_PART>\n" % kind_of_part
-    data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
+    data += "<BARCODE>%s</BARCODE>\n" % hybrid
     data += "</PART>\n"
     db_data = database.get_table_values(hybrid, dac)
     for i, dat in enumerate(db_data):
@@ -549,6 +543,3 @@ print "Generated xml-file for: %s" % dac
 print ""
 print "xml-file generation done."
 
-if create_zip == "Y":
-    with ZipFile('my_python_files.zip','w') as zip:
-        zip.write(file)
