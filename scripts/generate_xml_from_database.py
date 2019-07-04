@@ -3,7 +3,7 @@ import time
 import sys
 sys.path.append('../')
 from scripts.DatabaseInterfaceBrowse import *
-from datetime import datetime, timedelta
+
 
 
 user = "Henri Petrow"
