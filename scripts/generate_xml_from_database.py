@@ -71,8 +71,15 @@ print "Number of found hybrids:"
 print len(hybrid_list)
 
 
-database.list_hybrids_modifefied_in_days(4)
+print len(database.list_hybrids_modifefied_in_days(1))
+print len(database.list_hybrids_modifefied_in_days(2))
+print len(database.list_hybrids_modifefied_in_days(3))
+print len(database.list_hybrids_modifefied_in_days(4))
 
+print len(database.list_hybrids_modifefied_in_days(5))
+print len(database.list_hybrids_modifefied_in_days(6))
+print len(database.list_hybrids_modifefied_in_days(7))
+print len(database.list_hybrids_modifefied_in_days(8))
 
 # print "\n\nGenerating xml-files for the found hybrids."
 # adcs = ["ADC0", "ADC1"]

@@ -47,13 +47,13 @@ class DatabaseInterfaceBrowse:
             query += "WHERE Modified='%s'" % date
         query += ";"
         print query
-        # self.open_connection()
-        # self.cursor.execute(query)
-        # output = self.cursor.fetchall()
-        # for row in output:
-        #     hybrid_list.append(row[0])
-        # self.connection.close()
-        # return hybrid_list
+        self.open_connection()
+        self.cursor.execute(query)
+        output = self.cursor.fetchall()
+        for row in output:
+            hybrid_list.append(row[0])
+        self.connection.close()
+        return hybrid_list
 
     def list_hybrids_by_lot(self, lot_nr):
         hybrid_list = []
