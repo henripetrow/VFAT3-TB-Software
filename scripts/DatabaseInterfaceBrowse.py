@@ -36,7 +36,7 @@ class DatabaseInterfaceBrowse:
         hybrid_list.sort()
         return hybrid_list
 
-    def list_hybrids_modifefied_in_days(self, nr_days):
+    def list_hybrids_modified_in_days(self, nr_days):
         hybrid_list = []
         query = "SELECT * FROM Production WHERE "
         for days in range(0, nr_days+1):
@@ -53,6 +53,7 @@ class DatabaseInterfaceBrowse:
         for row in output:
             hybrid_list.append(row[0])
         self.connection.close()
+        hybrid_list.sort()
         return hybrid_list
 
     def list_hybrids_by_lot(self, lot_nr):

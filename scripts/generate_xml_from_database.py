@@ -10,8 +10,20 @@ user = "Henri Petrow"
 location = "Cern"
 start_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 stop_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-run_number = 4
 comment_description = "VFAT3 Production Data from Testing at CERN"
+
+
+nr_of_days = input("nr of days of database modifications to include:")
+
+database = DatabaseInterfaceBrowse()
+
+# hybrid_list = database.list_hybrids(greater=6700)
+hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
+
+print "Listing hybrids from the database."
+print "Number of found hybrids:"
+print len(hybrid_list)
+
 
 run_number = input("Give the run number:")
 
@@ -63,23 +75,8 @@ def generate_footer(file_name):
     outF.close()
 
 
-database = DatabaseInterfaceBrowse()
-
-hybrid_list = database.list_hybrids(greater=6700)
-print "Listing hybrids from the database."
-print "Number of found hybrids:"
-print len(hybrid_list)
 
 
-print len(database.list_hybrids_modifefied_in_days(1))
-print len(database.list_hybrids_modifefied_in_days(2))
-print len(database.list_hybrids_modifefied_in_days(3))
-print len(database.list_hybrids_modifefied_in_days(4))
-
-print len(database.list_hybrids_modifefied_in_days(5))
-print len(database.list_hybrids_modifefied_in_days(6))
-print len(database.list_hybrids_modifefied_in_days(7))
-print len(database.list_hybrids_modifefied_in_days(8))
 
 # print "\n\nGenerating xml-files for the found hybrids."
 # adcs = ["ADC0", "ADC1"]
