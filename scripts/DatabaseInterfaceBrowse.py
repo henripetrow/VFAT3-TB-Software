@@ -38,13 +38,13 @@ class DatabaseInterfaceBrowse:
 
     def list_hybrids_modifefied_in_days(self, nr_days):
         hybrid_list = []
-        query = "SELECT * FROM Production "
+        query = "SELECT * FROM Production WHERE "
         for days in range(0, nr_days+1):
             if days > 0:
                 query += " OR "
             d = datetime.today() - timedelta(days=days)
             date = d.strftime("%d%m%Y")
-            query += "WHERE Modified='%s'" % date
+            query += "Modified='%s'" % date
         query += ";"
         print query
         self.open_connection()
