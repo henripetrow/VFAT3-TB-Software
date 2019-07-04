@@ -70,14 +70,11 @@ print "Listing hybrids from the database."
 print "Number of found hybrids:"
 print len(hybrid_list)
 
-d = datetime.today()
 
-print d.timedelta(days=1)
-print d.timedelta(days=2)
-print d.timedelta(days=3)
-print d.timedelta(days=4)
-print d.timedelta(days=5)
-print d.timedelta(days=6)
+for days in range(0, 5):
+    d = datetime.today() - timedelta(days=1)
+    print d
+    print type(d)
 
 
 # print "\n\nGenerating xml-files for the found hybrids."
