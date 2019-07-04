@@ -35,6 +35,22 @@ class DatabaseInterfaceBrowse:
         hybrid_list.sort()
         return hybrid_list
 
+    def list_hybrids_modifefied_in_days(self, nr_days):
+        hybrid_list = []
+        query = "SELECT * FROM Production "
+        for days in range(0, nr_days+1):
+            d = datetime.today() - timedelta(days=days)
+            date = d.strftime("%d%m%Y")
+            query += "WHERE Modified='%s'" % date
+        print query
+        # self.open_connection()
+        # self.cursor.execute(query)
+        # output = self.cursor.fetchall()
+        # for row in output:
+        #     hybrid_list.append(row[0])
+        # self.connection.close()
+        # return hybrid_list
+
     def list_hybrids_by_lot(self, lot_nr):
         hybrid_list = []
         self.open_connection()

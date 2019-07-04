@@ -71,9 +71,7 @@ print "Number of found hybrids:"
 print len(hybrid_list)
 
 
-for days in range(0, 5):
-    d = datetime.today() - timedelta(days=days)
-    print d.strftime("%d%m%y")
+database.list_hybrids_modifefied_in_days(4)
 
 
 # print "\n\nGenerating xml-files for the found hybrids."
