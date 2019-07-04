@@ -72,7 +72,7 @@ print len(hybrid_list)
 
 
 for days in range(0, 5):
-    d = datetime.today() - timedelta(days=1)
+    d = datetime.today() - timedelta(days=days)
     print d.strftime("%d%m%y")
 
 
