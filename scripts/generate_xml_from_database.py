@@ -64,6 +64,7 @@ def generate_footer(file_name):
 
 
 database = DatabaseInterfaceBrowse()
+
 hybrid_list = database.list_hybrids(greater=6700)
 print "Listing hybrids from the database."
 # temp_list = []

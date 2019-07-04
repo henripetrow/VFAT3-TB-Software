@@ -32,6 +32,7 @@ class DatabaseInterfaceBrowse:
         for row in output:
             hybrid_list.append(row[0])
         self.connection.close()
+        hybrid_list.sort()
         return hybrid_list
 
     def list_hybrids_by_lot(self, lot_nr):
