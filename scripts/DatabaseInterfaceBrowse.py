@@ -40,9 +40,12 @@ class DatabaseInterfaceBrowse:
         hybrid_list = []
         query = "SELECT * FROM Production "
         for days in range(0, nr_days+1):
+            if days > 0:
+                query += " OR "
             d = datetime.today() - timedelta(days=days)
             date = d.strftime("%d%m%Y")
             query += "WHERE Modified='%s'" % date
+        query += ";"
         print query
         # self.open_connection()
         # self.cursor.execute(query)
