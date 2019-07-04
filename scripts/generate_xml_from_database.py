@@ -73,8 +73,7 @@ print len(hybrid_list)
 
 for days in range(0, 5):
     d = datetime.today() - timedelta(days=1)
-    print d
-    print type(d)
+    print d.strftime("%d%m%y")
 
 
 # print "\n\nGenerating xml-files for the found hybrids."
