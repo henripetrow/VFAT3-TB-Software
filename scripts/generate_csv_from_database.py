@@ -15,10 +15,6 @@ if not os.path.exists(os.path.dirname(folder)):
     except OSError as exc:  # Guard against race condition
         print "Unable to create directory"
 
-# test_hybrids = ['Hybrid333', 'Hybrid3333', 'Hybrid33333', 'Hybrid3333333', 'Hybrid333333', 'Hybrid324234', 'Hybrid354',
-#                'Hybrid34543', 'Hybrid444444', 'Hybrid44444']
-test_hybrids = []
-
 
 database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids(greater=6000)
@@ -44,7 +40,6 @@ print "Generating csv-files for the found hybrids."
 
 
 for hybrid in hybrid_list:
-
     production_data = database.get_production_results(hybrid)
     text = "%s" % production_data[0]
     for name in production_data[1:]:
