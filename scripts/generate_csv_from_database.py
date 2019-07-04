@@ -21,21 +21,8 @@ test_hybrids = []
 
 
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids()
+hybrid_list = database.list_hybrids(greater=6000)
 print "Listing hybrids from the database."
-temp_list = []
-
-for h in hybrid_list:
-    hybrid_number = int(h[6:])
-    temp_list.append(int(h[6:]))
-
-temp_list.sort()
-hybrid_list = []
-for k in temp_list:
-    if k > 6000:
-        hybrid_name = "Hybrid%s" % k
-        hybrid_list.append(hybrid_name)
-        # print hybrid_name
 print "Number of found hybrids:"
 print len(hybrid_list)
 
@@ -79,7 +66,7 @@ for item in tables:
     outF.close()
 
     for hybrid in hybrid_list:
-        text = "%s" % hybrid[6:]
+        text = "%s" % hybrid
         db_data = database.get_table_values(hybrid, item)
         for dat in db_data:
             text += ",%s" % dat
@@ -101,7 +88,7 @@ for item in tables:
     outF.close()
 
     for hybrid in hybrid_list:
-        text = "%s" % hybrid[6:]
+        text = "%s" % hybrid
         db_data = database.get_table_values(hybrid, item, allow_non_existing_hybrids=1)
         if db_data:
             for dat in db_data:
@@ -129,7 +116,7 @@ for dac in dac_list:
         outF.write(text)
         outF.close()
         for hybrid in hybrid_list:
-            text = "%s" % hybrid[6:]
+            text = "%s" % hybrid
             db_data = database.get_table_values(hybrid, "%s_%s" % (dac, adc))
             for dat in db_data:
                 text += ",%s" % dat
@@ -149,7 +136,6 @@ for adc in adcs:
     outF.write(text)
     outF.close()
     for hybrid in hybrid_list:
-        # production_data = database.get_production_results(hybrid)
         db_data = database.get_table_values(hybrid, "%s_%s" % (adc, dac))
         for dat in db_data:
             text += ",%s" % dat

@@ -67,17 +67,10 @@ database = DatabaseInterfaceBrowse()
 
 hybrid_list = database.list_hybrids(greater=6700)
 print "Listing hybrids from the database."
-# temp_list = []
-#
-# for h in hybrid_list:
-#     if h > 6700:
-#         temp_list.append(h)
-#
-# temp_list.sort()
-# hybrid_list = temp_list
-
 print "Number of found hybrids:"
 print len(hybrid_list)
+
+
 
 print ""
 print "Generating xml-files for the found hybrids."
