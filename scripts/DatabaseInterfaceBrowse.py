@@ -17,13 +17,20 @@ class DatabaseInterfaceBrowse:
         self.connection = pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd, database=self.database_name)
         self.cursor = self.connection.cursor()
 
-    def list_hybrids(self):
+    def list_hybrids(self, greater="", smaller=""):
         hybrid_list = []
         self.open_connection()
-        self.cursor.execute("SELECT * FROM Production;")
+        if greater != "" and smaller != "":
+            self.cursor.execute("SELECT * FROM Production WHERE ChipID >= %s AND ChipID <= %s;" % (greater, smaller))
+        elif greater != "":
+            self.cursor.execute("SELECT * FROM Production WHERE ChipID >= %s;" % greater)
+        elif smaller != "":
+            self.cursor.execute("SELECT * FROM Production WHERE ChipID <= %s;" % smaller)
+        else:
+            self.cursor.execute("SELECT * FROM Production;")
         output = self.cursor.fetchall()
         for row in output:
-            hybrid_list.append("Hybrid%i" % row[0])
+            hybrid_list.append(row[0])
         self.connection.close()
         return hybrid_list
 
@@ -33,7 +40,7 @@ class DatabaseInterfaceBrowse:
         self.cursor.execute("SELECT * FROM Production WHERE Lot='%s';" % lot_nr)
         output = self.cursor.fetchall()
         for row in output:
-            hybrid_list.append("Hybrid%i" % row[0])
+            hybrid_list.append(row[0])
         self.connection.close()
         return hybrid_list
 
