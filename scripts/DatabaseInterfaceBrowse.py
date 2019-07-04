@@ -21,7 +21,7 @@ class DatabaseInterfaceBrowse:
         hybrid_list = []
         self.open_connection()
         if greater != "" and smaller != "":
-            self.cursor.execute("SELECT * FROM Production WHERE ChipID >= %s AND ChipID <= %s;" % (greater, smaller))
+            self.cursor.execute("SELECT * FROM Production WHERE ChipID >= '%s' AND ChipID <= '%s';" % (greater, smaller))
         elif greater != "":
             self.cursor.execute("SELECT * FROM Production WHERE ChipID >= %s;" % greater)
         elif smaller != "":
@@ -57,7 +57,7 @@ class DatabaseInterfaceBrowse:
     def get_production_results(self, chip_id):
         data_list = []
         self.open_connection()
-        rows_count = self.cursor.execute("SELECT * FROM Production WHERE ChipID = '%s';" % chip_id[6:])
+        rows_count = self.cursor.execute("SELECT * FROM Production WHERE ChipID = '%s';" % chip_id)
         if rows_count > 0:
             output = self.cursor.fetchall()
             for row in output[0]:
@@ -70,7 +70,7 @@ class DatabaseInterfaceBrowse:
         data_list = []
         return_list = []
         self.open_connection()
-        self.cursor.execute("SELECT * FROM %s WHERE ChipID = '%s';" % (table, chip_id[6:]))
+        self.cursor.execute("SELECT * FROM %s WHERE ChipID = '%s';" % (table, chip_id))
         output = self.cursor.fetchall()
         if len(output) != 0:
             for row in output[0]:
