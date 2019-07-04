@@ -1,9 +1,9 @@
 import os
 import time
 import sys
+import glob
 sys.path.append('../')
 from scripts.DatabaseInterfaceBrowse import *
-
 
 
 user = "Henri Petrow"
@@ -13,7 +13,7 @@ stop_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 comment_description = "VFAT3 Production Data from Testing at CERN"
 
 
-nr_of_days = input("nr of days of database modifications to include:")
+nr_of_days = input("Nr. of days of database modifications to include:")
 
 database = DatabaseInterfaceBrowse()
 
@@ -29,7 +29,6 @@ print len(hybrid_list)
 
 run_number = input("Give the run number:")
 
-create_zip = 'N'
 kind_of_part = "GEM VFAT3"
 
 file_path = "../results/xml/"
@@ -39,7 +38,9 @@ if not os.path.exists(os.path.dirname(file_path)):
         os.makedirs(os.path.dirname(file_path))
     except OSError as exc:  # Guard against race condition
         print "Unable to create directory"
-
+else:
+    filelist = glob.glob('%s*.xml' % file_path)
+    print filelist
 test_hybrids = []
 
 
