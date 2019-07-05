@@ -241,7 +241,7 @@ class FW_interface:
                     obj.register[i].mask[0] = 0
                     obj.write_register(i)
                     time.sleep(1)
-                    message = [0xca, 0, 0x08, i-1, i+1, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8, latency & 0xFF,
+                    message = [0xca, 0, 0x08, i, i, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8, latency & 0xFF,
                                triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
                     out = self.execute_req(message, no_packets=3, timeout=30, scurve="yes")
                     out = out[1]
