@@ -244,7 +244,7 @@ class FW_interface:
                     message = [0xca, 0, 0x08, i, i, step_ch, cal_dac_start, cal_dac_stop, 1, latency >> 8, latency & 0xFF,
                                triggers >> 8, triggers & 0xFF, arm_dac, delay, d1 >> 8, d1 & 0xFF, d2 >> 8, d2 & 0xFF]
                     out = self.execute_req(message, no_packets=1, timeout=30, scurve="yes")
-                    if not all(v == 0 for v in data):
+                    if not all(v == 0 for v in out):
                         break
                     time.sleep(0.5)
                 output.pop(i)
