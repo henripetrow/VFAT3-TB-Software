@@ -2108,9 +2108,10 @@ class VFAT3_GUI:
                 problematic_ch.extend(x for x in output[4] if x not in problematic_ch)
                 problematic_ch.extend(x for x in output[6] if x not in problematic_ch)
                 problematic_ch.extend(x for x in output[7] if x not in problematic_ch)
-                print problematic_ch
+
                 self.problematic_channels = len(problematic_ch)
                 print "Problematic channels: %s" % self.problematic_channels
+                print problematic_ch
                 errors[1] = self.check_selection_criteria(self.problematic_channels, lim_Problematic_Channels, "Problematic Channels")
                 errors[2] = self.check_selection_criteria(output[5], lim_Mean_enc, "Noise")
             if 'y' in errors:
