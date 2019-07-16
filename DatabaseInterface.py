@@ -233,9 +233,10 @@ class DatabaseInterface:
     def save_barcode(self, value):
         self.set_int("Barcode", value)
 
-    def save_power(self, ch1_power, ch2_power, mode):
+    def save_power(self, ch1_power, ch2_power, iovdd_power, mode):
         self.set_float("%s_Power_digital" % mode, ch1_power)
         self.set_float("%s_Power_analog" % mode, ch2_power)
+        self.set_float("%s_Power_iovdd" % mode, iovdd_power)
 
     def save_hw_id_ver(self, hw_id_ver):
         self.set_int("HW_ID_VER", hw_id_ver)

@@ -1441,7 +1441,7 @@ class VFAT3_GUI:
         iovdd_power = self.interfaceFW.read_iovdd_power()
         errors = [0]*3
         if self.database:
-            self.database.save_power(dvdd_power, avdd_power, mode)
+            self.database.save_power(dvdd_power, avdd_power, iovdd_power, mode)
             if mode == "SLEEP":
                 errors[0] = self.check_selection_criteria(dvdd_power, lim_Digital_Power_SLEEP, "Power measurement Digital SLEEP")
                 errors[1] = self.check_selection_criteria(avdd_power, lim_Analog_Power_SLEEP, "Power measurement Analog SLEEP")
