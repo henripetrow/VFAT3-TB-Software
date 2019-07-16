@@ -1438,15 +1438,17 @@ class VFAT3_GUI:
         time.sleep(0.2)
         dvdd_power = self.interfaceFW.read_dvdd_power()
         iovdd_power = self.interfaceFW.read_iovdd_power()
-        errors = [0]*2
+        errors = [0]*3
         if self.database:
             self.database.save_power(dvdd_power, avdd_power, mode)
             if mode == "SLEEP":
                 errors[0] = self.check_selection_criteria(dvdd_power, lim_Digital_Power_SLEEP, "Power measurement Digital SLEEP")
                 errors[1] = self.check_selection_criteria(avdd_power, lim_Analog_Power_SLEEP, "Power measurement Analog SLEEP")
+                errors[2] = self.check_selection_criteria(iovdd_power, lim_IOVDD_Power_SLEEP, "Power measurement IOVDD SLEEP")
             elif mode == "RUN":
                 errors[0] = self.check_selection_criteria(dvdd_power, lim_Digital_Power_RUN, "Power measurement Digital RUN")
                 errors[1] = self.check_selection_criteria(avdd_power, lim_Analog_Power_RUN, "Power measurement Analog RUN")
+                errors[2] = self.check_selection_criteria(iovdd_power, lim_IOVDD_Power_RUN, "Power measurement IOVDD RUN")
             else:
                 print "ERROR. Mode not found."
                 errors[0] = 'r'
