@@ -432,7 +432,14 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
                     adc_flag = 0
         # Save the results.
         # print mv_adc0_values
-        find_closest_value(scan_name[:-5], dac_values, mv_adc0_values)
+
+        # Use preferably values from ADC0. If it is broken, use values from ADC1.
+        if obj.adc0M != 0:
+            find_closest_value(scan_name[:-5], dac_values, mv_adc0_values)
+        else:
+            print "ADC0, broken, using ADC1 values."
+            find_closest_value(scan_name[:-5], dac_values, mv_adc1_values)
+
         if obj.database:
             obj.database.save_dac_data(modified[:-5], "ADC0", int_adc0_values, dac_values)
             obj.database.save_dac_data(modified[:-5], "ADC1", int_adc1_values, dac_values)
