@@ -1437,6 +1437,7 @@ class VFAT3_GUI:
         avdd_power = self.interfaceFW.read_avdd_power()
         time.sleep(0.2)
         dvdd_power = self.interfaceFW.read_dvdd_power()
+        time.sleep(0.2)
         iovdd_power = self.interfaceFW.read_iovdd_power()
         errors = [0]*3
         if self.database:
