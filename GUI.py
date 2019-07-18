@@ -1384,6 +1384,8 @@ class VFAT3_GUI:
             print "Check ok."
         print "*******************"
         print ""
+        if self.database and production == 'yes':
+            self.database.save_short_circuit(error)
         return error
 
     def calibrate_temperature(self, production='yes'):
@@ -1482,6 +1484,8 @@ class VFAT3_GUI:
                 print text
                 break
             counter += 1
+        if self.database and production == 'yes':
+            self.database.save_sync_error(error)
         return error
 
     def read_ext_adc(self, verbose='yes'):
