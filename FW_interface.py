@@ -233,8 +233,13 @@ class FW_interface:
             time.sleep(0.5)
             output[re_channel] = out
 
+        dead_channel_list = []
         for i, data in enumerate(output):
             if all(v == 0 for v in data):
+                dead_channel_list.append(i)
+
+        if len(dead_channel_list) < 100:
+            for i, in dead_channel_list:
                 print "Detected zero output in channel %s." % i
                 print "Trying to re-run s-curve for it."
                 for k in range(0, 3):
