@@ -2520,8 +2520,6 @@ class VFAT3_GUI:
                 self.database = DatabaseInterface(barcode_value)
                 self.database.update_values = self.db_mode
                 self.database.save_date()
-                self.database.save_arrival(self.arrival_date)
-                self.database.save_lot(self.lot_nr)
                 self.database.save_terminal(self.terminal)
                 if not self.database.error:
                     if self.database.id_exists:
@@ -2532,8 +2530,9 @@ class VFAT3_GUI:
                                 error = 1
                             else:
                                 self.database.save_location(hybrid_location)
-                    #text = "Read barcode: %s\n" % barcode_value
-                    #self.add_to_interactive_screen(text)
+                    else:
+                        self.database.save_arrival(self.arrival_date)
+                        self.database.save_lot(self.lot_nr)
                 else:
                     error = 1
         else:
