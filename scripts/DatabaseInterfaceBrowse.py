@@ -76,6 +76,17 @@ class DatabaseInterfaceBrowse:
         self.connection.close()
         return data_list
 
+    def get_run_number(self):
+        data_list = []
+        self.open_connection()
+        self.cursor.execute("select RUN_NUMBER from setup_info;")
+        output = self.cursor.fetchall()
+        print output
+        for row in output:
+            data_list.append(row[0])
+        self.connection.close()
+        return data_list
+
     def get_production_results(self, chip_id):
         data_list = []
         self.open_connection()
