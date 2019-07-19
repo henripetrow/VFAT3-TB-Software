@@ -1,4 +1,5 @@
 import pymysql
+sys.path.append('../')
 from test_system_functions import read_database_info
 from datetime import datetime, timedelta
 
