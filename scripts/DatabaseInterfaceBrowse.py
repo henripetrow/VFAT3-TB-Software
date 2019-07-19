@@ -1,7 +1,5 @@
 import pymysql
 import sys
-sys.path.append('../')
-sys.path.append('$HOME/VFAT3-TB-Software/')
 from test_system_functions import read_database_info
 from datetime import datetime, timedelta
 
