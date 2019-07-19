@@ -171,3 +171,15 @@ def read_database_info():
         passwd = ""
         database = ""
     return [error, host, port, user, passwd, database]
+
+def check_data(name, data, error):
+    if data:
+        if name == 'port':
+            output_data = int(data.strip())
+        else:
+            output_data = data.strip()
+    else:
+        print "Invalid %s." % name
+        output_data = 'error'
+        error += 1
+    return [error, output_data]
