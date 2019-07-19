@@ -6,8 +6,7 @@ import sys
 import glob
 import subprocess
 sys.path.append('../')
-from scripts.DatabaseInterfaceBrowse import *
-from DatabaseInterface import *
+from DatabaseInterfaceBrowse import *
 
 
 user = "Henri Petrow"
