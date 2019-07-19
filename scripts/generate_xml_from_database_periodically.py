@@ -15,6 +15,11 @@ start_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 stop_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 comment_description = "VFAT3 Production Data from Testing at CERN"
 
+with open('./gem_db_info.dat', 'r') as f:
+    line = f.readline()
+    info = line.split()
+    gem_user = info[0]
+    gem_passwd = info[1]
 
 nr_of_days = 1
 
@@ -204,10 +209,7 @@ time.sleep(30)
 os.system('scp "%s" "%s:%s"' % (localfile2, remotehost, remotefile))
 time.sleep(30)
 
-
-user = raw_input("Give the INT2R user:")
-passwd = raw_input("Give the INT2R password:")
-os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (user, passwd))
+os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (gem_user, gen_passwd))
 
 
 
