@@ -204,9 +204,9 @@ if len(hybrid_list) > 0:
     remotefile = "/home/dbspool/spool/gem/int2r/"
     remotefile = "~/testaus/"
     print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-    time.sleep(300)
+    time.sleep(30)
     print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-    time.sleep(300)
+    time.sleep(30)
 
     #os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (gem_user, gem_passwd))
 
