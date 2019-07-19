@@ -80,7 +80,6 @@ class DatabaseInterfaceBrowse:
         self.open_connection()
         self.cursor.execute("select RUN_NUMBER from setup_info;")
         output = self.cursor.fetchall()
-        print output
         self.connection.close()
         return output[0][0]
 
