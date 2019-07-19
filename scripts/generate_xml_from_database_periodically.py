@@ -205,7 +205,7 @@ localfile2 = "../results/xml/VFAT3_Production_summary.xml"
 remotehost = "gem-machine-a"
 #remotefile = "/home/dbspool/spool/gem/int2r/"
 remotefile = "~/testaus/"
-print subprocess.Popen(['scp', '%s' % localfile, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()[0]
+print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()[0]
 time.sleep(30)
 print subprocess.check_output('scp "%s" "%s:%s"' % (localfile2, remotehost, remotefile))
 time.sleep(30)
