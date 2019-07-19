@@ -207,7 +207,7 @@ time.sleep(30)
 
 user = raw_input("Give the INT2R user:")
 passwd = raw_input("Give the INT2R password:")
-os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (user, passw))
+os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (user, passwd))
 
 
 
