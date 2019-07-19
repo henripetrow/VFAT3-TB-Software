@@ -200,8 +200,12 @@ remotefile = "~/testaus/"
 os.system('scp "%s" "%s:%s"' % (localfile1, remotehost, remotefile))
 time.sleep(300)
 os.system('scp "%s" "%s:%s"' % (localfile2, remotehost, remotefile))
+time.sleep(300)
 
 
+user = input("Give the INT2R user:")
+passwd = input("Give the INT2R password:")
+os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (user, passw))
 
 
 
