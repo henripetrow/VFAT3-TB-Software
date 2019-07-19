@@ -1,6 +1,6 @@
 import pymysql
-import sys
-from test_system_functions import read_database_info
+#import sys
+#from test_system_functions import read_database_info
 from datetime import datetime, timedelta
 
 
@@ -125,3 +125,49 @@ class DatabaseInterfaceBrowse:
 
     def get_threshold_values(self, chip_id):
         return self.get_table_values(chip_id, "Threshold")
+
+
+def read_database_info():
+    fail = 0
+    try:
+        f = open("./data/database_login.dat", "r")
+    except:
+        fail = 1
+    if fail:
+        try:
+            f = open("../data/database_login.dat", "r")
+            fail = 0
+        except:
+            fail = 1
+    if not fail:
+        print "Resolving database login information."
+        error = 0
+        for line in f:
+            data = line.split(" ")
+            field_name = data[0]
+            try:
+                value = data[2]
+            except:
+                value = ""
+
+            if field_name == 'host':
+                [error, host] = check_data(field_name, value, error)
+            if field_name == 'port':
+                [error, port] = check_data(field_name, value, error)
+            if field_name == 'user':
+                [error, user] = check_data(field_name, value, error)
+            if field_name == 'passwd':
+                [error, passwd] = check_data(field_name, value, error)
+            if field_name == 'database':
+                [error, database] = check_data(field_name, value, error)
+        if error:
+            print "Invalid database information found, contact the database admin for correct info."
+    else:
+        print "Database login information not found. Please contact the database admin for login information."
+        error = 1
+        host = ""
+        port = ""
+        user = ""
+        passwd = ""
+        database = ""
+    return [error, host, port, user, passwd, database]
