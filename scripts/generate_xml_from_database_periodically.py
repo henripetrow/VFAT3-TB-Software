@@ -14,11 +14,11 @@ start_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 stop_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 comment_description = "VFAT3 Production Data from Testing at CERN"
 
-with open('./gem_db_info.dat', 'r') as f:
-    line = f.readline()
-    info = line.split()
-    gem_user = info[0]
-    gem_passwd = info[1]
+# with open('./gem_db_info.dat', 'r') as f:
+#     line = f.readline()
+#     info = line.split()
+#     gem_user = info[0]
+#     gem_passwd = info[1]
 
 nr_of_days = 1
 
