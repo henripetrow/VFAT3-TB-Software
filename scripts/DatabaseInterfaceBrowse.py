@@ -139,6 +139,12 @@ def read_database_info():
             fail = 0
         except:
             fail = 1
+    if fail:
+        try:
+            f = open("/home/cronVFAT3-TB-Software/data/database_login.dat", "r")
+            fail = 0
+        except:
+            fail = 1
     if not fail:
         print "Resolving database login information."
         error = 0
