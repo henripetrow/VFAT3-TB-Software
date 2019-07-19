@@ -5,8 +5,8 @@ import time
 import sys
 import glob
 import subprocess
-sys.path.append('../')
-from DatabaseInterfaceBrowse import *
+sys.path.append('$HOME/VFAT3-TB-Software/')
+from scripts.DatabaseInterfaceBrowse import *
 
 
 user = "Henri Petrow"
