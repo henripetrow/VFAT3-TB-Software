@@ -4,6 +4,7 @@ import sys
 import glob
 sys.path.append('../')
 from scripts.DatabaseInterfaceBrowse import *
+from DatabaseInterface import *
 
 
 user = "Henri Petrow"
