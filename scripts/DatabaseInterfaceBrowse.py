@@ -86,7 +86,10 @@ class DatabaseInterfaceBrowse:
 
     def set_run_number(self, new_run_nr):
         self.open_connection()
-        self.cursor.execute("UPDATE  setup_info SET RUN_NUMBER=%i;" % new_run_nr)
+        query = "UPDATE setup_info SET RUN_NUMBER=%i;" % new_run_nr
+        print query
+        self.cursor.execute(query)
+
         self.connection.close()
 
     def get_production_results(self, chip_id):
