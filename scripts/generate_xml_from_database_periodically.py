@@ -28,6 +28,9 @@ print "Fetching RUN_NUMBER"
 run_number = database.get_run_number()
 print run_number
 
+database_w = DatabaseInterface()
+database_w.set_run_number(run_number + 1)
+
 kind_of_part = "GEM VFAT3"
 file_path = "../results/xml/"
 

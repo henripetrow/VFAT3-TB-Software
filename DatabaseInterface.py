@@ -17,7 +17,7 @@ class DatabaseInterface:
         if self.user == "VFAT3r":
             print "This login information can be used for database read only"
             error = 1
-        if not error:
+        if not error and name != "":
             self.dacs_8bit = ["ZCC_DAC", "ARM_DAC", "PRE_I_BIT", "PRE_VREF", "SH_I_BFCAS", "SH_I_BDIFF", "SD_I_BDIFF",
                               "SD_I_BFCAS", "CAL_DAC"]
             self.dacs_6bit = ["HYST_DAC", "CFD_DAC_1", "CFD_DAC_2", "PRE_I_BSF", "PRE_I_BLCC", "SD_I_BSF"]
@@ -129,6 +129,9 @@ class DatabaseInterface:
 
     def set_float(self, field, data):
         self.execute_command("UPDATE  %s SET %s=%f  WHERE ChipID = '%s' ;" % (self.table_name, field, data, self.name))
+
+    def set_run_number(self, new_run_nr):
+        self.execute_command("UPDATE  setup_info SET RUN_NUMBER=%i;" % new_run_nr)
 
     def save_dac_data(self, table_name, adc, adc_values, dac_values):
         table_sql = "UPDATE %s_%s SET " % (table_name, adc)
