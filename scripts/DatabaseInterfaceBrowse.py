@@ -85,7 +85,7 @@ class DatabaseInterfaceBrowse:
 
     def set_run_number(self, new_run_nr):
         self.open_connection()
-        query = "UPDATE setup_info SET RUN_NUMBER=%i;" % new_run_nr
+        query = "UPDATE setup_info ST RUN_NUMBER=%i;" % new_run_nr
         print query
         self.cursor.execute(query)
 
