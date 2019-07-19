@@ -207,7 +207,7 @@ remotehost = "gem-machine-a"
 remotefile = "~/testaus/"
 print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()[0]
 time.sleep(30)
-print subprocess.check_output('scp "%s" "%s:%s"' % (localfile2, remotehost, remotefile))
+print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()[0]
 time.sleep(30)
 
 #os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (gem_user, gem_passwd))
