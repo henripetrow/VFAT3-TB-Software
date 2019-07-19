@@ -191,3 +191,20 @@ print "Generated xml-file for: %s" % name
 
 print "xml-file generation done."
 
+print "Sending xml-files to the server."
+localfile1 = "../results/xml/pre_LoadVFAT3s.xml"
+localfile2 = "../results/xml/VFAT3_Production_summary.xml"
+remotehost = "gem-machine-a"
+#remotefile = "/home/dbspool/spool/gem/int2r/"
+remotefile = "~/testaus/"
+os.system('scp "%s" "%s:%s"' % (localfile1, remotehost, remotefile))
+time.sleep(300)
+os.system('scp "%s" "%s:%s"' % (localfile2, remotehost, remotefile))
+
+
+
+
+
+
+
+
