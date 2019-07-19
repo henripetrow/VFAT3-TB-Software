@@ -205,9 +205,9 @@ remotehost = "gem-machine-a"
 #remotefile = "/home/dbspool/spool/gem/int2r/"
 remotefile = "~/testaus/"
 os.system('scp "%s" "%s:%s"' % (localfile1, remotehost, remotefile))
-time.sleep(300)
+time.sleep(30)
 os.system('scp "%s" "%s:%s"' % (localfile2, remotehost, remotefile))
-time.sleep(300)
+time.sleep(30)
 
 os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (gem_user, gem_passwd))
 
