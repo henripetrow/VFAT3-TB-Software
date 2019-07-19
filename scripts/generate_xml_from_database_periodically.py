@@ -204,7 +204,7 @@ if len(hybrid_list) > 0:
     localfile2 = "../results/xml/VFAT3_Production_summary.xml"
     remotehost = "gem-machine-a"
     remotefile = "/home/dbspool/spool/gem/int2r/"
-    #remotefile = "~/testaus/"
+    remotefile = "~/testaus/"
     print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
     time.sleep(300)
     print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
