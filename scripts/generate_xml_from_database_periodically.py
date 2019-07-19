@@ -209,7 +209,7 @@ time.sleep(30)
 os.system('scp "%s" "%s:%s"' % (localfile2, remotehost, remotefile))
 time.sleep(30)
 
-os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (gem_user, gen_passwd))
+os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (gem_user, gem_passwd))
 
 
 
