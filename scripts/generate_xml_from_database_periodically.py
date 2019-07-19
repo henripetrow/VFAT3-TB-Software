@@ -4,6 +4,7 @@ import os
 import time
 import sys
 import glob
+import subprocess
 sys.path.append('../')
 from scripts.DatabaseInterfaceBrowse import *
 from DatabaseInterface import *
@@ -204,12 +205,12 @@ localfile2 = "../results/xml/VFAT3_Production_summary.xml"
 remotehost = "gem-machine-a"
 #remotefile = "/home/dbspool/spool/gem/int2r/"
 remotefile = "~/testaus/"
-os.system('scp "%s" "%s:%s"' % (localfile1, remotehost, remotefile))
+print subprocess.check_output('scp "%s" "%s:%s"' % (localfile1, remotehost, remotefile))
 time.sleep(30)
-os.system('scp "%s" "%s:%s"' % (localfile2, remotehost, remotefile))
+print subprocess.check_output('scp "%s" "%s:%s"' % (localfile2, remotehost, remotefile))
 time.sleep(30)
 
-os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (gem_user, gem_passwd))
+#os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (gem_user, gem_passwd))
 
 
 
