@@ -203,6 +203,8 @@ if len(hybrid_list) > 0:
     remotehost = "gem-machine-a"
     remotefile = "/home/dbspool/spool/gem/int2r/"
     remotefile = "~/testaus/"
+    print subprocess.Popen(['which', 'csp'],
+                           stdout=subprocess.PIPE).communicate()
     print subprocess.Popen(['/usr/bin/scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
     time.sleep(30)
     print subprocess.Popen(['/usr/bin/scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
