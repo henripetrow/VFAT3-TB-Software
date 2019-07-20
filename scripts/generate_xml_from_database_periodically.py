@@ -205,9 +205,9 @@ if len(hybrid_list) > 0:
     remotefile = "~/testaus/"
     print subprocess.Popen(['which', 'scp'],
                            stdout=subprocess.PIPE).communicate()
-    print subprocess.Popen(['/usr/bin/scp', '-i', '~/.ssh/id_rsa', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
+    print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
     time.sleep(30)
-    print subprocess.Popen(['/usr/bin/scp', '-i', '~/.ssh/id_rsa', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
+    print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
     time.sleep(30)
 
     #os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (gem_user, gem_passwd))
