@@ -14,11 +14,11 @@ start_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 stop_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 comment_description = "VFAT3 Production Data from Testing at CERN"
 
-# with open('./gem_db_info.dat', 'r') as f:
-#     line = f.readline()
-#     info = line.split()
-#     gem_user = info[0]
-#     gem_passwd = info[1]
+with open('./gem_db_info.dat', 'r') as f:
+    line = f.readline()
+    info = line.split()
+    gem_user = info[0]
+    gem_passwd = info[1]
 
 nr_of_days = 1
 
@@ -203,13 +203,14 @@ if len(hybrid_list) > 0:
     remotehost = "gem-machine-a"
     remotefile = "/home/dbspool/spool/gem/int2r/"
     remotefile = "~/testaus/"
-    print subprocess.Popen(['which', 'scp'],
-                           stdout=subprocess.PIPE).communicate()
+
     print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
     time.sleep(30)
     print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
     time.sleep(30)
 
+    print subprocess.Popen(['python', 'checkVFATs.py', '../results/xml/pre_LoadVFAT3s.xml', '%s' % gem_user, '%s' % gem_passwd],
+                           stdout=subprocess.PIPE).communicate()
     #os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (gem_user, gem_passwd))
 
 else:
