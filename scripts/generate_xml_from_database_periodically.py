@@ -6,6 +6,7 @@ import sys
 import glob
 import subprocess
 from DatabaseInterfaceBrowse import *
+from checkVFATs import *
 
 
 user = "Henri Petrow"
@@ -209,9 +210,12 @@ if len(hybrid_list) > 0:
     print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
     time.sleep(30)
 
-    print subprocess.Popen(['python', 'checkVFATs.py', '../results/xml/pre_LoadVFAT3s.xml', '%s' % gem_user, '%s' % gem_passwd],
+    print subprocess.Popen(['python', 'checkVFATs.py', 'INT2R', '%s' % gem_user, '%s' % gem_passwd, '../results/xml/pre_LoadVFAT3s.xml'],
                            stdout=subprocess.PIPE).communicate()
     #os.system('python checkVFATs.py INT2R %s %s ../results/xml/pre_LoadVFAT3s.xml' % (gem_user, gem_passwd))
+
+
+
 
 else:
     print "No hybrids found."
