@@ -9,6 +9,7 @@ def getChipIDs(fname, debug=False):
         print(result)
     return result
 
+
 def makeQuery(chipIDs, debug=False):
     # vfatQuery = "' OR data.VFAT3_SER_NUM='".join(["0x{:x}".format(int(chip)) for chip in chipIDs] )
     vfatQuery = "' OR data.VFAT3_BARCODE='".join(chipIDs)
@@ -18,10 +19,11 @@ def makeQuery(chipIDs, debug=False):
         print(vfatQuery)
     return vfatQuery
 
+
 def doQuery(args, vfatQuery):
     import cx_Oracle
     gemdb = '{:s}/{:s}@{:s}'.format(args.dbuser,args.dbpass,args.dbname)
-    print args.dbuser, args.dbpass, args.dbname
+
     db    = cx_Oracle.connect(gemdb)
     cur   = db.cursor()
 
@@ -42,6 +44,7 @@ def doQuery(args, vfatQuery):
         print(len(results))
     return results
 
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='checkVFATs.py Usage:')
@@ -58,7 +61,7 @@ if __name__ == '__main__':
         assert (len(result) == len(chipIDs))
         print("Length of VFATs uploaded ({:d}) matches those returned from DB ({:d})".format(len(result), len(chipIDs)))
     except AssertionError as e:
-        print("Unable to find exact match between uploaded VFATs and VFATs in the DB")
-        print(len(result),len(chipIDs))
+        sys.exit('Error!Unable to find exact match between uploaded VFATs and VFATs in the DB (%s,%s)' % (len(result), len(chipIDs)))
+        print(len(result), len(chipIDs))
         for r in result:
             print(r)
