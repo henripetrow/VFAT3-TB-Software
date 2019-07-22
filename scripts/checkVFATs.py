@@ -61,7 +61,10 @@ if __name__ == '__main__':
         assert (len(result) == len(chipIDs))
         print("Length of VFATs uploaded ({:d}) matches those returned from DB ({:d})".format(len(result), len(chipIDs)))
     except AssertionError as e:
-        sys.exit('Error!Unable to find exact match between uploaded VFATs and VFATs in the DB (%s,%s)' % (len(result), len(chipIDs)))
+        print('Error!Unable to find exact match between uploaded VFATs and VFATs in the DB (%s,%s)' % (len(result), len(chipIDs)))
+
         print(len(result), len(chipIDs))
         for r in result:
             print(r)
+        sys.exit('Error!Unable to find exact match between uploaded VFATs and VFATs in the DB (%s,%s)' % (
+        len(result), len(chipIDs)))
