@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
         print(len(result), len(chipIDs))
         for r in result:
-            print(r)
+            print(r[1])
         import sys
         sys.exit('Error!Unable to find exact match between uploaded VFATs and VFATs in the DB (%s,%s)' % (
         len(result), len(chipIDs)))
