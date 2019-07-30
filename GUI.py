@@ -2234,6 +2234,8 @@ class VFAT3_GUI:
         print "Starting production test. "
         print "***************************************"
         self.test_label[5].config(text="")
+        for label in self.test_label:
+            label.config(bg='gray')
         start = time.time()
         test_aborted = 0
         result = ['g'] * len(self.tests)
@@ -2291,7 +2293,7 @@ class VFAT3_GUI:
                     print "Aborting test."
         else:
             print "Production test aborted."
-            test_aborted = 0
+            test_aborted = 1
         if not test_aborted:
             stop = time.time()
             duration = (stop - start) / 60
