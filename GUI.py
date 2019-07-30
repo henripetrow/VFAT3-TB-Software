@@ -2238,7 +2238,7 @@ class VFAT3_GUI:
         test_aborted = 0
         result = ['g'] * len(self.tests)
         self.clear_interactive_screen()
-        self.save_barcode()
+        barcode_check = self.save_barcode()
         if self.tti_if:
             self.tti_if.set_outputs_off()
             self.tti_if.set_ch1_current_limit(0.5)
@@ -2249,7 +2249,7 @@ class VFAT3_GUI:
             result[0] = self.check_short_circuit()
         else:
             result[0] = 0
-        if result[0] == 0:
+        if result[0] == 0 and barcode_check != 1:
             self.unset_calibration_variables()
             if not self.iref_mode:
                 result[1] = self.test_bist()
@@ -2506,8 +2506,8 @@ class VFAT3_GUI:
                 barcode = self.barcode_entry.get()
                 if len(barcode) > 5:
                     print "Detected a long barcode: %s" % barcode
-                    barcode = barcode[-5:]
-                    print "Using only four digits: %s" % barcode
+                    barcode = barcode[-6:]
+                    print "Using only five digits: %s" % barcode
                 barcode_value = int(barcode)
             except Exception as e:
                 print(e)
