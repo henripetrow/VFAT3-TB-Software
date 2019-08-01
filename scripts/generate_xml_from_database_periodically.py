@@ -27,8 +27,13 @@ database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
 
 print "Listing hybrids from the database."
+test_hybrids = [8888, 8889, 8891]
+temp_hybrid_list = []
 for hybrid in hybrid_list:
-    print hybrid
+    if hybrid not in test_hybrids:
+        print hybrid
+        temp_hybrid_list.append(hybrid)
+hybrid_list = temp_hybrid_list
 print "Number of found hybrids:"
 print len(hybrid_list)
 if len(hybrid_list) > 0:
