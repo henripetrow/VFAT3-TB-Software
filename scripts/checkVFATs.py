@@ -64,7 +64,7 @@ if __name__ == '__main__':
         print('Error!Unable to find exact match between uploaded VFATs and VFATs in the DB (%s,%s)' % (len(result), len(chipIDs)))
 
         print(len(result), len(chipIDs))
-        print "Hybrids missing from the database:"
+        print "Hybrids found from the database:"
         for r in result:
             print(r[1])
         import sys
