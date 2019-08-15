@@ -120,9 +120,12 @@ if len(hybrid_list) > 0:
 
     for hybrid in hybrid_list:
         production_data = database.get_production_results(hybrid)
+        barcode_base = "30630001100017"
+        nr_fill_zeroes = 5-len(production_data[0])
+        barcode = barcode_base + "0"*nr_fill_zeroes + production_data[0]
         data = '<PART mode="auto">\n'
         data += '<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n'
-        data += '<SERIAL_NUMBER>0x%x</SERIAL_NUMBER>\n<BARCODE>%i</BARCODE>\n' % (int(production_data[0]), int(production_data[0]))
+        data += '<SERIAL_NUMBER>0x%x</SERIAL_NUMBER>\n<BARCODE>%i</BARCODE>\n' % (int(production_data[0]), barcode)
         data += '</PART>\n'
         outF = open(filename, "a")
         outF.write(data)
@@ -203,21 +206,21 @@ if len(hybrid_list) > 0:
 
     print "xml-file generation done."
 
-    print "Sending xml-files to the server."
-    localfile1 = "../results/xml/pre_LoadVFAT3s.xml"
-    localfile2 = "../results/xml/VFAT3_Production_summary.xml"
-    remotehost = "gem-machine-a"
-    remotefile = "/home/dbspool/spool/gem/int2r/"
-    #remotefile = "~/testaus/"
-
-    print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-    time.sleep(300)
-    print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-    time.sleep(300)
-
-    print subprocess.Popen(['python', 'checkVFATs.py', 'INT2R', '%s' % gem_user, '%s' % gem_passwd, '../results/xml/pre_LoadVFAT3s.xml'],
-                           stdout=subprocess.PIPE).communicate()
-
+    # print "Sending xml-files to the server."
+    # localfile1 = "../results/xml/pre_LoadVFAT3s.xml"
+    # localfile2 = "../results/xml/VFAT3_Production_summary.xml"
+    # remotehost = "gem-machine-a"
+    # remotefile = "/home/dbspool/spool/gem/int2r/"
+    # #remotefile = "~/testaus/"
+    #
+    # print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
+    # time.sleep(300)
+    # print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
+    # time.sleep(300)
+    #
+    # print subprocess.Popen(['python', 'checkVFATs.py', 'INT2R', '%s' % gem_user, '%s' % gem_passwd, '../results/xml/pre_LoadVFAT3s.xml'],
+    #                        stdout=subprocess.PIPE).communicate()
+    #
 
 
 
