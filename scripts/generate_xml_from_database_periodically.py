@@ -27,7 +27,7 @@ database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
 
 print "Listing hybrids from the database."
-test_hybrids = []
+test_hybrids = [8888, 8889, 8891]
 temp_hybrid_list = []
 for hybrid in hybrid_list:
     if hybrid not in test_hybrids:
@@ -206,21 +206,21 @@ if len(hybrid_list) > 0:
 
     print "xml-file generation done."
 
-    # print "Sending xml-files to the server."
-    # localfile1 = "../results/xml/pre_LoadVFAT3s.xml"
-    # localfile2 = "../results/xml/VFAT3_Production_summary.xml"
-    # remotehost = "gem-machine-a"
-    # remotefile = "/home/dbspool/spool/gem/int2r/"
-    # #remotefile = "~/testaus/"
-    #
-    # print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-    # time.sleep(300)
-    # print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-    # time.sleep(300)
-    #
-    # print subprocess.Popen(['python', 'checkVFATs.py', 'INT2R', '%s' % gem_user, '%s' % gem_passwd, '../results/xml/pre_LoadVFAT3s.xml'],
-    #                        stdout=subprocess.PIPE).communicate()
-    #
+    print "Sending xml-files to the server."
+    localfile1 = "../results/xml/pre_LoadVFAT3s.xml"
+    localfile2 = "../results/xml/VFAT3_Production_summary.xml"
+    remotehost = "gem-machine-a"
+    remotefile = "/home/dbspool/spool/gem/int2r/"
+    #remotefile = "~/testaus/"
+
+    print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
+    time.sleep(300)
+    print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
+    time.sleep(300)
+
+    print subprocess.Popen(['python', 'checkVFATs.py', 'INT2R', '%s' % gem_user, '%s' % gem_passwd, '../results/xml/pre_LoadVFAT3s.xml'],
+                           stdout=subprocess.PIPE).communicate()
+
 
 
 
