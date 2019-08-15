@@ -121,8 +121,8 @@ if len(hybrid_list) > 0:
     for hybrid in hybrid_list:
         production_data = database.get_production_results(hybrid)
         barcode_base = "30630001100017"
-        nr_fill_zeroes = 5-len(production_data[0])
-        barcode = barcode_base + "0"*nr_fill_zeroes + production_data[0]
+        nr_fill_zeroes = 5 - len(str(production_data[0]))
+        barcode = barcode_base + "0" * nr_fill_zeroes + str(production_data[0])
         data = '<PART mode="auto">\n'
         data += '<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n'
         data += '<SERIAL_NUMBER>0x%x</SERIAL_NUMBER>\n<BARCODE>%i</BARCODE>\n' % (int(production_data[0]), barcode)
