@@ -125,7 +125,7 @@ if len(hybrid_list) > 0:
         barcode = barcode_base + "0" * nr_fill_zeroes + str(production_data[0])
         data = '<PART mode="auto">\n'
         data += '<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n'
-        data += '<SERIAL_NUMBER>0x%x</SERIAL_NUMBER>\n<BARCODE>%i</BARCODE>\n' % (int(production_data[0]), barcode)
+        data += '<SERIAL_NUMBER>0x%x</SERIAL_NUMBER>\n<BARCODE>%s</BARCODE>\n' % (int(production_data[0]), barcode)
         data += '</PART>\n'
         outF = open(filename, "a")
         outF.write(data)
@@ -136,7 +136,7 @@ if len(hybrid_list) > 0:
     outF = open(filename, "a")
     outF.write(data)
     outF.close()
-
+    print "Generated pre_LoadVFAT3s"
 
     # Generation of the production summary table xml-file
 
