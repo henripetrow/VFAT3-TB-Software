@@ -24,8 +24,8 @@ with open('./gem_db_info.dat', 'r') as f:
 nr_of_days = 1
 
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
-
+#hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
+hybrid_list = [9023]
 print "Listing hybrids from the database."
 test_hybrids = []
 temp_hybrid_list = []
@@ -38,10 +38,11 @@ print "Number of found hybrids:"
 print len(hybrid_list)
 if len(hybrid_list) > 0:
     print "Fetching RUN_NUMBER"
-    run_number = database.get_run_number()
+    #run_number = database.get_run_number()
+    run_number = 53
     print run_number
 
-    database.set_run_number(run_number + 1)
+    #database.set_run_number(run_number + 1)
 
     kind_of_part = "GEM VFAT3"
     file_path = "../results/xml/"
