@@ -24,7 +24,7 @@ with open('./gem_db_info.dat', 'r') as f:
 nr_of_days = 1
 
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids_modified_by_day('29072019')
+hybrid_list = database.list_hybrids_modified_by_day('02082019')
 print "Listing hybrids from the database."
 test_hybrids = []
 temp_hybrid_list = []
@@ -118,9 +118,10 @@ if len(hybrid_list) > 0:
         outF.write(data)
         outF.close()
         production_data = database.get_production_results(hybrid)
-        barcode_base = "30630001100017"
-        nr_fill_zeroes = 5 - len(str(production_data[0]))
-        barcode = barcode_base + "0" * nr_fill_zeroes + str(production_data[0])
+        # barcode_base = "30630001100017"
+        # nr_fill_zeroes = 5 - len(str(production_data[0]))
+        # barcode = barcode_base + "0" * nr_fill_zeroes + str(production_data[0])
+        barcode = production_data[0]
         data = '<PART mode="auto">\n'
         data += '<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n'
         data += '<SERIAL_NUMBER>0x%x</SERIAL_NUMBER>\n<BARCODE>%s</BARCODE>\n' % (int(production_data[0]), barcode)
@@ -152,10 +153,10 @@ if len(hybrid_list) > 0:
             else:
                 production_data.append(item)
 
-        barcode_base = "30630001100017"
-        nr_fill_zeroes = 5 - len(str(production_data[0]))
-        barcode = barcode_base + "0" * nr_fill_zeroes + str(production_data[0])
-
+        # barcode_base = "30630001100017"
+        # nr_fill_zeroes = 5 - len(str(production_data[0]))
+        # barcode = barcode_base + "0" * nr_fill_zeroes + str(production_data[0])
+        barcode = production_data[0]
 
         # Start of DATA_SET.
         data = "<DATA_SET>\n"
