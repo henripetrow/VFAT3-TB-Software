@@ -119,10 +119,10 @@ if len(hybrid_list) > 0:
         outF.write(data)
         outF.close()
         production_data = database.get_production_results(hybrid)
-        # barcode_base = "30630001100017"
-        # nr_fill_zeroes = 5 - len(str(production_data[0]))
-        # barcode = barcode_base + "0" * nr_fill_zeroes + str(production_data[0])
-        barcode = production_data[0]
+        barcode_base = "30630001100017"
+        nr_fill_zeroes = 5 - len(str(production_data[0]))
+        barcode = barcode_base + "0" * nr_fill_zeroes + str(production_data[0])
+        #barcode = production_data[0]
         data = '<PART mode="auto">\n'
         data += '<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n'
         data += '<SERIAL_NUMBER>0x%x</SERIAL_NUMBER>\n<BARCODE>%s</BARCODE>\n' % (int(production_data[0]), barcode)
@@ -154,10 +154,10 @@ if len(hybrid_list) > 0:
             else:
                 production_data.append(item)
 
-        # barcode_base = "30630001100017"
-        # nr_fill_zeroes = 5 - len(str(production_data[0]))
-        # barcode = barcode_base + "0" * nr_fill_zeroes + str(production_data[0])
-        barcode = production_data[0]
+        barcode_base = "30630001100017"
+        nr_fill_zeroes = 5 - len(str(production_data[0]))
+        barcode = barcode_base + "0" * nr_fill_zeroes + str(production_data[0])
+        #barcode = production_data[0]
 
         # Start of DATA_SET.
         data = "<DATA_SET>\n"
@@ -218,9 +218,9 @@ if len(hybrid_list) > 0:
         #remotefile = "~/testaus/"
 
         print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-        time.sleep(10)
+        time.sleep(30)
         print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-        time.sleep(10)
+        time.sleep(30)
 
         print subprocess.Popen(['python', 'checkVFATs.py', 'INT2R', '%s' % gem_user, '%s' % gem_passwd, '../results/xml/pre_LoadVFAT3s.xml'],
                                stdout=subprocess.PIPE).communicate()
