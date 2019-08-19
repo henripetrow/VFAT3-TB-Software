@@ -42,7 +42,7 @@ if len(hybrid_list) > 0:
     run_number = database.get_run_number()
     print run_number
 
-    #database.set_run_number(run_number + 1)
+    database.set_run_number(run_number + 1)
 
     kind_of_part = "GEM VFAT3"
     file_path = "../results/xml/"
