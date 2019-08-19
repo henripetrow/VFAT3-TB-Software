@@ -156,13 +156,19 @@ if len(hybrid_list) > 0:
                 production_data.append("")
             else:
                 production_data.append(item)
+
+        barcode_base = "30630001100017"
+        nr_fill_zeroes = 5 - len(str(production_data[0]))
+        barcode = barcode_base + "0" * nr_fill_zeroes + str(production_data[0])
+
+
         # Start of DATA_SET.
         data = "<DATA_SET>\n"
         data += "<COMMENT_DESCRIPTION>GEM VFAT3 Production Summary Data</COMMENT_DESCRIPTION>\n"
         data += "<VERSION>1</VERSION>\n"
         data += "<PART>\n"
         data += "<KIND_OF_PART>GEM VFAT3</KIND_OF_PART>\n"
-        data += "<BARCODE>%s</BARCODE>\n" % production_data[0]
+        data += "<BARCODE>%s</BARCODE>\n" % barcode
         data += "</PART>\n"
         data += "<DATA>\n"
         data += "<HW_ID_VERSION>%s</HW_ID_VERSION>\n" % production_data[1]
