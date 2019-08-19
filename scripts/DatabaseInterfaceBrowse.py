@@ -47,7 +47,7 @@ class DatabaseInterfaceBrowse:
             date = d.strftime("%d%m%Y")
             query += "Modified='%s'" % date
         query += ";"
-        query = "SELECT * FROM Production WHERE Modified='15082019';"
+        query = "SELECT * FROM Production WHERE Modified='16082019';"
         print query
         self.open_connection()
         self.cursor.execute(query)

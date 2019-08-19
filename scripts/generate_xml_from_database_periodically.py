@@ -31,7 +31,7 @@ test_hybrids = []
 temp_hybrid_list = []
 for hybrid in hybrid_list:
     if hybrid not in test_hybrids:
-        print hybrid
+        print "%s %s" % (hybrid, hex(hybrid))
         temp_hybrid_list.append(hybrid)
 hybrid_list = temp_hybrid_list
 print "Number of found hybrids:"
