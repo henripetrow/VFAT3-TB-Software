@@ -47,7 +47,6 @@ class DatabaseInterfaceBrowse:
             date = d.strftime("%d%m%Y")
             query += "Modified='%s'" % date
         query += ";"
-        query = "SELECT * FROM Production WHERE Modified='29072019';"
         print query
         self.open_connection()
         self.cursor.execute(query)
@@ -57,6 +56,20 @@ class DatabaseInterfaceBrowse:
         self.connection.close()
         hybrid_list.sort()
         return hybrid_list
+
+    def list_hybrids_modified_by_day(self, day): #ddmmyyyy
+        hybrid_list = []
+        query = "SELECT * FROM Production WHERE Modified='%d';" % day
+        print query
+        self.open_connection()
+        self.cursor.execute(query)
+        output = self.cursor.fetchall()
+        for row in output:
+            hybrid_list.append(row[0])
+        self.connection.close()
+        hybrid_list.sort()
+        return hybrid_list
+
 
     def list_hybrids_by_lot(self, lot_nr):
         hybrid_list = []

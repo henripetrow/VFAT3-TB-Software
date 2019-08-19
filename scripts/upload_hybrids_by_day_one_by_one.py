@@ -24,9 +24,7 @@ with open('./gem_db_info.dat', 'r') as f:
 nr_of_days = 1
 
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
-#hybrid_list = database.list_hybrids_modified_by_day('29072019')
-#hybrid_list = [9022]
+hybrid_list = database.list_hybrids_modified_by_day('29072019')
 print "Listing hybrids from the database."
 test_hybrids = []
 temp_hybrid_list = []
@@ -110,16 +108,15 @@ if len(hybrid_list) > 0:
     # Generate list file of hybrids.
 
 
-    filename = "%spre_LoadVFAT3s.xml" % file_path
-
-    data = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
-    data += '<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n'
-    data += '<PARTS>\n'
-    outF = open(filename, "w")
-    outF.write(data)
-    outF.close()
-
     for hybrid in hybrid_list:
+        filename = "%spre_LoadVFAT3s.xml" % file_path
+
+        data = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+        data += '<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n'
+        data += '<PARTS>\n'
+        outF = open(filename, "w")
+        outF.write(data)
+        outF.close()
         production_data = database.get_production_results(hybrid)
         barcode_base = "30630001100017"
         nr_fill_zeroes = 5 - len(str(production_data[0]))
@@ -132,22 +129,20 @@ if len(hybrid_list) > 0:
         outF.write(data)
         outF.close()
 
-    data = '</PARTS>\n'
-    data += '</ROOT>\n'
-    outF = open(filename, "a")
-    outF.write(data)
-    outF.close()
-    print "Generated pre_LoadVFAT3s"
+        data = '</PARTS>\n'
+        data += '</ROOT>\n'
+        outF = open(filename, "a")
+        outF.write(data)
+        outF.close()
+        print "Generated pre_LoadVFAT3s"
 
-    # Generation of the production summary table xml-file
+        # Generation of the production summary table xml-file
 
-    filename = "%sVFAT3_Production_summary.xml" % file_path
-    table_name = "VFAT3_PRODUCTION_SUMMARY"
-    name = "VFAT3 Production Summary Data"
-    run_type = "Summary"
-    generate_header(filename, table_name, name, run_type)
-
-    for hybrid in hybrid_list:
+        filename = "%sVFAT3_Production_summary.xml" % file_path
+        table_name = "VFAT3_PRODUCTION_SUMMARY"
+        name = "VFAT3 Production Summary Data"
+        run_type = "Summary"
+        generate_header(filename, table_name, name, run_type)
 
         production_data_int = database.get_production_results(hybrid)
         production_data = []
@@ -208,25 +203,25 @@ if len(hybrid_list) > 0:
         outF.write(data)
         outF.close()
 
-    generate_footer(filename)
-    print "Generated xml-file for: %s" % name
+        generate_footer(filename)
+        print "Generated xml-file for: %s" % name
 
-    print "xml-file generation done."
+        print "xml-file generation done."
 
-    print "Sending xml-files to the server."
-    localfile1 = "../results/xml/pre_LoadVFAT3s.xml"
-    localfile2 = "../results/xml/VFAT3_Production_summary.xml"
-    remotehost = "gem-machine-a"
-    remotefile = "/home/dbspool/spool/gem/int2r/"
-    #remotefile = "~/testaus/"
+        print "Sending xml-files to the server."
+        localfile1 = "../results/xml/pre_LoadVFAT3s.xml"
+        localfile2 = "../results/xml/VFAT3_Production_summary.xml"
+        remotehost = "gem-machine-a"
+        remotefile = "/home/dbspool/spool/gem/int2r/"
+        #remotefile = "~/testaus/"
 
-    print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-    time.sleep(30)
-    print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-    time.sleep(30)
+        print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
+        time.sleep(10)
+        print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
+        time.sleep(10)
 
-    print subprocess.Popen(['python', 'checkVFATs.py', 'INT2R', '%s' % gem_user, '%s' % gem_passwd, '../results/xml/pre_LoadVFAT3s.xml'],
-                           stdout=subprocess.PIPE).communicate()
+        print subprocess.Popen(['python', 'checkVFATs.py', 'INT2R', '%s' % gem_user, '%s' % gem_passwd, '../results/xml/pre_LoadVFAT3s.xml'],
+                               stdout=subprocess.PIPE).communicate()
 
 
 
@@ -234,7 +229,3 @@ if len(hybrid_list) > 0:
 
 else:
     print "No hybrids found."
-
-
-
-
