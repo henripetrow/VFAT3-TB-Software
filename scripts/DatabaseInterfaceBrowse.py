@@ -59,7 +59,7 @@ class DatabaseInterfaceBrowse:
 
     def list_hybrids_modified_by_day(self, day): #ddmmyyyy
         hybrid_list = []
-        query = "SELECT * FROM Production WHERE Modified='%d';" % day
+        query = "SELECT * FROM Production WHERE Modified='%s';" % day
         print query
         self.open_connection()
         self.cursor.execute(query)
