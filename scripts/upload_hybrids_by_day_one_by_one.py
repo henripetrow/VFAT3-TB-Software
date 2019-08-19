@@ -24,7 +24,7 @@ with open('./gem_db_info.dat', 'r') as f:
 nr_of_days = 1
 
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids_modified_by_day('29072019')
+hybrid_list = database.list_hybrids_modified_by_day('02082019')
 print "Listing hybrids from the database."
 test_hybrids = []
 temp_hybrid_list = []
