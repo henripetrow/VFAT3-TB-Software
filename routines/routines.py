@@ -365,7 +365,7 @@ def find_closest_value(scan, dac_values, adc_values, hv3b_biasing_lut):
     #plt.show()
 
 
-def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
+def scan_execute(obj, scan_name, scan_nr, dac_size, hv3b_biasing_lut, save_data=1):
     if obj.adcM == 0:
         text = "\nADCs are not calibrated. Run ADC calibration first.\n"
         obj.add_to_interactive_screen(text)
@@ -435,10 +435,10 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
 
         # Use preferably values from ADC0. If it is broken, use values from ADC1.
         if obj.adc0M != 0:
-            find_closest_value(scan_name[:-5], dac_values, mv_adc0_values)
+            find_closest_value(scan_name[:-5], dac_values, mv_adc0_values, hv3b_biasing_lut)
         else:
             print "ADC0, broken, using ADC1 values."
-            find_closest_value(scan_name[:-5], dac_values, mv_adc1_values)
+            find_closest_value(scan_name[:-5], dac_values, mv_adc1_values, hv3b_biasing_lut)
 
         if obj.database:
             obj.database.save_dac_data(modified[:-5], "ADC0", int_adc0_values, dac_values)

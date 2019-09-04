@@ -2651,7 +2651,7 @@ class VFAT3_GUI:
         print scan_name
         print scan_nr
         print dac_size
-        scan_execute(self, scan_name, scan_nr, dac_size)
+        scan_execute(self, scan_name, scan_nr, dac_size, hv3b_biasing_lut)
 
     def counter_resets_execute(self, scan_name):
         modified = scan_name.replace(" ", "_")
@@ -2720,7 +2720,7 @@ class VFAT3_GUI:
             print "\nRunning %s" % scan
             scan_nr = self.scan_options_value[self.scan_options.index(scan)]
             dac_size = self.dac_sizes[self.scan_options.index(scan)]
-            output = scan_execute(self, scan, scan_nr, dac_size, save_data)
+            output = scan_execute(self, scan, scan_nr, dac_size, hv3b_biasing_lut, save_data)
             if output != 'Error':
                 errors.append(self.check_selection_criteria(output[0][-1], adc0_dac_selection_criteria_lut[scan[:-5]], scan))
             else:
