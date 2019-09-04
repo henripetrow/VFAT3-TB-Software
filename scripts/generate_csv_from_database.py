@@ -131,6 +131,7 @@ for adc in adcs:
     outF.write(text)
     outF.close()
     for hybrid in hybrid_list:
+        text = "%s" % hybrid
         db_data = database.get_table_values(hybrid, "%s_%s" % (adc, dac))
         for dat in db_data:
             text += ",%s" % dat
