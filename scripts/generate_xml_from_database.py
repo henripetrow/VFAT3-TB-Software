@@ -17,8 +17,8 @@ nr_of_days = input("Nr. of days of database modifications to include:")
 
 database = DatabaseInterfaceBrowse()
 
-# hybrid_list = database.list_hybrids(greater=6700)
-hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
+hybrid_list = database.list_hybrids(greater=6000)
+#hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
 
 print "Listing hybrids from the database."
 for hybrid in hybrid_list:
