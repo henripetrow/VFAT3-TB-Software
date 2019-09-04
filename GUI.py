@@ -23,10 +23,10 @@ from routines.datapacket_routines import *
 from tti_serial_interface import *
 from luts import *
 if os.path.isfile("./luts_custom.py"):
-    print "Found luts.py"
+    print "Found luts_custom.py"
     from luts_custom import *
 else:
-    print "No luts_custom.py found."
+    print "No luts_custom.py found. Using default values."
 from reedmuller import *
 from os1327dInterface import os1327dInterface
 
