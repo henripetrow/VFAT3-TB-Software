@@ -72,7 +72,7 @@ class VFAT3_GUI:
                 print "Entering Iref measurement-mode."
                 self.iref_mode = 1
             if arg == '-no_temp_gun':
-                print "Entering Infrared temperature measurement-mode."
+                print "Entering no Infrared temperature measurement-mode."
                 self.temp_gun_mode = 0
             if arg == '-no_chipid_encoding':
                 print "Entering Chip ID Reed-Muller encoding-mode."
