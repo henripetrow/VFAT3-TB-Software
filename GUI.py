@@ -2106,7 +2106,7 @@ class VFAT3_GUI:
         if error == 0:
             text = "->Running S-curve\n"
             self.add_to_interactive_screen(text)
-            output = scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel,
+            output = scurve_all_ch_execute(self, "S-curve", hv3b_biasing_lut, arm_dac=self.arm_dac, ch=[self.start_channel,
                                            self.stop_channel], ch_step=self.channel_step, configuration=configuration,
                                            dac_range=[self.start_cal_dac, self.stop_cal_dac],
                                            bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch,
@@ -2773,7 +2773,7 @@ class VFAT3_GUI:
             self.data_folder = folder
             self.xray_routine_flag = 1
             self.run_all_dac_scans()
-            scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=[0, 127], configuration="yes",
+            scurve_all_ch_execute(self, "S-curve", hv3b_biasing_lut, arm_dac=100, ch=[0, 127], configuration="yes",
                                               dac_range=[200, 240], delay=50, bc_between_calpulses=2000, pulsestretch=7,
                                              latency=45, cal_phi=0)
             gain_measurement(self, adc="int1")
