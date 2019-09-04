@@ -124,6 +124,7 @@ for dac in dac_list:
 
 dac = "CAL_LUT"
 
+
 for adc in adcs:
     file = "%s%s_%s.csv" % (folder, adc, dac)
     text = "Data\n"
