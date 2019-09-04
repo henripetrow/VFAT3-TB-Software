@@ -25,7 +25,7 @@ nr_of_days = 1
 
 database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
-hybrid_list = database.list_hybrids_modified_by_day('19082019')
+hybrid_list = database.list_hybrids_modified_by_day('29082019')
 #hybrid_list = [9022]
 print "Listing hybrids from the database."
 test_hybrids = []
