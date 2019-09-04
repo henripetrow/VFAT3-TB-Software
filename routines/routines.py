@@ -171,7 +171,7 @@ def scurve_all_ch_execute(obj, scan_name, hv3b_biasing_lut, arm_dac=100, ch=[0, 
 
         # Analyze data.
         # mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list = scurve_analyze(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
-        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels, untrimmable_channels = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data)
+        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels, untrimmable_channels = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data, hv3b_biasing_lut)
         # print enc_list
         # Save data to database.
         if obj.database:
@@ -716,7 +716,7 @@ def gain_histogram(obj):
     print "Runtime: %f" % run_time
 
 
-def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
+def scurve_analyze_old(obj, dac_values, channels, scurve_data, hv3b_biasing_lut, folder=""):
     timestamp = time.strftime("%d.%m.%Y %H:%M")
     mean_list = []
     rms_list = []
