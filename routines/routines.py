@@ -10,7 +10,10 @@ import matplotlib.mlab as mlab
 import numpy
 import csv
 import os
-#from luts import *
+if os.path.isfile("./luts_custom.py"):
+    from luts_custom import *
+else:
+    from luts import *
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.special import erf
@@ -65,7 +68,7 @@ def find_threshold(obj):
     fig.savefig(filename)
 
 
-def scurve_all_ch_execute(obj, scan_name, hv3b_biasing_lut, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes",
+def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes",
                           dac_range=[220, 240], bc_between_calpulses=2000, pulsestretch=7, latency=40,
                           cal_phi=0, folder="scurve", triggers=100):
     mean_th_fc = "n"
@@ -171,7 +174,7 @@ def scurve_all_ch_execute(obj, scan_name, hv3b_biasing_lut, arm_dac=100, ch=[0, 
 
         # Analyze data.
         # mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list = scurve_analyze(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
-        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels, untrimmable_channels = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data, hv3b_biasing_lut)
+        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels, untrimmable_channels = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data)
         # print enc_list
         # Save data to database.
         if obj.database:
@@ -345,7 +348,7 @@ def fitScurve(scurve_g):
     return bestFit_f
 
 
-def find_closest_value(scan, dac_values, adc_values, hv3b_biasing_lut):
+def find_closest_value(scan, dac_values, adc_values):
     #plt.plot(dac_values, adc_values)
     #plt.grid()
     value = hv3b_biasing_lut[scan][0]
@@ -365,7 +368,7 @@ def find_closest_value(scan, dac_values, adc_values, hv3b_biasing_lut):
     #plt.show()
 
 
-def scan_execute(obj, scan_name, scan_nr, dac_size, hv3b_biasing_lut, save_data=1):
+def scan_execute(obj, scan_name, scan_nr, dac_size, save_data=1,):
     if obj.adcM == 0:
         text = "\nADCs are not calibrated. Run ADC calibration first.\n"
         obj.add_to_interactive_screen(text)
@@ -435,10 +438,10 @@ def scan_execute(obj, scan_name, scan_nr, dac_size, hv3b_biasing_lut, save_data=
 
         # Use preferably values from ADC0. If it is broken, use values from ADC1.
         if obj.adc0M != 0:
-            find_closest_value(scan_name[:-5], dac_values, mv_adc0_values, hv3b_biasing_lut)
+            find_closest_value(scan_name[:-5], dac_values, mv_adc0_values)
         else:
             print "ADC0, broken, using ADC1 values."
-            find_closest_value(scan_name[:-5], dac_values, mv_adc1_values, hv3b_biasing_lut)
+            find_closest_value(scan_name[:-5], dac_values, mv_adc1_values)
 
         if obj.database:
             obj.database.save_dac_data(modified[:-5], "ADC0", int_adc0_values, dac_values)
@@ -716,7 +719,7 @@ def gain_histogram(obj):
     print "Runtime: %f" % run_time
 
 
-def scurve_analyze_old(obj, dac_values, channels, scurve_data, hv3b_biasing_lut, folder=""):
+def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
     timestamp = time.strftime("%d.%m.%Y %H:%M")
     mean_list = []
     rms_list = []

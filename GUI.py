@@ -1615,7 +1615,7 @@ class VFAT3_GUI:
             output = self.read_ext_adc(verbose='no')
             adc_values.append(output[3])
             dac_values.append(i)
-        find_closest_value('Iref', dac_values, adc_values, hv3b_biasing_lut)
+        find_closest_value('Iref', dac_values, adc_values)
         print hv3b_biasing_lut['Iref'][1]
         self.register[134].Iref[0] = hv3b_biasing_lut['Iref'][1]
         self.write_register(134)
@@ -2106,7 +2106,7 @@ class VFAT3_GUI:
         if error == 0:
             text = "->Running S-curve\n"
             self.add_to_interactive_screen(text)
-            output = scurve_all_ch_execute(self, "S-curve", hv3b_biasing_lut, arm_dac=self.arm_dac, ch=[self.start_channel,
+            output = scurve_all_ch_execute(self, "S-curve", arm_dac=self.arm_dac, ch=[self.start_channel,
                                            self.stop_channel], ch_step=self.channel_step, configuration=configuration,
                                            dac_range=[self.start_cal_dac, self.stop_cal_dac],
                                            bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch,
@@ -2651,7 +2651,7 @@ class VFAT3_GUI:
         print scan_name
         print scan_nr
         print dac_size
-        scan_execute(self, scan_name, scan_nr, dac_size, hv3b_biasing_lut)
+        scan_execute(self, scan_name, scan_nr, dac_size)
 
     def counter_resets_execute(self, scan_name):
         modified = scan_name.replace(" ", "_")
@@ -2720,7 +2720,7 @@ class VFAT3_GUI:
             print "\nRunning %s" % scan
             scan_nr = self.scan_options_value[self.scan_options.index(scan)]
             dac_size = self.dac_sizes[self.scan_options.index(scan)]
-            output = scan_execute(self, scan, scan_nr, dac_size, hv3b_biasing_lut, save_data)
+            output = scan_execute(self, scan, scan_nr, dac_size, save_data)
             if output != 'Error':
                 errors.append(self.check_selection_criteria(output[0][-1], adc0_dac_selection_criteria_lut[scan[:-5]], scan))
             else:
@@ -2773,7 +2773,7 @@ class VFAT3_GUI:
             self.data_folder = folder
             self.xray_routine_flag = 1
             self.run_all_dac_scans()
-            scurve_all_ch_execute(self, "S-curve", hv3b_biasing_lut, arm_dac=100, ch=[0, 127], configuration="yes",
+            scurve_all_ch_execute(self, "S-curve", arm_dac=100, ch=[0, 127], configuration="yes",
                                               dac_range=[200, 240], delay=50, bc_between_calpulses=2000, pulsestretch=7,
                                              latency=45, cal_phi=0)
             gain_measurement(self, adc="int1")
