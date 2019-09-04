@@ -10,7 +10,7 @@ import matplotlib.mlab as mlab
 import numpy
 import csv
 import os
-from luts import *
+#from luts import *
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.special import erf
