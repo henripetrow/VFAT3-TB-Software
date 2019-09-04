@@ -21,9 +21,12 @@ from routines.routines import *
 from routines.calibration_routines import *
 from routines.datapacket_routines import *
 from tti_serial_interface import *
-if os.path.isfile("./luts.py"):
+from luts import *
+if os.path.isfile("./luts_custom.py"):
     print "Found luts.py"
-    from luts import *
+    from luts_custom import *
+else:
+    print "No luts_custom.py found."
 from reedmuller import *
 from os1327dInterface import os1327dInterface
 
