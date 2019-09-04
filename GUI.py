@@ -1615,7 +1615,7 @@ class VFAT3_GUI:
             output = self.read_ext_adc(verbose='no')
             adc_values.append(output[3])
             dac_values.append(i)
-        find_closest_value('Iref', dac_values, adc_values)
+        find_closest_value('Iref', dac_values, adc_values, hv3b_biasing_lut)
         print hv3b_biasing_lut['Iref'][1]
         self.register[134].Iref[0] = hv3b_biasing_lut['Iref'][1]
         self.write_register(134)

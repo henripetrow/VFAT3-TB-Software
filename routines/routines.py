@@ -345,7 +345,7 @@ def fitScurve(scurve_g):
     return bestFit_f
 
 
-def find_closest_value(scan, dac_values, adc_values):
+def find_closest_value(scan, dac_values, adc_values, hv3b_biasing_lut):
     #plt.plot(dac_values, adc_values)
     #plt.grid()
     value = hv3b_biasing_lut[scan][0]
