@@ -24,9 +24,10 @@ with open('./gem_db_info.dat', 'r') as f:
 nr_of_days = 1
 
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
+#hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
 #hybrid_list = database.list_hybrids_modified_by_day('27082019')
 #hybrid_list = [9022]
+hybrid_list = database.list_hybrids(greater=6101)
 print "Listing hybrids from the database."
 test_hybrids = []
 temp_hybrid_list = []
@@ -220,13 +221,13 @@ if len(hybrid_list) > 0:
     remotefile = "/home/dbspool/spool/gem/int2r/"
     #remotefile = "~/testaus/"
 
-    print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-    time.sleep(300)
-    print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
-    time.sleep(300)
-
-    print subprocess.Popen(['python', 'checkVFATs.py', 'INT2R', '%s' % gem_user, '%s' % gem_passwd, '../results/xml/pre_LoadVFAT3s.xml'],
-                           stdout=subprocess.PIPE).communicate()
+    # print subprocess.Popen(['scp', '%s' % localfile1, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
+    # time.sleep(300)
+    # print subprocess.Popen(['scp', '%s' % localfile2, '%s:%s' % (remotehost, remotefile)], stdout=subprocess.PIPE).communicate()
+    # time.sleep(300)
+    #
+    # print subprocess.Popen(['python', 'checkVFATs.py', 'INT2R', '%s' % gem_user, '%s' % gem_passwd, '../results/xml/pre_LoadVFAT3s.xml'],
+    #                        stdout=subprocess.PIPE).communicate()
 
 
 
