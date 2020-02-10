@@ -172,6 +172,7 @@ class VFAT3_GUI:
         # modemenu.entryconfig(3, state=DISABLED)
         menubar.add_cascade(label="Mode", menu=modemenu)
 
+
         helpmenu = Menu(menubar, tearoff=0)
         helpmenu.add_command(label="About")
         menubar.add_cascade(label="Help", menu=helpmenu)
