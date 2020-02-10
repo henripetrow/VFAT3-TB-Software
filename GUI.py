@@ -33,7 +33,6 @@ from reedmuller import *
 from os1327dInterface import os1327dInterface
 
 
-
 class VFAT3_GUI:
     def __init__(self, master):
         self.psu_mode = 1
