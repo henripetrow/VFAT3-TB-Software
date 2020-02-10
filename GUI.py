@@ -153,9 +153,7 @@ class VFAT3_GUI:
         self.master.minsize(width=300, height=450)
         self.master.configure(background='white')
 
-
         # ######MENUBAR#################################
-
         # create a top level menu
         menubar = Menu(self.master)
 
