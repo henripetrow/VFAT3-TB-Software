@@ -432,9 +432,7 @@ def charge_distribution_on_neighbouring_ch(obj, nr_loops=10):
     output_file = "%s/concecutive_tiggers/%s_concecutive_triggers.dat" % (obj.data_folder, timestamp)
 
     instruction_text = []
-    instruction_text.append("1 Send RunMode")
     instruction_text.append("1000 Send_Repeat CalPulse_LV1A 10 3000 5")
-    instruction_text.append("1000 Send SCOnly")
 
     # Write the instructions to the file.
     output_file_name = "./routines/%s/instruction_list.txt" % scan_name

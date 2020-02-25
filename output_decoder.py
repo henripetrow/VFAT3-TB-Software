@@ -137,6 +137,7 @@ class datapacket:
         self.BC = ""
         self.bc_size = 0
         self.data = ""
+        self.data_list = []
         self.szp = 0
         self.partition_table = "" 
         self.spzs_packet = 0
@@ -154,7 +155,8 @@ class datapacket:
         # print "DATA PACKET RECEIVED"
         # print "Header: %s" % self.header
         # print "FIFO warning: %d" % self.FIFO_warning
-        # print "System BC: %d" % self.systemBC
+        # print "BC: %s" % self.BC
+        # print "EC: %s" % self.EC
         # print self.data
         #print self.crc
         if self.szp == 0:
@@ -187,7 +189,7 @@ class datapacket:
 
             if '1' in self.data:
                 self.hit_found = 1
-
+            self.data_list = [int(char) for char in self.data]
             received_crc_int = int(self.crc, 2)
             self.calculated_crc = crc_remainder(list(self.crc_calc[:-16]))
 
@@ -196,7 +198,7 @@ class datapacket:
                 print("!-> data packet CRC error.")
             else:
                 pass
-                #print("CRC ok.")
+                # print("CRC ok.")
 
 
 def decode_output_data(data_list, register):

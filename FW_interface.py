@@ -180,7 +180,7 @@ class FW_interface:
         # print ipbus_header
         # print crc_received
         # print crc_calculated
-        # print output_bin
+        #print output_bin
         return output_bin
 
     def send_sync(self):
@@ -212,7 +212,7 @@ class FW_interface:
         delay = 1
         d1 = obj.d1
         d2 = obj.d2
-
+        print(d1,d2)
         cal_dac_array = range(cal_dac_start, cal_dac_stop+1, 1)
 
         message = [0xca, 0xff, 0x08, start_ch, stop_ch, step_ch, 0, 0, 0, latency >> 8, latency & 0xFF, triggers >> 8,

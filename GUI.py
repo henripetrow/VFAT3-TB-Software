@@ -355,7 +355,7 @@ class VFAT3_GUI:
         self.cont_trig_button = Button(self.misc_frame, text="Sync FPGA", command=lambda: self.send_reset(), width=bwidth)
         self.cont_trig_button.grid(column=1, row=15, sticky='e')
 
-        self.cont_trig_button = Button(self.misc_frame, text="Charge distribution", command=lambda: charge_distribution_on_neighbouring_ch(self), width=bwidth, state=DISABLED)
+        self.cont_trig_button = Button(self.misc_frame, text="Charge distribution", command=lambda: charge_distribution_on_neighbouring_ch(self), width=bwidth)
         self.cont_trig_button.grid(column=1, row=16, sticky='e')
 
         self.temp_button = Button(self.misc_frame, text="Read temp.", command=lambda: self.read_temperature(), width=bwidth)
@@ -364,6 +364,9 @@ class VFAT3_GUI:
         # self.temp_label.grid(column=2, row=17, sticky='e')
 
         self.temp_button = Button(self.misc_frame, text="Test S-bits", command=lambda: self.test_trigger_outputs(), width=bwidth)
+        self.temp_button.grid(column=1, row=18, sticky='e')
+
+        self.temp_button = Button(self.misc_frame, text="Test charge distribution", command=lambda: measure_charge_distribution(self), width=bwidth)
         self.temp_button.grid(column=1, row=18, sticky='e')
 
         # ###############NEW TAB #######################################
@@ -997,10 +1000,11 @@ class VFAT3_GUI:
         if filename != "":
             with open(filename, 'r') as f:
                 for i, line in enumerate(f):
-
-                    if i == 1:
+                    if i == 0:
                         line = line.rstrip()
-                        line = [splits for splits in line.split("\t") if splits is not ""]
+                        print(line)
+                        line = [splits for splits in line.split(" ") if splits is not ""]
+                        print(line)
                         self.adc0M = float(line[0])
                         self.adc0B = float(line[1])
                         self.adc1M = float(line[2])
@@ -1029,7 +1033,7 @@ class VFAT3_GUI:
                         text += "ADC1: %f + %f\n" % (self.adc1M, self.adc1B)
                         text += "CAL_DAC: %f + %f\n" % (self.cal_dac_fcM, self.cal_dac_fcB)
                         text += "Iref: %i\n" % self.register[134].Iref[0]
-                        self.add_to_interactive_screen(text)
+                        print(text)
         else:
             print "Invalid file. Abort."
 
@@ -2039,31 +2043,29 @@ class VFAT3_GUI:
         self.execute(verbose="yes")
 
     def toggle_run_bit(self, change_value="yes"):
+        if self.register[0xffff].RUN[0] == 0:
+            if change_value == "yes":
+                self.register[0xffff].RUN[0] = 1
+                self.write_register(0xffff)
+        elif self.register[0xffff].RUN[0] == 1:
+            if change_value == "yes":
+                self.register[0xffff].RUN[0] = 0
+                self.write_register(0xffff)
+        else:
+            print "Error"
+        self.toggle_status_label()
+
+    def toggle_status_label(self):
         output = self.read_register(0xffff)
         if output[0] == "Error":
             self.run_status_label.config(text="ERROR")
             self.run_status_label.config(bg="red")
-        else:
-            if self.register[0xffff].RUN[0] == 0:
-                if change_value == "yes":
-                    self.register[0xffff].RUN[0] = 1
-                    self.write_register(0xffff)
-                    self.run_status_label.config(text="RUN")
-                    self.run_status_label.config(bg="green")
-                else:
-                    self.run_status_label.config(text="SLEEP")
-                    self.run_status_label.config(bg="blue")
-            elif self.register[0xffff].RUN[0] == 1:
-                if change_value == "yes":
-                    self.register[0xffff].RUN[0] = 0
-                    self.write_register(0xffff)
-                    self.run_status_label.config(text="SLEEP")
-                    self.run_status_label.config(bg="blue")
-                else:
-                    self.run_status_label.config(text="RUN")
-                    self.run_status_label.config(bg="green")
-            else:
-                print "Error"
+        if self.register[0xffff].RUN[0] == 0:
+            self.run_status_label.config(text="SLEEP")
+            self.run_status_label.config(bg="blue")
+        elif self.register[0xffff].RUN[0] == 1:
+            self.run_status_label.config(text="RUN")
+            self.run_status_label.config(bg="green")
 
     def run_scurve(self, production="no"):
         print "\n*************************"
@@ -2169,6 +2171,7 @@ class VFAT3_GUI:
         self.write_register(144)
         time.sleep(0.02)
         self.write_register(145)
+        print("Front end nominal values set.")
 
     def run_concecutive_triggers(self):
         self.nr_trigger_loops = int(self.cont_trig_entry.get())

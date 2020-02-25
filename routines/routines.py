@@ -19,6 +19,9 @@ from scipy.optimize import curve_fit
 from scipy.special import erf
 from scipy import sqrt
 import scipy.signal #To filter the S-curves
+from test_system_functions import *
+from output_decoder import *
+from generator import *
 
 
 def find_threshold(obj):
@@ -957,7 +960,196 @@ def calculate_r2_score(xdata, ydata, popt):
     r_squared = 1 - (ss_res / ss_tot)
     return r_squared
 
+
 def change_character_in_string(text, nr_character, new_character):
     new = list(text)
     new[nr_character] = "%s" % new_character
     return ''.join(new)
+
+
+def measure_charge_distribution(obj):
+    print("\n\n************STARTING CHARGE DISTRIBUTION TEST*************")
+    start = time.time()
+    timestamp = time.strftime("%d%m%Y%H%M")
+    folder = "./results/charge_distribution/run_%s/" % timestamp
+    data_file = "%sdata.csv" % folder
+    target_channel = 33
+    nr_of_triggers = 3000
+    hybrid_version = "VFAT3b"
+    hybrid_id = "#0060"
+
+    # Create new data folder.
+    if not os.path.exists(os.path.dirname(folder)):
+        try:
+            os.makedirs(os.path.dirname(folder))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
+
+    save_to_file_and_print(time.strftime("Time: %d.%m.%Y %H:%M"), data_file)
+    save_to_file_and_print("Hybrid version: %s" % hybrid_version, data_file)
+    save_to_file_and_print("Hybrid ID: %s" % hybrid_id, data_file)
+    save_to_file_and_print("Target channel: %s" % target_channel, data_file)
+    save_to_file_and_print("Nr. of triggers: %s" % nr_of_triggers, data_file)
+
+    print("Resetting the hardware.")
+    obj.sync_fpga()
+
+    print("Setting RUN-bit to 1.")
+    obj.register[0xffff].RUN[0] = 1
+    obj.write_register(0xffff)
+
+    obj.register[target_channel].cal[0] = 1
+    obj.write_register(target_channel)
+
+    obj.register[100].cal[0] = 1
+    obj.write_register(100)
+
+    obj.load_calibration_values_from_file(filename="vfat3_60_calibration_values.dat")
+
+    print "Sending RUNMode."
+    obj.interfaceFW.send_fcc("01100110")
+
+    save_to_file_and_print("Settings:", data_file)
+    gain = ['High', 'Medium', 'Low']
+    RES_PRE = [1, 2, 4]
+    CAP_PRE = [0, 1, 3]
+    obj.register[131].TP_FE[0] = 7
+    obj.write_register(131)
+    text = "TP_FE: %s" % obj.register[131].TP_FE[0]
+    save_to_file_and_print(text, data_file)
+
+    obj.register[132].PT[0] = 3
+    obj.register[132].SEL_POL[0] = 0
+    obj.register[132].SEL_COMP_MODE[0] = 1
+    obj.write_register(132)
+    text = "PT: %s, SEL_POL: %s, SEL_COMP_MODE: %s" % (obj.register[132].PT[0], obj.register[132].SEL_POL[0], obj.register[132].SEL_COMP_MODE[0])
+    save_to_file_and_print(text, data_file)
+
+    obj.register[129].PS[0] = 7
+    obj.write_register(129)
+    text = "PS: %s" % obj.register[129].PS[0]
+    save_to_file_and_print(text, data_file)
+
+    obj.register[139].CAL_DUR[0] = 200
+    obj.write_register(139)
+    text = "CAL_DUR: %s" % obj.register[139].CAL_DUR[0]
+    save_to_file_and_print(text, data_file)
+
+    obj.register[138].CAL_PHI[0] = 1
+    obj.register[138].CAL_MODE[0] = 1
+    obj.register[138].CAL_DAC[0] = 1
+    obj.write_register(138)
+    text = "CAL_PHI: %s, CAL_MODE: %s, CAL_DAC: %s" % (obj.register[138].CAL_PHI[0], obj.register[138].CAL_MODE[0], obj.register[138].CAL_DAC[0])
+    save_to_file_and_print(text, data_file)
+
+    obj.register[137].LAT[0] = 0
+    obj.write_register(137)
+
+    print('\n\n')
+    obj.set_fe_nominal_values(chip=hybrid_version)
+    print('\n')
+
+    save_to_file_and_print("Find noise floor.", data_file)
+    sample_size = 5
+    save_to_file_and_print("Nr. of triggers: %s/channel" % sample_size, data_file)
+    noise_arm_dac = []
+    noise_hits = []
+    noise_hits_norm = []
+    for arm_dac_value in range(0, 150, 1):
+        obj.register[135].ARM_DAC[0] = arm_dac_value
+        obj.write_register(135)
+        result_data_vector = numpy.array([0]*128)
+        for loop in range(0, sample_size):
+            time.sleep(0.05)
+            output = obj.interfaceFW.send_fcc("01101001")
+            output_data = []
+            byte_counter = 0
+            for i in range(0, len(output)):
+                if byte_counter == 0 or byte_counter == 4:
+                    output_data.append(int(output[i], 16))
+                    byte_counter = 0
+                byte_counter += 1
+            decoded_data = decode_output_data(output_data, obj.register)
+            for i in decoded_data[3]:
+                data_vector = numpy.array(i.data_list)
+                result_data_vector += data_vector
+        # print(result_data_vector)
+        noise_arm_dac.append(arm_dac_value)
+        noise_hits.append(sum(result_data_vector))
+        noise_hits_norm.append(sum(result_data_vector)/(float(sample_size*128))*100)
+        print("ARM_DAC: %s, hits: %s/%s" % (arm_dac_value, sum(result_data_vector), sample_size*128))
+    save_list_to_file_and_print("noise_arm_dac", noise_arm_dac, data_file)
+    save_list_to_file_and_print("noise_hits", noise_hits, data_file)
+    save_list_to_file_and_print("noise_hits_norm", noise_hits_norm, data_file)
+
+    # Plot the ARM_DAC vs. noise plot.
+    plt.figure()
+    plt.plot(noise_arm_dac, noise_hits)
+    plt.title("Noise vs. Arming comparator threshold")
+    plt.xlabel("ARM_DAC [DAC counts]")
+    plt.ylabel("Normalized hits [#]")
+    plt.grid(b=True, which='both')
+    plt.savefig('%sARM_DAC_noise.png' % folder)
+
+
+
+    arm_dac_values = [60, 25, 10]
+
+    fig, axs = plt.subplots(3, tight_layout=True)
+    save_to_file_and_print("Channel data is from [1:128].", data_file)
+    channels = range(0, 128)
+    for gain_i in range(0, len(gain)):
+        save_to_file_and_print('Setting the Gain to: %s' % gain[gain_i], data_file)
+        obj.register[131].RES_PRE[0] = RES_PRE[gain_i]
+        obj.register[131].CAP_PRE[0] = CAP_PRE[gain_i]
+        obj.write_register(131)
+        text = "RES_PRE: %s, CAP_PRE: %s" % (obj.register[131].RES_PRE[0], obj.register[131].CAP_PRE[0])
+        save_to_file_and_print(text, data_file)
+        obj.register[135].ARM_DAC[0] = arm_dac_values[gain_i]
+        obj.write_register(135)
+        text = "ARM_DAC: %s" % obj.register[135].ARM_DAC[0]
+        save_to_file_and_print(text, data_file)
+
+        result_data_vector = numpy.array([0]*128)
+        for loop in range(0, nr_of_triggers):
+            time.sleep(0.05)
+            output = obj.interfaceFW.send_fcc(["00111100", "11111111", "00000000", "11111111", "00000000", "11111111", "00000000", "11111111", "00000000",  "11111111", "01101001"])
+            output_data = []
+            byte_counter = 0
+            for i in range(0, len(output)):
+                if byte_counter == 0 or byte_counter == 4:
+                    output_data.append(int(output[i], 16))
+                    byte_counter = 0
+                byte_counter += 1
+            decoded_data = decode_output_data(output_data, obj.register)
+            for i in decoded_data[3]:
+                i.data_list.reverse()
+                data_vector = numpy.array(i.data_list)
+                result_data_vector += data_vector
+        save_to_file_and_print(numpy.array2string(result_data_vector, separator=','), data_file)
+        axs[gain_i].bar(channels, result_data_vector)
+        axs[gain_i].set_title("%s Gain" % gain[gain_i])
+        axs[gain_i].set_ylabel("Hits")
+        axs[gain_i].grid(True)
+
+    axs[2].set_xlabel("Channel")
+    fig.savefig('%scharge_distribution.png' % folder)
+    print("************END OF THE CHARGE DISTRIBUTION TEST*************")
+    stop = time.time()
+    run_time = (stop - start) / 60
+    print("Runtime: %f min" % run_time)
+
+
+def save_to_file_and_print(text, filename):
+    with open(filename, "a") as mfile:
+        mfile.write("%s\n" % text)
+    print(text)
+
+
+def save_list_to_file_and_print(list_name, mylist, filename):
+    list_string = ''.join(str(mylist))
+    text = "%s = %s" % (list_name, list_string)
+    with open(filename, "a") as mfile:
+        mfile.write("%s\n" % text)
+    print(text)
+
