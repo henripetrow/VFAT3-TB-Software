@@ -55,7 +55,7 @@ def find_threshold(obj):
         plt.title("Threshold vs. ARM_DAC, %s Gain" % gain)
         timestamp = time.strftime("%Y%m%d_%H%M")
         # folder = obj.data_folder
-        folder = "../cernbox/VFAT3_charge_distribution/Data/"
+        folder = "../cernbox/VFAT3_charge_distribution/Data/threshold/"
         filename = "%s/threshold/%sthresholds_%s_gain.png" % (folder, timestamp, gain)
         data_file = "%s%sdata.csv" % (folder, timestamp)
         if not os.path.exists(os.path.dirname(filename)):
