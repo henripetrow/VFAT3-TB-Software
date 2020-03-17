@@ -25,6 +25,7 @@ from generator import *
 
 
 def find_threshold(obj):
+    start = time.time()
     thresholds = []
     arm_values = []
     # arm_dac_stop = [201, 161, 141]
@@ -53,7 +54,9 @@ def find_threshold(obj):
         plt.ylabel('Threshold [fC]')
         plt.title("Threshold vs. ARM_DAC, %s Gain" % gain)
         timestamp = time.strftime("%Y%m%d_%H%M")
-        filename = "%s/threshold/%sthresholds_%s_gain.png" % (obj.data_folder, timestamp, gain)
+        # folder = obj.data_folder
+        folder = "../cernbox/VFAT3_charge_distribution/Data/"
+        filename = "%s/threshold/%sthresholds_%s_gain.png" % (folder, timestamp, gain)
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
@@ -61,6 +64,9 @@ def find_threshold(obj):
                 print "Unable to create directory"
         plt.savefig(filename)
         plt.clf()
+        stop = time.time()
+        run_time = (stop - start) / 60
+        print("Runtime: %f min" % run_time)
 
 
 def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes",
