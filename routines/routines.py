@@ -38,7 +38,7 @@ def find_threshold(obj):
     arm_dac_stop = [100]
     dac_start = [254]
     dac_stop = [1]
-    gains = ['Low']
+    gains = ['Medium']
     for j, gain in enumerate(gains):
         for arm_dac in range(arm_dac_start[j], arm_dac_stop[j], 5):
             print "ARM_DAC: %s" % arm_dac
