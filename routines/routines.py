@@ -35,8 +35,8 @@ def find_threshold(obj):
     # arm_dac_start = [30, 10, 5]
     arm_dac_start = [5]
     arm_dac_stop = [100]
-    dac_start = [225]
-    dac_stop = [10]
+    dac_start = [254]
+    dac_stop = [1]
     gains = ['Low']
     for j, gain in enumerate(gains):
         for arm_dac in range(arm_dac_start[j], arm_dac_stop[j], 5):
@@ -190,8 +190,8 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             fig.savefig(filename)
 
         # Analyze data.
-        # mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list = scurve_analyze(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
-        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels, untrimmable_channels = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data, verbose=verbose)
+        # mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list = scurve_analyze_root(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
+        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels, untrimmable_channels = scurve_analyze_numpy(obj, cal_dac_values, channels, scurve_data, verbose=verbose)
         # print enc_list
         # Save data to database.
         if obj.database:
@@ -231,7 +231,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     return [mean_th_fc, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc, unbonded_channels, untrimmable_channels]
 
 
-def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes", verbose='yes'):
+def scurve_analyze_root(obj, dac_values, channels, scurve_data, folder, save="yes", verbose='yes'):
 
     r.gROOT.SetBatch(True)
 
@@ -734,7 +734,7 @@ def gain_histogram(obj):
     print "Runtime: %f" % run_time
 
 
-def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder="", verbose='yes'):
+def scurve_analyze_numpy(obj, dac_values, channels, scurve_data, folder="", verbose='yes'):
     timestamp = time.strftime("%d.%m.%Y %H:%M")
     mean_list = []
     rms_list = []
