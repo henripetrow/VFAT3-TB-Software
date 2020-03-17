@@ -32,12 +32,14 @@ def find_threshold(obj):
     # dac_start = [254, 240, 225]
     # dac_stop = [120, 90, 10]
     # gains = ['High', 'Medium', 'Low']
-    arm_dac_stop = [141]
+    # arm_dac_start = [30, 10, 5]
+    arm_dac_start = [5]
+    arm_dac_stop = [100]
     dac_start = [225]
     dac_stop = [10]
     gains = ['Low']
     for j, gain in enumerate(gains):
-        for arm_dac in range(30, arm_dac_stop[j], 20):
+        for arm_dac in range(arm_dac_start[j], arm_dac_stop[j], 5):
             print "ARM_DAC: %s" % arm_dac
             arm_values.append(arm_dac)
             output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, dac_range=[dac_stop[j], dac_start[j]], gain=gain, configuration='no')
@@ -56,7 +58,7 @@ def find_threshold(obj):
         timestamp = time.strftime("%Y%m%d_%H%M")
         # folder = obj.data_folder
         folder = "../cernbox/VFAT3_charge_distribution/Data/threshold/"
-        filename = "%s/threshold/%sthresholds_%s_gain.png" % (folder, timestamp, gain)
+        filename = "%s%sthresholds_%s_gain.png" % (folder, timestamp, gain)
         data_file = "%s%sdata.csv" % (folder, timestamp)
         if not os.path.exists(os.path.dirname(filename)):
             try:
