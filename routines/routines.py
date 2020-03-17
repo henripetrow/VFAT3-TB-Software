@@ -57,6 +57,7 @@ def find_threshold(obj):
         # folder = obj.data_folder
         folder = "../cernbox/VFAT3_charge_distribution/Data/"
         filename = "%s/threshold/%sthresholds_%s_gain.png" % (folder, timestamp, gain)
+        data_file = "%s%sdata.csv" % (folder, timestamp)
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
@@ -64,6 +65,9 @@ def find_threshold(obj):
                 print "Unable to create directory"
         plt.savefig(filename)
         plt.clf()
+
+        save_list_to_file_and_print('arm_values', arm_values, data_file)
+        save_list_to_file_and_print('thresholds',thresholds, data_file)
         stop = time.time()
         run_time = (stop - start) / 60
         print("Runtime: %f min" % run_time)
