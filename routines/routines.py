@@ -794,6 +794,8 @@ def scurve_analyze_numpy(obj, dac_values, channels, scurve_data, folder="", verb
             rms_list.append(rms)
             if 0 < mean < 100:
                 mean_list.append(mean)
+            else:
+                mean_list.append(0)
 
     rms_mean = numpy.mean(rms_list)
     rms_rms = numpy.std(rms_list)
