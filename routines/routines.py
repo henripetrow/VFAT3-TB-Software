@@ -27,53 +27,45 @@ from generator import *
 def find_threshold(obj):
     thresholds = []
     arm_values = []
-    for i, arm_dac in enumerate(range(20, 220, 20)):
-        print "ARM_DAC:"
-        print arm_dac
-        arm_values.append(arm_dac)
-        if arm_dac < 180:
-            dac_start = 250 - 5 * i
-            dac_stop = 230 - 5 * i
-        elif arm_dac == 180:
-            dac_start = 200
-            dac_stop = 180
-        elif arm_dac == 200:
-            dac_start = 190
-            dac_stop = 170
-        elif arm_dac == 220:
-            dac_start = 170
-            dac_stop = 150
-        elif arm_dac == 240:
-            dac_start = 160
-            dac_stop = 140
-        print dac_start
-        print dac_stop
-        output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, dac_range=[dac_stop, dac_start])
-        thresholds.append(output[0])
-    print arm_values
-    print thresholds
-    fig = plt.figure()
-    plt.plot(arm_values, thresholds)
-    plt.plot(arm_values, thresholds, 'x')
-    plt.grid(True)
-    plt.xlabel('ARM_DAC[DAC]')
-    plt.ylabel('Threshold [fC]')
-    # plt.xlim(0, 10)
-    # plt.legend()
-    plt.title("Threshold vs. ARM_DAC")
-    timestamp = time.strftime("%Y%m%d_%H%M")
-    filename = "%s/threshold/%sthresholds.png" % (obj.data_folder, timestamp)
-    if not os.path.exists(os.path.dirname(filename)):
-        try:
-            os.makedirs(os.path.dirname(filename))
-        except OSError as exc:  # Guard against race condition
-            print "Unable to create directory"
-    fig.savefig(filename)
+    # arm_dac_stop = [201, 161, 141]
+    # dac_start = [254, 240, 225]
+    # dac_stop = [120, 90, 10]
+    # gains = ['High', 'Medium', 'Low']
+    arm_dac_stop = [161]
+    dac_start = [254]
+    dac_stop = [90]
+    gains = ['Medium']
+    for j, gain in enumerate(gains):
+        for arm_dac in range(30, arm_dac_stop[j], 20):
+            print "ARM_DAC: %s" % arm_dac
+            arm_values.append(arm_dac)
+            output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, dac_range=[dac_stop[j], dac_start[j]], gain=gain, configuration='no')
+            thresholds.append(output[0])
+            print arm_values
+            print thresholds
+        print arm_values
+        print thresholds
+        plt.figure()
+        plt.plot(arm_values, thresholds)
+        plt.plot(arm_values, thresholds, 'x')
+        plt.grid(True)
+        plt.xlabel('ARM_DAC[DAC]')
+        plt.ylabel('Threshold [fC]')
+        plt.title("Threshold vs. ARM_DAC, %s Gain" % gain)
+        timestamp = time.strftime("%Y%m%d_%H%M")
+        filename = "%s/threshold/%sthresholds_%s_gain.png" % (obj.data_folder, timestamp, gain)
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError as exc:  # Guard against race condition
+                print "Unable to create directory"
+        plt.savefig(filename)
+        plt.clf()
 
 
 def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes",
-                          dac_range=[220, 240], bc_between_calpulses=2000, pulsestretch=7, latency=40,
-                          cal_phi=0, folder="scurve", triggers=100):
+                          dac_range=[200, 250], bc_between_calpulses=2000, pulsestretch=7, latency=50,
+                          cal_phi=0, folder="scurve", triggers=100, verbose='yes', gain='High'):
     mean_th_fc = "n"
     all_ch_data = "n"
     noisy_channels = "n"
@@ -97,7 +89,8 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
 
         # Create list of cal dac values.
         cal_dac_values = range(start_dac_value, stop_dac_value+1)
-
+        print configuration
+        print verbose
         if configuration == "no":
             print "Setting s-curve for production."
 
@@ -108,13 +101,28 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.interfaceFW.send_fcc("01100110")
 
             obj.register[131].TP_FE[0] = 7
-            obj.register[131].RES_PRE[0] = 2
-            obj.register[131].CAP_PRE[0] = 1
+            if gain == 'High':
+                print("Setting Gain to High.")
+                obj.register[131].RES_PRE[0] = 1
+                obj.register[131].CAP_PRE[0] = 0
+            elif gain == 'Medium':
+                print("Setting Gain to Medium.")
+                obj.register[131].RES_PRE[0] = 2
+                obj.register[131].CAP_PRE[0] = 1
+            elif gain == 'Low':
+                print("Setting Gain to Low.")
+                obj.register[131].RES_PRE[0] = 4
+                obj.register[131].CAP_PRE[0] = 3
+            else:
+                print('ERROR: Invalid Gain Setting. Using High gain.')
+                obj.register[131].RES_PRE[0] = 1
+                obj.register[131].CAP_PRE[0] = 0
+
             obj.write_register(131)
 
             obj.register[132].PT[0] = 3
             obj.register[132].SEL_POL[0] = 0
-            obj.register[132].SEL_COMP_MODE[0] = 0
+            obj.register[132].SEL_COMP_MODE[0] = 1
             obj.write_register(132)
 
             obj.register[129].PS[0] = pulsestretch
@@ -132,20 +140,14 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             print "Unmasking all channels."
             for k in range(0, 128):
                 obj.register[k].mask[0] = 0
-                #obj.register[k].arm_dac[0] = 63
                 obj.write_register(k)
                 time.sleep(0.015)
 
-            #obj.register[137].LAT[0] = latency
-            #obj.write_register(137)
-
-            #obj.set_fe_nominal_values()
-
-            obj.measure_power("RUN")
+            if obj.db_mode == 1:
+                obj.measure_power("RUN")
 
         cal_dac_values.reverse()
         cal_dac_values[:] = [obj.cal_dac_fcM * x + obj.cal_dac_fcB for x in cal_dac_values]
-
 
         # Create a list of channels the s-curve is run on.
         channels = range(start_ch, stop_ch+1, ch_step)
@@ -154,7 +156,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         scurve_data = obj.interfaceFW.run_scurve(start_ch, stop_ch, ch_step, start_dac_value, stop_dac_value, arm_dac, triggers, latency, obj)
 
         # Plot the s-curve data.
-        if configuration == "yes":
+        if configuration == "yes" and verbose == 'yes':
             timestamp = time.strftime("%Y%m%d_%H%M")
             modified = scan_name.replace(" ", "_")
             text = "Results were saved to the folder:\n %s \n" % folder
@@ -177,7 +179,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
 
         # Analyze data.
         # mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list = scurve_analyze(obj, cal_dac_values, channels, scurve_data, folder, save=configuration)
-        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels, untrimmable_channels = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data)
+        mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels, untrimmable_channels = scurve_analyze_old(obj, cal_dac_values, channels, scurve_data, verbose=verbose)
         # print enc_list
         # Save data to database.
         if obj.database:
@@ -217,7 +219,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
     return [mean_th_fc, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc, unbonded_channels, untrimmable_channels]
 
 
-def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
+def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes", verbose='yes'):
 
     r.gROOT.SetBatch(True)
 
@@ -315,7 +317,6 @@ def scurve_analyze(obj, dac_values, channels, scurve_data, folder, save="yes"):
         drawHisto(chi2_h, cc, '%s/%s/chi2Histo%s.png' % (obj.data_folder, folder, timestamp))
         chi2_h.Write()
         outF.Close()
-
 
     return mean_th, mean_enc, noisy_channels, dead_channels, enc_list, thr_list
 
@@ -520,19 +521,18 @@ def scurve_analyze_one_ch(scurve_data):
 def adjust_local_thresholds(obj):
     start = time.time()
     # Measure the mean threshold of the channels, that will be used as a target.
-    mean_threshold, all_ch_data, noisy_channels, thr_list = scurve_all_ch_execute(obj, "S-curve")
+    # mean_threshold, all_ch_data, noisy_channels, thr_list = scurve_all_ch_execute(obj, "S-curve", dac_range=[110, 160])
+    mean_threshold, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc, unbonded_channels, untrimmable_channels = scurve_all_ch_execute(obj, "S-curve", configuration='no')
     correction = []
     print "Found the mean threshold for the 128 channels: %f" % mean_threshold
     for k in range(0, 128):
-        obj.send_reset()
-        obj.send_sync()
         thresholds = []
         diff_values = []
 
         # Read the current dac values
-        #obj.read_register(k)
+
         print "Adjusting the channel %d local arm_dac." % k
-        output = scurve_all_ch_execute(obj, "S-curve", arm_dac=100, ch=[k, k], configuration="no", triggers=250)
+        output = scurve_all_ch_execute(obj, "S-curve", arm_dac=100, ch=[k, k], triggers=250, verbose='no')
         threshold = output[0]
         print "Threshold: %f, target: %f. DAC: %d" % (threshold, mean_threshold, obj.register[k].arm_dac[0])
         previous_diff = abs(mean_threshold - threshold)
@@ -555,8 +555,8 @@ def adjust_local_thresholds(obj):
         while True:
             obj.register[k].arm_dac[0] += 1
             obj.write_register(k)
-
-            output = scurve_all_ch_execute(obj, "S-curve", arm_dac=100, ch=[k, k], configuration="no", triggers=250)
+            time.sleep(0.5)
+            output = scurve_all_ch_execute(obj, "S-curve", arm_dac=100, ch=[k, k], triggers=250, verbose='no')
             threshold = output[0]
             if abs(mean_threshold - threshold) > 5:
                 print "Broken channel."
@@ -722,7 +722,7 @@ def gain_histogram(obj):
     print "Runtime: %f" % run_time
 
 
-def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
+def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder="", verbose='yes'):
     timestamp = time.strftime("%d.%m.%Y %H:%M")
     mean_list = []
     rms_list = []
@@ -766,7 +766,13 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
                         print "Trying a fit with starting values. %s %s" % (st_x, st_y)
                     else:
                         break
-                    mean, rms, r_squared = fit_scurve(filtered_data, dac_values, st_x, st_y)
+                    try:
+                        mean, rms, r_squared = fit_scurve(filtered_data, dac_values, st_x, st_y)
+                    except:
+                        print('Fit failed.')
+                        mean = 0
+                        rms = 0
+                        r_squared = 0
                 print rms
                 print mean
             else:
@@ -813,20 +819,20 @@ def scurve_analyze_old(obj, dac_values, channels, scurve_data, folder=""):
 
                 unbonded_channels.append(channel)
                 channel_category[channel] = change_character_in_string(channel_category[channel], 1, 1)
-
-    print ""
-    print "Mean Threshold: %f fC, sigma: %f fC" % (mean_mean, mean_rms)
-    print "Mean enc: %f fC, sigma: %f fC" % (rms_mean, rms_rms)
-    print "Dead Channels:"
-    print dead_channels
-    print "Noisy Channels (lim1:%s fC, lim2:%s fC):" % (rms_mean + lim_enc_noisy_channel, lim_enc_noisy_channel_flex_end_channels)
-    print noisy_channels
-    print "Unbonded channels (lim1:%s fC, lim2:%s fC):" % (lim_enc_unbonded_channel, lim_enc_unbonded_channel_flex_end_channels)
-    print unbonded_channels
-    print "Untrimmable channels (lim1: %s*sigma + %s fC/2, lim2: %s*sigma + %s fC/2):" % (lim_sigma, lim_trim_dac_scale, lim_sigma_flex_end_channels, lim_trim_dac_scale)
-    print untrimmable_channels
-    print ""
-    print channel_category
+    if verbose == 'yes':
+        print ""
+        print "Mean Threshold: %f fC, sigma: %f fC" % (mean_mean, mean_rms)
+        print "Mean enc: %f fC, sigma: %f fC" % (rms_mean, rms_rms)
+        print "Dead Channels:"
+        print dead_channels
+        print "Noisy Channels (lim1:%s fC, lim2:%s fC):" % (rms_mean + lim_enc_noisy_channel, lim_enc_noisy_channel_flex_end_channels)
+        print noisy_channels
+        print "Unbonded channels (lim1:%s fC, lim2:%s fC):" % (lim_enc_unbonded_channel, lim_enc_unbonded_channel_flex_end_channels)
+        print unbonded_channels
+        print "Untrimmable channels (lim1: %s*sigma + %s fC/2, lim2: %s*sigma + %s fC/2):" % (lim_sigma, lim_trim_dac_scale, lim_sigma_flex_end_channels, lim_trim_dac_scale)
+        print untrimmable_channels
+        print ""
+        print channel_category
 
 
 
@@ -968,87 +974,208 @@ def change_character_in_string(text, nr_character, new_character):
 
 
 def measure_charge_distribution(obj):
-    print("\n\n************STARTING CHARGE DISTRIBUTION TEST*************")
-    start = time.time()
-    timestamp = time.strftime("%d%m%Y%H%M")
-    folder = "./results/charge_distribution/run_%s/" % timestamp
-    data_file = "%sdata.csv" % folder
-    target_channel = 33
-    nr_of_triggers = 3000
-    hybrid_version = "VFAT3b"
-    hybrid_id = "#0060"
+    for nr_delay in range(2, 6):
+        print("\n\n************STARTING CHARGE DISTRIBUTION TEST*************")
+        start = time.time()
+        timestamp = time.strftime("%d%m%Y%H%M")
 
-    # Create new data folder.
-    if not os.path.exists(os.path.dirname(folder)):
-        try:
-            os.makedirs(os.path.dirname(folder))
-        except OSError as exc:  # Guard against race condition
-            print "Unable to create directory"
+        dr_high_gain = 9.5
+        dr_medium_gain = 28
+        dr_low_gain = 55
+        target_channels = [49, 100, 106, 55]  # check VFAT3-strip mapping
+        mapped_target_channels = [25, 50, 75, 100]
+        hybrid_version = "VFAT3b"
+        hybrid_id = "#0060"
 
-    save_to_file_and_print(time.strftime("Time: %d.%m.%Y %H:%M"), data_file)
-    save_to_file_and_print("Hybrid version: %s" % hybrid_version, data_file)
-    save_to_file_and_print("Hybrid ID: %s" % hybrid_id, data_file)
-    save_to_file_and_print("Target channel: %s" % target_channel, data_file)
-    save_to_file_and_print("Nr. of triggers: %s" % nr_of_triggers, data_file)
+        delay = nr_delay
+        nr_of_triggers = 30
+        arm_dac_max = 50
+        arm_dac_step = 1
 
-    print("Resetting the hardware.")
-    obj.sync_fpga()
+        # folder = "./results/charge_distribution/run_%s_delay%s/" % (timestamp, delay)
+        folder = "../cernbox/VFAT3_charge_distribution/Data/run_%s_delay%s/" % (timestamp, delay)
+        data_file = "%s%sdata.csv" % (folder, timestamp)
 
-    print("Setting RUN-bit to 1.")
-    obj.register[0xffff].RUN[0] = 1
-    obj.write_register(0xffff)
+        # Create new data folder.
+        if not os.path.exists(os.path.dirname(folder)):
+            try:
+                os.makedirs(os.path.dirname(folder))
+            except OSError as exc:  # Guard against race condition
+                print "Unable to create directory"
 
-    obj.register[target_channel].cal[0] = 1
-    obj.write_register(target_channel)
+        save_to_file_and_print(time.strftime("Time: %d.%m.%Y %H:%M"), data_file)
+        save_to_file_and_print("Hybrid version: %s" % hybrid_version, data_file)
+        save_to_file_and_print("Hybrid ID: %s" % hybrid_id, data_file)
+        save_to_file_and_print("Target channels: %s" % ''.join(str(target_channels)), data_file)
+        save_to_file_and_print("Nr. of triggers: %s" % nr_of_triggers, data_file)
 
-    obj.register[100].cal[0] = 1
-    obj.write_register(100)
+        print("Resetting the hardware.")
+        #obj.sync_fpga()
 
-    obj.load_calibration_values_from_file(filename="vfat3_60_calibration_values.dat")
+        print("Setting RUN-bit to 1.")
+        obj.register[0xffff].RUN[0] = 1
+        obj.write_register(0xffff)
 
-    print "Sending RUNMode."
-    obj.interfaceFW.send_fcc("01100110")
+        for target_channel in target_channels:
+            obj.register[target_channel].cal[0] = 1
+            obj.write_register(target_channel)
+            time.sleep(0.1)
 
-    save_to_file_and_print("Settings:", data_file)
-    gain = ['High', 'Medium', 'Low']
-    RES_PRE = [1, 2, 4]
-    CAP_PRE = [0, 1, 3]
-    obj.register[131].TP_FE[0] = 7
-    obj.write_register(131)
-    text = "TP_FE: %s" % obj.register[131].TP_FE[0]
-    save_to_file_and_print(text, data_file)
+        obj.load_calibration_values_from_file(filename="vfat3_60_calibration_values.dat")
 
-    obj.register[132].PT[0] = 3
-    obj.register[132].SEL_POL[0] = 0
-    obj.register[132].SEL_COMP_MODE[0] = 1
-    obj.write_register(132)
-    text = "PT: %s, SEL_POL: %s, SEL_COMP_MODE: %s" % (obj.register[132].PT[0], obj.register[132].SEL_POL[0], obj.register[132].SEL_COMP_MODE[0])
-    save_to_file_and_print(text, data_file)
+        cal_dac_hg = int(round((dr_high_gain - obj.cal_dac_fcB) / obj.cal_dac_fcM))
+        cal_dac_mg = int(round((dr_medium_gain - obj.cal_dac_fcB) / obj.cal_dac_fcM))
+        cal_dac_lg = int(round((dr_low_gain - obj.cal_dac_fcB) / obj.cal_dac_fcM))
 
-    obj.register[129].PS[0] = 7
-    obj.write_register(129)
-    text = "PS: %s" % obj.register[129].PS[0]
-    save_to_file_and_print(text, data_file)
+        print(cal_dac_hg, cal_dac_lg, cal_dac_mg)
 
-    obj.register[139].CAL_DUR[0] = 200
-    obj.write_register(139)
-    text = "CAL_DUR: %s" % obj.register[139].CAL_DUR[0]
-    save_to_file_and_print(text, data_file)
+        print "Sending RUNMode."
+        obj.interfaceFW.send_fcc("01100110")
 
-    obj.register[138].CAL_PHI[0] = 1
-    obj.register[138].CAL_MODE[0] = 1
-    obj.register[138].CAL_DAC[0] = 1
-    obj.write_register(138)
-    text = "CAL_PHI: %s, CAL_MODE: %s, CAL_DAC: %s" % (obj.register[138].CAL_PHI[0], obj.register[138].CAL_MODE[0], obj.register[138].CAL_DAC[0])
-    save_to_file_and_print(text, data_file)
+        save_to_file_and_print("Settings:", data_file)
+        gain = ['High', 'Medium', 'Low']
+        cal_dac_values = [cal_dac_hg, cal_dac_mg, cal_dac_lg]
+        RES_PRE = [1, 2, 4]
+        CAP_PRE = [0, 1, 3]
+        obj.register[131].TP_FE[0] = 7
+        obj.write_register(131)
+        text = "TP_FE: %s" % obj.register[131].TP_FE[0]
+        save_to_file_and_print(text, data_file)
 
-    obj.register[137].LAT[0] = 0
-    obj.write_register(137)
+        obj.register[132].PT[0] = 3
+        obj.register[132].SEL_POL[0] = 0
+        obj.register[132].SEL_COMP_MODE[0] = 1
+        obj.write_register(132)
+        text = "PT: %s, SEL_POL: %s, SEL_COMP_MODE: %s" % (obj.register[132].PT[0], obj.register[132].SEL_POL[0], obj.register[132].SEL_COMP_MODE[0])
+        save_to_file_and_print(text, data_file)
 
-    print('\n\n')
-    obj.set_fe_nominal_values(chip=hybrid_version)
-    print('\n')
+        obj.register[129].PS[0] = 0
+        obj.write_register(129)
+        text = "PS: %s" % obj.register[129].PS[0]
+        save_to_file_and_print(text, data_file)
 
+        obj.register[139].CAL_DUR[0] = 200
+        obj.write_register(139)
+        text = "CAL_DUR: %s" % obj.register[139].CAL_DUR[0]
+        save_to_file_and_print(text, data_file)
+
+        obj.register[138].CAL_PHI[0] = 1
+        obj.register[138].CAL_MODE[0] = 1
+        obj.write_register(138)
+        text = "CAL_PHI: %s, CAL_MODE: %s" % (obj.register[138].CAL_PHI[0], obj.register[138].CAL_MODE[0])
+        save_to_file_and_print(text, data_file)
+
+        obj.register[137].LAT[0] = 0
+        obj.write_register(137)
+
+        print('\n\n')
+        obj.set_fe_nominal_values(chip=hybrid_version)
+        print('\n')
+
+        save_to_file_and_print("Channel data is from [1:128].", data_file)
+
+        #command = []
+        command = ["00111100"]
+        for delay_i in range(1, delay + 1):
+            if (delay_i % 2) == 0:
+                command.append("11111111")
+            else:
+                command.append("00000000")
+        command.append("01101001")
+        save_list_to_file_and_print('command', command, data_file)
+
+        for gain_i in range(0, len(gain)):
+            save_to_file_and_print('Setting the Gain to: %s' % gain[gain_i], data_file)
+            obj.register[131].RES_PRE[0] = RES_PRE[gain_i]
+            obj.register[131].CAP_PRE[0] = CAP_PRE[gain_i]
+            obj.write_register(131)
+            text = "RES_PRE: %s, CAP_PRE: %s" % (obj.register[131].RES_PRE[0], obj.register[131].CAP_PRE[0])
+            save_to_file_and_print(text, data_file)
+
+            obj.register[138].CAL_DAC[0] = cal_dac_values[gain_i]
+            obj.write_register(138)
+            text = "CAL_DAC: %s" % (obj.register[138].CAL_DAC[0])
+            save_to_file_and_print(text, data_file)
+            cal_dac_fc = obj.cal_dac_fcM * obj.register[138].CAL_DAC[0] + obj.cal_dac_fcB
+            text = "Calibration Pulse: %s fC" % cal_dac_fc
+            save_to_file_and_print(text, data_file)
+
+            result_data_matrix = numpy.array([0] * 128)
+            for arm_dac_value in range(0, arm_dac_max, arm_dac_step):
+                obj.register[135].ARM_DAC[0] = arm_dac_value
+                obj.write_register(135)
+                text = "ARM_DAC: %s" % obj.register[135].ARM_DAC[0]
+                save_to_file_and_print(text, data_file)
+
+                result_data_vector = numpy.array([0]*128)
+                for loop in range(0, nr_of_triggers):
+                    time.sleep(0.02)
+                    output = obj.interfaceFW.send_fcc(["00111100", "11111111", "00000000", "11111111", "00000000", "11111111", "00000000", "11111111", "00000000",  "11111111", "01101001"])
+                    output = obj.interfaceFW.send_fcc(command)
+                    output_data = []
+                    byte_counter = 0
+                    for i in range(0, len(output)):
+                        if byte_counter == 0 or byte_counter == 4:
+                            output_data.append(int(output[i], 16))
+                            byte_counter = 0
+                        byte_counter += 1
+                    decoded_data = decode_output_data(output_data, obj.register)
+                    for i in decoded_data[3]:
+                        i.data_list.reverse()
+                        data_vector = numpy.array(i.data_list)
+                        result_data_vector += data_vector
+                result_data_vector = map_channels(result_data_vector)
+                result_data_matrix = numpy.vstack((result_data_matrix, result_data_vector))
+                save_to_file_and_print(numpy.array2string(result_data_vector, separator=','), data_file)
+                for channel in mapped_target_channels:
+                    previous_ch_charge = (result_data_vector[channel - 1] / float(nr_of_triggers)) * 100
+                    target_ch_charge = (result_data_vector[channel] / float(nr_of_triggers)) * 100
+                    next_ch_charge = (result_data_vector[channel + 1] / float(nr_of_triggers)) * 100
+                    text = "Charge spread for channel: %s.  %3.1f %% %3.1f %% %3.1f %%" % (channel, previous_ch_charge, target_ch_charge, next_ch_charge)
+                    save_to_file_and_print(text, data_file)
+            print(result_data_matrix)
+            save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), data_file)
+            plt.figure()
+            fig, ax = plt.subplots()
+            plt.imshow(result_data_matrix, origin='lower', interpolation='none')
+            cbar = plt.colorbar()
+            cbar.ax.set_ylabel('# hits')
+            plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain[gain_i], nr_of_triggers, cal_dac_fc))
+            plt.xlabel('Channel')
+            plt.ylabel('Threshold [DAC counts]')
+            plt.savefig('%s%scharge_distribution_%s.png' % (folder, timestamp, gain[gain_i]))
+
+        print("************END OF THE CHARGE DISTRIBUTION TEST*************")
+        stop = time.time()
+        run_time = (stop - start) / 60
+        print("Runtime: %f min" % run_time)
+
+
+def save_to_file_and_print(text, filename):
+    with open(filename, "a") as mfile:
+        mfile.write("%s\n" % text)
+    print(text)
+
+
+def save_list_to_file_and_print(list_name, mylist, filename):
+    list_string = ''.join(str(mylist))
+    text = "%s = %s" % (list_name, list_string)
+    with open(filename, "a") as mfile:
+        mfile.write("%s\n" % text)
+    print(text)
+
+
+def map_channels(channel_data):
+    file_name = "./data/hv3b_slot10_channel_mapping.dat"
+    channel_map = [int(line.rstrip('\n')) for line in open(file_name)]
+    mapped_data = [0]*128
+    for i, position in enumerate(channel_map):
+        mapped_data[position] = channel_data[i]
+    numpy_mapped_data = numpy.array(mapped_data)
+    return numpy_mapped_data
+
+
+def find_noise_floor(obj, folder, data_file):
     save_to_file_and_print("Find noise floor.", data_file)
     sample_size = 5
     save_to_file_and_print("Nr. of triggers: %s/channel" % sample_size, data_file)
@@ -1090,66 +1217,3 @@ def measure_charge_distribution(obj):
     plt.ylabel("Normalized hits [#]")
     plt.grid(b=True, which='both')
     plt.savefig('%sARM_DAC_noise.png' % folder)
-
-
-
-    arm_dac_values = [60, 25, 10]
-
-    fig, axs = plt.subplots(3, tight_layout=True)
-    save_to_file_and_print("Channel data is from [1:128].", data_file)
-    channels = range(0, 128)
-    for gain_i in range(0, len(gain)):
-        save_to_file_and_print('Setting the Gain to: %s' % gain[gain_i], data_file)
-        obj.register[131].RES_PRE[0] = RES_PRE[gain_i]
-        obj.register[131].CAP_PRE[0] = CAP_PRE[gain_i]
-        obj.write_register(131)
-        text = "RES_PRE: %s, CAP_PRE: %s" % (obj.register[131].RES_PRE[0], obj.register[131].CAP_PRE[0])
-        save_to_file_and_print(text, data_file)
-        obj.register[135].ARM_DAC[0] = arm_dac_values[gain_i]
-        obj.write_register(135)
-        text = "ARM_DAC: %s" % obj.register[135].ARM_DAC[0]
-        save_to_file_and_print(text, data_file)
-
-        result_data_vector = numpy.array([0]*128)
-        for loop in range(0, nr_of_triggers):
-            time.sleep(0.05)
-            output = obj.interfaceFW.send_fcc(["00111100", "11111111", "00000000", "11111111", "00000000", "11111111", "00000000", "11111111", "00000000",  "11111111", "01101001"])
-            output_data = []
-            byte_counter = 0
-            for i in range(0, len(output)):
-                if byte_counter == 0 or byte_counter == 4:
-                    output_data.append(int(output[i], 16))
-                    byte_counter = 0
-                byte_counter += 1
-            decoded_data = decode_output_data(output_data, obj.register)
-            for i in decoded_data[3]:
-                i.data_list.reverse()
-                data_vector = numpy.array(i.data_list)
-                result_data_vector += data_vector
-        save_to_file_and_print(numpy.array2string(result_data_vector, separator=','), data_file)
-        axs[gain_i].bar(channels, result_data_vector)
-        axs[gain_i].set_title("%s Gain" % gain[gain_i])
-        axs[gain_i].set_ylabel("Hits")
-        axs[gain_i].grid(True)
-
-    axs[2].set_xlabel("Channel")
-    fig.savefig('%scharge_distribution.png' % folder)
-    print("************END OF THE CHARGE DISTRIBUTION TEST*************")
-    stop = time.time()
-    run_time = (stop - start) / 60
-    print("Runtime: %f min" % run_time)
-
-
-def save_to_file_and_print(text, filename):
-    with open(filename, "a") as mfile:
-        mfile.write("%s\n" % text)
-    print(text)
-
-
-def save_list_to_file_and_print(list_name, mylist, filename):
-    list_string = ''.join(str(mylist))
-    text = "%s = %s" % (list_name, list_string)
-    with open(filename, "a") as mfile:
-        mfile.write("%s\n" % text)
-    print(text)
-

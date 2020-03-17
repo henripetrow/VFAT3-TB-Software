@@ -367,7 +367,10 @@ class VFAT3_GUI:
         self.temp_button.grid(column=1, row=18, sticky='e')
 
         self.temp_button = Button(self.misc_frame, text="Test charge distribution", command=lambda: measure_charge_distribution(self), width=bwidth)
-        self.temp_button.grid(column=1, row=18, sticky='e')
+        self.temp_button.grid(column=1, row=19, sticky='e')
+
+        self.temp_button = Button(self.misc_frame, text="find threshold in charge", command=lambda: find_threshold(self), width=bwidth)
+        self.temp_button.grid(column=1, row=20, sticky='e')
 
         # ###############NEW TAB #######################################
 
@@ -1145,6 +1148,7 @@ class VFAT3_GUI:
                         self.register[reg].change_values(line)
                         print "Write:%s to register:%d" % (line,reg)
                         self.write_register(reg)
+                        time.sleep(0.1)
                 text = "Channel calibration data applied successfully.\n"
                 self.add_to_interactive_screen(text)
 
@@ -1481,13 +1485,13 @@ class VFAT3_GUI:
         self.interfaceFW.send_ext_reset()
         while True:
             result = self.interfaceFW.send_sync()
-            time.sleep(0.1)
+            time.sleep(1)
             if result[0] == '0x3a':
                 text = "->Sync success.\n"
                 self.add_to_interactive_screen(text)
                 print text
                 break
-            if counter > 1:
+            if counter > 3:
                 error = 'r'
                 text = "->Sync fail.\n"
                 self.add_to_interactive_screen(text)
@@ -2112,27 +2116,28 @@ class VFAT3_GUI:
                                            dac_range=[self.start_cal_dac, self.stop_cal_dac],
                                            bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch,
                                            latency=self.latency, cal_phi=self.calphi, triggers=self.triggers)
-            if output[0] == 'n':
-                errors = ['r']
-            else:
-                errors = [0] * 3
-                errors[0] = self.check_selection_criteria(len(output[2]), lim_Noisy_Channels, "Noisy Channels")
-                errors[1] = self.check_selection_criteria(len(output[4]), lim_Dead_Channels, "Dead Channels")
-                self.problematic_channels = 0
-                problematic_ch = list(output[2])
-                problematic_ch.extend(x for x in output[4] if x not in problematic_ch)
-                problematic_ch.extend(x for x in output[6] if x not in problematic_ch)
-                problematic_ch.extend(x for x in output[7] if x not in problematic_ch)
+            if self.db_mode != 0:
+                if output[0] == 'n':
+                    errors = ['r']
+                else:
+                    errors = [0] * 3
+                    errors[0] = self.check_selection_criteria(len(output[2]), lim_Noisy_Channels, "Noisy Channels")
+                    errors[1] = self.check_selection_criteria(len(output[4]), lim_Dead_Channels, "Dead Channels")
+                    self.problematic_channels = 0
+                    problematic_ch = list(output[2])
+                    problematic_ch.extend(x for x in output[4] if x not in problematic_ch)
+                    problematic_ch.extend(x for x in output[6] if x not in problematic_ch)
+                    problematic_ch.extend(x for x in output[7] if x not in problematic_ch)
 
-                self.problematic_channels = len(problematic_ch)
-                print "Problematic channels: %s" % self.problematic_channels
-                print problematic_ch
-                errors[1] = self.check_selection_criteria(self.problematic_channels, lim_Problematic_Channels, "Problematic Channels")
-                errors[2] = self.check_selection_criteria(output[5], lim_Mean_enc, "Noise")
-            if 'y' in errors:
-                prod_error = 'y'
-            if 'r' in errors:
-                prod_error = 'r'
+                    self.problematic_channels = len(problematic_ch)
+                    print "Problematic channels: %s" % self.problematic_channels
+                    print problematic_ch
+                    errors[1] = self.check_selection_criteria(self.problematic_channels, lim_Problematic_Channels, "Problematic Channels")
+                    errors[2] = self.check_selection_criteria(output[5], lim_Mean_enc, "Noise")
+                if 'y' in errors:
+                    prod_error = 'y'
+                if 'r' in errors:
+                    prod_error = 'r'
         else:
             print "Aborting s-curve run."
         print "\n*************************"
