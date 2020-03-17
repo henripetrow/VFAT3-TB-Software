@@ -26,6 +26,7 @@ from generator import *
 
 def find_threshold(obj):
     start = time.time()
+    obj.load_calibration_values_from_file(filename="vfat3_60_calibration_values.dat")
     thresholds = []
     arm_values = []
     # arm_dac_stop = [201, 161, 141]
@@ -775,7 +776,8 @@ def scurve_analyze_numpy(obj, dac_values, channels, scurve_data, folder="", verb
                 for h, st_x in enumerate(par_st_x_list):
                     st_y = par_st_y_list[h]
                     if r_squared < 0.99:
-                        print "Trying a fit with starting values. %s %s" % (st_x, st_y)
+                        # print "Trying a fit with starting values. %s %s" % (st_x, st_y)
+                        pass
                     else:
                         break
                     try:
@@ -785,13 +787,13 @@ def scurve_analyze_numpy(obj, dac_values, channels, scurve_data, folder="", verb
                         mean = 0
                         rms = 0
                         r_squared = 0
-                print rms
-                print mean
+                print mean, rms
             else:
-                print "Error. Starting paramter lists are not of equal length."
+                print "Error. Starting parameter lists are not of equal length."
             # Append values to list
             rms_list.append(rms)
-            mean_list.append(mean)
+            if 0 < mean < 100:
+                mean_list.append(mean)
 
     rms_mean = numpy.mean(rms_list)
     rms_rms = numpy.std(rms_list)
@@ -966,8 +968,8 @@ def fit_scurve(hit_data, charge_data, st_x, st_y):
     np_y = np.array(hit_data)
     params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
     r_squared = calculate_r2_score(np_x, np_y, params)
-    print "R^2: %s" % r_squared
-    print params
+    # print "R^2: %s" % r_squared
+    # print params
     return params[0], params[1], r_squared
 
 
