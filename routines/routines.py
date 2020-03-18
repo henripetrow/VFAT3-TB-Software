@@ -92,10 +92,11 @@ def find_threshold(obj):
         # Save values to a file.
         save_list_to_file_and_print('arm_values', arm_values, data_file)
         save_list_to_file_and_print('thresholds',thresholds, data_file)
-        save_to_file_and_print('arm_dac_fcM %s' % arm_dac_fcM, data_file)
-        save_to_file_and_print('arm_dac_fcB %s' % arm_dac_fcB, data_file)
-        stop = time.time()
+        if linear_fit == 1:
+            save_to_file_and_print('arm_dac_fcM %s' % arm_dac_fcM, data_file)
+            save_to_file_and_print('arm_dac_fcB %s' % arm_dac_fcB, data_file)
 
+    stop = time.time()
     run_time = (stop - start) / 60
     print("Runtime: %f min" % run_time)
 
