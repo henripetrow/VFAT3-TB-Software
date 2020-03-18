@@ -1138,7 +1138,7 @@ def measure_charge_distribution(obj):
             text = "RES_PRE: %s, CAP_PRE: %s" % (obj.register[131].RES_PRE[0], obj.register[131].CAP_PRE[0])
             save_to_file_and_print(text, data_file)
 
-            obj.register[138].CAL_DAC[0] = dynamic_range[gain]
+            obj.register[138].CAL_DAC[0] = int(round((dynamic_range[gain] - obj.cal_dac_fcB) / obj.cal_dac_fcM))
             obj.write_register(138)
             text = "CAL_DAC: %s" % (obj.register[138].CAL_DAC[0])
             save_to_file_and_print(text, data_file)
