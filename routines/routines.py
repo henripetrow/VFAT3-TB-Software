@@ -1021,10 +1021,9 @@ def measure_charge_distribution(obj):
         start = time.time()
         timestamp = time.strftime("%d%m%Y%H%M")
 
-        dr_high_gain = 9.5
-        dr_medium_gain = 28
-        dr_low_gain = 55
+        gains = ['High', 'Medium', 'Low']
 
+        dynamic_range = {'High': 9.5, 'Medium': 28, 'Low': 55}
         arm_dac_fcM = {'Low': 0.308756078585, 'Medium': 0.160574730846, 'High': 0.0525736788946}
         arm_dac_fcB = {'Low': -0.20026469513, 'Medium': -0.344217476814, 'High': -0.225712925757}
 
@@ -1080,10 +1079,8 @@ def measure_charge_distribution(obj):
         obj.interfaceFW.send_fcc("01100110")
 
         save_to_file_and_print("Settings:", data_file)
-        gain = ['High', 'Medium', 'Low']
-        cal_dac_values = [cal_dac_hg, cal_dac_mg, cal_dac_lg]
-        RES_PRE = [1, 2, 4]
-        CAP_PRE = [0, 1, 3]
+        RES_PRE = {'High': 1, 'Medium': 2, 'Low': 4}
+        CAP_PRE = {'High': 0, 'Medium': 1, 'Low': 3}
         obj.register[131].TP_FE[0] = 7
         obj.write_register(131)
         text = "TP_FE: %s" % obj.register[131].TP_FE[0]
@@ -1131,24 +1128,17 @@ def measure_charge_distribution(obj):
         command.append("01101001")
         save_list_to_file_and_print('command', command, data_file)
 
-        for gain_i in range(0, len(gain)):
-            print gain_i
-            print arm_dac_fcM['High']
-            print arm_dac_fcM[gain_i]
-            print arm_dac_fcB[gain_i]
-            ymin = arm_dac_min * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
-            ymax= arm_dac_max * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
-            print ymin
-            print ymax
+        for gain in gains:
+
             arm_dac_values = []
-            save_to_file_and_print('Setting the Gain to: %s' % gain[gain_i], data_file)
-            obj.register[131].RES_PRE[0] = RES_PRE[gain_i]
-            obj.register[131].CAP_PRE[0] = CAP_PRE[gain_i]
+            save_to_file_and_print('Setting the Gain to: %s' % gain, data_file)
+            obj.register[131].RES_PRE[0] = RES_PRE[gain]
+            obj.register[131].CAP_PRE[0] = CAP_PRE[gain]
             obj.write_register(131)
             text = "RES_PRE: %s, CAP_PRE: %s" % (obj.register[131].RES_PRE[0], obj.register[131].CAP_PRE[0])
             save_to_file_and_print(text, data_file)
 
-            obj.register[138].CAL_DAC[0] = cal_dac_values[gain_i]
+            obj.register[138].CAL_DAC[0] = dynamic_range[gain]
             obj.write_register(138)
             text = "CAL_DAC: %s" % (obj.register[138].CAL_DAC[0])
             save_to_file_and_print(text, data_file)
@@ -1192,8 +1182,8 @@ def measure_charge_distribution(obj):
             save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), data_file)
             plt.figure()
             fig, ax = plt.subplots()
-            ymin = arm_dac_min * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
-            ymax= arm_dac_max * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
+            ymin = arm_dac_min * arm_dac_fcM[gain] + arm_dac_fcB[gain]
+            ymax= arm_dac_max * arm_dac_fcM[gain] + arm_dac_fcB[gain]
             plt.imshow(result_data_matrix, origin='lower', interpolation='none', extent=[1,128,ymin,ymax])
             cbar = plt.colorbar()
             cbar.ax.set_ylabel('# hits')
