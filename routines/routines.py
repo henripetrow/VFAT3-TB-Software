@@ -81,11 +81,11 @@ def find_threshold(obj):
         else:
             plt.plot(arm_values, thresholds)
             plt.plot(arm_values, thresholds, 'x')
-            plt.grid(True)
-            plt.xlabel('ARM_DAC[DAC]')
-            plt.ylabel('Threshold [fC]')
-            plt.title("Threshold vs. ARM_DAC, %s Gain" % gain)
 
+        plt.grid(True)
+        plt.xlabel('ARM_DAC[DAC]')
+        plt.ylabel('Threshold [fC]')
+        plt.title("Threshold vs. ARM_DAC, %s Gain" % gain)
         plt.savefig(filename)
         plt.clf()
 
