@@ -1016,7 +1016,7 @@ def change_character_in_string(text, nr_character, new_character):
 
 
 def measure_charge_distribution(obj):
-    for nr_delay in range(2, 6):
+    for nr_delay in range(1, 4):
         print("\n\n************STARTING CHARGE DISTRIBUTION TEST*************")
         start = time.time()
         timestamp = time.strftime("%d%m%Y%H%M")
@@ -1024,6 +1024,10 @@ def measure_charge_distribution(obj):
         dr_high_gain = 9.5
         dr_medium_gain = 28
         dr_low_gain = 55
+
+        arm_dac_fcM = {'Low' : 0.308756078585, 'Medium' : 0.160574730846, 'High' : 0.0525736788946}
+        arm_dac_fcB = {'Low' : -0.20026469513, 'Medium' : -0.344217476814, 'High' : -0.225712925757}
+
         target_channels = [49, 100, 106, 55]  # check VFAT3-strip mapping
         mapped_target_channels = [25, 50, 75, 100]
         hybrid_version = "VFAT3b"
@@ -1031,6 +1035,7 @@ def measure_charge_distribution(obj):
 
         delay = nr_delay
         nr_of_triggers = 30
+        arm_dac_min = 0
         arm_dac_max = 50
         arm_dac_step = 1
 
@@ -1127,6 +1132,7 @@ def measure_charge_distribution(obj):
         save_list_to_file_and_print('command', command, data_file)
 
         for gain_i in range(0, len(gain)):
+            arm_dac_values = []
             save_to_file_and_print('Setting the Gain to: %s' % gain[gain_i], data_file)
             obj.register[131].RES_PRE[0] = RES_PRE[gain_i]
             obj.register[131].CAP_PRE[0] = CAP_PRE[gain_i]
@@ -1143,16 +1149,15 @@ def measure_charge_distribution(obj):
             save_to_file_and_print(text, data_file)
 
             result_data_matrix = numpy.array([0] * 128)
-            for arm_dac_value in range(0, arm_dac_max, arm_dac_step):
+            for arm_dac_value in range(arm_dac_min, arm_dac_max, arm_dac_step):
+                arm_dac_values.append(arm_dac_value)
                 obj.register[135].ARM_DAC[0] = arm_dac_value
                 obj.write_register(135)
                 text = "ARM_DAC: %s" % obj.register[135].ARM_DAC[0]
                 save_to_file_and_print(text, data_file)
-
                 result_data_vector = numpy.array([0]*128)
                 for loop in range(0, nr_of_triggers):
                     time.sleep(0.02)
-                    output = obj.interfaceFW.send_fcc(["00111100", "11111111", "00000000", "11111111", "00000000", "11111111", "00000000", "11111111", "00000000",  "11111111", "01101001"])
                     output = obj.interfaceFW.send_fcc(command)
                     output_data = []
                     byte_counter = 0
@@ -1179,12 +1184,14 @@ def measure_charge_distribution(obj):
             save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), data_file)
             plt.figure()
             fig, ax = plt.subplots()
-            plt.imshow(result_data_matrix, origin='lower', interpolation='none')
+            ymin = arm_dac_min * arm_dac_fcM[gain] + arm_dac_fcB[gain]
+            ymin = arm_dac_max * arm_dac_fcM[gain] + arm_dac_fcB[gain]
+            plt.imshow(result_data_matrix, origin='lower', interpolation='none', extent=[1,128,ymin,ymax])
             cbar = plt.colorbar()
             cbar.ax.set_ylabel('# hits')
             plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain[gain_i], nr_of_triggers, cal_dac_fc))
             plt.xlabel('Channel')
-            plt.ylabel('Threshold [DAC counts]')
+            plt.ylabel('Threshold [fC]')
             plt.savefig('%s%scharge_distribution_%s.png' % (folder, timestamp, gain[gain_i]))
 
         print("************END OF THE CHARGE DISTRIBUTION TEST*************")
