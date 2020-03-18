@@ -1069,12 +1069,6 @@ def measure_charge_distribution(obj):
 
         obj.load_calibration_values_from_file(filename="vfat3_60_calibration_values.dat")
 
-        cal_dac_hg = int(round((dr_high_gain - obj.cal_dac_fcB) / obj.cal_dac_fcM))
-        cal_dac_mg = int(round((dr_medium_gain - obj.cal_dac_fcB) / obj.cal_dac_fcM))
-        cal_dac_lg = int(round((dr_low_gain - obj.cal_dac_fcB) / obj.cal_dac_fcM))
-
-        print(cal_dac_hg, cal_dac_lg, cal_dac_mg)
-
         print "Sending RUNMode."
         obj.interfaceFW.send_fcc("01100110")
 
