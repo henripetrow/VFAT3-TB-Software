@@ -18,13 +18,15 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy.special import erf
 from scipy import sqrt
-import scipy.signal #To filter the S-curves
+from scipy import stats
+import scipy.signal
 from test_system_functions import *
 from output_decoder import *
 from generator import *
 
 
 def find_threshold(obj):
+    linear_fit = 1
     start = time.time()
     obj.load_calibration_values_from_file(filename="vfat3_60_calibration_values.dat")
     thresholds = []
@@ -37,43 +39,65 @@ def find_threshold(obj):
     arm_dac_start = [25]
     arm_dac_stop = [100]
     dac_start = [254]
-    dac_stop = [1]
+    dac_stop = [120]
     gains = ['High']
+    arm_dac_step = 20
+
     for j, gain in enumerate(gains):
-        for arm_dac in range(arm_dac_start[j], arm_dac_stop[j], 5):
+
+        # Generate output file names.
+        timestamp = time.strftime("%Y%m%d_%H%M")
+        # folder = obj.data_folder
+        folder = "../cernbox/VFAT3_charge_distribution/Data/threshold/"
+        filename = "%s%sthresholds_%s_gain.png" % (folder, timestamp, gain)
+        data_file = "%s%sdata.csv" % (folder, timestamp)
+        if not os.path.exists(os.path.dirname(folder)):
+            try:
+                os.makedirs(os.path.dirname(folder))
+            except OSError as exc:
+                print "Unable to create directory"
+
+        for arm_dac in range(arm_dac_start[j], arm_dac_stop[j], arm_dac_step):
             print "ARM_DAC: %s" % arm_dac
             arm_values.append(arm_dac)
             output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, dac_range=[dac_stop[j], dac_start[j]], gain=gain, configuration='no')
             thresholds.append(output[0])
             print arm_values
             print thresholds
-        print arm_values
-        print thresholds
+
+        if linear_fit == 1:
+            # Make a linear fit for the values.
+            arm_dac_fcM, arm_dac_fcB, r_value, p_value, std_err = stats.linregress(arm_values, thresholds)
+
+        # Plot Threshold in fC vs. ARM_DAC.
         plt.figure()
-        plt.plot(arm_values, thresholds)
-        plt.plot(arm_values, thresholds, 'x')
-        plt.grid(True)
-        plt.xlabel('ARM_DAC[DAC]')
-        plt.ylabel('Threshold [fC]')
-        plt.title("Threshold vs. ARM_DAC, %s Gain" % gain)
-        timestamp = time.strftime("%Y%m%d_%H%M")
-        # folder = obj.data_folder
-        folder = "../cernbox/VFAT3_charge_distribution/Data/threshold/"
-        filename = "%s%sthresholds_%s_gain.png" % (folder, timestamp, gain)
-        data_file = "%s%sdata.csv" % (folder, timestamp)
-        if not os.path.exists(os.path.dirname(filename)):
-            try:
-                os.makedirs(os.path.dirname(filename))
-            except OSError as exc:  # Guard against race condition
-                print "Unable to create directory"
+        if linear_fit == 1:
+            fit_values = []
+            for value in arm_values:
+                fit_values.append(value * arm_dac_fcM + arm_dac_fcB)
+            plt.plot(dac_values, fit_values, label="fit")
+            for i, value in enumerate(dac_values):
+                plt.plot(value, charge_values[i], 'r*')
+        else:
+            plt.plot(arm_values, thresholds)
+            plt.plot(arm_values, thresholds, 'x')
+            plt.grid(True)
+            plt.xlabel('ARM_DAC[DAC]')
+            plt.ylabel('Threshold [fC]')
+            plt.title("Threshold vs. ARM_DAC, %s Gain" % gain)
+
         plt.savefig(filename)
         plt.clf()
 
+        # Save values to a file.
         save_list_to_file_and_print('arm_values', arm_values, data_file)
         save_list_to_file_and_print('thresholds',thresholds, data_file)
+        save_to_file_and_print('arm_dac_fcM %s' % arm_dac_fcM, data_file)
+        save_to_file_and_print('arm_dac_fcB %s' % arm_dac_fcB, data_file)
         stop = time.time()
-        run_time = (stop - start) / 60
-        print("Runtime: %f min" % run_time)
+
+    run_time = (stop - start) / 60
+    print("Runtime: %f min" % run_time)
 
 
 def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, configuration="yes",
