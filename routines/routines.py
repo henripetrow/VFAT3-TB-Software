@@ -41,7 +41,7 @@ def find_threshold(obj):
     dac_start = [254]
     dac_stop = [120]
     gains = ['High']
-    arm_dac_step = 20
+    arm_dac_step = 5
 
     for j, gain in enumerate(gains):
 
@@ -71,6 +71,7 @@ def find_threshold(obj):
 
         # Plot Threshold in fC vs. ARM_DAC.
         plt.figure()
+
         if linear_fit == 1:
             fit_values = []
             for value in arm_values:
