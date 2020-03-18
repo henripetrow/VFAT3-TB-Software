@@ -1132,6 +1132,12 @@ def measure_charge_distribution(obj):
         save_list_to_file_and_print('command', command, data_file)
 
         for gain_i in range(0, len(gain)):
+            print arm_dac_fcM[gain_i]
+            print arm_dac_fcB[gain_i]
+            ymin = arm_dac_min * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
+            ymax= arm_dac_max * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
+            print ymin
+            print ymax
             arm_dac_values = []
             save_to_file_and_print('Setting the Gain to: %s' % gain[gain_i], data_file)
             obj.register[131].RES_PRE[0] = RES_PRE[gain_i]
@@ -1185,7 +1191,7 @@ def measure_charge_distribution(obj):
             plt.figure()
             fig, ax = plt.subplots()
             ymin = arm_dac_min * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
-            ymin = arm_dac_max * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
+            ymax= arm_dac_max * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
             plt.imshow(result_data_matrix, origin='lower', interpolation='none', extent=[1,128,ymin,ymax])
             cbar = plt.colorbar()
             cbar.ax.set_ylabel('# hits')
