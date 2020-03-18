@@ -1184,8 +1184,8 @@ def measure_charge_distribution(obj):
             save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), data_file)
             plt.figure()
             fig, ax = plt.subplots()
-            ymin = arm_dac_min * arm_dac_fcM[gain] + arm_dac_fcB[gain]
-            ymin = arm_dac_max * arm_dac_fcM[gain] + arm_dac_fcB[gain]
+            ymin = arm_dac_min * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
+            ymin = arm_dac_max * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
             plt.imshow(result_data_matrix, origin='lower', interpolation='none', extent=[1,128,ymin,ymax])
             cbar = plt.colorbar()
             cbar.ax.set_ylabel('# hits')
