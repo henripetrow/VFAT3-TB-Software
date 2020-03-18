@@ -1025,8 +1025,8 @@ def measure_charge_distribution(obj):
         dr_medium_gain = 28
         dr_low_gain = 55
 
-        arm_dac_fcM = {'Low' : 0.308756078585, 'Medium' : 0.160574730846, 'High' : 0.0525736788946}
-        arm_dac_fcB = {'Low' : -0.20026469513, 'Medium' : -0.344217476814, 'High' : -0.225712925757}
+        arm_dac_fcM = {'Low': 0.308756078585, 'Medium': 0.160574730846, 'High': 0.0525736788946}
+        arm_dac_fcB = {'Low': -0.20026469513, 'Medium': -0.344217476814, 'High': -0.225712925757}
 
         target_channels = [49, 100, 106, 55]  # check VFAT3-strip mapping
         mapped_target_channels = [25, 50, 75, 100]
@@ -1132,6 +1132,8 @@ def measure_charge_distribution(obj):
         save_list_to_file_and_print('command', command, data_file)
 
         for gain_i in range(0, len(gain)):
+            print gain_i
+            print arm_dac_fcM['High']
             print arm_dac_fcM[gain_i]
             print arm_dac_fcB[gain_i]
             ymin = arm_dac_min * arm_dac_fcM[gain_i] + arm_dac_fcB[gain_i]
