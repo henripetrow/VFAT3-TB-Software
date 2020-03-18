@@ -1181,10 +1181,10 @@ def measure_charge_distribution(obj):
             plt.imshow(result_data_matrix, origin='lower', interpolation='none', extent=[1,128,ymin,ymax])
             cbar = plt.colorbar()
             cbar.ax.set_ylabel('# hits')
-            plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain[gain_i], nr_of_triggers, cal_dac_fc))
+            plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain, nr_of_triggers, cal_dac_fc))
             plt.xlabel('Channel')
             plt.ylabel('Threshold [fC]')
-            plt.savefig('%s%scharge_distribution_%s.png' % (folder, timestamp, gain[gain_i]))
+            plt.savefig('%s%scharge_distribution_%s.png' % (folder, timestamp, gain))
 
         print("************END OF THE CHARGE DISTRIBUTION TEST*************")
         stop = time.time()
