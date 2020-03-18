@@ -75,9 +75,9 @@ def find_threshold(obj):
             fit_values = []
             for value in arm_values:
                 fit_values.append(value * arm_dac_fcM + arm_dac_fcB)
-            plt.plot(dac_values, fit_values, label="fit")
-            for i, value in enumerate(dac_values):
-                plt.plot(value, charge_values[i], 'r*')
+            plt.plot(arm_values, fit_values, label="fit")
+            for i, value in enumerate(arm_values):
+                plt.plot(value, thresholds[i], 'r*')
         else:
             plt.plot(arm_values, thresholds)
             plt.plot(arm_values, thresholds, 'x')
