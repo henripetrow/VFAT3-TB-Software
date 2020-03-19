@@ -1129,7 +1129,6 @@ def measure_charge_distribution(obj):
         save_list_to_file_and_print('command', command, data_file)
 
         for gain in gains:
-
             arm_dac_values = []
             save_to_file_and_print('Setting the Gain to: %s' % gain, data_file)
             obj.register[131].RES_PRE[0] = RES_PRE[gain]
@@ -1180,24 +1179,30 @@ def measure_charge_distribution(obj):
                     save_to_file_and_print(text, data_file)
             print(result_data_matrix)
             save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), data_file)
+
+            # Plot 2D map.
             plt.figure()
             fig, ax = plt.subplots()
-
             plt.imshow(result_data_matrix, origin='lower', interpolation='none')
-
             y_ticks = range(20, arm_dac_max+1, 20)
             y_label_list = []
             y_label_list[:] = ["%.1f" % (arm_dac_fcM[gain] * y + arm_dac_fcB[gain]) for y in y_ticks]
-
             ax.set_yticks(y_ticks)
             ax.set_yticklabels(y_label_list)
-
             c_bar = plt.colorbar()
             c_bar.ax.set_ylabel('# hits')
             plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain, nr_of_triggers, cal_dac_fc))
             plt.xlabel('Channel')
             plt.ylabel('Threshold [fC]')
             plt.savefig('%s%scharge_distribution_%s_lat%s.png' % (folder, timestamp, gain, latency))
+
+            # Plot channels.
+            plt.figure()
+            fig, axs = plt.subplots(len(mapped_target_channels))
+            fig.suptitle('Vertically stacked subplots')
+            for axis in range(0,len(mapped_target_channels)):
+                axs[axis].plot(arm_dac_values, result_data_matrix[:,mapped_target_channels[axis]])
+            plt.savefig('%s%scharge_distributions_%s_lat%s.png' % (folder, timestamp, gain, latency))
 
         print("************END OF THE CHARGE DISTRIBUTION TEST*************")
         stop = time.time()
