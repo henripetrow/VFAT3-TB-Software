@@ -1130,6 +1130,7 @@ def measure_charge_distribution(obj):
 
         for gain in gains:
             arm_dac_values = []
+            thresholds = []
             save_to_file_and_print('Setting the Gain to: %s' % gain, data_file)
             obj.register[131].RES_PRE[0] = RES_PRE[gain]
             obj.register[131].CAP_PRE[0] = CAP_PRE[gain]
@@ -1150,7 +1151,9 @@ def measure_charge_distribution(obj):
                 arm_dac_values.append(arm_dac_value)
                 obj.register[135].ARM_DAC[0] = arm_dac_value
                 obj.write_register(135)
-                text = "ARM_DAC: %s" % obj.register[135].ARM_DAC[0]
+                threshold = arm_dac_fcM[gain] * obj.register[135].ARM_DAC[0] + arm_dac_fcB[gain]
+                thresholds.append(threshold)
+                text = "ARM_DAC: %s, %s fC" % (obj.register[135].ARM_DAC[0], threshold)
                 save_to_file_and_print(text, data_file)
                 result_data_vector = numpy.array([0]*128)
                 for loop in range(0, nr_of_triggers):
@@ -1204,9 +1207,9 @@ def measure_charge_distribution(obj):
                 main_ch = mapped_target_channels[axis]
                 previous_ch = mapped_target_channels[axis] - 1
                 next_ch = mapped_target_channels[axis] + 1
-                axs[axis].plot(arm_dac_values, result_data_matrix[1:, previous_ch], label='ch %s' % previous_ch)
-                axs[axis].plot(arm_dac_values, result_data_matrix[1:,main_ch], label='ch %s' % main_ch)
-                axs[axis].plot(arm_dac_values, result_data_matrix[1:, next_ch], label='ch %s' % next_ch)
+                axs[axis].plot(thresholds, result_data_matrix[1:, previous_ch], label='ch %s' % previous_ch)
+                axs[axis].plot(thresholds, result_data_matrix[1:,main_ch], label='ch %s' % main_ch)
+                axs[axis].plot(thresholds, result_data_matrix[1:, next_ch], label='ch %s' % next_ch)
                 axs[axis].grid()
                 axs[axis].legend()
             plt.savefig('%s%scharge_distributions_%s_lat%s.png' % (folder, timestamp, gain, latency))
@@ -1219,11 +1222,11 @@ def measure_charge_distribution(obj):
                 previous_2_ch = mapped_target_channels[axis] - 2
                 next_2_ch = mapped_target_channels[axis] + 2
                 plt.figure()
-                plt.plot(arm_dac_values, result_data_matrix[1:, previous_2_ch], label='ch %s' % previous_2_ch)
-                plt.plot(arm_dac_values, result_data_matrix[1:, previous_ch], label='ch %s' % previous_ch)
-                plt.plot(arm_dac_values, result_data_matrix[1:, main_ch], label='ch %s' % main_ch)
-                plt.plot(arm_dac_values, result_data_matrix[1:, next_ch], label='ch %s' % next_ch)
-                plt.plot(arm_dac_values, result_data_matrix[1:, next_2_ch], label='ch %s' % next_2_ch)
+                plt.plot(thresholds, result_data_matrix[1:, previous_2_ch], label='ch %s' % previous_2_ch)
+                plt.plot(thresholds, result_data_matrix[1:, previous_ch], label='ch %s' % previous_ch)
+                plt.plot(thresholds, result_data_matrix[1:, main_ch], label='ch %s' % main_ch)
+                plt.plot(thresholds, result_data_matrix[1:, next_ch], label='ch %s' % next_ch)
+                plt.plot(thresholds, result_data_matrix[1:, next_2_ch], label='ch %s' % next_2_ch)
                 plt.grid()
                 plt.legend()
                 plt.ylabel('# Hits')
