@@ -1033,7 +1033,7 @@ def measure_charge_distribution(obj):
         hybrid_id = "#0060"
 
         delay = nr_delay
-        nr_of_triggers = 30
+        nr_of_triggers = 10
         arm_dac_min = 0
         arm_dac_max = 100
         arm_dac_step = 1
