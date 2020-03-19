@@ -1201,6 +1201,8 @@ def measure_charge_distribution(obj):
             fig, axs = plt.subplots(len(mapped_target_channels))
             fig.suptitle('Vertically stacked subplots')
             for axis in range(0,len(mapped_target_channels)):
+                print arm_dac_values
+                print result_data_matrix[:,mapped_target_channels[axis]]
                 axs[axis].plot(arm_dac_values, result_data_matrix[:,mapped_target_channels[axis]])
             plt.savefig('%s%scharge_distributions_%s_lat%s.png' % (folder, timestamp, gain, latency))
 
