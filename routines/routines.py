@@ -26,7 +26,7 @@ from generator import *
 
 
 def find_threshold(obj):
-    linear_fit = 1
+    fit = 'exp'
     start = time.time()
     obj.load_calibration_values_from_file(filename="vfat3_60_calibration_values.dat")
     thresholds = []
@@ -65,17 +65,26 @@ def find_threshold(obj):
             print arm_values
             print thresholds
 
-        if linear_fit == 1:
+        if fit == 'linear':
             # Make a linear fit for the values.
             arm_dac_fcM, arm_dac_fcB, r_value, p_value, std_err = stats.linregress(arm_values, thresholds)
+        elif fit == 'exp':
+            arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w=numpy.sqrt(thresholds))
 
         # Plot Threshold in fC vs. ARM_DAC.
         plt.figure()
 
-        if linear_fit == 1:
+        if fit == 'linear':
             fit_values = []
             for value in arm_values:
                 fit_values.append(value * arm_dac_fcM + arm_dac_fcB)
+            plt.plot(arm_values, fit_values, label="fit")
+            for i, value in enumerate(arm_values):
+                plt.plot(value, thresholds[i], 'r*')
+        elif fit == 'exp':
+            fit_values = []
+            for value in arm_values:
+                fit_values.append(exp(arm_dac_fcB) * exp(arm_dac_fcM * value))
             plt.plot(arm_values, fit_values, label="fit")
             for i, value in enumerate(arm_values):
                 plt.plot(value, thresholds[i], 'r*')
