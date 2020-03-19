@@ -1036,10 +1036,10 @@ def measure_charge_distribution(obj):
     latency_stop =3
     latency_step = 1
 
-    nr_of_triggers = 50
+    nr_of_triggers = 100
 
     arm_dac_min = 0
-    arm_dac_max = 50
+    arm_dac_max = 150
     arm_dac_step = 1
 
     # Create new data folder.
@@ -1204,8 +1204,10 @@ def measure_charge_distribution(obj):
                 main_ch = mapped_target_channels[axis]
                 previous_ch = mapped_target_channels[axis] - 1
                 next_ch = mapped_target_channels[axis] + 1
-                axs[axis].plot(arm_dac_values, result_data_matrix[1:,main_ch], label='ch %s' % main_ch)
+                previous_2_ch = mapped_target_channels[axis] - 2
+                next_2_ch = mapped_target_channels[axis] + 2
                 axs[axis].plot(arm_dac_values, result_data_matrix[1:, previous_ch], label='ch %s' % previous_ch)
+                axs[axis].plot(arm_dac_values, result_data_matrix[1:,main_ch], label='ch %s' % main_ch)
                 axs[axis].plot(arm_dac_values, result_data_matrix[1:, next_ch], label='ch %s' % next_ch)
                 axs[axis].grid()
                 axs[axis].legend()
