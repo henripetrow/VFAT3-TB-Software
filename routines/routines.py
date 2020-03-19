@@ -1016,47 +1016,48 @@ def change_character_in_string(text, nr_character, new_character):
 
 
 def measure_charge_distribution(obj):
-    for nr_delay in range(1, 2):
-        print("\n\n************STARTING CHARGE DISTRIBUTION TEST*************")
-        start = time.time()
-        timestamp = time.strftime("%d%m%Y%H%M")
+    print("\n\n************STARTING CHARGE DISTRIBUTION TEST*************")
+    start = time.time()
+    timestamp = time.strftime("%d%m%Y%H%M")
 
-        gains = ['High', 'Medium', 'Low']
+    gains = ['High', 'Medium', 'Low']
 
-        dynamic_range = {'High': 9.5, 'Medium': 28, 'Low': 55}
-        arm_dac_fcM = {'Low': 0.308756078585, 'Medium': 0.160574730846, 'High': 0.0525736788946}
-        arm_dac_fcB = {'Low': -0.20026469513, 'Medium': -0.344217476814, 'High': -0.225712925757}
+    dynamic_range = {'High': 9.5, 'Medium': 28, 'Low': 55}
+    arm_dac_fcM = {'Low': 0.308756078585, 'Medium': 0.160574730846, 'High': 0.0525736788946}
+    arm_dac_fcB = {'Low': -0.20026469513, 'Medium': -0.344217476814, 'High': -0.225712925757}
 
-        target_channels = [49, 100, 106, 55]  # check VFAT3-strip mapping
-        mapped_target_channels = [25, 50, 75, 100]
-        hybrid_version = "VFAT3b"
-        hybrid_id = "#0060"
+    target_channels = [49, 100, 106, 55]  # check VFAT3-strip mapping
+    mapped_target_channels = [25, 50, 75, 100]
+    hybrid_version = "VFAT3b"
+    hybrid_id = "#0060"
 
-        delay = nr_delay
-        nr_of_triggers = 10
-        arm_dac_min = 0
-        arm_dac_max = 100
-        arm_dac_step = 1
+    delay = 5
+    nr_of_triggers = 10
+    arm_dac_min = 0
+    arm_dac_max = 100
+    arm_dac_step = 1
 
-        # folder = "./results/charge_distribution/run_%s_delay%s/" % (timestamp, delay)
-        folder = "../cernbox/VFAT3_charge_distribution/Data/run_%s_delay%s/" % (timestamp, delay)
-        data_file = "%s%sdata.csv" % (folder, timestamp)
+    # Create new data folder.
+    # folder = "./results/charge_distribution/run_%s/" % timestamp
+    folder = "../cernbox/VFAT3_charge_distribution/Data/run_%s/" % timestamp
+    if not os.path.exists(os.path.dirname(folder)):
+        try:
+            os.makedirs(os.path.dirname(folder))
+        except OSError as exc:  # Guard against race condition
+            print "Unable to create directory"
 
-        # Create new data folder.
-        if not os.path.exists(os.path.dirname(folder)):
-            try:
-                os.makedirs(os.path.dirname(folder))
-            except OSError as exc:  # Guard against race condition
-                print "Unable to create directory"
+    for latency in range(1, 7):
+
+        data_file = "%s%sdata_lat%s.csv" % (folder, timestamp, latency)
 
         save_to_file_and_print(time.strftime("Time: %d.%m.%Y %H:%M"), data_file)
         save_to_file_and_print("Hybrid version: %s" % hybrid_version, data_file)
         save_to_file_and_print("Hybrid ID: %s" % hybrid_id, data_file)
         save_to_file_and_print("Target channels: %s" % ''.join(str(target_channels)), data_file)
         save_to_file_and_print("Nr. of triggers: %s" % nr_of_triggers, data_file)
+        save_to_file_and_print("Latency: %s" % latency, data_file)
+        save_to_file_and_print("Delay: %s" % delay, data_file)
 
-        print("Resetting the hardware.")
-        #obj.sync_fpga()
 
         print("Setting RUN-bit to 1.")
         obj.register[0xffff].RUN[0] = 1
@@ -1103,7 +1104,7 @@ def measure_charge_distribution(obj):
         text = "CAL_PHI: %s, CAL_MODE: %s" % (obj.register[138].CAL_PHI[0], obj.register[138].CAL_MODE[0])
         save_to_file_and_print(text, data_file)
 
-        obj.register[137].LAT[0] = 0
+        obj.register[137].LAT[0] = latency
         obj.write_register(137)
 
         print('\n\n')
@@ -1181,7 +1182,7 @@ def measure_charge_distribution(obj):
 
             y_ticks = range(20, arm_dac_max+1, 20)
             y_label_list = []
-            y_label_list[:] = ["%.2f" % (arm_dac_fcM[gain] * y + arm_dac_fcB[gain]) for y in y_ticks]
+            y_label_list[:] = ["%.1f" % (arm_dac_fcM[gain] * y + arm_dac_fcB[gain]) for y in y_ticks]
 
             ax.set_yticks(y_ticks)
             ax.set_yticklabels(y_label_list)
@@ -1191,7 +1192,7 @@ def measure_charge_distribution(obj):
             plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain, nr_of_triggers, cal_dac_fc))
             plt.xlabel('Channel')
             plt.ylabel('Threshold [fC]')
-            plt.savefig('%s%scharge_distribution_%s.png' % (folder, timestamp, gain))
+            plt.savefig('%s%scharge_distribution_%s_lat%s.png' % (folder, timestamp, gain, latency))
 
         print("************END OF THE CHARGE DISTRIBUTION TEST*************")
         stop = time.time()
