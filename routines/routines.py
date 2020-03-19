@@ -1036,7 +1036,7 @@ def measure_charge_distribution(obj):
     latency_stop =3
     latency_step = 1
 
-    nr_of_triggers = 10
+    nr_of_triggers = 100
 
     arm_dac_min = 0
     arm_dac_max = 150
@@ -1234,6 +1234,7 @@ def measure_charge_distribution(obj):
                 plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain, nr_of_triggers, cal_dac_fc))
                 plt.savefig('%s%scharge_distribution_ch%s_%s_lat%s.png' % (folder, timestamp, main_ch, gain, latency))
 
+        plt.close('all')
         print("************END OF THE CHARGE DISTRIBUTION TEST*************")
         stop = time.time()
         run_time = (stop - start) / 60
