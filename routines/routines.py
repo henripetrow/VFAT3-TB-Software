@@ -1036,7 +1036,7 @@ def measure_charge_distribution(obj):
     latency_stop =3
     latency_step = 1
 
-    nr_of_triggers = 100
+    nr_of_triggers = 10
 
     arm_dac_min = 0
     arm_dac_max = 150
