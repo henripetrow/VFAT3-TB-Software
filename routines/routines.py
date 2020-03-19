@@ -31,7 +31,7 @@ def find_threshold(obj):
     obj.load_calibration_values_from_file(filename="vfat3_60_calibration_values.dat")
     thresholds = []
     arm_values = []
-    # arm_dac_stop = [201, 161, 141]
+    # arm_dac_stop = [201, 161, 136]
     # dac_start = [254, 240, 225]
     # dac_stop = [120, 90, 10]
     # gains = ['High', 'Medium', 'Low']
@@ -84,7 +84,7 @@ def find_threshold(obj):
         elif fit == 'exp':
             fit_values = []
             for value in arm_values:
-                fit_values.append(exp(arm_dac_fcB) * exp(arm_dac_fcM * value))
+                fit_values.append(numpy.exp(arm_dac_fcB) * numpy.exp(arm_dac_fcM * value))
             plt.plot(arm_values, fit_values, label="fit")
             for i, value in enumerate(arm_values):
                 plt.plot(value, thresholds[i], 'r*')
@@ -102,7 +102,7 @@ def find_threshold(obj):
         # Save values to a file.
         save_list_to_file_and_print('arm_values', arm_values, data_file)
         save_list_to_file_and_print('thresholds',thresholds, data_file)
-        if linear_fit == 1:
+        if fit:
             save_to_file_and_print('arm_dac_fcM %s' % arm_dac_fcM, data_file)
             save_to_file_and_print('arm_dac_fcB %s' % arm_dac_fcB, data_file)
 
