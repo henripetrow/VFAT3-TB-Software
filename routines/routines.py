@@ -1039,7 +1039,7 @@ def measure_charge_distribution(obj):
     nr_of_triggers = 10
 
     arm_dac_min = 0
-    arm_dac_max = 100
+    arm_dac_max = 160
     arm_dac_step = 1
 
     # Create new data folder.
