@@ -1201,10 +1201,14 @@ def measure_charge_distribution(obj):
             fig, axs = plt.subplots(len(mapped_target_channels))
             fig.suptitle('Vertically stacked subplots')
             for axis in range(0,len(mapped_target_channels)):
-                axs[axis].plot(arm_dac_values, result_data_matrix[1:,mapped_target_channels[axis]], label='ch %s' % mapped_target_channels[axis])
-                axs[axis].plot(arm_dac_values, result_data_matrix[1:, mapped_target_channels[axis]-1], label='ch %s' % mapped_target_channels[axis]-1)
-                axs[axis].plot(arm_dac_values, result_data_matrix[1:, mapped_target_channels[axis]+1], label='ch %s' % mapped_target_channels[axis]+1)
+                main_ch = mapped_target_channels[axis]
+                previous_ch = mapped_target_channels[axis] - 1
+                next_ch = mapped_target_channels[axis] + 1
+                axs[axis].plot(arm_dac_values, result_data_matrix[1:,main_ch], label='ch %s' % main_ch)
+                axs[axis].plot(arm_dac_values, result_data_matrix[1:, previous_ch], label='ch %s' % previous_ch)
+                axs[axis].plot(arm_dac_values, result_data_matrix[1:, next_ch], label='ch %s' % next_ch)
                 axs[axis].grid()
+                axs[axis].legend()
             plt.savefig('%s%scharge_distributions_%s_lat%s.png' % (folder, timestamp, gain, latency))
 
         print("************END OF THE CHARGE DISTRIBUTION TEST*************")
