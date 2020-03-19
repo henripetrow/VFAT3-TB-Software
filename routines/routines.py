@@ -1032,7 +1032,12 @@ def measure_charge_distribution(obj):
     hybrid_id = "#0060"
 
     delay = 5
+    latency_start = 3
+    latency_stop =3
+    latency_step = 1
+
     nr_of_triggers = 10
+
     arm_dac_min = 0
     arm_dac_max = 100
     arm_dac_step = 1
@@ -1046,7 +1051,7 @@ def measure_charge_distribution(obj):
         except OSError as exc:  # Guard against race condition
             print "Unable to create directory"
 
-    for latency in range(1, 7):
+    for latency in range(latency_start, latency_stop, latency_step):
 
         data_file = "%s%sdata_lat%s.csv" % (folder, timestamp, latency)
 
