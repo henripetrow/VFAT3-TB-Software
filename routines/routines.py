@@ -1016,7 +1016,7 @@ def change_character_in_string(text, nr_character, new_character):
 
 
 def measure_charge_distribution(obj):
-    for nr_delay in range(1, 4):
+    for nr_delay in range(1, 2):
         print("\n\n************STARTING CHARGE DISTRIBUTION TEST*************")
         start = time.time()
         timestamp = time.strftime("%d%m%Y%H%M")
@@ -1176,20 +1176,18 @@ def measure_charge_distribution(obj):
             save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), data_file)
             plt.figure()
             fig, ax = plt.subplots()
-            ymin = arm_dac_min * arm_dac_fcM[gain] + arm_dac_fcB[gain]
-            ymax= arm_dac_max * arm_dac_fcM[gain] + arm_dac_fcB[gain]
-            print ymin, ymax
+
             plt.imshow(result_data_matrix, origin='lower', interpolation='none')
 
-            xticks = [20, 40, 60, 80, 100]
-            x_label_list = []
-            x_label_list[:] = [arm_dac_fcM[gain] * x + arm_dac_fcB[gain] for x in xticks]
+            y_ticks = range(0, arm_dac_max, 20)
+            y_label_list = []
+            y_label_list[:] = ["%.2f" % (arm_dac_fcM[gain] * y + arm_dac_fcB[gain]) for y in y_ticks]
 
-            ax.set_xticks(xticks)
-            ax.set_xticklabels(x_label_list)
+            ax.set_yticks(y_ticks)
+            ax.set_yticklabels(y_label_list)
 
-            cbar = plt.colorbar()
-            cbar.ax.set_ylabel('# hits')
+            c_bar = plt.colorbar()
+            c_bar.ax.set_ylabel('# hits')
             plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain, nr_of_triggers, cal_dac_fc))
             plt.xlabel('Channel')
             plt.ylabel('Threshold [fC]')
@@ -1202,8 +1200,8 @@ def measure_charge_distribution(obj):
 
 
 def save_to_file_and_print(text, filename):
-    with open(filename, "a") as mfile:
-        mfile.write("%s\n" % text)
+    with open(filename, "a") as m_file:
+        m_file.write("%s\n" % text)
     print(text)
 
 
