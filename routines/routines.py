@@ -1036,7 +1036,7 @@ def measure_charge_distribution(obj):
     latency_stop =3
     latency_step = 1
 
-    nr_of_triggers = 10
+    nr_of_triggers = 50
 
     arm_dac_min = 0
     arm_dac_max = 50
@@ -1202,6 +1202,8 @@ def measure_charge_distribution(obj):
             fig.suptitle('Vertically stacked subplots')
             for axis in range(0,len(mapped_target_channels)):
                 axs[axis].plot(arm_dac_values, result_data_matrix[1:,mapped_target_channels[axis]])
+                axs[axis].plot(arm_dac_values, result_data_matrix[1:, mapped_target_channels[axis]-1])
+                axs[axis].plot(arm_dac_values, result_data_matrix[1:, mapped_target_channels[axis]+1])
             plt.savefig('%s%scharge_distributions_%s_lat%s.png' % (folder, timestamp, gain, latency))
 
         print("************END OF THE CHARGE DISTRIBUTION TEST*************")
