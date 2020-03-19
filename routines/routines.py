@@ -1196,7 +1196,7 @@ def measure_charge_distribution(obj):
             plt.ylabel('Threshold [fC]')
             plt.savefig('%s%scharge_distribution_%s_lat%s.png' % (folder, timestamp, gain, latency))
 
-            # Plot channels.
+            # Plot channels in subplots.
             plt.figure()
             fig, axs = plt.subplots(len(mapped_target_channels))
             fig.suptitle('Vertically stacked subplots')
@@ -1204,14 +1204,32 @@ def measure_charge_distribution(obj):
                 main_ch = mapped_target_channels[axis]
                 previous_ch = mapped_target_channels[axis] - 1
                 next_ch = mapped_target_channels[axis] + 1
-                previous_2_ch = mapped_target_channels[axis] - 2
-                next_2_ch = mapped_target_channels[axis] + 2
                 axs[axis].plot(arm_dac_values, result_data_matrix[1:, previous_ch], label='ch %s' % previous_ch)
                 axs[axis].plot(arm_dac_values, result_data_matrix[1:,main_ch], label='ch %s' % main_ch)
                 axs[axis].plot(arm_dac_values, result_data_matrix[1:, next_ch], label='ch %s' % next_ch)
                 axs[axis].grid()
                 axs[axis].legend()
             plt.savefig('%s%scharge_distributions_%s_lat%s.png' % (folder, timestamp, gain, latency))
+
+            # Plot channels.
+            for axis in range(0,len(mapped_target_channels)):
+                main_ch = mapped_target_channels[axis]
+                previous_ch = mapped_target_channels[axis] - 1
+                next_ch = mapped_target_channels[axis] + 1
+                previous_2_ch = mapped_target_channels[axis] - 2
+                next_2_ch = mapped_target_channels[axis] + 2
+                plt.figure()
+                plt.plot(arm_dac_values, result_data_matrix[1:, previous_2_ch], label='ch %s' % previous_2_ch)
+                plt.plot(arm_dac_values, result_data_matrix[1:, previous_ch], label='ch %s' % previous_ch)
+                plt.plot(arm_dac_values, result_data_matrix[1:, main_ch], label='ch %s' % main_ch)
+                plt.plot(arm_dac_values, result_data_matrix[1:, next_ch], label='ch %s' % next_ch)
+                plt.plot(arm_dac_values, result_data_matrix[1:, next_2_ch], label='ch %s' % next_2_ch)
+                plt.grid()
+                plt.legend()
+                plt.ylabel('# Hits')
+                plt.xlabel('Threshold [fC]')
+                plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain, nr_of_triggers, cal_dac_fc))
+                plt.savefig('%s%scharge_distribution_ch%s_%s_lat%s.png' % (folder, timestamp, main_ch, gain, latency))
 
         print("************END OF THE CHARGE DISTRIBUTION TEST*************")
         stop = time.time()
