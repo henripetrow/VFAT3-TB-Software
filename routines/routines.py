@@ -1051,7 +1051,7 @@ def measure_charge_distribution(obj):
         except OSError as exc:  # Guard against race condition
             print "Unable to create directory"
 
-    for latency in range(latency_start, latency_stop, latency_step):
+    for latency in range(latency_start, latency_stop+1, latency_step):
 
         data_file = "%s%sdata_lat%s.csv" % (folder, timestamp, latency)
 
