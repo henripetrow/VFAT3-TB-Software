@@ -1035,7 +1035,7 @@ def measure_charge_distribution(obj):
         delay = nr_delay
         nr_of_triggers = 30
         arm_dac_min = 0
-        arm_dac_max = 50
+        arm_dac_max = 100
         arm_dac_step = 1
 
         # folder = "./results/charge_distribution/run_%s_delay%s/" % (timestamp, delay)
@@ -1178,7 +1178,16 @@ def measure_charge_distribution(obj):
             fig, ax = plt.subplots()
             ymin = arm_dac_min * arm_dac_fcM[gain] + arm_dac_fcB[gain]
             ymax= arm_dac_max * arm_dac_fcM[gain] + arm_dac_fcB[gain]
-            plt.imshow(result_data_matrix, origin='lower', interpolation='none', extent=[1,128,ymin,ymax])
+            print ymin, ymax
+            plt.imshow(result_data_matrix, origin='lower', interpolation='none')
+
+            xticks = [20, 40, 60, 80, 100]
+            x_label_list = []
+            x_label_list[:] = [arm_dac_fcM[gain] * x + arm_dac_fcB[gain] for x in xticks]
+
+            ax.set_xticks(xticks)
+            ax.set_xticklabels(x_label_list)
+
             cbar = plt.colorbar()
             cbar.ax.set_ylabel('# hits')
             plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain, nr_of_triggers, cal_dac_fc))
