@@ -1179,7 +1179,7 @@ def measure_charge_distribution(obj):
 
             plt.imshow(result_data_matrix, origin='lower', interpolation='none')
 
-            y_ticks = range(0, arm_dac_max, 20)
+            y_ticks = range(20, arm_dac_max+1, 20)
             y_label_list = []
             y_label_list[:] = ["%.2f" % (arm_dac_fcM[gain] * y + arm_dac_fcB[gain]) for y in y_ticks]
 
