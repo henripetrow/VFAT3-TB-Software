@@ -74,7 +74,7 @@ plt.figure()
 #
 fit_values_s = []
 for value in arm_values:
-    fit_values_s.append(output[0][0] * numpy.exp(-output[0][1] * value))
+    fit_values_s.append(a * numpy.exp(-b * value))
 plt.plot(arm_values, fit_values_s, label="curve_fit")
 
 for i, value in enumerate(arm_values):
