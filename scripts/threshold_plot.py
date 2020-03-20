@@ -8,7 +8,8 @@ thresholds = [1.348262002375149, 1.9220152953946463, 2.3640977196625594, 2.83693
               8.3334771549366735, 9.6298644804688429, 10.903228239070421, 12.198457683172119, 14.169913199830889,
               16.299331595708555, 18.598998488265384, 22.784327925376502]
 
-arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w=numpy.sqrt(thresholds))
+# arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w=numpy.sqrt(thresholds))
+arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1)
 
 # Plot Threshold in fC vs. ARM_DAC.
 plt.figure()
