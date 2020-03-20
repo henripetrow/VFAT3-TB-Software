@@ -49,9 +49,9 @@ a,b,c,r = fit_curve(thresholds[5:], arm_values[5:], st_x, st_y, st_z)
 print a,b,c,r
 
 
-arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w=numpy.sqrt(thresholds))
+#arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w=numpy.sqrt(thresholds))
 # arm_dac_fcM_w, arm_dac_fcB_w = numpy.polyfit(arm_values, numpy.log(thresholds), 1)
-# arm_dac_fcM_l, arm_dac_fcB_l, r_value, p_value, std_err = stats.linregress(arm_values, thresholds)
+arm_dac_fcM_l, arm_dac_fcB_l, r_value, p_value, std_err = stats.linregress(arm_values, thresholds)
 #
 # print arm_dac_fcM, arm_dac_fcB
 # print arm_dac_fcM_l, arm_dac_fcB_l
