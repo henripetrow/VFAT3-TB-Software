@@ -1,6 +1,7 @@
 import numpy
 import matplotlib.pyplot as plt
 from scipy import stats
+from scipy.optimize import curve_fit
 
 gain = 'High'
 arm_values = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]
@@ -19,6 +20,7 @@ thresholds = [1.5737974242415889, 3.1065293496705233, 4.3476081986120079, 5.9706
 arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w=numpy.sqrt(thresholds))
 arm_dac_fcM_w, arm_dac_fcB_w = numpy.polyfit(arm_values, numpy.log(thresholds), 1)
 arm_dac_fcM_l, arm_dac_fcB_l, r_value, p_value, std_err = stats.linregress(arm_values, thresholds)
+print curve_fit(lambda t,a,b: a*numpy.exp(b*t),  arm_values,  thresholds,  p0=(4, 0.1))
 
 # Plot Threshold in fC vs. ARM_DAC.
 plt.figure()
