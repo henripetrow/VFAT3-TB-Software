@@ -72,7 +72,7 @@ plt.figure()
 #     fit_values_w.append(numpy.exp(arm_dac_fcB_w) * numpy.exp(arm_dac_fcM_w * value))
 # plt.plot(arm_values, fit_values_w, label="exp weighted fit")
 #
-a = 1
+a = 4
 for i in range(1,3):
     b = -i/100.0
     fit_values_s = []
