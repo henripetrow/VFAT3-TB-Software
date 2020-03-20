@@ -17,51 +17,75 @@ thresholds = numpy.array([1.5737974242415889, 3.1065293496705233, 4.347608198612
               19.473473145434752, 22.0167733105664, 24.902603095877453, 28.630473169366493, 32.320441327236324,
               35.986788485746111])
 
-arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w=numpy.sqrt(thresholds))
-arm_dac_fcM_w, arm_dac_fcB_w = numpy.polyfit(arm_values, numpy.log(thresholds), 1)
-arm_dac_fcM_l, arm_dac_fcB_l, r_value, p_value, std_err = stats.linregress(arm_values, thresholds)
+st_x = 4
+st_y = 0.05
 
-print arm_dac_fcM, arm_dac_fcB
-print arm_dac_fcM_l, arm_dac_fcB_l
-print arm_dac_fcM_w, arm_dac_fcB_w
+a,b,r = fit_curve(thresholds, arm_values, st_x, st_y)
+print r
 
-def exponential_func(x, a, b):
+
+# arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w=numpy.sqrt(thresholds))
+# arm_dac_fcM_w, arm_dac_fcB_w = numpy.polyfit(arm_values, numpy.log(thresholds), 1)
+# arm_dac_fcM_l, arm_dac_fcB_l, r_value, p_value, std_err = stats.linregress(arm_values, thresholds)
+#
+# print arm_dac_fcM, arm_dac_fcB
+# print arm_dac_fcM_l, arm_dac_fcB_l
+# print arm_dac_fcM_w, arm_dac_fcB_w
+
+
+# plt.figure()
+# fit_values = []
+#
+# fit_values_l = []
+# for value in arm_values:
+#     fit_values_l.append(value * arm_dac_fcM_l + arm_dac_fcB_l)
+# plt.plot(arm_values, fit_values_l, label="Linear fit")
+#
+# for value in arm_values:
+#     fit_values.append(numpy.exp(arm_dac_fcB) * numpy.exp(arm_dac_fcM * value))
+# plt.plot(arm_values, fit_values, label="exp fit")
+#
+# fit_values_w = []
+# for value in arm_values:
+#     fit_values_w.append(numpy.exp(arm_dac_fcB_w) * numpy.exp(arm_dac_fcM_w * value))
+# plt.plot(arm_values, fit_values_w, label="exp weighted fit")
+#
+# fit_values_s = []
+# for value in arm_values:
+#     fit_values_s.append(output[0][0] * numpy.exp(output[0][1] * value))
+# plt.plot(arm_values, fit_values_s, label="curve_fit")
+#
+# for i, value in enumerate(arm_values):
+#     plt.plot(value, thresholds[i], 'r*')
+#
+# plt.legend()
+# plt.grid(True)
+# plt.xlabel('ARM_DAC[DAC]')
+# plt.ylabel('Threshold [fC]')
+# plt.title("Threshold vs. ARM_DAC, %s Gain" % gain)
+# plt.show()
+# plt.clf()
+
+
+
+def fit_func(x, a, b):
     return a*numpy.exp(-b*x)
 
 
-output = curve_fit(exponential_func, arm_values, thresholds, p0=(1, 1 ))
-print output[0]
+def fit_curve(y, x, st_x, st_y):
 
-# Plot Threshold in fC vs. ARM_DAC.
-plt.figure()
-fit_values = []
+    np_x = np.array(x)
+    np_y = np.array(y)
+    params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
+    r_squared = calculate_r2_score(np_x, np_y, params)
+    # print "R^2: %s" % r_squared
+    # print params
+    return params[0], params[1], r_squared
 
-fit_values_l = []
-for value in arm_values:
-    fit_values_l.append(value * arm_dac_fcM_l + arm_dac_fcB_l)
-plt.plot(arm_values, fit_values_l, label="Linear fit")
 
-for value in arm_values:
-    fit_values.append(numpy.exp(arm_dac_fcB) * numpy.exp(arm_dac_fcM * value))
-plt.plot(arm_values, fit_values, label="exp fit")
-
-fit_values_w = []
-for value in arm_values:
-    fit_values_w.append(numpy.exp(arm_dac_fcB_w) * numpy.exp(arm_dac_fcM_w * value))
-plt.plot(arm_values, fit_values_w, label="exp weighted fit")
-
-fit_values_s = []
-for value in arm_values:
-    fit_values_s.append(output[0][0] * numpy.exp(output[0][1] * value))
-plt.plot(arm_values, fit_values_s, label="curve_fit")
-
-for i, value in enumerate(arm_values):
-    plt.plot(value, thresholds[i], 'r*')
-
-plt.legend()
-plt.grid(True)
-plt.xlabel('ARM_DAC[DAC]')
-plt.ylabel('Threshold [fC]')
-plt.title("Threshold vs. ARM_DAC, %s Gain" % gain)
-plt.show()
-plt.clf()
+def calculate_r2_score(xdata, ydata, popt):
+    residuals = ydata - fit_func(xdata, popt[0], popt[1])
+    ss_res = numpy.sum(residuals ** 2)
+    ss_tot = numpy.sum((ydata - numpy.mean(ydata)) ** 2)
+    r_squared = 1 - (ss_res / ss_tot)
+    return r_squared
