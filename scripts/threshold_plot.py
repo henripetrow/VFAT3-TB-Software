@@ -17,7 +17,7 @@ def fit_curve(y, x, st_a, st_b, st_c):
 
 
 def calculate_r2_score(xdata, ydata, popt):
-    residuals = ydata - fit_func(xdata, popt[0], popt[1])
+    residuals = ydata - fit_func(xdata, popt[0], popt[1], popt[2])
     ss_res = numpy.sum(residuals ** 2)
     ss_tot = numpy.sum((ydata - numpy.mean(ydata)) ** 2)
     r_squared = 1 - (ss_res / ss_tot)
