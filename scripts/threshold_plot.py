@@ -39,8 +39,8 @@ thresholds = numpy.array([1.5737974242415889, 3.1065293496705233, 4.347608198612
               19.473473145434752, 22.0167733105664, 24.902603095877453, 28.630473169366493, 32.320441327236324,
               35.986788485746111])
 
-st_x = 1
-st_y = 0.1
+st_x = 2
+st_y = 0.01
 
 a,b,r = fit_curve(thresholds, arm_values, st_x, st_y)
 print a,b,r
@@ -72,7 +72,7 @@ plt.figure()
 #     fit_values_w.append(numpy.exp(arm_dac_fcB_w) * numpy.exp(arm_dac_fcM_w * value))
 # plt.plot(arm_values, fit_values_w, label="exp weighted fit")
 #
-a = 3
+a = 1
 for i in range(10,20):
     b = -i/1000.0
     fit_values_s = []
