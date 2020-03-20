@@ -72,14 +72,16 @@ plt.figure()
 #     fit_values_w.append(numpy.exp(arm_dac_fcB_w) * numpy.exp(arm_dac_fcM_w * value))
 # plt.plot(arm_values, fit_values_w, label="exp weighted fit")
 #
+arm_values = arm_values[5:]
+thresholds = thresholds[5:]
 
 fit_values_s = []
-for value in arm_values[5:]:
+for value in arm_values:
     fit_values_s.append(a * numpy.exp(-b * value))
 plt.plot(arm_values, fit_values_s, label="curve_fit")
 
-for i, value in enumerate(arm_values[5:]):
-    plt.plot(value, thresholds[5:][i], 'r*')
+for i, value in enumerate(arm_values):
+    plt.plot(value, thresholds[i], 'r*')
 
 plt.legend()
 plt.grid(True)
