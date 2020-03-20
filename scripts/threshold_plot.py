@@ -53,7 +53,7 @@ plt.plot(arm_values, fit_values_w, label="exp weighted fit")
 fit_values_s = []
 for value in arm_values:
     #fit_values_s.append(output[0][0] * numpy.exp(output[0][1] * value) + output[0][2])
-    fit_values_s.append(0.2 * numpy.exp(0.9 * value) + output[0][2])
+    fit_values_s.append(0.2 * numpy.exp(0.9 * value) + 1)
 plt.plot(arm_values, fit_values_s, label="curve_fit")
 
 for i, value in enumerate(arm_values):
