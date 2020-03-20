@@ -3,19 +3,17 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from scipy.optimize import curve_fit
 
-def fit_func(x, a, b):
-    return a*numpy.exp(-b*x)
+def fit_func(x, a, b, c):
+    return a*numpy.exp(-b*x) + c
 
 
-def fit_curve(y, x, st_x, st_y):
+def fit_curve(y, x, st_a, st_b, st_c):
 
     np_x = numpy.array(x)
     np_y = numpy.array(y)
-    params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
+    params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_a, st_b, st_c])
     r_squared = calculate_r2_score(np_x, np_y, params)
-    # print "R^2: %s" % r_squared
-    # print params
-    return params[0], params[1], r_squared
+    return params[0], params[1], params[2], r_squared
 
 
 def calculate_r2_score(xdata, ydata, popt):
@@ -39,11 +37,16 @@ thresholds = numpy.array([1.5737974242415889, 3.1065293496705233, 4.347608198612
               19.473473145434752, 22.0167733105664, 24.902603095877453, 28.630473169366493, 32.320441327236324,
               35.986788485746111])
 
+
+arm_values = arm_values[:11]
+thresholds = thresholds[:11]
+
 st_x = 2
 st_y = 0.01
+st_z = 1
 
-a,b,r = fit_curve(thresholds[5:], arm_values[5:], st_x, st_y)
-print a,b,r
+a,b,c,r = fit_curve(thresholds[5:], arm_values[5:], st_x, st_y, st_z)
+print a,b,c,r
 
 
 # arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w=numpy.sqrt(thresholds))
@@ -56,8 +59,8 @@ print a,b,r
 
 
 plt.figure()
-# fit_values = []
-#
+fit_values = []
+
 # fit_values_l = []
 # for value in arm_values:
 #     fit_values_l.append(value * arm_dac_fcM_l + arm_dac_fcB_l)
@@ -72,8 +75,7 @@ plt.figure()
 #     fit_values_w.append(numpy.exp(arm_dac_fcB_w) * numpy.exp(arm_dac_fcM_w * value))
 # plt.plot(arm_values, fit_values_w, label="exp weighted fit")
 #
-arm_values = arm_values[5:]
-thresholds = thresholds[5:]
+
 
 fit_values_s = []
 for value in arm_values:
