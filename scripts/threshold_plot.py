@@ -30,7 +30,7 @@ plt.plot(arm_values, fit_values_l, label="Linear fit")
 
 for value in arm_values:
     fit_values.append(numpy.exp(arm_dac_fcB) * numpy.exp(arm_dac_fcM * value))
-plt.plot(arm_values, fit_values, label="exp fit"
+plt.plot(arm_values, fit_values, label="exp fit")
 
 fit_values_w = []
 for value in arm_values:
