@@ -9,8 +9,8 @@ def fit_func(x, a, b):
 
 def fit_curve(y, x, st_x, st_y):
 
-    np_x = np.array(x)
-    np_y = np.array(y)
+    np_x = numpy.array(x)
+    np_y = numpy.array(y)
     params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
     r_squared = calculate_r2_score(np_x, np_y, params)
     # print "R^2: %s" % r_squared
