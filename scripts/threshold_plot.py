@@ -17,13 +17,21 @@ thresholds = [1.5737974242415889, 3.1065293496705233, 4.3476081986120079, 5.9706
 
 arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w=numpy.sqrt(thresholds))
 arm_dac_fcM_w, arm_dac_fcB_w = numpy.polyfit(arm_values, numpy.log(thresholds), 1)
+arm_dac_fcM_l, arm_dac_fcB_l, r_value, p_value, std_err = stats.linregress(arm_values, thresholds)
 
 # Plot Threshold in fC vs. ARM_DAC.
 plt.figure()
 fit_values = []
+
+fit_values_l = []
+for value in arm_values:
+    fit_values_l.append(value * arm_dac_fcM_l + arm_dac_fcB_l)
+plt.plot(arm_values, fit_values_l, label="Linear fit")
+
 for value in arm_values:
     fit_values.append(numpy.exp(arm_dac_fcB) * numpy.exp(arm_dac_fcM * value))
-plt.plot(arm_values, fit_values, label="exp fit")
+plt.plot(arm_values, fit_values, label="exp fit"
+
 fit_values_w = []
 for value in arm_values:
     fit_values_w.append(numpy.exp(arm_dac_fcB_w) * numpy.exp(arm_dac_fcM_w * value))
