@@ -37,11 +37,11 @@ def find_threshold(obj):
     # gains = ['High', 'Medium', 'Low']
     # arm_dac_start = [30, 10, 5]
     arm_dac_start = [30]
-    arm_dac_stop = [201]
+    arm_dac_stop = [120]
     dac_start = [254]
     dac_stop = [120]
     gains = ['High']
-    arm_dac_step = 10
+    arm_dac_step = 1
 
     for j, gain in enumerate(gains):
 
@@ -50,7 +50,7 @@ def find_threshold(obj):
         # folder = obj.data_folder
         folder = "../cernbox/VFAT3_charge_distribution/Data/threshold/"
         filename = "%s%sthresholds_%s_gain.png" % (folder, timestamp, gain)
-        data_file = "%s%sdata.csv" % (folder, timestamp)
+        data_file = "%s%sthresholds_%s_gain.dat" % (folder, timestamp)
         if not os.path.exists(os.path.dirname(folder)):
             try:
                 os.makedirs(os.path.dirname(folder))
@@ -62,8 +62,8 @@ def find_threshold(obj):
             arm_values.append(arm_dac)
             output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, dac_range=[dac_stop[j], dac_start[j]], gain=gain, configuration='no')
             thresholds.append(output[0])
-            print arm_values
-            print thresholds
+            save_list_to_file_and_print('arm_values', arm_values, data_file)
+            save_list_to_file_and_print('thresholds', thresholds, data_file)
 
         if fit == 'linear':
             # Make a linear fit for the values.
