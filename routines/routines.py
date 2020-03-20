@@ -1192,6 +1192,8 @@ def measure_charge_distribution(obj):
             print(result_data_matrix)
             save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), data_file)
 
+            thresholds = arm_dac_values
+
             # Plot 2D map.
             plt.figure()
             fig, ax = plt.subplots()
@@ -1199,8 +1201,8 @@ def measure_charge_distribution(obj):
             y_ticks = range(20, arm_dac_max+1, 20)
             y_label_list = []
             y_label_list[:] = ["%.1f" % (arm_dac_fcM[gain] * y + arm_dac_fcB[gain]) for y in y_ticks]
-            ax.set_yticks(y_ticks)
-            ax.set_yticklabels(y_label_list)
+            #ax.set_yticks(y_ticks)
+            #ax.set_yticklabels(y_label_list)
             c_bar = plt.colorbar()
             c_bar.ax.set_ylabel('# hits')
             plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain, nr_of_triggers, cal_dac_fc))
