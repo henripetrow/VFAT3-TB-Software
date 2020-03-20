@@ -43,7 +43,7 @@ st_x = 1
 st_y = 0.1
 
 a,b,r = fit_curve(thresholds, arm_values, st_x, st_y)
-print r
+print a,b,r
 
 
 # arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w=numpy.sqrt(thresholds))
