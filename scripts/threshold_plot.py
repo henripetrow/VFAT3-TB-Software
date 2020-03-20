@@ -22,7 +22,7 @@ arm_dac_fcM_w, arm_dac_fcB_w = numpy.polyfit(arm_values, numpy.log(thresholds), 
 arm_dac_fcM_l, arm_dac_fcB_l, r_value, p_value, std_err = stats.linregress(arm_values, thresholds)
 
 def exponenial_func(x, a, b, c):
-    return a*np.exp(-b*x)+c
+    return a*numpy.exp(-b*x)+c
 
 
 popt, pcov = curve_fit(exponenial_func, arm_values, thresholds, p0=(1, 1e-6, 1))
