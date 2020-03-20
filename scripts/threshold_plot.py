@@ -21,11 +21,15 @@ arm_dac_fcM, arm_dac_fcB = numpy.polyfit(arm_values, numpy.log(thresholds), 1, w
 arm_dac_fcM_w, arm_dac_fcB_w = numpy.polyfit(arm_values, numpy.log(thresholds), 1)
 arm_dac_fcM_l, arm_dac_fcB_l, r_value, p_value, std_err = stats.linregress(arm_values, thresholds)
 
+print arm_dac_fcM, arm_dac_fcB
+print arm_dac_fcM_l, arm_dac_fcB_l
+print arm_dac_fcM_w, arm_dac_fcB_w
+
 def exponenial_func(x, a, b, c):
     return a*numpy.exp(-b*x)+c
 
 
-output = curve_fit(exponenial_func, arm_values, thresholds, p0=(1, 1e-6, 1))
+output = curve_fit(exponenial_func, arm_values, thresholds, p0=(1, 0.4, 1))
 print output[0][0]
 
 # Plot Threshold in fC vs. ARM_DAC.
