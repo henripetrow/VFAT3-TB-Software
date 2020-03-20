@@ -73,11 +73,11 @@ plt.figure()
 # plt.plot(arm_values, fit_values_w, label="exp weighted fit")
 #
 a = 1
-for b in range(0,1,0.1):
+for b in range(0,10):
     fit_values_s = []
     for value in arm_values:
-        fit_values_s.append(a * numpy.exp(-b * value))
-    plt.plot(arm_values, fit_values_s, label="curve_fit%s" % a)
+        fit_values_s.append(a * numpy.exp(-b/10 * value))
+    plt.plot(arm_values, fit_values_s, label="curve_fit%s" % b)
 
 for i, value in enumerate(arm_values):
     plt.plot(value, thresholds[i], 'r*')
