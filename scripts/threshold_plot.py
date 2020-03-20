@@ -74,7 +74,7 @@ plt.figure()
 #
 a = 1
 for i in range(1,10):
-    b = i/10.0
+    b = -i/100.0
     fit_values_s = []
     for value in arm_values:
         fit_values_s.append(a * numpy.exp(-b * value))
