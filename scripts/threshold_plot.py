@@ -42,7 +42,7 @@ thresholds = numpy.array([1.5737974242415889, 3.1065293496705233, 4.347608198612
 st_x = 2
 st_y = 0.01
 
-a,b,r = fit_curve(thresholds, arm_values, st_x, st_y)
+a,b,r = fit_curve(thresholds[5:], arm_values[5:], st_x, st_y)
 print a,b,r
 
 
@@ -74,7 +74,7 @@ plt.figure()
 #
 
 fit_values_s = []
-for value in arm_values:
+for value in arm_values[5:]:
     fit_values_s.append(a * numpy.exp(-b * value))
 plt.plot(arm_values, fit_values_s, label="curve_fit")
 
