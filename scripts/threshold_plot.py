@@ -25,11 +25,11 @@ print arm_dac_fcM, arm_dac_fcB
 print arm_dac_fcM_l, arm_dac_fcB_l
 print arm_dac_fcM_w, arm_dac_fcB_w
 
-def exponential_func(x, a, b, c):
-    return a*numpy.exp(-b*x)+c
+def exponential_func(x, a, b):
+    return a*numpy.exp(-b*x)
 
 
-output = curve_fit(exponential_func, arm_values, thresholds, p0=(0.2, 1, 1))
+output = curve_fit(exponential_func, arm_values, thresholds, p0=(1, 1 ))
 print output[0]
 
 # Plot Threshold in fC vs. ARM_DAC.
@@ -52,8 +52,7 @@ plt.plot(arm_values, fit_values_w, label="exp weighted fit")
 
 fit_values_s = []
 for value in arm_values:
-    #fit_values_s.append(output[0][0] * numpy.exp(output[0][1] * value) + output[0][2])
-    fit_values_s.append(0.2 * numpy.exp(0.9 * value) + 1)
+    fit_values_s.append(output[0][0] * numpy.exp(output[0][1] * value))
 plt.plot(arm_values, fit_values_s, label="curve_fit")
 
 for i, value in enumerate(arm_values):
