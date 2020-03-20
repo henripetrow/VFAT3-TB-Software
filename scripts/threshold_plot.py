@@ -73,7 +73,7 @@ plt.figure()
 # plt.plot(arm_values, fit_values_w, label="exp weighted fit")
 #
 a = 3
-for i in range(1,2):
+for i in range(10,20):
     b = -i/1000.0
     fit_values_s = []
     for value in arm_values:
