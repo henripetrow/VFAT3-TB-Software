@@ -25,7 +25,9 @@ def exponenial_func(x, a, b, c):
     return a*numpy.exp(-b*x)+c
 
 
-print  curve_fit(exponenial_func, arm_values, thresholds, p0=(1, 1e-6, 1))
+output = curve_fit(exponenial_func, arm_values, thresholds, p0=(1, 1e-6, 1))
+print output[0]
+
 # Plot Threshold in fC vs. ARM_DAC.
 plt.figure()
 fit_values = []
