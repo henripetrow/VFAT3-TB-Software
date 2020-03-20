@@ -3,6 +3,28 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from scipy.optimize import curve_fit
 
+def fit_func(x, a, b):
+    return a*numpy.exp(-b*x)
+
+
+def fit_curve(y, x, st_x, st_y):
+
+    np_x = np.array(x)
+    np_y = np.array(y)
+    params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
+    r_squared = calculate_r2_score(np_x, np_y, params)
+    # print "R^2: %s" % r_squared
+    # print params
+    return params[0], params[1], r_squared
+
+
+def calculate_r2_score(xdata, ydata, popt):
+    residuals = ydata - fit_func(xdata, popt[0], popt[1])
+    ss_res = numpy.sum(residuals ** 2)
+    ss_tot = numpy.sum((ydata - numpy.mean(ydata)) ** 2)
+    r_squared = 1 - (ss_res / ss_tot)
+    return r_squared
+
 # gain = 'High'
 # arm_values = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]
 # thresholds = [1.348262002375149, 1.9220152953946463, 2.3640977196625594, 2.8369307126025629, 3.3124976163706239,
@@ -68,24 +90,3 @@ print r
 
 
 
-def fit_func(x, a, b):
-    return a*numpy.exp(-b*x)
-
-
-def fit_curve(y, x, st_x, st_y):
-
-    np_x = np.array(x)
-    np_y = np.array(y)
-    params, params_covariance = curve_fit(fit_func, np_x, np_y, p0=[st_x, st_y])
-    r_squared = calculate_r2_score(np_x, np_y, params)
-    # print "R^2: %s" % r_squared
-    # print params
-    return params[0], params[1], r_squared
-
-
-def calculate_r2_score(xdata, ydata, popt):
-    residuals = ydata - fit_func(xdata, popt[0], popt[1])
-    ss_res = numpy.sum(residuals ** 2)
-    ss_tot = numpy.sum((ydata - numpy.mean(ydata)) ** 2)
-    r_squared = 1 - (ss_res / ss_tot)
-    return r_squared
