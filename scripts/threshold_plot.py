@@ -78,8 +78,8 @@ for value in arm_values[5:]:
     fit_values_s.append(a * numpy.exp(-b * value))
 plt.plot(arm_values, fit_values_s, label="curve_fit")
 
-for i, value in enumerate(arm_values):
-    plt.plot(value, thresholds[i], 'r*')
+for i, value in enumerate(arm_values[5:]):
+    plt.plot(value, thresholds[5:][i], 'r*')
 
 plt.legend()
 plt.grid(True)
