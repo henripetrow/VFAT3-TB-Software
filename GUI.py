@@ -850,12 +850,10 @@ class VFAT3_GUI:
             ("Medium", 2),
             ("Low", 3)]
 
-        for val, language in enumerate(languages):
-            Radiobutton(self.scurve_frame,
-                           text=language,
-                           padx=20,
-                           variable=self.gain_choice,
-                           value=val).pack(anchor=tk.W)
+
+        Radiobutton(self.scurve_frame,text='High',variable=self.gain_choice,value=1).grid()
+        Radiobutton(self.scurve_frame, text='Medium', variable=self.gain_choice, value=2).grid()
+        Radiobutton(self.scurve_frame, text='Low', variable=self.gain_choice, value=3).grid()
 
         self.scurve0_button = Button(self.scurve_frame, text="RUN S-curve", command=self.run_scurve, width=bwidth)
         self.scurve0_button.grid(column=1, sticky='e', columnspan=2)
