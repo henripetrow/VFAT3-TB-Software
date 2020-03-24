@@ -251,7 +251,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         if obj.plot_enc:
             timestamp = time.strftime("%Y%m%d_%H%M")
             enc_filename = "%s/%s/%sscurve_enc_%s.png" % (obj.data_folder, folder, timestamp, gain)
-            thr_filename = "%s/%s/%sscurve_threshold_s.png" % (obj.data_folder, folder, timestamp, gain)
+            thr_filename = "%s/%s/%sscurve_threshold_%s.png" % (obj.data_folder, folder, timestamp, gain)
             plt.figure()
             plt.plot(enc_list)
             plt.text(100, 0.8, "Mean enc:\n %f" % mean_enc_fc, bbox=dict(alpha=0.5))
