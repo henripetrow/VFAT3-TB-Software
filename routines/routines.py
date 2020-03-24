@@ -225,7 +225,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             plt.grid(True)
             plt.ylabel('[%]')
             plt.xlabel('Charge [fC]')
-            plt.xlim(0, 10)
+            # plt.xlim(0, 10)
             plt.title(modified)
             fig.savefig(filename)
 
@@ -267,7 +267,8 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             plt.plot(thr_list)
             plt.text(100, 0.8, "Mean Thr:\n %f" % mean_th_fc, bbox=dict(alpha=0.5))
             plt.title("Threshold, %s Gain" % gain)
-            plt.ylim([0, mean_th_fc + par_enc_plot_lim])
+            #plt.ylim([0, mean_th_fc + par_enc_plot_lim])
+            plt.ylim([0, mean_th_fc * 2])
             plt.xlim([0, 128])
             plt.xlabel("Channel")
             plt.ylabel("Threshold [fC]")
