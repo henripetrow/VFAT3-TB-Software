@@ -843,12 +843,12 @@ class VFAT3_GUI:
         self.stop_cal_dac_label0.grid(column=3, row=11, sticky='w')
 
         self.gain_choice = IntVar()
-        self.gain_choice.set('High')  # initializing the choice, i.e. Python
+        self.gain_choice.set(1)  # initializing the choice, i.e. Python
 
         Label(self.scurve_frame, text="Gain:").grid(column=1, sticky='w')
-        Radiobutton(self.scurve_frame,text='High',variable=self.gain_choice,value='High').grid(column=1, sticky='w')
-        Radiobutton(self.scurve_frame, text='Medium', variable=self.gain_choice, value='Medium').grid(column=1, sticky='w')
-        Radiobutton(self.scurve_frame, text='Low', variable=self.gain_choice, value='Low').grid(column=1, sticky='w')
+        Radiobutton(self.scurve_frame,text='High',variable=self.gain_choice,value=1).grid(column=1, sticky='w')
+        Radiobutton(self.scurve_frame, text='Medium', variable=self.gain_choice, value=2).grid(column=1, sticky='w')
+        Radiobutton(self.scurve_frame, text='Low', variable=self.gain_choice, value=3).grid(column=1, sticky='w')
 
         self.scurve0_button = Button(self.scurve_frame, text="RUN S-curve", command=self.run_scurve, width=bwidth)
         self.scurve0_button.grid(column=1, sticky='e', columnspan=2)
@@ -2114,6 +2114,13 @@ class VFAT3_GUI:
         error += self.check_value_range("Start CAL_DAC", self.start_cal_dac, 0, 254)
         self.stop_cal_dac = int(self.stop_cal_dac_entry.get())
         error += self.check_value_range("Stop CAL_DAC", self.stop_cal_dac, 0, 254)
+        gain_value = self.gain_choice.get()
+        if gain_value == 1:
+            gain_choice = "High"
+        if gain_value == 2:
+            gain_choice = "Medium"
+        if gain_value == 3:
+            gain_choice = "Low"
         if self.stop_cal_dac < self.start_cal_dac:
             print "Stop CAL_DAC should be higher than start CAL_DAC."
             error += 1
@@ -2124,7 +2131,7 @@ class VFAT3_GUI:
                                            self.stop_channel], ch_step=self.channel_step, configuration=configuration,
                                            dac_range=[self.start_cal_dac, self.stop_cal_dac],
                                            bc_between_calpulses=self.interval, pulsestretch=self.pulsestretch,
-                                           latency=self.latency, cal_phi=self.calphi, triggers=self.triggers, gain=self.gain_choice.get())
+                                           latency=self.latency, cal_phi=self.calphi, triggers=self.triggers, gain=gain_choice)
             if self.db_mode != 0:
                 if output[0] == 'n':
                     errors = ['r']
