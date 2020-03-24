@@ -139,6 +139,27 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         cal_dac_values = range(start_dac_value, stop_dac_value+1)
         print configuration
         print verbose
+
+        if gain == 'High':
+            print("Setting Gain to High.")
+            obj.register[131].RES_PRE[0] = 1
+            obj.register[131].CAP_PRE[0] = 0
+        elif gain == 'Medium':
+            print("Setting Gain to Medium.")
+            obj.register[131].RES_PRE[0] = 2
+            obj.register[131].CAP_PRE[0] = 1
+        elif gain == 'Low':
+            print("Setting Gain to Low.")
+            obj.register[131].RES_PRE[0] = 4
+            obj.register[131].CAP_PRE[0] = 3
+        else:
+            print('ERROR: Invalid Gain Setting. Using High gain.')
+            obj.register[131].RES_PRE[0] = 1
+            obj.register[131].CAP_PRE[0] = 0
+
+        obj.write_register(131)
+
+
         if configuration == "no":
             print "Setting s-curve for production."
 
@@ -149,24 +170,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             obj.interfaceFW.send_fcc("01100110")
 
             obj.register[131].TP_FE[0] = 7
-            if gain == 'High':
-                print("Setting Gain to High.")
-                obj.register[131].RES_PRE[0] = 1
-                obj.register[131].CAP_PRE[0] = 0
-            elif gain == 'Medium':
-                print("Setting Gain to Medium.")
-                obj.register[131].RES_PRE[0] = 2
-                obj.register[131].CAP_PRE[0] = 1
-            elif gain == 'Low':
-                print("Setting Gain to Low.")
-                obj.register[131].RES_PRE[0] = 4
-                obj.register[131].CAP_PRE[0] = 3
-            else:
-                print('ERROR: Invalid Gain Setting. Using High gain.')
-                obj.register[131].RES_PRE[0] = 1
-                obj.register[131].CAP_PRE[0] = 0
 
-            obj.write_register(131)
 
             obj.register[132].PT[0] = 3
             obj.register[132].SEL_POL[0] = 0

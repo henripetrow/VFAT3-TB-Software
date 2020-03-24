@@ -842,6 +842,21 @@ class VFAT3_GUI:
         self.stop_cal_dac_label0 = Label(self.scurve_frame, text="0-254  max diff 40")
         self.stop_cal_dac_label0.grid(column=3, row=11, sticky='w')
 
+        self.gain_choice = IntVar()
+        self.gain_choice.set(1)  # initializing the choice, i.e. Python
+
+        languages = [
+            ("High", 1),
+            ("Medium", 2),
+            ("Low", 3)]
+
+        for val, language in enumerate(languages):
+            Radiobutton(self.scurve_frame,
+                           text=language,
+                           padx=20,
+                           variable=self.gain_choice,
+                           value=val).pack(anchor=tk.W)
+
         self.scurve0_button = Button(self.scurve_frame, text="RUN S-curve", command=self.run_scurve, width=bwidth)
         self.scurve0_button.grid(column=1, sticky='e', columnspan=2)
 
