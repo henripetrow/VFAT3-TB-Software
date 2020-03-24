@@ -129,7 +129,8 @@ class VFAT3_GUI:
         self.scurve_channel = 0
         self.transaction_ID = 0
         self.interactive_output_file = "./data/FPGA_instruction_list.dat"
-        self.data_folder = "./results"
+        # self.data_folder = "./results"
+        self.data_folder = "../cernbox/VFAT3_charge_distribution/Data"
         self.COM_port = "/dev/ttyUSB0"
         self.register_mode = 'r'
         self.register_names = []

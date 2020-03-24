@@ -245,6 +245,9 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
         text = "S-curve Run time (minutes): %f\n" % run_time
         print text
         if obj.plot_enc:
+            timestamp = time.strftime("%Y%m%d_%H%M")
+            enc_filename = "%s/%s/%sscurve_enc.png" % (obj.data_folder, folder, timestamp)
+            thr_filename = "%s/%s/%sscurve_threshold.png" % (obj.data_folder, folder, timestamp)
             plt.plot(enc_list)
             plt.text(100, 0.8, "Mean enc:\n %f" % mean_enc_fc, bbox=dict(alpha=0.5))
             plt.title("enc")
@@ -253,7 +256,7 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             plt.xlabel("Channel")
             plt.ylabel("enc [fC]")
             plt.grid(True)
-            plt.show()
+            plt.savefig(enc_filename)
 
             plt.plot(thr_list)
             plt.text(100, 0.8, "Mean Thr:\n %f" % mean_th_fc, bbox=dict(alpha=0.5))
@@ -263,7 +266,8 @@ def scurve_all_ch_execute(obj, scan_name, arm_dac=100, ch=[0, 127], ch_step=1, c
             plt.xlabel("Channel")
             plt.ylabel("Threshold [fC]")
             plt.grid(True)
-            plt.show()
+            plt.savefig(thr_filename)
+
     return [mean_th_fc, all_ch_data, noisy_channels, thr_list, dead_channels, mean_enc_fc, unbonded_channels, untrimmable_channels]
 
 
