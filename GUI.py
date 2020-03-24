@@ -845,15 +845,10 @@ class VFAT3_GUI:
         self.gain_choice = IntVar()
         self.gain_choice.set(1)  # initializing the choice, i.e. Python
 
-        languages = [
-            ("High", 1),
-            ("Medium", 2),
-            ("Low", 3)]
-
-
-        Radiobutton(self.scurve_frame,text='High',variable=self.gain_choice,value=1).grid(column=1, sticky='w')
-        Radiobutton(self.scurve_frame, text='Medium', variable=self.gain_choice, value=2).grid(column=1, sticky='w')
-        Radiobutton(self.scurve_frame, text='Low', variable=self.gain_choice, value=3).grid(column=1, sticky='w')
+        Label(self.scurve_frame, text="Gain:").grid(column=1, row=12, sticky='w')
+        Radiobutton(self.scurve_frame,text='High',variable=self.gain_choice,value=1).grid(column=2, row=12, sticky='w')
+        Radiobutton(self.scurve_frame, text='Medium', variable=self.gain_choice, value=2).grid(column=3, row=12, sticky='w')
+        Radiobutton(self.scurve_frame, text='Low', variable=self.gain_choice, value=3).grid(column=4, row=12, sticky='w')
 
         self.scurve0_button = Button(self.scurve_frame, text="RUN S-curve", command=self.run_scurve, width=bwidth)
         self.scurve0_button.grid(column=1, sticky='e', columnspan=2)
