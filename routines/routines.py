@@ -1056,10 +1056,10 @@ def measure_charge_distribution(obj):
     latency_stop =3
     latency_step = 1
 
-    nr_of_triggers = 100
+    nr_of_triggers = 10
 
     arm_dac_min = 0
-    arm_dac_max = 150
+    arm_dac_max = 50
     arm_dac_step = 1
 
     # Create new data folder.
@@ -1202,7 +1202,7 @@ def measure_charge_distribution(obj):
                     save_to_file_and_print(text, data_file)
             print(result_data_matrix)
             save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), data_file)
-
+            save_numpy_2d_array_to_file_and_print('results_data_matrix', result_data_matrix, data_file)
             thresholds = arm_dac_values
 
             # Plot 2D map.
@@ -1272,6 +1272,16 @@ def save_to_file_and_print(text, filename):
 def save_list_to_file_and_print(list_name, mylist, filename):
     list_string = ''.join(str(mylist))
     text = "%s = %s" % (list_name, list_string)
+    with open(filename, "a") as mfile:
+        mfile.write("%s\n" % text)
+    print(text)
+
+
+def save_numpy_2d_array_to_file_and_print(list_name, mylist, filename):
+    text = "%s = [ \n" % list_name
+    for i in range(mylist.shape[0]):
+        list_string = ''.join(str(mylist[i, :]))
+        text += "%s\n" % list_string
     with open(filename, "a") as mfile:
         mfile.write("%s\n" % text)
     print(text)
