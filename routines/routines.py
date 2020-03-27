@@ -1056,7 +1056,7 @@ def measure_charge_distribution(obj):
     latency_stop = 3
     latency_step = 1
 
-    nr_of_triggers = 100
+    nr_of_triggers = 500
 
     arm_dac_min = 0
     arm_dac_max = 120
@@ -1218,7 +1218,7 @@ def measure_charge_distribution(obj):
             c_bar.ax.set_ylabel('# hits')
             plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain, nr_of_triggers, cal_dac_fc))
             plt.xlabel('Channel')
-            plt.ylabel('Threshold [fC]')
+            plt.ylabel('Threshold [DAC counts]')
             plt.savefig('%s%scharge_distribution_%s_lat%s.png' % (folder, timestamp, gain, latency))
 
             # Plot channels in subplots.
@@ -1252,7 +1252,7 @@ def measure_charge_distribution(obj):
                 plt.grid()
                 plt.legend()
                 plt.ylabel('# Hits')
-                plt.xlabel('Threshold [fC]')
+                plt.xlabel('Threshold [DAC counts]')
                 plt.title('Charge distribution, %s Gain, s=%s, Q=%.1f fC' % (gain, nr_of_triggers, cal_dac_fc))
                 plt.savefig('%s%scharge_distribution_ch%s_%s_lat%s.png' % (folder, timestamp, main_ch, gain, latency))
 
