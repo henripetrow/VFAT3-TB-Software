@@ -1056,7 +1056,7 @@ def measure_charge_distribution(obj):
     latency_stop = 3
     latency_step = 1
 
-    nr_of_triggers = 10
+    nr_of_triggers = 30
 
     arm_dac_min = 0
     arm_dac_max = 120
@@ -1166,7 +1166,7 @@ def measure_charge_distribution(obj):
             print("Setting calibration pulse to: %s" % obj.register[138].CAL_DAC[0])
             obj.write_register(138)
             obj.read_register(138)
-            print("Reading register CAL_DAC: %s")
+            print("Reading register CAL_DAC: %s" % obj.register[138].CAL_DAC[0])
             text = "CAL_DAC: %s" % (obj.register[138].CAL_DAC[0])
             save_to_file_and_print(text, data_file)
             cal_dac_fc = obj.cal_dac_fcM * obj.register[138].CAL_DAC[0] + obj.cal_dac_fcB
@@ -1177,7 +1177,10 @@ def measure_charge_distribution(obj):
             for arm_dac_value in range(arm_dac_min, arm_dac_max, arm_dac_step):
                 arm_dac_values.append(arm_dac_value)
                 obj.register[135].ARM_DAC[0] = arm_dac_value
+                print("Setting ARM_DAC: %s" % obj.register[135].ARM_DAC[0])
                 obj.write_register(135)
+                obj.read_register(135)
+                print("Reading ARM_DAC: %s" % obj.register[135].ARM_DAC[0])
                 threshold = arm_dac_fcM[gain] * obj.register[135].ARM_DAC[0] + arm_dac_fcB[gain]
                 thresholds.append(threshold)
                 text = "ARM_DAC: %s, %s fC" % (obj.register[135].ARM_DAC[0], threshold)
