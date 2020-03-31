@@ -1114,7 +1114,7 @@ def measure_charge_distribution(obj):
         text = "PT: %s, SEL_POL: %s, SEL_COMP_MODE: %s" % (obj.register[132].PT[0], obj.register[132].SEL_POL[0], obj.register[132].SEL_COMP_MODE[0])
         save_to_file_and_print(text, data_file)
 
-        obj.register[129].PS[0] = 0
+        obj.register[129].PS[0] = 1
         obj.write_register(129)
         text = "PS: %s" % obj.register[129].PS[0]
         save_to_file_and_print(text, data_file)
