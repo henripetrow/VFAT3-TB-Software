@@ -1052,7 +1052,7 @@ def measure_charge_distribution(obj):
     hybrid_version = "VFAT3b"
     hybrid_id = "#0060"
 
-    pulse_stretch = 0
+    pulse_stretch = 1
     delay = 5
     latency_start = 0
     latency_stop = 4
@@ -1215,7 +1215,7 @@ def measure_charge_distribution(obj):
                     save_to_file_and_print(text, output_file)
             print(result_data_matrix)
             save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), output_file)
-            save_numpy_2d_array_to_file('%s_data_ps%s_lat%s' % (gain, pulse_stretch, latency), result_data_matrix, data_file)
+            save_numpy_2d_array_to_file('%s_gain_data_ps%s_lat%s' % (gain, pulse_stretch, latency), result_data_matrix, data_file)
             thresholds = arm_dac_values
 
             # Plot 2D map.
