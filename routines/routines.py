@@ -1052,9 +1052,10 @@ def measure_charge_distribution(obj):
     hybrid_version = "VFAT3b"
     hybrid_id = "#0060"
 
+    pulse_stretch = 0
     delay = 5
     latency_start = 0
-    latency_stop = 0
+    latency_stop = 4
     latency_step = 1
 
     nr_of_triggers = 20
@@ -1066,6 +1067,7 @@ def measure_charge_distribution(obj):
     # Create new data folder.
     # folder = "./results/charge_distribution/run_%s/" % timestamp
     folder = "../cernbox/VFAT3_charge_distribution/Data/run_%s/" % timestamp
+    data_file = "%s%soutput_data.dat" % (folder, timestamp)
     if not os.path.exists(os.path.dirname(folder)):
         try:
             os.makedirs(os.path.dirname(folder))
@@ -1074,15 +1076,15 @@ def measure_charge_distribution(obj):
 
     for latency in range(latency_start, latency_stop+1, latency_step):
 
-        data_file = "%s%sdata_lat%s.csv" % (folder, timestamp, latency)
+        output_file = "%s%soutput_lat%s.dat" % (folder, timestamp, latency)
 
-        save_to_file_and_print(time.strftime("Time: %d.%m.%Y %H:%M"), data_file)
-        save_to_file_and_print("Hybrid version: %s" % hybrid_version, data_file)
-        save_to_file_and_print("Hybrid ID: %s" % hybrid_id, data_file)
-        save_to_file_and_print("Target channels: %s" % ''.join(str(target_channels)), data_file)
-        save_to_file_and_print("Nr. of triggers: %s" % nr_of_triggers, data_file)
-        save_to_file_and_print("Latency: %s" % latency, data_file)
-        save_to_file_and_print("Delay: %s" % delay, data_file)
+        save_to_file_and_print(time.strftime("Time: %d.%m.%Y %H:%M"), output_file)
+        save_to_file_and_print("Hybrid version: %s" % hybrid_version, output_file)
+        save_to_file_and_print("Hybrid ID: %s" % hybrid_id, output_file)
+        save_to_file_and_print("Target channels: %s" % ''.join(str(target_channels)), output_file)
+        save_to_file_and_print("Nr. of triggers: %s" % nr_of_triggers, output_file)
+        save_to_file_and_print("Latency: %s" % latency, output_file)
+        save_to_file_and_print("Delay: %s" % delay, output_file)
 
 
         print("Setting RUN-bit to 1.")
@@ -1099,36 +1101,36 @@ def measure_charge_distribution(obj):
         print "Sending RUNMode."
         obj.interfaceFW.send_fcc("01100110")
 
-        save_to_file_and_print("Settings:", data_file)
+        save_to_file_and_print("Settings:", output_file)
         RES_PRE = {'High': 1, 'Medium': 2, 'Low': 4}
         CAP_PRE = {'High': 0, 'Medium': 1, 'Low': 3}
         obj.register[131].TP_FE[0] = 7
         obj.write_register(131)
         text = "TP_FE: %s" % obj.register[131].TP_FE[0]
-        save_to_file_and_print(text, data_file)
+        save_to_file_and_print(text, output_file)
 
         obj.register[132].PT[0] = 3
         obj.register[132].SEL_POL[0] = 0
         obj.register[132].SEL_COMP_MODE[0] = 1
         obj.write_register(132)
         text = "PT: %s, SEL_POL: %s, SEL_COMP_MODE: %s" % (obj.register[132].PT[0], obj.register[132].SEL_POL[0], obj.register[132].SEL_COMP_MODE[0])
-        save_to_file_and_print(text, data_file)
+        save_to_file_and_print(text, output_file)
 
-        obj.register[129].PS[0] = 0
+        obj.register[129].PS[0] = pulse_stretch
         obj.write_register(129)
         text = "PS: %s" % obj.register[129].PS[0]
-        save_to_file_and_print(text, data_file)
+        save_to_file_and_print(text, output_file)
 
         obj.register[139].CAL_DUR[0] = 200
         obj.write_register(139)
         text = "CAL_DUR: %s" % obj.register[139].CAL_DUR[0]
-        save_to_file_and_print(text, data_file)
+        save_to_file_and_print(text, output_file)
 
         obj.register[138].CAL_PHI[0] = 1
         obj.register[138].CAL_MODE[0] = 1
         obj.write_register(138)
         text = "CAL_PHI: %s, CAL_MODE: %s" % (obj.register[138].CAL_PHI[0], obj.register[138].CAL_MODE[0])
-        save_to_file_and_print(text, data_file)
+        save_to_file_and_print(text, output_file)
 
         obj.register[137].LAT[0] = latency
         obj.write_register(137)
@@ -1137,7 +1139,7 @@ def measure_charge_distribution(obj):
         obj.set_fe_nominal_values(chip=hybrid_version)
         print('\n')
 
-        save_to_file_and_print("Channel data is from [1:128].", data_file)
+        save_to_file_and_print("Channel data is from [1:128].", output_file)
 
         #command = []
         command = ["00111100"]
@@ -1147,12 +1149,12 @@ def measure_charge_distribution(obj):
             else:
                 command.append("00000000")
         command.append("01101001")
-        save_list_to_file_and_print('command', command, data_file)
+        save_list_to_file_and_print('command', command, output_file)
 
         for gain in gains:
             arm_dac_values = []
             thresholds = []
-            save_to_file_and_print('Setting the Gain to: %s' % gain, data_file)
+            save_to_file_and_print('Setting the Gain to: %s' % gain, output_file)
             print("RES_PRE: %s, CAP_PRE: %s" % (RES_PRE[gain], CAP_PRE[gain]))
             obj.register[131].RES_PRE[0] = RES_PRE[gain]
             obj.register[131].CAP_PRE[0] = CAP_PRE[gain]
@@ -1160,7 +1162,7 @@ def measure_charge_distribution(obj):
             print "Reading register:"
             obj.read_register(131)
             text = "RES_PRE: %s, CAP_PRE: %s" % (obj.register[131].RES_PRE[0], obj.register[131].CAP_PRE[0])
-            save_to_file_and_print(text, data_file)
+            save_to_file_and_print(text, output_file)
 
             print("Setting calibration pulse to")
             obj.register[138].CAL_DAC[0] = int(round((dynamic_range[gain] - obj.cal_dac_fcB) / obj.cal_dac_fcM))
@@ -1169,10 +1171,10 @@ def measure_charge_distribution(obj):
             obj.read_register(138)
             print("Reading register CAL_DAC: %s" % obj.register[138].CAL_DAC[0])
             text = "CAL_DAC: %s" % (obj.register[138].CAL_DAC[0])
-            save_to_file_and_print(text, data_file)
+            save_to_file_and_print(text, output_file)
             cal_dac_fc = obj.cal_dac_fcM * obj.register[138].CAL_DAC[0] + obj.cal_dac_fcB
             text = "Calibration Pulse: %s fC" % cal_dac_fc
-            save_to_file_and_print(text, data_file)
+            save_to_file_and_print(text, output_file)
 
             result_data_matrix = numpy.array([0] * 128)
             for arm_dac_value in range(arm_dac_min, arm_dac_max, arm_dac_step):
@@ -1185,7 +1187,7 @@ def measure_charge_distribution(obj):
                 threshold = arm_dac_fcM[gain] * obj.register[135].ARM_DAC[0] + arm_dac_fcB[gain]
                 thresholds.append(threshold)
                 text = "ARM_DAC: %s, %s fC" % (obj.register[135].ARM_DAC[0], threshold)
-                save_to_file_and_print(text, data_file)
+                save_to_file_and_print(text, output_file)
                 result_data_vector = numpy.array([0]*128)
                 for loop in range(0, nr_of_triggers):
                     time.sleep(0.02)
@@ -1204,16 +1206,16 @@ def measure_charge_distribution(obj):
                         result_data_vector += data_vector
                 result_data_vector = map_channels(result_data_vector)
                 result_data_matrix = numpy.vstack((result_data_matrix, result_data_vector))
-                save_to_file_and_print(numpy.array2string(result_data_vector, separator=','), data_file)
+                save_to_file_and_print(numpy.array2string(result_data_vector, separator=','), output_file)
                 for channel in mapped_target_channels:
                     previous_ch_charge = (result_data_vector[channel - 1] / float(nr_of_triggers)) * 100
                     target_ch_charge = (result_data_vector[channel] / float(nr_of_triggers)) * 100
                     next_ch_charge = (result_data_vector[channel + 1] / float(nr_of_triggers)) * 100
                     text = "Charge spread for channel: %s.  %3.1f %% %3.1f %% %3.1f %%" % (channel, previous_ch_charge, target_ch_charge, next_ch_charge)
-                    save_to_file_and_print(text, data_file)
+                    save_to_file_and_print(text, output_file)
             print(result_data_matrix)
-            save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), data_file)
-            save_numpy_2d_array_to_file('results_data_matrix', result_data_matrix, data_file)
+            save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), output_file)
+            save_numpy_2d_array_to_file('%s_data_ps%s_lat%s' % (gain, pulse_stretch, latency), result_data_matrix, data_file)
             thresholds = arm_dac_values
 
             # Plot 2D map.
