@@ -5,7 +5,7 @@ timestamp = "010420201143"
 folder = "../../cernbox/VFAT3_charge_distribution/Data/run_%s/" % timestamp
 data_file = "%s%soutput_data.dat" % (folder, timestamp)
 
-import data_file
+from data_file import *
 
 
 print Low_data_ps0_lat2
