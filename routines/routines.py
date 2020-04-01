@@ -1054,8 +1054,8 @@ def measure_charge_distribution(obj):
 
     pulse_stretch = 1
     delay = 5
-    latency_start = 0
-    latency_stop = 4
+    latency_start = 3
+    latency_stop = 3
     latency_step = 1
 
     nr_of_triggers = 20
@@ -1293,7 +1293,7 @@ def save_list_to_file_and_print(list_name, mylist, filename):
 def save_numpy_2d_array_to_file(list_name, mylist, filename):
     text = "%s = [ \n" % list_name
     for i in range(mylist.shape[0]):
-        list_string = ''.join(str(mylist[i, :]))
+        list_string = ','.join(str(mylist[i, :]))
         text += "%s\n" % list_string
     text += "]"
     with open(filename, "a") as mfile:
