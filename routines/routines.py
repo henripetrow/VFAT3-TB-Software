@@ -1216,6 +1216,7 @@ def measure_charge_distribution(obj):
             print(result_data_matrix)
             save_to_file_and_print(numpy.array2string(result_data_matrix, separator=','), output_file)
             save_numpy_2d_array_to_file('%s_gain_data_ps%s_lat%s' % (gain, pulse_stretch, latency), result_data_matrix, data_file)
+            save_numpy_2d_array_to_file('thresholds', thresholds, data_file)
             thresholds = arm_dac_values
 
             # Plot 2D map.
@@ -1295,8 +1296,8 @@ def save_numpy_2d_array_to_file(list_name, mylist, filename):
     for i in range(mylist.shape[0]):
         text += "["
         list_string = ','.join(map(str, mylist[i, :]))
-        text += "%s\n" % list_string
-        text += "]"
+        text += "%s" % list_string
+        text += "]\n"
     text += "]"
     with open(filename, "a") as mfile:
         mfile.write("%s\n" % text)
