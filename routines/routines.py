@@ -1052,16 +1052,16 @@ def measure_charge_distribution(obj):
     hybrid_version = "VFAT3b"
     hybrid_id = "#0060"
 
-    pulse_stretch = 1
+    pulse_stretch = 0
     delay = 5
-    latency_start = 3
-    latency_stop = 3
+    latency_start = 0
+    latency_stop = 5
     latency_step = 1
 
-    nr_of_triggers = 20
+    nr_of_triggers = 30
 
     arm_dac_min = 0
-    arm_dac_max = 50
+    arm_dac_max = 180
     arm_dac_step = 1
 
     # Create new data folder.
