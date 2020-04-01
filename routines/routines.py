@@ -1293,9 +1293,10 @@ def save_list_to_file_and_print(list_name, mylist, filename):
 def save_numpy_2d_array_to_file(list_name, mylist, filename):
     text = "%s = [ \n" % list_name
     for i in range(mylist.shape[0]):
+        text += "["
         list_string = ','.join(map(str, mylist[i, :]))
-        #list_string = ','.join(str(mylist[i, :]))
         text += "%s\n" % list_string
+        text += "]"
     text += "]"
     with open(filename, "a") as mfile:
         mfile.write("%s\n" % text)
