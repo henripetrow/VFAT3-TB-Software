@@ -14,5 +14,5 @@ def getVarFromFile(filename):
 
 # path to "config" file
 getVarFromFile(data_file)
-print data.Low_data_ps0_lat2
+print data.High_gain_data_ps1_lat3
 
