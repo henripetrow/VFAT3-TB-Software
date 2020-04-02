@@ -19,21 +19,24 @@ def getVarFromFile(filename):
 
 # path to "config" file
 getVarFromFile(data_file)
-testimatriisi = numpy.array(data.High_gain_data_ps0_lat3)
+data_lat0 = numpy.array(data.High_gain_data_ps0_lat0)
+data_lat1 = numpy.array(data.High_gain_data_ps0_lat1)
+data_lat2 = numpy.array(data.High_gain_data_ps0_lat2)
+data_lat3 = numpy.array(data.High_gain_data_ps0_lat3)
+data_lat4 = numpy.array(data.High_gain_data_ps0_lat4)
+data_lat5 = numpy.array(data.High_gain_data_ps0_lat5)
+data_lat6 = numpy.array(data.High_gain_data_ps0_lat6)
 print testimatriisi[1:, 25]
 
 for axis in range(0, len(mapped_target_channels)):
     main_ch = mapped_target_channels[axis]
     plt.figure()
-    print data.thresholds
-    print main_ch
-    print data.High_gain_data_ps0_lat0[1:, 25]
-    plt.plot(data.thresholds, data.High_gain_data_ps0_lat0[1:, main_ch], label='LAT 0')
-    plt.plot(data.thresholds, data.High_gain_data_ps0_lat1[1:, main_ch], label='LAT 1')
-    plt.plot(data.thresholds, data.High_gain_data_ps0_lat2[1:, main_ch], label='LAT 2')
-    plt.plot(data.thresholds, data.High_gain_data_ps0_lat3[1:, main_ch], label='LAT 3')
-    plt.plot(data.thresholds, data.High_gain_data_ps0_lat4[1:, main_ch], label='LAT 4')
-    plt.plot(data.thresholds, data.High_gain_data_ps0_lat5[1:, main_ch], label='LAT 5')
+    plt.plot(data.thresholds, data_lat0[1:, main_ch], label='LAT 0')
+    plt.plot(data.thresholds, data_lat1[1:, main_ch], label='LAT 1')
+    plt.plot(data.thresholds, data_lat2[1:, main_ch], label='LAT 2')
+    plt.plot(data.thresholds, data_lat3[1:, main_ch], label='LAT 3')
+    plt.plot(data.thresholds, data_lat4[1:, main_ch], label='LAT 4')
+    plt.plot(data.thresholds, data_lat5[1:, main_ch], label='LAT 5')
 
 
     plt.grid()
