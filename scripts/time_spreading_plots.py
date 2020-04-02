@@ -35,8 +35,8 @@ for axis in range(0, len(mapped_target_channels)):
     # plt.plot(data.thresholds, data_lat3[1:, main_ch], label='LAT 3')
     # plt.plot(data.thresholds, data_lat4[1:, main_ch], label='LAT 4')
     # plt.plot(data.thresholds, data_lat5[1:, main_ch], label='LAT 5')
-    y_pos = numpy.arange(len(data_lat3[1]))
-    plt.barh(data_lat3[1:, main_ch], y_pos, align='center', alpha=0.5)
+    y_pos = numpy.arange(len(data_lat3[1:, main_ch]))
+    plt.barh(y_pos, data_lat3[1:, main_ch], align='center', alpha=0.5)
 
     # plt.grid()
     # plt.legend()
