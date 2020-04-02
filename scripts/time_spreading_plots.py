@@ -36,9 +36,12 @@ for axis in range(0, len(mapped_target_channels)):
     # plt.plot(data.thresholds, data_lat4[1:, main_ch], label='LAT 4')
     # plt.plot(data.thresholds, data_lat5[1:, main_ch], label='LAT 5')
     y_pos = numpy.arange(len(data_lat3[1:, main_ch]))
-    plt.barh(y_pos, data_lat2[1:, main_ch], align='center', alpha=0.5)
-    plt.barh(y_pos, data_lat3[1:, main_ch], align='center', alpha=0.5)
-    plt.barh(y_pos, data_lat4[1:, main_ch], align='center', alpha=0.5)
+    plt.bar(y_pos, data_lat0[1:, main_ch], align='center', alpha=0.5)
+    plt.bar(y_pos, data_lat1[1:, main_ch], align='center', alpha=0.5)
+    plt.bar(y_pos, data_lat2[1:, main_ch], align='center', alpha=0.5)
+    plt.bar(y_pos, data_lat3[1:, main_ch], align='center', alpha=0.5)
+    plt.bar(y_pos, data_lat4[1:, main_ch], align='center', alpha=0.5)
+    plt.bar(y_pos, data_lat5[1:, main_ch], align='center', alpha=0.5)
 
 
     # plt.grid()
