@@ -25,8 +25,6 @@ data_lat2 = numpy.array(data.High_gain_data_ps0_lat2)
 data_lat3 = numpy.array(data.High_gain_data_ps0_lat3)
 data_lat4 = numpy.array(data.High_gain_data_ps0_lat4)
 data_lat5 = numpy.array(data.High_gain_data_ps0_lat5)
-data_lat6 = numpy.array(data.High_gain_data_ps0_lat6)
-print testimatriisi[1:, 25]
 
 for axis in range(0, len(mapped_target_channels)):
     main_ch = mapped_target_channels[axis]
