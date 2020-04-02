@@ -25,12 +25,12 @@ for axis in range(0, len(mapped_target_channels)):
     main_ch = mapped_target_channels[axis]
     plt.figure()
 
-    plt.plot(thresholds, data.High_gain_data_ps0_lat0[1:, main_ch], label='LAT 0')
-    plt.plot(thresholds, data.High_gain_data_ps0_lat1[1:, main_ch], label='LAT 1')
-    plt.plot(thresholds, data.High_gain_data_ps0_lat2[1:, main_ch], label='LAT 2')
-    plt.plot(thresholds, data.High_gain_data_ps0_lat3[1:, main_ch], label='LAT 3')
-    plt.plot(thresholds, data.High_gain_data_ps0_lat4[1:, main_ch], label='LAT 4')
-    plt.plot(thresholds, data.High_gain_data_ps0_lat5[1:, main_ch], label='LAT 5')
+    plt.plot(data.thresholds, data.High_gain_data_ps0_lat0[1:, main_ch], label='LAT 0')
+    plt.plot(data.thresholds, data.High_gain_data_ps0_lat1[1:, main_ch], label='LAT 1')
+    plt.plot(data.thresholds, data.High_gain_data_ps0_lat2[1:, main_ch], label='LAT 2')
+    plt.plot(data.thresholds, data.High_gain_data_ps0_lat3[1:, main_ch], label='LAT 3')
+    plt.plot(data.thresholds, data.High_gain_data_ps0_lat4[1:, main_ch], label='LAT 4')
+    plt.plot(data.thresholds, data.High_gain_data_ps0_lat5[1:, main_ch], label='LAT 5')
 
 
     plt.grid()
