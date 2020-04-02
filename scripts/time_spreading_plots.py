@@ -26,7 +26,7 @@ for axis in range(0, len(mapped_target_channels)):
     plt.figure()
     print data.thresholds
     print main_ch
-    print data.High_gain_data_ps0_lat0[1:, main_ch]
+    print data.High_gain_data_ps0_lat0[1:, 25]
     plt.plot(data.thresholds, data.High_gain_data_ps0_lat0[1:, main_ch], label='LAT 0')
     plt.plot(data.thresholds, data.High_gain_data_ps0_lat1[1:, main_ch], label='LAT 1')
     plt.plot(data.thresholds, data.High_gain_data_ps0_lat2[1:, main_ch], label='LAT 2')
