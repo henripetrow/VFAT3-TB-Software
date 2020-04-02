@@ -41,7 +41,7 @@ for axis in range(0, len(mapped_target_channels)):
     plt.legend()
     plt.ylabel('# Hits')
     plt.xlabel('Threshold [DAC counts]')
-    plt.title('Charge distribution')
-    plt.savefig('%stime_spread_ps_0_ch_%s.png' % (folder, main_ch))
+    plt.title('Charge distribution, High Gain, different latencies')
+    plt.savefig('%stime_spread_high_gain_ps_0_ch_%s.png' % (output_folder, main_ch))
 
 
