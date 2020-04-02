@@ -1064,9 +1064,7 @@ def measure_charge_distribution(obj):
     arm_dac_max = 180
     arm_dac_step = 1
 
-    save_to_file_and_print("pulse_stretch =  %s" % pulse_stretch, data_file)
-    save_to_file_and_print("nr_of_triggers =  %s" % nr_of_triggers, data_file)
-    save_list_to_file_and_print('mapped_target_channels', mapped_target_channels, data_file)
+
 
     # Create new data folder.
     # folder = "./results/charge_distribution/run_%s/" % timestamp
@@ -1077,6 +1075,10 @@ def measure_charge_distribution(obj):
             os.makedirs(os.path.dirname(folder))
         except OSError as exc:  # Guard against race condition
             print "Unable to create directory"
+
+    save_to_file_and_print("pulse_stretch =  %s" % pulse_stretch, data_file)
+    save_to_file_and_print("nr_of_triggers =  %s" % nr_of_triggers, data_file)
+    save_list_to_file_and_print('mapped_target_channels', mapped_target_channels, data_file)
 
     for latency in range(latency_start, latency_stop+1, latency_step):
 
