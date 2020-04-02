@@ -1064,6 +1064,9 @@ def measure_charge_distribution(obj):
     arm_dac_max = 180
     arm_dac_step = 1
 
+    save_to_file_and_print("pulse_stretch: =  %s" % pulse_stretch, data_file)
+    save_list_to_file_and_print('mapped_target_channels', mapped_target_channels, data_file)
+
     # Create new data folder.
     # folder = "./results/charge_distribution/run_%s/" % timestamp
     folder = "../cernbox/VFAT3_charge_distribution/Data/run_%s/" % timestamp

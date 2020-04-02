@@ -29,19 +29,19 @@ data_lat5 = numpy.array(data.High_gain_data_ps0_lat5)
 for axis in range(0, len(mapped_target_channels)):
     main_ch = mapped_target_channels[axis]
     plt.figure()
-    plt.plot(data.thresholds, data_lat0[1:, main_ch], label='LAT 0')
-    plt.plot(data.thresholds, data_lat1[1:, main_ch], label='LAT 1')
-    plt.plot(data.thresholds, data_lat2[1:, main_ch], label='LAT 2')
-    plt.plot(data.thresholds, data_lat3[1:, main_ch], label='LAT 3')
-    plt.plot(data.thresholds, data_lat4[1:, main_ch], label='LAT 4')
-    plt.plot(data.thresholds, data_lat5[1:, main_ch], label='LAT 5')
+    # plt.plot(data.thresholds, data_lat0[1:, main_ch], label='LAT 0')
+    # plt.plot(data.thresholds, data_lat1[1:, main_ch], label='LAT 1')
+    # plt.plot(data.thresholds, data_lat2[1:, main_ch], label='LAT 2')
+    # plt.plot(data.thresholds, data_lat3[1:, main_ch], label='LAT 3')
+    # plt.plot(data.thresholds, data_lat4[1:, main_ch], label='LAT 4')
+    # plt.plot(data.thresholds, data_lat5[1:, main_ch], label='LAT 5')
+    y_pos = np.arange(len(data_lat3[1:, main_ch]))
+    plt.barh(y_pos, data_lat3[1:, main_ch], align='center', alpha=0.5)
 
-
-    plt.grid()
-    plt.legend()
-    plt.ylabel('# Hits')
-    plt.xlabel('Threshold [DAC counts]')
-    plt.title('Charge distribution, High Gain, different latencies')
+    # plt.grid()
+    # plt.legend()
+    # plt.ylabel('# Hits')
+    # plt.xlabel('Threshold [DAC counts]')
+    # plt.title('Charge distribution, High Gain, different latencies')
     plt.savefig('%stime_spread_high_gain_ps_0_ch_%s.png' % (output_folder, main_ch))
-
 
