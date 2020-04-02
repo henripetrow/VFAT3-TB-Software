@@ -19,7 +19,7 @@ def getVarFromFile(filename):
 
 # path to "config" file
 getVarFromFile(data_file)
-print data.High_gain_data_ps0_lat3[0]
+print data.High_gain_data_ps0_lat3
 
 for axis in range(0, len(mapped_target_channels)):
     main_ch = mapped_target_channels[axis]
