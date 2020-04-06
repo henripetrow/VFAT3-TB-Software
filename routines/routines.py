@@ -52,7 +52,7 @@ def find_threshold(obj):
         # folder = obj.data_folder
         folder = "../cernbox/VFAT3_charge_distribution/Data/threshold/"
         filename = "%s%sthresholds_%s_gain.png" % (folder, timestamp, gain)
-        data_file = "%s%sthresholds_%s_gain.dat" % (folder, timestamp)
+        data_file = "%s%sthresholds_%s_gain.dat" % (folder, timestamp, gain)
         if not os.path.exists(os.path.dirname(folder)):
             try:
                 os.makedirs(os.path.dirname(folder))
