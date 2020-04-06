@@ -30,6 +30,8 @@ def find_threshold(obj):
     start = time.time()
     obj.load_calibration_values_from_file(filename="vfat3_60_calibration_values.dat")
     thresholds = []
+    threshold_rms = []
+    enc_values = []
     arm_values = []
     # arm_dac_stop = [201, 161, 136]
     # dac_start = [254, 240, 225]
@@ -37,7 +39,7 @@ def find_threshold(obj):
     # gains = ['High', 'Medium', 'Low']
     # arm_dac_start = [30, 10, 5]
     arm_dac_start = [30]
-    arm_dac_stop = [120]
+    arm_dac_stop = [150]
     dac_start = [254]
     dac_stop = [120]
     gains = ['High']
@@ -62,8 +64,12 @@ def find_threshold(obj):
             arm_values.append(arm_dac)
             output = scurve_all_ch_execute(obj, "S-curve", arm_dac=arm_dac, dac_range=[dac_stop[j], dac_start[j]], gain=gain, configuration='no')
             thresholds.append(output[0])
+            enc_values.append(output[5])
+            threshold_rms.append(numpy.std(output[3]))
             save_list_to_file_and_print('arm_values', arm_values, data_file)
             save_list_to_file_and_print('thresholds', thresholds, data_file)
+            save_list_to_file_and_print('threshold_rms', threshold_rms, data_file)
+            save_list_to_file_and_print('enc_values', enc_values, data_file)
 
         if fit == 'linear':
             # Make a linear fit for the values.
@@ -102,6 +108,8 @@ def find_threshold(obj):
         # Save values to a file.
         save_list_to_file_and_print('arm_values', arm_values, data_file)
         save_list_to_file_and_print('thresholds',thresholds, data_file)
+        save_list_to_file_and_print('threshold_rms', threshold_rms, data_file)
+        save_list_to_file_and_print('enc_values', enc_values, data_file)
         if fit:
             save_to_file_and_print('arm_dac_fcM %s' % arm_dac_fcM, data_file)
             save_to_file_and_print('arm_dac_fcB %s' % arm_dac_fcB, data_file)
