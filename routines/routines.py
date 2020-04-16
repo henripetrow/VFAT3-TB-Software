@@ -43,7 +43,7 @@ def find_threshold(obj):
     dac_start = [254]
     dac_stop = [10]
     gains = ['Low']
-    arm_dac_step = 2
+    arm_dac_step = 5
 
     for j, gain in enumerate(gains):
 
@@ -1048,8 +1048,8 @@ def measure_charge_distribution(obj):
     start = time.time()
     timestamp = time.strftime("%d%m%Y%H%M")
 
-    gains = ['High', 'Medium', 'Low']
-
+    #gains = ['High', 'Medium', 'Low']
+    gains = ['High']
     #dynamic_range = {'High': 9.5, 'Medium': 28, 'Low': 55}
     dynamic_range = {'High': 30, 'Medium': 55, 'Low': 55}
     arm_dac_fcM = {'Low': 0.308756078585, 'Medium': 0.160574730846, 'High': 0.0525736788946}
@@ -1062,11 +1062,11 @@ def measure_charge_distribution(obj):
 
     pulse_stretch = 2
     delay = 5
-    latency_start = 0
-    latency_stop = 5
+    latency_start = 2
+    latency_stop = 2
     latency_step = 1
 
-    nr_of_triggers = 50
+    nr_of_triggers = 200
 
     arm_dac_min = 0
     arm_dac_max = 180
