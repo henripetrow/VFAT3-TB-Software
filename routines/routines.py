@@ -1050,8 +1050,8 @@ def measure_charge_distribution(obj):
 
     gains = ['High', 'Medium', 'Low']
 
-    dynamic_range = {'High': 9.5, 'Medium': 28, 'Low': 55}
-    #dynamic_range = {'High': 30, 'Medium': 30, 'Low': 30}
+    #dynamic_range = {'High': 9.5, 'Medium': 28, 'Low': 55}
+    dynamic_range = {'High': 55, 'Medium': 55, 'Low': 55}
     arm_dac_fcM = {'Low': 0.308756078585, 'Medium': 0.160574730846, 'High': 0.0525736788946}
     arm_dac_fcB = {'Low': -0.20026469513, 'Medium': -0.344217476814, 'High': -0.225712925757}
 
@@ -1060,7 +1060,7 @@ def measure_charge_distribution(obj):
     hybrid_version = "VFAT3b"
     hybrid_id = "#0060"
 
-    pulse_stretch = 0
+    pulse_stretch = 2
     delay = 5
     latency_start = 0
     latency_stop = 5
