@@ -1062,8 +1062,8 @@ def measure_charge_distribution(obj):
 
     pulse_stretch = 2
     delay = 5
-    latency_start = 2
-    latency_stop = 2
+    latency_start = 0
+    latency_stop = 5
     latency_step = 1
 
     nr_of_triggers = 20
@@ -1125,7 +1125,7 @@ def measure_charge_distribution(obj):
 
         obj.register[132].PT[0] = 3
         obj.register[132].SEL_POL[0] = 0
-        obj.register[132].SEL_COMP_MODE[0] = 1
+        obj.register[132].SEL_COMP_MODE[0] = 0
         obj.write_register(132)
         text = "PT: %s, SEL_POL: %s, SEL_COMP_MODE: %s" % (obj.register[132].PT[0], obj.register[132].SEL_POL[0], obj.register[132].SEL_COMP_MODE[0])
         save_to_file_and_print(text, output_file)
