@@ -1061,7 +1061,7 @@ def measure_charge_distribution(obj):
     hybrid_id = "#0060"
 
     pulse_stretch = 2
-    delay = 10
+    delay = 8
     latency_start = 0
     latency_stop = 5
     latency_step = 1
