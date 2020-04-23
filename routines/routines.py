@@ -1140,6 +1140,7 @@ def measure_charge_distribution(obj):
         text = "CAL_DUR: %s" % obj.register[139].CAL_DUR[0]
         save_to_file_and_print(text, output_file)
 
+        obj.register[138].CAL_SEL_POL[0] = 1
         obj.register[138].CAL_PHI[0] = 1
         obj.register[138].CAL_MODE[0] = 1
         obj.write_register(138)
