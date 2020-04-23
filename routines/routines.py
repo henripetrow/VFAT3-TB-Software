@@ -1061,9 +1061,9 @@ def measure_charge_distribution(obj):
     hybrid_id = "#0060"
 
     pulse_stretch = 2
-    delay = 8
+    delay = 11
     latency_start = 0
-    latency_stop = 5
+    latency_stop = 9
     latency_step = 1
 
     nr_of_triggers = 20
@@ -1142,7 +1142,7 @@ def measure_charge_distribution(obj):
 
         obj.register[138].CAL_SEL_POL[0] = 1
         obj.register[138].CAL_PHI[0] = 1
-        obj.register[138].CAL_MODE[0] = 2
+        obj.register[138].CAL_MODE[0] = 1
         obj.write_register(138)
         text = "CAL_PHI: %s, CAL_MODE: %s" % (obj.register[138].CAL_PHI[0], obj.register[138].CAL_MODE[0])
         save_to_file_and_print(text, output_file)
