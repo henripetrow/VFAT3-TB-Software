@@ -1060,9 +1060,9 @@ def measure_charge_distribution(obj):
     hybrid_version = "VFAT3b"
     hybrid_id = "#0060"
 
-    pulse_stretch = 2
+    pulse_stretch = 0
     delay = 30
-    latency_start = 0
+    latency_start = 7
     latency_stop = 33
     latency_step = 1
 
