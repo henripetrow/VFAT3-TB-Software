@@ -1050,8 +1050,8 @@ def measure_charge_distribution(obj):
 
     #gains = ['High', 'Medium', 'Low']
     gains = ['High']
-    #dynamic_range = {'High': 9.5, 'Medium': 28, 'Low': 55}
-    dynamic_range = {'High': 30, 'Medium': 55, 'Low': 55}
+    dynamic_range = {'High': 9.5, 'Medium': 28, 'Low': 55}
+    #dynamic_range = {'High': 30, 'Medium': 55, 'Low': 55}
     arm_dac_fcM = {'Low': 0.308756078585, 'Medium': 0.160574730846, 'High': 0.0525736788946}
     arm_dac_fcB = {'Low': -0.20026469513, 'Medium': -0.344217476814, 'High': -0.225712925757}
 
@@ -1234,6 +1234,13 @@ def measure_charge_distribution(obj):
             save_list_to_file_and_print('%s_gain_arm_dac_values' % gain, arm_dac_values, data_file)
             save_list_to_file_and_print('%s_gain_thresholds' % gain, thresholds, data_file)
             thresholds = arm_dac_values
+
+
+            # Unset calibration pulses for the target channels.
+            for target_channel in target_channels:
+                obj.register[target_channel].cal[0] = 0
+                obj.write_register(target_channel)
+                time.sleep(0.1)
 
             # Plot 2D map.
             plt.figure()
