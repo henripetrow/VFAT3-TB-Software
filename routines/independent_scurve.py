@@ -52,6 +52,10 @@ mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, chan
 print mean_th_fc
 print mean_enc_fc
 
+timestamp = time.strftime("%Y%m%d_%H%M")
+with open('%s/enc_data.txt' % folder, 'a') as the_file:
+    the_file.write('%s %s\n' % (timestamp, mean_enc_fc))
+
 # Print routine duration.
 stop = time.time()
 run_time = (stop - start) / 60
