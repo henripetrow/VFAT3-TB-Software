@@ -22,7 +22,7 @@ vfat3_obj = Vfat3Object()
 start = time.time()
 
 # Set channels and Cal dac range.
-folder = "../../cernbox/VFAT3_charge_distribution/Data"
+folder = "../../cernbox/VFAT3_charge_distribution/Data/scurve/"
 ch_step = 1
 start_ch = 0
 stop_ch = 127
