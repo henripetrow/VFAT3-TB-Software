@@ -19,6 +19,7 @@ vfat3_obj = Vfat3Object()
 start = time.time()
 
 # Set channels and Cal dac range.
+ch_step = 1
 start_ch = 0
 stop_ch = 127
 start_dac_value = 0
