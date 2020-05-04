@@ -48,7 +48,7 @@ channels = range(start_ch, stop_ch+1, ch_step)
 scurve_data = vfat3_obj.interfaceFW.run_scurve(start_ch, stop_ch, ch_step, start_dac_value, stop_dac_value, arm_dac, triggers, latency, vfat3_obj)
 
 # Analyze data.
-mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels, untrimmable_channels = scurve_analyze_numpy(vfat3_obj, cal_dac_values, channels, scurve_data, folder=folder, verbose=verbose)
+mean_th_fc, mean_enc_fc, noisy_channels, dead_channels, enc_list, thr_list, channel_category, unbonded_channels, untrimmable_channels = scurve_analyze_numpy(vfat3_obj, cal_dac_values, channels, scurve_data, folder="", verbose=verbose)
 
 print mean_th_fc
 print mean_enc_fc
