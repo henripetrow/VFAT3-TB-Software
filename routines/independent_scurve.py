@@ -7,8 +7,8 @@ from FW_interface import *
 
 class Vfat3Object:
     def __init__(self):
-        self.cal_dac_fcM = 0
-        self.cal_dac_fcB = 0
+        self.cal_dac_fcM = -0.2868
+        self.cal_dac_fcB = 71.013
         self.rerun_scurve_channel_list = []
         self.cal_dac_start_rerun = 0
         self.cal_dac_stop_rerun = 0
