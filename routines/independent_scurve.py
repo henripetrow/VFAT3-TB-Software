@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../')
 from FW_interface import *
 
 class Vfat3Object:
