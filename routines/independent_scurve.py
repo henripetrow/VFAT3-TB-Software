@@ -1,4 +1,5 @@
 import sys
+sys.path.append('/home/vfat3production/VFAT3-TB-Software/')
 sys.path.append('../')
 sys.path.append('../routines/')
 
