@@ -24,6 +24,7 @@ start_ch = 0
 stop_ch = 127
 start_dac_value = 0
 stop_dac_value = 250
+arm_dac = 100
 print "Running S-curves for channels: %i-%i, for CAL_DAC range: %i-%i:" % (start_ch, stop_ch, start_dac_value, stop_dac_value)
 samples_per_dac_value = 100
 
