@@ -976,7 +976,7 @@ def scurve_analyze_numpy(obj, dac_values, channels, scurve_data, folder="", verb
         fig.savefig("%s%sS-curve_plot.pdf" % (folder, timestamp))
 
         text = "Results were saved to the folder:\n %s \n" % folder
-        obj.add_to_interactive_screen(text)
+        print text
 
     return mean_mean, rms_mean, noisy_channels, dead_channels, rms_list, mean_list, channel_category, unbonded_channels, untrimmable_channels
 
