@@ -7,8 +7,8 @@ class Vfat3Object:
         self.rerun_scurve_channel_list = []
         self.cal_dac_start_rerun = 0
         self.cal_dac_stop_rerun = 0
-        self.d1 = 0
-        self.d2 = 0
+        self.d1 = 58
+        self.d2 = 200
         self.interfaceFW = FW_interface(0)
 
 
