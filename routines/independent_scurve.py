@@ -1,5 +1,8 @@
 import sys
 sys.path.append('../')
+sys.path.append('../routines/')
+
+from routines import scurve_analyze_numpy
 from FW_interface import *
 
 class Vfat3Object:
@@ -22,8 +25,8 @@ start = time.time()
 ch_step = 1
 start_ch = 0
 stop_ch = 127
-start_dac_value = 0
-stop_dac_value = 250
+start_dac_value = 200
+stop_dac_value = 254
 arm_dac = 100
 triggers = 10
 latency = 50
