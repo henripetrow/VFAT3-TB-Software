@@ -30,7 +30,7 @@ stop_ch = 127
 start_dac_value = 100
 stop_dac_value = 254
 arm_dac = 150
-triggers = 100
+triggers = 500
 latency = 50
 verbose = 'yes'
 print "Running S-curves for channels: %i-%i, for CAL_DAC range: %i-%i:" % (start_ch, stop_ch, start_dac_value, stop_dac_value)
