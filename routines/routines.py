@@ -959,17 +959,15 @@ def scurve_analyze_numpy(obj, dac_values, channels, scurve_data, folder="", verb
         text = "Mean: %.2f RMS: %.2f" % (mean_mean, mean_rms)
         sub3.text(10, mean_mean, text, horizontalalignment='center', verticalalignment='center', bbox=dict(alpha=0.5))
 
-        sub4 = plt.subplot(514)
-        print len(mean_list)
-        print mean_list
-        n, bins, patches = sub4.hist(mean_list, bins='auto')
-        y = mlab.normpdf(bins, mean_mean, mean_rms)
-        sub4.plot(bins, y, 'r--', linewidth=1)
-
-        sub5 = plt.subplot(515)
-        n, bins, patches = sub5.hist(rms_list, bins='auto')
-        y = mlab.normpdf(bins, rms_mean, rms_rms)
-        sub5.plot(bins, y, 'r--', linewidth=1)
+        # sub4 = plt.subplot(514)
+        # n, bins, patches = sub4.hist(mean_list, bins='auto')
+        # y = mlab.normpdf(bins, mean_mean, mean_rms)
+        # sub4.plot(bins, y, 'r--', linewidth=1)
+        #
+        # sub5 = plt.subplot(515)
+        # n, bins, patches = sub5.hist(rms_list, bins='auto')
+        # y = mlab.normpdf(bins, rms_mean, rms_rms)
+        # sub5.plot(bins, y, 'r--', linewidth=1)
 
         fig.subplots_adjust(hspace=.5)
 
