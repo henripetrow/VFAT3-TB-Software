@@ -2,6 +2,9 @@
 # Created by Henri Petrow 2017
 # Lappeenranta University of Technology
 ###########################################
+import sys
+sys.path.append('../')
+
 
 import math
 import time
