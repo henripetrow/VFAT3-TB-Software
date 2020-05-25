@@ -142,17 +142,27 @@ class VFAT3_GUI:
         self.terminal = ""
         self.read_lot_information()
 
+
         # Initiations
+        print "1"
         self.SC_encoder = SC_encode()
+        print "2"
         self.register = register
+        print "3"
         s = ttk.Style()
+        print "4"
         s.configure('My.TFrame', background='white')
+        print "5"
         self.master = master
+        print "6"
         # self.master.wm_iconbitmap('/home/a0312687/VFAT3-TB-Software/data/LUT_logo.ico')
         self.master.title("VFAT3 test platform")
+        print "7"
         bwidth = 15
         self.master.minsize(width=300, height=450)
+        print "8"
         self.master.configure(background='white')
+        print "9"
 
         # ######MENUBAR#################################
         # create a top level menu
