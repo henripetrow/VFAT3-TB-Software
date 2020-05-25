@@ -144,30 +144,21 @@ class VFAT3_GUI:
 
 
         # Initiations
-        print "1"
         self.SC_encoder = SC_encode()
-        print "2"
         self.register = register
-        print "3"
         s = ttk.Style()
-        print "4"
         s.configure('My.TFrame', background='white')
-        print "5"
         self.master = master
-        print "6"
         # self.master.wm_iconbitmap('/home/a0312687/VFAT3-TB-Software/data/LUT_logo.ico')
         self.master.title("VFAT3 test platform")
-        print "7"
         bwidth = 15
         self.master.minsize(width=300, height=450)
-        print "8"
         self.master.configure(background='white')
-        print "9"
 
         # ######MENUBAR#################################
         # create a top level menu
         menubar = Menu(self.master)
-
+        print "1"
         # create a pull down menu, and add it to the menu bar
         filemenu = Menu(menubar, tearoff=0)
         filemenu.add_command(label="Quit", command=master.quit)
@@ -183,7 +174,7 @@ class VFAT3_GUI:
         # modemenu.entryconfig(3, state=DISABLED)
         menubar.add_cascade(label="Mode", menu=modemenu)
 
-
+        print "2"
         helpmenu = Menu(menubar, tearoff=0)
         helpmenu.add_command(label="About")
         menubar.add_cascade(label="Help", menu=helpmenu)
@@ -194,7 +185,7 @@ class VFAT3_GUI:
         ###############################################################################################################
         # ##################################################INTERACTIVE MODE###########################################
         ###############################################################################################################
-
+        print "3"
         # #########NOTEBOOK##############################
         self.nb = ttk.Notebook(master, width=300)
 
@@ -210,7 +201,7 @@ class VFAT3_GUI:
         self.new_frame = ttk.Frame(self.nb)
         self.new_frame.grid()
         #self.new_frame.grid_propagate(False)
-
+        print "4"
         # #########FCC TAB################################
         self.label = Label(self.FCC_frame, text="Send Fast Control Commands (FCC)")
         self.label.grid(columnspan=2)
@@ -258,7 +249,7 @@ class VFAT3_GUI:
         self.EC0BC0_button.grid()
 
         # #################REGISTERS TAB###################################
-
+        print "5"
         OPTIONS = [
                 "Channels",
                 "Front End Settings",
@@ -306,7 +297,7 @@ class VFAT3_GUI:
         self.label = []
         self.entry = []
         self.range = []
-
+        print "6"
         # REGISTER APPLY AND DEFAULT BUTTONS
         self.register_button_frame = ttk.Frame(self.register_frame)
         self.register_button_frame.grid()  
@@ -548,7 +539,7 @@ class VFAT3_GUI:
         self.nb.add(self.new_frame, text="new")
 
         self.nb.grid_forget()
-
+        print "7"
         ###############################################################################################################
         # ##################################################SCAN MODE##################################################
         ###############################################################################################################
@@ -871,7 +862,7 @@ class VFAT3_GUI:
         self.scan_mode_nb.add(self.scurve_frame, text="S-curve")
 
         self.scan_mode_nb.grid_forget()
-
+        print "8"
         ##############################################################################################################
         # ##################################################PRODUCTION MODE###########################################
         ##############################################################################################################
@@ -971,7 +962,7 @@ class VFAT3_GUI:
         # self.clear_button.grid(column=1, row=0)
         self.close_button = Button(self.ctrlButtons_frame, text="Close", command=master.quit)
         self.close_button.grid(column=2, row=0)
-
+        print "90"
 
 ####################################################################################
 # ##################################FUNCTIONS#######################################
