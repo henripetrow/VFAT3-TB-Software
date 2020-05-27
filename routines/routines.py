@@ -1051,7 +1051,7 @@ def measure_charge_distribution(obj):
     #gains = ['High', 'Medium', 'Low']
     gains = ['High']
     #dynamic_range = {'High': 9.5, 'Medium': 28, 'Low': 55}
-    dynamic_range = {'High': 40, 'Medium': 55, 'Low': 55}
+    dynamic_range = {'High': 55, 'Medium': 55, 'Low': 55}
     arm_dac_fcM = {'Low': 0.308756078585, 'Medium': 0.160574730846, 'High': 0.0525736788946}
     arm_dac_fcB = {'Low': -0.20026469513, 'Medium': -0.344217476814, 'High': -0.225712925757}
 
@@ -1195,8 +1195,9 @@ def measure_charge_distribution(obj):
             for arm_dac_value in range(arm_dac_min, arm_dac_max, arm_dac_step):
                 arm_dac_values.append(arm_dac_value)
                 obj.register[135].ARM_DAC[0] = arm_dac_value
+                print("\nRunning with:")
                 print("Latency: %s/%s" % (latency, latency_stop))
-                print("Setting ARM_DAC: %s" % obj.register[135].ARM_DAC[0])
+                # print("Setting ARM_DAC: %s" % obj.register[135].ARM_DAC[0])
                 obj.write_register(135)
                 obj.read_register(135)
                 threshold = arm_dac_fcM[gain] * obj.register[135].ARM_DAC[0] + arm_dac_fcB[gain]
@@ -1221,6 +1222,7 @@ def measure_charge_distribution(obj):
                         result_data_vector += data_vector
                 result_data_vector = map_channels(result_data_vector)
                 result_data_matrix = numpy.vstack((result_data_matrix, result_data_vector))
+                print("Results:")
                 save_to_file_and_print(numpy.array2string(result_data_vector, separator=','), output_file)
                 for channel in mapped_target_channels:
                     previous_ch_charge = (result_data_vector[channel - 1] / float(nr_of_triggers)) * 100
