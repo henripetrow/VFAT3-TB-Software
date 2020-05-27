@@ -1051,7 +1051,7 @@ def measure_charge_distribution(obj):
     #gains = ['High', 'Medium', 'Low']
     gains = ['High']
     #dynamic_range = {'High': 9.5, 'Medium': 28, 'Low': 55}
-    dynamic_range = {'High': 30, 'Medium': 55, 'Low': 55}
+    dynamic_range = {'High': 40, 'Medium': 55, 'Low': 55}
     arm_dac_fcM = {'Low': 0.308756078585, 'Medium': 0.160574730846, 'High': 0.0525736788946}
     arm_dac_fcB = {'Low': -0.20026469513, 'Medium': -0.344217476814, 'High': -0.225712925757}
 
@@ -1195,13 +1195,13 @@ def measure_charge_distribution(obj):
             for arm_dac_value in range(arm_dac_min, arm_dac_max, arm_dac_step):
                 arm_dac_values.append(arm_dac_value)
                 obj.register[135].ARM_DAC[0] = arm_dac_value
+                print("Latency: %s/%s" % (latency, latency_stop))
                 print("Setting ARM_DAC: %s" % obj.register[135].ARM_DAC[0])
                 obj.write_register(135)
                 obj.read_register(135)
-                print("Reading ARM_DAC: %s" % obj.register[135].ARM_DAC[0])
                 threshold = arm_dac_fcM[gain] * obj.register[135].ARM_DAC[0] + arm_dac_fcB[gain]
                 thresholds.append(threshold)
-                text = "ARM_DAC: %s, %s fC" % (obj.register[135].ARM_DAC[0], threshold)
+                text = "ARM_DAC: %s/%s, %s fC" % (obj.register[135].ARM_DAC[0], arm_dac_max, threshold)
                 save_to_file_and_print(text, output_file)
                 result_data_vector = numpy.array([0]*128)
                 for loop in range(0, nr_of_triggers):
