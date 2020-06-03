@@ -1049,9 +1049,9 @@ def measure_charge_distribution(obj):
     timestamp = time.strftime("%d%m%Y%H%M")
 
     #gains = ['High', 'Medium', 'Low']
-    gains = ['High']
+    gains = ['Medium', 'Low']
     #dynamic_range = {'High': 9.5, 'Medium': 28, 'Low': 55}
-    dynamic_range = {'High': 70, 'Medium': 55, 'Low': 55}
+    dynamic_range = {'High': 70, 'Medium': 70, 'Low': 70}
     arm_dac_fcM = {'Low': 0.308756078585, 'Medium': 0.160574730846, 'High': 0.0525736788946}
     arm_dac_fcB = {'Low': -0.20026469513, 'Medium': -0.344217476814, 'High': -0.225712925757}
 
