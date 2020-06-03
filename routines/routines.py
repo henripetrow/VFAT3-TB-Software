@@ -1062,7 +1062,7 @@ def measure_charge_distribution(obj):
 
     pulse_stretch = 3
     delay = 30
-    latency_start = 7
+    latency_start = 18
     latency_stop = 33
     latency_step = 1
 
