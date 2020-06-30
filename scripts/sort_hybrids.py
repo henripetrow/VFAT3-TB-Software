@@ -9,11 +9,19 @@ hybrid_list = database.list_hybrids_modified_by_state('red', greater=6100, small
 i = 0
 cal_dac_list = [8636, 7334, 6820]
 buffer_offset_list = [9985, 9953, 9827, 7463]
-adc_list = [6105, 6560, 6631, 6632, 6810, 7460, 10371, 10393, 7439, 7042, 6641, 6448, 7330, 7111]
+adc_list = [6105, 6560, 6631, 6632, 6810, 7460, 10371, 10393, 7439, 7042, 6641, 6448, 7330, 7111, 7731]
 old_syc_sc = [7393]
 register_test_list = [10742]
 
-noise_list = [7925, 7843, 7731, 7206, 6900, 6555, 6445, 6130] #weird. noise?
+noise_list = [6445, 6130] #noise?
+
+other_list = [7925, 7843, 7206, 6900, 6555, 6130]
+# 7925, iref 15.
+# 7843, iref 44.
+# 7206, somehow s-curve values missing. Maybe crashed?
+# 6900, no apparent reason.
+# 6555, no apparent reason.
+# 6130, iref 45.
 
 
 for hybrid in hybrid_list:
@@ -44,6 +52,8 @@ for hybrid in hybrid_list:
         print_text += ", >>>>>>>>Noise problem?"
     elif hybrid in register_test_list:
         print_text += ", Register test problem"
+    elif hybrid in other_list:
+        print_text += ", Other problem"
     i += 1
     print print_text
 print i
