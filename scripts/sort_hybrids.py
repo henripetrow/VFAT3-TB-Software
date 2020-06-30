@@ -5,7 +5,7 @@ sys.path.append('../')
 from scripts.DatabaseInterfaceBrowse import *
 
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids_modified_by_state('red')
+hybrid_list = database.list_hybrids_modified_by_state('red', greater=6100, smaller=50000)
 i = 0
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)

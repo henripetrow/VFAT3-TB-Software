@@ -70,9 +70,14 @@ class DatabaseInterfaceBrowse:
         hybrid_list.sort()
         return hybrid_list
 
-    def list_hybrids_modified_by_state(self, state):
+    def list_hybrids_modified_by_state(self, state, greater="", smaller=""):
         hybrid_list = []
-        query = "SELECT * FROM Production WHERE State='%s';" % state
+        query = "SELECT * FROM Production WHERE State='%s'" % state
+        if greater != "":
+            query += " AND ChipID >= %s" % greater
+        if smaller != "":
+            query += " AND ChipID <= %s" % smaller
+        query += ";"
         print query
         self.open_connection()
         self.cursor.execute(query)
