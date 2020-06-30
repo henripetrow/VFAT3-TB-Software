@@ -27,19 +27,19 @@ for hybrid in hybrid_list:
     print_text = "Hybrid: %s" % hybrid
     if int(production_data[1]) == 0:
         print_text += ", short circuit1"
-    if int(production_data[40]) == 1:
+    elif int(production_data[40]) == 1:
         print_text += ", short circuit"
-    if int(production_data[41]) == 1 or hybrid in old_syc_sc:
+    elif int(production_data[41]) == 1 or hybrid in old_syc_sc:
         print_text += ", sync problem"
-    if int(production_data[36]) > 0:
+    elif int(production_data[36]) > 0:
         print_text += ", S-bit problem"
-    if hybrid in cal_dac_list:
+    elif hybrid in cal_dac_list:
         print_text += ", CAL_DAC problem"
-    if hybrid in buffer_offset_list:
+    elif hybrid in buffer_offset_list:
         print_text += ", Buffer offset problem"
-    if hybrid in adc_list:
+    elif hybrid in adc_list:
         print_text += ", ADC problem"
-    if hybrid in noise_list:
+    elif hybrid in noise_list:
         print_text += ", Noise problem?"
     i += 1
     print print_text
