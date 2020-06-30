@@ -36,7 +36,7 @@ for hybrid in hybrid_list:
     print print_text
 print i
 
-for hybrid in cal_dac_list_list:
+for hybrid in cal_dac_list:
     production_data_int = database.get_production_results(hybrid)
     production_data = []
     for item in production_data_int:
