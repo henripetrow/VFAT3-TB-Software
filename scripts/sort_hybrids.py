@@ -28,7 +28,7 @@ for hybrid in hybrid_list:
         print_text += ", sync problem"
     if int(production_data[36]) > 0:
         print_text += ", S-bit problem"
-    if hybrid in cal_dac_list_list:
+    if hybrid in cal_dac_list:
         print_text += ", CAL_DAC problem"
     if hybrid in others_list:
         print_text += ", Other problem"
