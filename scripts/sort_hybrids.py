@@ -7,10 +7,12 @@ from scripts.DatabaseInterfaceBrowse import *
 database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids_modified_by_state('red', greater=6100, smaller=50000)
 i = 0
-cal_dac_list = [10393, 8636, 7439, 7334, 7330, 7111, 7042, 6820, 6641, 6448] #Vai ADC0 ongelma?
-noise_list = [7925, 7843, 7731, 7206, 6900, 6555, 6445, 6130] #weird. noise?
+cal_dac_list = [8636, 7334, 7330, 7111, 6820]
 buffer_offset_list = [9985, 9953, 9827, 7463]
-adc_list = [6105, 6560, 6631, 6632, 6810, 7460, 10371]
+adc_list = [6105, 6560, 6631, 6632, 6810, 7460, 10371, 10393, 7439, 7042, 6641, 6448]
+
+noise_list = [7925, 7843, 7731, 7206, 6900, 6555, 6445, 6130] #weird. noise?
+
 old_syc_sc = [7393]
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)
