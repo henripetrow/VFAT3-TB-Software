@@ -7,6 +7,7 @@ from scripts.DatabaseInterfaceBrowse import *
 database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids_modified_by_state('red', greater=6100, smaller=50000)
 i = 0
+others_list = [10371, 10393, 9985, 9953, 9827]
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)
     production_data = []
@@ -24,6 +25,8 @@ for hybrid in hybrid_list:
         print_text += ", sync problem"
     if int(production_data[36]) > 0:
         print_text += ", S-bit problem"
+    if hybrid in others_list:
+        print_text += ", Other problem"
     i += 1
     print print_text
 print i
