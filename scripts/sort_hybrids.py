@@ -4,9 +4,8 @@ import sys
 sys.path.append('../')
 from scripts.DatabaseInterfaceBrowse import *
 
-lot_nr = input("Give the lot number:")
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids_modified_by_state(red)
+hybrid_list = database.list_hybrids_modified_by_state('red')
 i = 0
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)
