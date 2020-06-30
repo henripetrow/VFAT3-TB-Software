@@ -47,5 +47,7 @@ for hybrid in cal_dac_list:
             production_data.append(0)
         else:
             production_data.append(item)
-    print_text = "Hybrid: %s, %s, %s, %s, %s" % (hybrid, production_data[5], production_data[6], production_data[7], production_data[8])
+    print_text = "Hybrid: %s, %s, %s, %s, %s, %s, %s" % (hybrid, production_data[5], production_data[6],
+                                                         production_data[7], production_data[8], production_data[9],
+                                                         production_data[10])
     print print_text
