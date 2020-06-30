@@ -6,7 +6,8 @@ from scripts.DatabaseInterfaceBrowse import *
 
 lot_nr = input("Give the lot number:")
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids(greater=6100, smaller=50000)
+hybrid_list = database.list_hybrids_modified_by_state(red)
+i = 0
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)
     production_data = []
@@ -15,8 +16,8 @@ for hybrid in hybrid_list:
             production_data.append(0)
         else:
             production_data.append(item)
-    i = 0
-    if production_data[29] == 'red':
-        print "Hybrid: %s, Dead Channels: %s, Color: %s" % (hybrid, production_data[20], production_data[29])
-        i += 1
-    print i
+
+
+    print "Hybrid: %s, Dead Channels: %s, Color: %s" % (hybrid, production_data[20], production_data[29])
+    i += 1
+print i

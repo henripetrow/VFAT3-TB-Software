@@ -70,6 +70,18 @@ class DatabaseInterfaceBrowse:
         hybrid_list.sort()
         return hybrid_list
 
+    def list_hybrids_modified_by_state(self, state):
+        hybrid_list = []
+        query = "SELECT * FROM Production WHERE State='%s';" % state
+        print query
+        self.open_connection()
+        self.cursor.execute(query)
+        output = self.cursor.fetchall()
+        for row in output:
+            hybrid_list.append(row[0])
+        self.connection.close()
+        hybrid_list.sort()
+        return hybrid_list
 
     def list_hybrids_by_lot(self, lot_nr):
         hybrid_list = []
