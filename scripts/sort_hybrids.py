@@ -36,6 +36,8 @@ for hybrid in hybrid_list:
         print_text += ", CAL_DAC problem"
     if hybrid in buffer_offset_list:
         print_text += ", Buffer offset problem"
+    if hybrid in adc_list:
+        print_text += ", ADC problem"
     if hybrid in noise_list:
         print_text += ", Noise problem?"
     i += 1
