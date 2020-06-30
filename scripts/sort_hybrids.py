@@ -11,6 +11,7 @@ cal_dac_list = [8636, 7334, 6820]
 buffer_offset_list = [9985, 9953, 9827, 7463]
 adc_list = [6105, 6560, 6631, 6632, 6810, 7460, 10371, 10393, 7439, 7042, 6641, 6448, 7330, 7111]
 old_syc_sc = [7393]
+register_test_list = [10742]
 
 noise_list = [7925, 7843, 7731, 7206, 6900, 6555, 6445, 6130] #weird. noise?
 
@@ -40,7 +41,9 @@ for hybrid in hybrid_list:
     elif hybrid in adc_list:
         print_text += ", ADC problem"
     elif hybrid in noise_list:
-        print_text += ", Noise problem?"
+        print_text += ", >>>>>>>>Noise problem?"
+    elif hybrid in register_test_list:
+        print_text += ", Register test problem"
     i += 1
     print print_text
 print i
