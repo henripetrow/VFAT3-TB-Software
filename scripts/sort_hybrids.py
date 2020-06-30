@@ -17,7 +17,7 @@ for hybrid in hybrid_list:
             production_data.append(item)
     print_text = "Hybrid: %s" % hybrid
     print production_data[1]
-    if production_data[1] is None or production_data[1] == "None":
+    if int(production_data[1]):
         print_text += ", short circuit1"
     if int(production_data[40]) == 1:
         print_text += ", short circuit"
