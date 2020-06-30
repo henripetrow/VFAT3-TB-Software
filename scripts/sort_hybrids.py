@@ -7,7 +7,8 @@ from scripts.DatabaseInterfaceBrowse import *
 database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids_modified_by_state('red', greater=6100, smaller=50000)
 i = 0
-others_list = [10371, 10393, 9985, 9953, 9827]
+others_list = [10371, 10393, 9985, 9953, 9827, 8636, 7925, 7731, 7463]
+# 7925 7731weird.
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)
     production_data = []
