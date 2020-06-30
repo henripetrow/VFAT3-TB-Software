@@ -20,6 +20,6 @@ for hybrid in hybrid_list:
         print_text += ", short circuit"
     if production_data[production_data[41]] == 1:
         print_text += ", sync problem"
-    print "Hybrid: %s, Dead Channels: %s, Color: %s, SC:%s, sync:%s" % (hybrid, production_data[20], production_data[29], production_data[40], production_data[41])
     i += 1
+    print print_text
 print i
