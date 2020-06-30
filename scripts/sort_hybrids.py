@@ -22,6 +22,8 @@ for hybrid in hybrid_list:
         print_text += ", short circuit"
     if int(production_data[41]) == 1:
         print_text += ", sync problem"
+    if int(production_data[36]) > 0:
+        print_text += ", S-bit problem"
     i += 1
     print print_text
 print i
