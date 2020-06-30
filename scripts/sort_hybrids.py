@@ -17,6 +17,6 @@ for hybrid in hybrid_list:
             production_data.append(item)
 
 
-    print "Hybrid: %s, Dead Channels: %s, Color: %s, SC:%s, sync:%s" % (hybrid, production_data[20], production_data[29], production_data[40] production_data[41])
+    print "Hybrid: %s, Dead Channels: %s, Color: %s, SC:%s, sync:%s" % (hybrid, production_data[20], production_data[29], production_data[40], production_data[41])
     i += 1
 print i
