@@ -7,8 +7,10 @@ from scripts.DatabaseInterfaceBrowse import *
 database = DatabaseInterfaceBrowse()
 hybrid_list = database.list_hybrids_modified_by_state('red', greater=6100, smaller=50000)
 i = 0
-others_list = [10371, 10393, 9985, 9953, 9827, 8636, 7925, 7731, 7463]
-# 7925 7731weird.
+cal_dac_list = [10371, 10393, 9985, 9953, 9827, 8636, 7463, 7460, 7439, 7334, 7330, 7111, 7042, 6820, 6810, 6641, 6632,
+                6631, 6560, 6448, 6105] #Vai ADC0 ongelma?
+others_list = [7925, 7731, 7206, 6900, 6555, 6445, 6130] #weird. noise?
+old_syc_sc = [7393]
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)
     production_data = []
@@ -26,6 +28,8 @@ for hybrid in hybrid_list:
         print_text += ", sync problem"
     if int(production_data[36]) > 0:
         print_text += ", S-bit problem"
+    if hybrid in cal_dac_list_list:
+        print_text += ", CAL_DAC problem"
     if hybrid in others_list:
         print_text += ", Other problem"
     i += 1
