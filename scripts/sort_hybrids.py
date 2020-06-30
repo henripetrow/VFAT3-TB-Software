@@ -23,6 +23,15 @@ other_list = [7925, 7843, 7206, 6900, 6555, 6130]
 # 6555, no apparent reason.
 # 6130, iref 45.
 
+sc_problems = 0
+sync_problems = 0
+sbit_problems = 0
+cal_dac_problems = 0
+bo_problems = 0
+adc_problems = 0
+noise_problems = 0
+register_problems = 0
+other_problems = 0
 
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)
@@ -33,30 +42,50 @@ for hybrid in hybrid_list:
         else:
             production_data.append(item)
 
+
     print_text = "Hybrid: %s" % hybrid
     if int(production_data[1]) == 0:
         print_text += ", short circuit1"
+        sc_problems += 1
     elif int(production_data[40]) == 1:
         print_text += ", short circuit"
+        sc_problems += 1
     elif int(production_data[41]) == 1 or hybrid in old_syc_sc:
         print_text += ", sync problem"
+        sync_problems += 1
     elif int(production_data[36]) > 0:
         print_text += ", S-bit problem"
+        sbit_problems += 1
     elif hybrid in cal_dac_list:
         print_text += ", CAL_DAC problem"
+        cal_dac_problems += 1
     elif hybrid in buffer_offset_list:
         print_text += ", Buffer offset problem"
+        bo_problems += 1
     elif hybrid in adc_list:
         print_text += ", ADC problem"
+        adc_problems += 1
     elif hybrid in noise_list:
-        print_text += ", >>>>>>>>Noise problem?"
+        print_text += ", Noise problem"
+        noise_problems += 1
     elif hybrid in register_test_list:
         print_text += ", Register test problem"
+        register_problems += 1
     elif hybrid in other_list:
         print_text += ", Other problem"
+        other_problems += 1
     i += 1
     print print_text
 print i
+print "Short circuit: %s" % sc_problems
+print "Sync: %s" % sync_problems
+print "S-bit: %s" % sbit_problems
+print "CAL_DAC: %s" % cal_dac_problems
+print "Buffer offset: %s" % bo_problems
+print "ADC: %s" % adc_problems
+print "Register: %s" % register_problems
+print "Other: %s" % other_problems
+
 
 for hybrid in cal_dac_list:
     production_data_int = database.get_production_results(hybrid)
