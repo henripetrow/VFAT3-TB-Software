@@ -16,10 +16,9 @@ for hybrid in hybrid_list:
         else:
             production_data.append(item)
     print_text = "Hybrid: %s" % hybrid
-    print production_data[40]
     if int(production_data[40]) == 1:
         print_text += ", short circuit"
-    if production_data[41] == '1':
+    if int(production_data[41]) == 1:
         print_text += ", sync problem"
     i += 1
     print print_text
