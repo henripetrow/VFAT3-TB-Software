@@ -144,7 +144,7 @@ if sort_type == 'yellow':
                 production_data.append(item)
 
         print_text = "Hybrid: %s" % hybrid
-        if (int(production_data[20]) + int(production_data[19])) > lim_Problematic_Channels:
+        if (int(production_data[20]) + int(production_data[19])) > lim_Problematic_Channels[1]:
             print_text += ", Bad channels"
         elif lim_BIST[0] > int(production_data[21]) or int(production_data[21]) > lim_BIST[1]:
             print_text += ", BIST problem"
