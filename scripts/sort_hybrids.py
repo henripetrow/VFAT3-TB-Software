@@ -42,7 +42,6 @@ for hybrid in hybrid_list:
         else:
             production_data.append(item)
 
-    print production_data[21]
     print_text = "Hybrid: %s" % hybrid
     if int(production_data[1]) == 0 and int(production_data[21]) == 0:
         print_text += ", short circuit1"
@@ -88,3 +87,17 @@ print "Buffer offset: %s" % bo_problems
 print "ADC: %s" % adc_problems
 print "Register: %s" % register_problems
 print "Other: %s" % other_problems
+
+
+hybrid_list = database.list_hybrids_modified_by_state('None', greater=6100, smaller=50000)
+for hybrid in hybrid_list:
+    production_data_int = database.get_production_results(hybrid)
+    production_data = []
+    for item in production_data_int:
+        if item is None or item == "None":
+            production_data.append(0)
+        else:
+            production_data.append(item)
+
+    print_text = "Hybrid: %s" % hybrid
+    print print_text
