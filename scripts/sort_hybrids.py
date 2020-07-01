@@ -42,7 +42,7 @@ for hybrid in hybrid_list:
         else:
             production_data.append(item)
 
-
+    print production_data[22]
     print_text = "Hybrid: %s" % hybrid
     if int(production_data[1]) == 0:
         print_text += ", short circuit1"
@@ -85,17 +85,3 @@ print "Buffer offset: %s" % bo_problems
 print "ADC: %s" % adc_problems
 print "Register: %s" % register_problems
 print "Other: %s" % other_problems
-
-
-for hybrid in cal_dac_list:
-    production_data_int = database.get_production_results(hybrid)
-    production_data = []
-    for item in production_data_int:
-        if item is None or item == "None":
-            production_data.append(0)
-        else:
-            production_data.append(item)
-    print_text = "Hybrid: %s, %s, %s, %s, %s, %s, %s" % (hybrid, production_data[5], production_data[6],
-                                                         production_data[7], production_data[8], production_data[9],
-                                                         production_data[10])
-    print print_text
