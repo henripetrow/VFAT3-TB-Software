@@ -162,21 +162,21 @@ if sort_type == 'yellow':
             print_text += ", ADC1 problem"
         elif lim_iref[0] > float(production_data[31]) or float(production_data[31]) > lim_iref[1]:
             print_text += ", Iref problem"
-        elif lim_Analog_Power_SLEEP[0] > float(production_data[23]) or float(production_data[31]) > lim_Analog_Power_SLEEP[1]:
+        elif lim_Analog_Power_SLEEP[0] > float(production_data[23]) or float(production_data[23]) > lim_Analog_Power_SLEEP[1]:
             print_text += ", Analog_Power_SLEEP problem"
-        elif lim_Digital_Power_SLEEP[0] > float(production_data[24]) or float(production_data[31]) > lim_Digital_Power_SLEEP[1]:
+        elif lim_Digital_Power_SLEEP[0] > float(production_data[24]) or float(production_data[24]) > lim_Digital_Power_SLEEP[1]:
             print_text += ", Digital_Power_SLEEP problem"
-        elif lim_IOVDD_Power_SLEEP[0] > float(production_data[38]) or float(production_data[31]) > lim_IOVDD_Power_SLEEP[1]:
+        elif lim_IOVDD_Power_SLEEP[0] > float(production_data[38]) or float(production_data[38]) > lim_IOVDD_Power_SLEEP[1]:
             print_text += ", IOVDD_Power_SLEEP problem"
-        elif lim_Analog_Power_RUN[0] > float(production_data[25]) or float(production_data[31]) > lim_Analog_Power_RUN[1]:
+        elif lim_Analog_Power_RUN[0] > float(production_data[25]) or float(production_data[25]) > lim_Analog_Power_RUN[1]:
             print_text += ", Analog_Power_RUN problem"
-        elif lim_Digital_Power_RUN[0] > float(production_data[26]) or float(production_data[31]) > lim_Digital_Power_RUN[1]:
+        elif lim_Digital_Power_RUN[0] > float(production_data[26]) or float(production_data[26]) > lim_Digital_Power_RUN[1]:
             print_text += ", Digital_Power_RUN problem"
-        elif lim_IOVDD_Power_RUN[0] > float(production_data[39]) or float(production_data[31]) > lim_IOVDD_Power_RUN[1]:
+        elif lim_IOVDD_Power_RUN[0] > float(production_data[39]) or float(production_data[39]) > lim_IOVDD_Power_RUN[1]:
             print_text += ", IOVDD_Power_RUN problem"
-        elif lim_Temperature_k2[0] > float(production_data[33]) or float(production_data[31]) > lim_Temperature_k2[1]:
+        elif lim_Temperature_k2[0] > float(production_data[33]) or float(production_data[33]) > lim_Temperature_k2[1]:
             print_text += ", Temperature_k2 problem"
-        elif lim_Temperature[0] > float(production_data[32]) or float(production_data[31]) > lim_Temperature[1]:
+        elif lim_Temperature[0] > float(production_data[32]) or float(production_data[32]) > lim_Temperature[1]:
             print_text += ", Temperature problem"
 
         else:
