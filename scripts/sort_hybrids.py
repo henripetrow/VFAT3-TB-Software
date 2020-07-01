@@ -144,10 +144,18 @@ if sort_type == 'yellow':
                 production_data.append(item)
 
         print_text = "Hybrid: %s" % hybrid
-        if (int(production_data[20]) + int(production_data[19])) > 3:
+        if (int(production_data[20]) + int(production_data[19])) > lim_Problematic_Channels:
             print_text += ", Bad channels"
-        elif 1080298 > int(production_data[21]) or int(production_data[21]) > 1080310:
+        elif lim_BIST[0] > int(production_data[21]) or int(production_data[21]) > lim_BIST[1]:
             print_text += ", BIST problem"
+        elif lim_ADC0b[0] > int(production_data[4]) or int(production_data[4]) > lim_ADC0b[1]:
+            print_text += ", ADC0 problem"
+        elif lim_ADC0m[0] > int(production_data[5]) or int(production_data[5]) > lim_ADC0m[1]:
+            print_text += ", ADC0 problem"
+        elif lim_ADC1b[0] > int(production_data[6]) or int(production_data[6]) > lim_ADC1b[1]:
+            print_text += ", ADC1 problem"
+        elif lim_ADC1m[0] > int(production_data[7]) or int(production_data[7]) > lim_ADC1m[1]:
+            print_text += ", ADC1 problem"
 
         i += 1
         print print_text
