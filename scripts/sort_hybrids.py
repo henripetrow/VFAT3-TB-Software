@@ -44,8 +44,11 @@ for hybrid in hybrid_list:
 
     print production_data[21]
     print_text = "Hybrid: %s" % hybrid
-    if int(production_data[1]) == 0:
+    if int(production_data[1]) == 0 and int(production_data[21]) == 0:
         print_text += ", short circuit1"
+        sc_problems += 1
+    elif int(production_data[1]) == 0 and int(production_data[21]) != 0:
+        print_text += ", sync problem1"
         sc_problems += 1
     elif int(production_data[40]) == 1:
         print_text += ", short circuit"
