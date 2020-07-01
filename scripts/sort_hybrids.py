@@ -3,6 +3,7 @@ import time
 import sys
 sys.path.append('../')
 from scripts.DatabaseInterfaceBrowse import *
+from luts import *
 
 sort_type = 'red'
 sort_type = 'yellow'
