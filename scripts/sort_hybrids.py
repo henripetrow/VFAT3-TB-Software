@@ -156,6 +156,8 @@ if sort_type == 'yellow':
             print_text += ", ADC1 problem"
         elif lim_ADC1b[0] > float(production_data[8]) or float(production_data[8]) > lim_ADC1b[1]:
             print_text += ", ADC1 problem"
+        elif lim_iref[0] > float(production_data[31]) or float(production_data[31]) > lim_iref[1]:
+            print_text += ", Iref problem"
 
         i += 1
         print print_text
