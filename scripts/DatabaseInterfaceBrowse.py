@@ -70,9 +70,12 @@ class DatabaseInterfaceBrowse:
         hybrid_list.sort()
         return hybrid_list
 
-    def list_hybrids_modified_by_state(self, state, greater="", smaller=""):
+    def list_hybrids_by_state(self, state, greater="", smaller=""):
         hybrid_list = []
-        query = "SELECT * FROM Production WHERE State='%s'" % state
+        if state == "NULL":
+            query = "SELECT * FROM Production WHERE State IS NULL" % state
+        else:
+            query = "SELECT * FROM Production WHERE State='%s'" % state
         if greater != "":
             query += " AND ChipID >= %s" % greater
         if smaller != "":

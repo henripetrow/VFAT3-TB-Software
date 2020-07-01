@@ -5,7 +5,7 @@ sys.path.append('../')
 from scripts.DatabaseInterfaceBrowse import *
 
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids_modified_by_state('red', greater=6100, smaller=50000)
+hybrid_list = database.list_hybrids_by_state('red', greater=6100, smaller=50000)
 i = 0
 cal_dac_list = [8636, 7334, 6820]
 buffer_offset_list = [9985, 9953, 9827, 7463]
@@ -89,7 +89,7 @@ print "Register: %s" % register_problems
 print "Other: %s" % other_problems
 
 
-hybrid_list = database.list_hybrids_modified_by_state('', greater=6100, smaller=50000)
+hybrid_list = database.list_hybrids_by_state('NULL', greater=6100, smaller=50000)
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)
     production_data = []
