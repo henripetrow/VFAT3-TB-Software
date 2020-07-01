@@ -103,6 +103,8 @@ for hybrid in hybrid_list:
     print_text = "Hybrid: %s" % hybrid
     if int(production_data[21]) == 0:
         print_text += ", short circuit"
+    elif int(production_data[9]) != 0 and int(production_data[12]) == 0:
+        print_text += ", failed S-curve"
     print print_text
     i  += 1
 print i
