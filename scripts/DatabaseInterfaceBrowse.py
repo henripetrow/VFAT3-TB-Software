@@ -73,7 +73,7 @@ class DatabaseInterfaceBrowse:
     def list_hybrids_by_state(self, state, greater="", smaller=""):
         hybrid_list = []
         if state == "NULL":
-            query = "SELECT * FROM Production WHERE State IS NULL" % state
+            query = "SELECT * FROM Production WHERE State IS NULL"
         else:
             query = "SELECT * FROM Production WHERE State='%s'" % state
         if greater != "":
