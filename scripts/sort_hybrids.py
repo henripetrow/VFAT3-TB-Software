@@ -100,8 +100,7 @@ for hybrid in hybrid_list:
         print_text += ", failed S-curve"
         scurve_problems += 1
     print print_text
-    print float(production_data[9])
-    print float(production_data[12])
+
     i  += 1
 print "Total Red Hybrids: %s" % i
 print "Short circuit: %s" % sc_problems
