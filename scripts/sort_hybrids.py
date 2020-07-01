@@ -103,7 +103,7 @@ for hybrid in hybrid_list:
     print float(production_data[9])
     print float(production_data[12])
     i  += 1
-print i
+print "Total Red Hybrids: %s" % i
 print "Short circuit: %s" % sc_problems
 print "Sync: %s" % sync_problems
 print "S-bit: %s" % sbit_problems
