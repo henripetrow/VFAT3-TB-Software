@@ -133,17 +133,6 @@ if sort_type == 'yellow':
     i = 0
     cal_dac_list = [8636, 7334, 6820]
 
-    sc_problems = 0
-    sync_problems = 0
-    sbit_problems = 0
-    cal_dac_problems = 0
-    bo_problems = 0
-    adc_problems = 0
-    noise_problems = 0
-    register_problems = 0
-    other_problems = 0
-    scurve_problems = 0
-
     for hybrid in hybrid_list:
         production_data_int = database.get_production_results(hybrid)
         production_data = []
@@ -156,36 +145,6 @@ if sort_type == 'yellow':
         print_text = "Hybrid: %s" % hybrid
         if int(production_data[1]) == 0 and int(production_data[21]) == 0:
             print_text += ", short circuit1"
-            sc_problems += 1
-        elif int(production_data[1]) == 0 and int(production_data[21]) != 0:
-            print_text += ", sync problem1"
-            sync_problems += 1
-        elif int(production_data[40]) == 1:
-            print_text += ", short circuit"
-            sc_problems += 1
-        elif int(production_data[41]) == 1 or hybrid in old_syc_sc:
-            print_text += ", sync problem"
-            sync_problems += 1
-        elif int(production_data[36]) > 0:
-            print_text += ", S-bit problem"
-            sbit_problems += 1
-        elif hybrid in cal_dac_list:
-            print_text += ", CAL_DAC problem"
-            cal_dac_problems += 1
-        elif hybrid in buffer_offset_list:
-            print_text += ", Buffer offset problem"
-            bo_problems += 1
-        elif hybrid in adc_list:
-            print_text += ", ADC problem"
-            adc_problems += 1
-        elif hybrid in noise_list:
-            print_text += ", Noise problem"
-            noise_problems += 1
-        elif hybrid in register_test_list:
-            print_text += ", Register test problem"
-            register_problems += 1
-        elif hybrid in other_list:
-            print_text += ", Other problem"
-            other_problems += 1
+
         i += 1
         print print_text
