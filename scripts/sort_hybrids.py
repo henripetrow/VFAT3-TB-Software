@@ -143,8 +143,8 @@ if sort_type == 'yellow':
                 production_data.append(item)
 
         print_text = "Hybrid: %s" % hybrid
-        if int(production_data[1]) == 0 and int(production_data[21]) == 0:
-            print_text += ", short circuit1"
+        if int(production_data[21]) > 3:
+            print_text += ", Bad channels"
 
         i += 1
         print print_text
