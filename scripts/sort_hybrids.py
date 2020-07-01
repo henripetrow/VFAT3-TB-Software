@@ -49,7 +49,7 @@ for hybrid in hybrid_list:
         sc_problems += 1
     elif int(production_data[1]) == 0 and int(production_data[21]) != 0:
         print_text += ", sync problem1"
-        sc_problems += 1
+        sync_problems += 1
     elif int(production_data[40]) == 1:
         print_text += ", short circuit"
         sc_problems += 1
