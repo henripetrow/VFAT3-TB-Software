@@ -145,7 +145,7 @@ if sort_type == 'yellow':
         print_text = "Hybrid: %s" % hybrid
         if (int(production_data[20]) + int(production_data[19])) > 3:
             print_text += ", Bad channels"
-        elif 1080298 > int(production_data[21]) > 1080310:
+        elif 1080298 > int(production_data[21]) or int(production_data[21]) > 1080310:
             print_text += ", BIST problem"
 
         i += 1
