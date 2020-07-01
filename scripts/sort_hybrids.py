@@ -147,6 +147,8 @@ if sort_type == 'yellow':
         print_text = "Hybrid: %s" % hybrid
         if (int(production_data[20]) + int(production_data[19])) > lim_Problematic_Channels[1]:
             print_text += ", Bad channels"
+        elif int(production_data[18]) > 0 or int(production_data[17]) > 0 or int(production_data[16]) > 0 or int(production_data[15]) > 0:
+            print_text += ", Data packet problem"
         elif lim_BIST[0] > int(production_data[21]) or int(production_data[21]) > lim_BIST[1]:
             print_text += ", BIST problem"
         elif lim_ADC0m[0] > float(production_data[5]) or float(production_data[5]) > lim_ADC0m[1]:
