@@ -102,6 +102,8 @@ for hybrid in hybrid_list:
     print print_text
 
     i  += 1
+print ""
+print "-------------------------------------"
 print "Total Red Hybrids: %s" % i
 print "Short circuit: %s" % sc_problems
 print "Sync: %s" % sync_problems
@@ -112,3 +114,5 @@ print "ADC: %s" % adc_problems
 print "Register: %s" % register_problems
 print "S-curve crash: %s" % scurve_problems
 print "Other: %s" % other_problems
+print ""
+print "-------------------------------------"
