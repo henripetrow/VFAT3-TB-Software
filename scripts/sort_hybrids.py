@@ -148,3 +148,5 @@ if sort_type == 'yellow':
 
         i += 1
         print print_text
+
+    print i
