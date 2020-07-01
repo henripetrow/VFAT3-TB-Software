@@ -134,6 +134,7 @@ if sort_type == 'yellow':
     i = 0
     cal_dac_list = [8636, 7334, 6820]
 
+    others = 0
     for hybrid in hybrid_list:
         production_data_int = database.get_production_results(hybrid)
         production_data = []
@@ -158,8 +159,11 @@ if sort_type == 'yellow':
             print_text += ", ADC1 problem"
         elif lim_iref[0] > float(production_data[31]) or float(production_data[31]) > lim_iref[1]:
             print_text += ", Iref problem"
+        else:
+            others += 1
 
         i += 1
         print print_text
 
     print i
+    print "Others: %s" % others
