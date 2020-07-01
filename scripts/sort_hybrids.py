@@ -146,7 +146,7 @@ if sort_type == 'yellow':
         if (int(production_data[20]) + int(production_data[19])) > 3:
             print_text += ", Bad channels"
         elif 1080299 > int(production_data[21]) > 1080302:
-            print_text += ", Bad channels"
+            print_text += ", BIST problem"
 
         i += 1
         print print_text
