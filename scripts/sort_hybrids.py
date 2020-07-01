@@ -15,13 +15,14 @@ register_test_list = [10742]
 
 noise_list = [6445, 6130] #noise?
 
-other_list = [7925, 7843, 7206, 6900, 6555, 6130]
+other_list = [7925, 7843, 7206, 6900, 6555, 6130, 10094]
 # 7925, iref 15.
 # 7843, iref 44.
 # 7206, somehow s-curve values missing. Maybe crashed?
 # 6900, no apparent reason.
 # 6555, no apparent reason.
 # 6130, iref 45.
+# 10094, system probably crashed.
 
 sc_problems = 0
 sync_problems = 0
@@ -99,6 +100,9 @@ for hybrid in hybrid_list:
     elif float(production_data[9]) != 0 and float(production_data[12]) == 0:
         print_text += ", failed S-curve"
         scurve_problems += 1
+    elif hybrid in other_list:
+        print_text += ", Other problem"
+        other_problems += 1
     print print_text
 
     i  += 1
