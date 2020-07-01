@@ -42,7 +42,7 @@ for hybrid in hybrid_list:
         else:
             production_data.append(item)
 
-    print production_data[22]
+    print production_data[23]
     print_text = "Hybrid: %s" % hybrid
     if int(production_data[1]) == 0:
         print_text += ", short circuit1"
