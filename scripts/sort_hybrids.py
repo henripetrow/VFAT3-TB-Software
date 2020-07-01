@@ -148,13 +148,13 @@ if sort_type == 'yellow':
             print_text += ", Bad channels"
         elif lim_BIST[0] > int(production_data[21]) or int(production_data[21]) > lim_BIST[1]:
             print_text += ", BIST problem"
-        elif lim_ADC0m[0] > int(production_data[5]) or int(production_data[5]) > lim_ADC0m[1]:
+        elif lim_ADC0m[0] > float(production_data[5]) or float(production_data[5]) > lim_ADC0m[1]:
             print_text += ", ADC0 problem"
-        elif lim_ADC0b[0] > int(production_data[6]) or int(production_data[6]) > lim_ADC0b[1]:
+        elif lim_ADC0b[0] > float(production_data[6]) or float(production_data[6]) > lim_ADC0b[1]:
             print_text += ", ADC0 problem"
-        elif lim_ADC1m[0] > int(production_data[7]) or int(production_data[7]) > lim_ADC1m[1]:
+        elif lim_ADC1m[0] > float(production_data[7]) or float(production_data[7]) > lim_ADC1m[1]:
             print_text += ", ADC1 problem"
-        elif lim_ADC1b[0] > int(production_data[8]) or int(production_data[8]) > lim_ADC1b[1]:
+        elif lim_ADC1b[0] > float(production_data[8]) or float(production_data[8]) > lim_ADC1b[1]:
             print_text += ", ADC1 problem"
 
         i += 1
