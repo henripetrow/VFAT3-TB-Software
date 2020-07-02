@@ -5,8 +5,7 @@ sys.path.append('../')
 from scripts.DatabaseInterfaceBrowse import *
 from luts import *
 
-sort_type = 'red'
-sort_type = 'yellow'
+sort_type = ['red', 'yellow']
 
 
 database = DatabaseInterfaceBrowse()
@@ -205,9 +204,10 @@ if 'red' in sort_type:
     print "Register: %s" % register_problems
     print "S-curve crash: %s" % scurve_problems
     print "Other: %s" % other_problems
+    print ""
 
 if 'yellow' in sort_type:
-    print i_yellow
+    print "Total Yellow hybrids: %s" % i_yellow
     print "Bad channels: %s" % channel_problem
     print "Data packet: %s" % data_packet_problem
     print "BIST: %s" % bist_problem
