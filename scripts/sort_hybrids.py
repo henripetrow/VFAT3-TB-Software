@@ -134,7 +134,17 @@ if sort_type == 'yellow':
     i = 0
     cal_dac_list = [8636, 7334, 6820]
 
-    others = 0
+    unknown = 0
+    data_packet_problem = 0
+    adc0_problem = 0
+    adc1_problem = 0
+    bist_problem = 0
+    channel_problem = 0
+    iref_problem = 0
+    analog_power_problem = 0
+    digital_power_problem = 0
+    temperature_problem = 0
+
     for hybrid in hybrid_list:
         production_data_int = database.get_production_results(hybrid)
         production_data = []
@@ -148,42 +158,61 @@ if sort_type == 'yellow':
         print_text = "Hybrid: %s" % hybrid
         if (int(production_data[20]) + int(production_data[19])) > lim_Problematic_Channels[1]:
             print_text += ", Bad channels"
+            channel_problem += 1
         elif int(production_data[18]) > 0 or int(production_data[17]) > 0 or int(production_data[16]) > 0 or int(production_data[15]) > 0:
             print_text += ", Data packet problem"
+            data_packet_problem += 1
         elif lim_BIST[0] > int(production_data[21]) or int(production_data[21]) > lim_BIST[1]:
             print_text += ", BIST problem"
+            bist_problem += 1
         elif lim_ADC0m[0] > float(production_data[5]) or float(production_data[5]) > lim_ADC0m[1]:
             print_text += ", ADC0 problem"
+            adc0_problem += 1
         elif lim_ADC0b[0] > float(production_data[6]) or float(production_data[6]) > lim_ADC0b[1]:
             print_text += ", ADC0 problem"
+            adc0_problem += 1
         elif lim_ADC1m[0] > float(production_data[7]) or float(production_data[7]) > lim_ADC1m[1]:
             print_text += ", ADC1 problem"
+            adc1_problem += 1
         elif lim_ADC1b[0] > float(production_data[8]) or float(production_data[8]) > lim_ADC1b[1]:
             print_text += ", ADC1 problem"
+            adc1_problem += 1
         elif lim_iref[0] > float(production_data[31]) or float(production_data[31]) > lim_iref[1]:
             print_text += ", Iref problem"
+            iref_problem += 1
         elif lim_Analog_Power_SLEEP[0] > float(production_data[23]) or float(production_data[23]) > lim_Analog_Power_SLEEP[1]:
             print_text += ", Analog_Power_SLEEP problem"
+            analog_power_problem += 1
         elif lim_Digital_Power_SLEEP[0] > float(production_data[24]) or float(production_data[24]) > lim_Digital_Power_SLEEP[1]:
             print_text += ", Digital_Power_SLEEP problem"
-        # elif lim_IOVDD_Power_SLEEP[0] > float(production_data[38]) or float(production_data[38]) > lim_IOVDD_Power_SLEEP[1]:
-        #     print_text += ", IOVDD_Power_SLEEP problem"
+            digital_power_problem += 1
         elif lim_Analog_Power_RUN[0] > float(production_data[25]) or float(production_data[25]) > lim_Analog_Power_RUN[1]:
             print_text += ", Analog_Power_RUN problem"
+            analog_power_problem += 1
         elif lim_Digital_Power_RUN[0] > float(production_data[26]) or float(production_data[26]) > lim_Digital_Power_RUN[1]:
             print_text += ", Digital_Power_RUN problem"
-        # elif lim_IOVDD_Power_RUN[0] > float(production_data[39]) or float(production_data[39]) > lim_IOVDD_Power_RUN[1]:
-        #     print_text += ", IOVDD_Power_RUN problem"
+            digital_power_problem += 1
         elif lim_Temperature_k2[0] > float(production_data[33]) or float(production_data[33]) > lim_Temperature_k2[1]:
             print_text += ", Temperature_k2 problem"
+            temperature_problem += 1
         elif lim_Temperature[0] > float(production_data[32]) or float(production_data[32]) > lim_Temperature[1]:
             print_text += ", Temperature problem"
+            temperature_problem += 1
 
         else:
-            others += 1
+            unknown += 1
 
         i += 1
         print print_text
 
     print i
-    print "Others: %s" % others
+    print "Bad channels: %s" % channel_problem
+    print "Data packet: %s" % data_packet_problem
+    print "BIST: %s" % bist_problem
+    print "ADC0: %s" % adc0_problem
+    print "ADC1: %s" % adc1_problem
+    print "Iref: %s" % iref_problem
+    print "Analog power: %s" % analog_power_problem
+    print "Digital power: %s" % digital_power_problem
+    print "Temperature: %s" % temperature_problem
+    print "Unknown: %s" % unknown
