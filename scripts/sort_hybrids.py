@@ -11,9 +11,9 @@ sort_type = 'yellow'
 
 database = DatabaseInterfaceBrowse()
 
-if sort_type == 'red':
+if 'red' in sort_type:
     hybrid_list = database.list_hybrids_by_state('red', greater=6100, smaller=50000)
-    i = 0
+    i_red = 0
     cal_dac_list = [8636, 7334, 6820]
     buffer_offset_list = [9985, 9953, 9827, 7463]
     adc_list = [6105, 6560, 6631, 6632, 6810, 7460, 10371, 10393, 7439, 7042, 6641, 6448, 7330, 7111, 7731]
@@ -85,7 +85,7 @@ if sort_type == 'red':
         elif hybrid in other_list:
             print_text += ", Other problem"
             other_problems += 1
-        i += 1
+        i_red += 1
         print print_text
 
 
@@ -112,26 +112,13 @@ if sort_type == 'red':
             other_problems += 1
         print print_text
 
-        i  += 1
-    print ""
-    print "-------------------------------------"
-    print "Total Red Hybrids: %s" % i
-    print "Short circuit: %s" % sc_problems
-    print "Sync: %s" % sync_problems
-    print "S-bit: %s" % sbit_problems
-    print "CAL_DAC: %s" % cal_dac_problems
-    print "Buffer offset: %s" % bo_problems
-    print "ADC: %s" % adc_problems
-    print "Register: %s" % register_problems
-    print "S-curve crash: %s" % scurve_problems
-    print "Other: %s" % other_problems
-    print ""
-    print "-------------------------------------"
+        i_red  += 1
 
 
-if sort_type == 'yellow':
+
+if 'yellow' in sort_type:
     hybrid_list = database.list_hybrids_by_state('yellow', greater=6100, smaller=50000)
-    i = 0
+    i_yellow = 0
     cal_dac_list = [8636, 7334, 6820]
 
     unknown = 0
@@ -202,10 +189,25 @@ if sort_type == 'yellow':
         else:
             unknown += 1
 
-        i += 1
+        i_yellow += 1
         print print_text
 
-    print i
+    print ""
+    print "-------------------------------------"
+if 'red' in sort_type:
+    print "Total Red Hybrids: %s" % i_red
+    print "Short circuit: %s" % sc_problems
+    print "Sync: %s" % sync_problems
+    print "S-bit: %s" % sbit_problems
+    print "CAL_DAC: %s" % cal_dac_problems
+    print "Buffer offset: %s" % bo_problems
+    print "ADC: %s" % adc_problems
+    print "Register: %s" % register_problems
+    print "S-curve crash: %s" % scurve_problems
+    print "Other: %s" % other_problems
+
+if 'yellow' in sort_type:
+    print i_yellow
     print "Bad channels: %s" % channel_problem
     print "Data packet: %s" % data_packet_problem
     print "BIST: %s" % bist_problem
@@ -216,3 +218,6 @@ if sort_type == 'yellow':
     print "Digital power: %s" % digital_power_problem
     print "Temperature: %s" % temperature_problem
     print "Unknown: %s" % unknown
+
+print ""
+print "-------------------------------------"
