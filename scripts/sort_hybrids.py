@@ -10,6 +10,9 @@ sort_type = ['red', 'yellow']
 
 database = DatabaseInterfaceBrowse()
 
+hybrid_list = database.list_hybrids_by_state('green', greater=6100, smaller=50000)
+i_green = len(hybrid_list)
+
 if 'red' in sort_type:
     hybrid_list = database.list_hybrids_by_state('red', greater=6100, smaller=50000)
     i_red = 0
@@ -226,6 +229,8 @@ if 'yellow' in sort_type:
     print "Digital power: %s" % digital_power_problem
     print "Temperature: %s" % temperature_problem
     print "Unknown: %s" % unknown
+
+print "Total Green hybrids: %s" % i_green
 
 print ""
 print "-------------------------------------"
