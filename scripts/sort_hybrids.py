@@ -124,6 +124,7 @@ if 'yellow' in sort_type:
     data_packet_problem = 0
     adc0_problem = 0
     adc1_problem = 0
+    cal_dac_problem = 0
     bist_problem = 0
     channel_problem = 0
     iref_problem = 0
@@ -163,6 +164,12 @@ if 'yellow' in sort_type:
         elif lim_ADC1b[0] > float(production_data[8]) or float(production_data[8]) > lim_ADC1b[1]:
             print_text += ", ADC1 problem"
             adc1_problem += 1
+        elif lim_CAL_DACm[0] > float(production_data[9]) or float(production_data[9]) > lim_CAL_DACm[1]:
+            print_text += ", CAL_DAC problem"
+            cal_dac_problem += 1
+        elif lim_CAL_DACb[0] > float(production_data[9]) or float(production_data[10]) > lim_CAL_DACb[1]:
+            print_text += ", CAL_DAC problem"
+            cal_dac_problem += 1
         elif lim_iref[0] > float(production_data[31]) or float(production_data[31]) > lim_iref[1]:
             print_text += ", Iref problem"
             iref_problem += 1
@@ -213,6 +220,7 @@ if 'yellow' in sort_type:
     print "BIST: %s" % bist_problem
     print "ADC0: %s" % adc0_problem
     print "ADC1: %s" % adc1_problem
+    print "CAL_DAC: %s" % cal_dac_problem
     print "Iref: %s" % iref_problem
     print "Analog power: %s" % analog_power_problem
     print "Digital power: %s" % digital_power_problem
