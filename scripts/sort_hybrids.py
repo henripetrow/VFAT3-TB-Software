@@ -230,6 +230,7 @@ if 'yellow' in sort_type:
     print "Temperature: %s" % temperature_problem
     print "Unknown: %s" % unknown
 
+print ""
 print "Total Green hybrids: %s" % i_green
 
 print ""
