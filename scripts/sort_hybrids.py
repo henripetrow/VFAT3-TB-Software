@@ -167,7 +167,7 @@ if 'yellow' in sort_type:
         elif lim_CAL_DACm[0] > float(production_data[9]) or float(production_data[9]) > lim_CAL_DACm[1]:
             print_text += ", CAL_DAC problem"
             cal_dac_problem += 1
-        elif lim_CAL_DACb[0] > float(production_data[9]) or float(production_data[10]) > lim_CAL_DACb[1]:
+        elif lim_CAL_DACb[0] > float(production_data[10]) or float(production_data[10]) > lim_CAL_DACb[1]:
             print_text += ", CAL_DAC problem"
             cal_dac_problem += 1
         elif lim_iref[0] > float(production_data[31]) or float(production_data[31]) > lim_iref[1]:
