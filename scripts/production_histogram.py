@@ -13,8 +13,10 @@ months = []
 
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)
-    if production_data_int[30] is not None or production_data_int[30] != "None":
+    if production_data_int[30]:
         months.append(production_data_int[30][2:4])
+    else:
+        print "Found NoneType."
 
 
 print "January: %s" % months.count('01')
