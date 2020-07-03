@@ -13,4 +13,4 @@ date_list = []
 
 for hybrid in hybrid_list:
     production_data_int = database.get_production_results(hybrid)
-    print production_data_int[30]
+    print production_data_int[30][2:3]
