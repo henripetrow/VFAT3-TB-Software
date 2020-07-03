@@ -7,7 +7,7 @@ from scripts.DatabaseInterfaceBrowse import *
 database = DatabaseInterfaceBrowse()
 
 
-hybrid_list = database.list_hybrids_by_state('red', greater=6100, smaller=50000)
+hybrid_list = database.list_hybrids(greater=6100, smaller=50000)
 
 months = []
 
