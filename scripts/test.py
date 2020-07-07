@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../')
 from reedmuller import *
 from test_system_functions import dec_to_bin_with_stuffing
 
