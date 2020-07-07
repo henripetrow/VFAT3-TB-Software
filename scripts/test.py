@@ -13,5 +13,4 @@ rm = reedmuller.ReedMuller(2, 5)
 chip_id_bin_rm = rm.encode(chip_id_bin[-16:])
 chip_id = int(''.join(map(str, chip_id_bin_rm)), 2)
 print "Reed-Muller encoded:"
-print chip_id_bin_rm
-chip_id_bin = chip_id_bin_rm
+print ''.join(map(str, chip_id_bin_rm))
