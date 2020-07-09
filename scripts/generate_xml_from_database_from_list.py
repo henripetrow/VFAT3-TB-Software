@@ -36,7 +36,7 @@ with open(input_file, 'r') as f:
     hybrid_list = []
     for line in f:
         line.strip('\n')
-        hybrid_list.append('%s' % int(line))
+        hybrid_list.append(int(line))
 
 print "Listing hybrids from the database."
 test_hybrids = []
