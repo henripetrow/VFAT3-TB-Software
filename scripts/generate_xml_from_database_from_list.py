@@ -24,10 +24,20 @@ with open('./gem_db_info.dat', 'r') as f:
 nr_of_days = 1
 
 database = DatabaseInterfaceBrowse()
-hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
+#hybrid_list = database.list_hybrids_modified_in_days(int(nr_of_days))
 #hybrid_list = database.list_hybrids_modified_by_day('27082019')
 #hybrid_list = [9022]
 #hybrid_list = database.list_hybrids(greater=6101)
+
+input_file = 'hybrids_list.txt'
+
+print "Reading list of hybrids from the file: %s" % input_file
+with open(input_file, 'r') as f:
+    hybrid_list = []
+    for line in f:
+        line.strip('\n')
+        hybrid_list.append('%s' % int(line))
+
 print "Listing hybrids from the database."
 test_hybrids = []
 temp_hybrid_list = []
