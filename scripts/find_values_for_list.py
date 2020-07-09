@@ -18,7 +18,7 @@ with open(input_file, 'r') as f:
     hybrids = []
     for line in f:
         line.strip('\n')
-        hybrids.append('Hybrid%s' % int(line))
+        hybrids.append('%s' % int(line))
 
 database_browse = DatabaseInterfaceBrowse()
 #hybrids = database_browse.list_hybrids()
