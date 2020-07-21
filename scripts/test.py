@@ -4,7 +4,7 @@ from reedmuller import *
 from test_system_functions import dec_to_bin_with_stuffing
 
 
-for chip_id in range(20000,6010):
+for chip_id in range(20000,20010):
     chip_id_bin = dec_to_bin_with_stuffing(chip_id, 32)
     print "Dec:"
     print chip_id
