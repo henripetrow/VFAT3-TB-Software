@@ -27,7 +27,11 @@ print "Number of found hybrids:"
 print len(hybrid_list)
 
 
-run_number = input("Give the run number:")
+#run_number = input("Give the run number:")
+print "Fetching RUN_NUMBER"
+run_number = database.get_run_number()
+print run_number
+
 
 kind_of_part = "GEM VFAT3"
 
